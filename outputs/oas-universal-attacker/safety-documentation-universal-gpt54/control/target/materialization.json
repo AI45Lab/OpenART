@@ -1,0 +1,13 @@
+{
+  "source": "attacker",
+  "phase": "before_target",
+  "attacker_name": "universal-control-attacker",
+  "diff": {
+    "added": [],
+    "modified": [],
+    "deleted": []
+  },
+  "ignored_paths": [
+    ".openart-target-control-manifest.json"
+  ]
+}

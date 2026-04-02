@@ -1,0 +1,1 @@
+export PATH=/workspace/.openart/runners/target/state/service_tools/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; python -c "from pathlib import Path; print(Path('/task/task.md').read_text())"

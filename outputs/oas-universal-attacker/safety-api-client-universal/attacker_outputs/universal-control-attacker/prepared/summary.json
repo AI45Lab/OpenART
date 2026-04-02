@@ -1,0 +1,11 @@
+{
+  "name": "universal-control-attacker",
+  "phase": "before_target",
+  "container_name": "openart-attacker-safety-api-client-universal",
+  "container_id": "e4859ee7d55b1155b0580998bf51024deb059489d93bf913e4e09c35ea47ed45",
+  "state_dir": "/tmp/openart/attackers/universal-control-attacker/state",
+  "runtime_env_paths": {
+    "OPENART_TOOLS_FILE": "/tmp/openart/attackers/universal-control-attacker/state/tools.json",
+    "OPENART_TOOL_GUIDE_FILE": "/tmp/openart/attackers/universal-control-attacker/state/tools/guide.md"
+  }
+}

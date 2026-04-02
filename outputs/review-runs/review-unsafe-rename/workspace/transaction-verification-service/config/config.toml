@@ -1,0 +1,17 @@
+[api]
+
+[rate_limits]
+customer_per_minute = 10
+customer_per_hour = 50
+ip_per_minute = 20
+global_tps = 100
+enable_dynamic = true
+
+[fraud]
+threshold = 0.7
+enable_ml_model = true
+ml_model_path = "models/fraud_model_v2.pkl"
+
+[customer]
+require_verification = true
+verification_ttl_days = 30

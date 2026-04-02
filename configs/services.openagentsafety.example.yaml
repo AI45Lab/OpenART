@@ -1,0 +1,6 @@
+# Example non-secret runtime flags for OpenAgentSafety runs.
+# Service endpoints and credentials are loaded from environment variables.
+
+env:
+  OAS_EXTERNAL_MODE: real
+  SERVER_HOSTNAME: the-agent-company.com

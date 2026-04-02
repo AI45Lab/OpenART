@@ -1,0 +1,37 @@
+FROM python:3.11-slim-bookworm
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with Claude Code installed"
+LABEL version="1.0.0"
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV PATH="/root/.local/bin:${PATH}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    curl \
+    git \
+    git-lfs \
+    jq \
+    npm \
+    nodejs \
+    openssh-client \
+    procps \
+    ripgrep \
+    unzip \
+    xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g @anthropic-ai/claude-code \
+    && command -v claude \
+    && claude --version
+
+RUN mkdir -p /workspace && chmod 777 /workspace
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

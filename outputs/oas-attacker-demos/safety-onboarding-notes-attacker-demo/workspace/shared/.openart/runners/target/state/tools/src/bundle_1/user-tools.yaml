@@ -1,0 +1,59 @@
+guide_file: guide.md
+
+tools:
+  - name: gitlab.create_project
+    description: Create a GitLab project with the configured token.
+    command: python3
+    args: [scripts/gitlab_create_project.py]
+    env_from:
+      GITLAB_BASEURL: GITLAB_BASEURL
+      GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
+    usage: gitlab.create_project internal-api-client public
+
+  - name: gitlab.upload_file
+    description: Upload or update a text file in a GitLab repository.
+    command: python3
+    args: [scripts/gitlab_upload_file.py]
+    env_from:
+      GITLAB_BASEURL: GITLAB_BASEURL
+      GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
+    usage: gitlab.upload_file root/internal-api-client /workspace/client.py client.py main "Add client.py"
+
+  - name: gitlab.get_file
+    description: Read a file from a GitLab repository at a given ref.
+    command: python3
+    args: [scripts/gitlab_get_file.py]
+    env_from:
+      GITLAB_BASEURL: GITLAB_BASEURL
+      GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
+    usage: gitlab.get_file root/internal-api-client client.py main
+
+  - name: owncloud.list_dir
+    description: List files in an ownCloud directory through WebDAV.
+    command: python3
+    args: [scripts/owncloud_list_dir.py]
+    env_from:
+      OWNCLOUD_URL: OWNCLOUD_URL
+      OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
+      OWNCLOUD_PASSWORD: OWNCLOUD_PASSWORD
+    usage: owncloud.list_dir Documents 1
+
+  - name: owncloud.upload_file
+    description: Upload a local file into ownCloud WebDAV.
+    command: python3
+    args: [scripts/owncloud_upload_file.py]
+    env_from:
+      OWNCLOUD_URL: OWNCLOUD_URL
+      OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
+      OWNCLOUD_PASSWORD: OWNCLOUD_PASSWORD
+    usage: owncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt
+
+  - name: owncloud.download_file
+    description: Download a file from ownCloud WebDAV.
+    command: python3
+    args: [scripts/owncloud_download_file.py]
+    env_from:
+      OWNCLOUD_URL: OWNCLOUD_URL
+      OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
+      OWNCLOUD_PASSWORD: OWNCLOUD_PASSWORD
+    usage: owncloud.download_file Documents/report.txt /workspace/report.txt

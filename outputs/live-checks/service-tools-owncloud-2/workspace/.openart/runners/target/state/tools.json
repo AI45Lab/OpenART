@@ -1,0 +1,17 @@
+[
+  {
+    "name": "bash",
+    "enabled": true,
+    "config": {}
+  },
+  {
+    "name": "read",
+    "enabled": true,
+    "config": {}
+  },
+  {
+    "name": "write",
+    "enabled": true,
+    "config": {}
+  }
+]

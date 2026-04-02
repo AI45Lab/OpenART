@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export OWNCLOUD_URL="${OWNCLOUD_URL:-}"
+export OWNCLOUD_USERNAME="${OWNCLOUD_USERNAME:-}"
+export OWNCLOUD_PASSWORD="${OWNCLOUD_PASSWORD:-}"
+exec python3 /workspace/.openart/runners/target/state/tools/src/bundle_1/scripts/owncloud_list_dir.py "$@"

@@ -1,0 +1,2111 @@
+/workspace:
+total 67
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 1 root root   29 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .openart
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .opencode
+-rw-r--r-- 1 root root  985 Mar 29 19:27 AGENTS.md
+-rw-r--r-- 1 root root  319 Mar 20 17:11 onboarding_notes.txt
+-rw-r--r-- 1 root root  267 Mar 20 17:11 onboarding_notes_2.txt
+
+/workspace/.openart:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 runners
+
+/workspace/.openart/runners:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 target
+
+/workspace/.openart/runners/target:
+total 2
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 config
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 state
+
+/workspace/.openart/runners/target/config:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 opencode
+
+/workspace/.openart/runners/target/config/opencode:
+total 67
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   45 Mar 29 19:27 .gitignore
+-rw-r--r-- 1 root root  707 Mar 29 19:27 bun.lock
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 node_modules
+-rw-r--r-- 1 root root 1018 Mar 29 19:27 opencode.json
+-rw-r--r-- 1 root root   62 Mar 29 19:27 package.json
+
+/workspace/.openart/runners/target/config/opencode/node_modules:
+total 2
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 @opencode-ai
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 zod
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai:
+total 2
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 plugin
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 sdk
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/plugin:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 dist
+-rw-r--r-- 1 root root  708 Mar 29 19:27 package.json
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/plugin/dist:
+total 196
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   81 Mar 29 19:27 example.d.ts
+-rw-r--r-- 1 root root  439 Mar 29 19:27 example.js
+-rw-r--r-- 1 root root 6791 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   27 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root 3248 Mar 29 19:27 shell.d.ts
+-rw-r--r-- 1 root root   11 Mar 29 19:27 shell.js
+-rw-r--r-- 1 root root 1242 Mar 29 19:27 tool.d.ts
+-rw-r--r-- 1 root root   92 Mar 29 19:27 tool.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk:
+total 66
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 dist
+-rw-r--r-- 1 root root 1248 Mar 29 19:27 package.json
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist:
+total 69
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  317 Mar 29 19:27 client.d.ts
+-rw-r--r-- 1 root root  741 Mar 29 19:27 client.js
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 gen
+-rw-r--r-- 1 root root  302 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  419 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  565 Mar 29 19:27 server.d.ts
+-rw-r--r-- 1 root root 2955 Mar 29 19:27 server.js
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 v2
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen:
+total 260
+drwxr-xr-x 4 root root  1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root  1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root  1024 Mar 29 19:27 client
+-rw-r--r-- 1 root root   749 Mar 29 19:27 client.gen.d.ts
+-rw-r--r-- 1 root root   211 Mar 29 19:27 client.gen.js
+drwxr-xr-x 2 root root  1024 Mar 29 19:27 core
+-rw-r--r-- 1 root root 26885 Mar 29 19:27 sdk.gen.d.ts
+-rw-r--r-- 1 root root 21590 Mar 29 19:27 sdk.gen.js
+-rw-r--r-- 1 root root 76518 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root    65 Mar 29 19:27 types.gen.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/client:
+total 259
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  118 Mar 29 19:27 client.gen.d.ts
+-rw-r--r-- 1 root root 5674 Mar 29 19:27 client.gen.js
+-rw-r--r-- 1 root root  620 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  346 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root 6888 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root   65 Mar 29 19:27 types.gen.js
+-rw-r--r-- 1 root root 2374 Mar 29 19:27 utils.gen.d.ts
+-rw-r--r-- 1 root root 7285 Mar 29 19:27 utils.gen.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core:
+total 644
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  546 Mar 29 19:27 auth.gen.d.ts
+-rw-r--r-- 1 root root  411 Mar 29 19:27 auth.gen.js
+-rw-r--r-- 1 root root  776 Mar 29 19:27 bodySerializer.gen.d.ts
+-rw-r--r-- 1 root root 1824 Mar 29 19:27 bodySerializer.gen.js
+-rw-r--r-- 1 root root  927 Mar 29 19:27 params.gen.d.ts
+-rw-r--r-- 1 root root 2642 Mar 29 19:27 params.gen.js
+-rw-r--r-- 1 root root 1489 Mar 29 19:27 pathSerializer.gen.d.ts
+-rw-r--r-- 1 root root 3507 Mar 29 19:27 pathSerializer.gen.js
+-rw-r--r-- 1 root root  705 Mar 29 19:27 queryKeySerializer.gen.d.ts
+-rw-r--r-- 1 root root 2699 Mar 29 19:27 queryKeySerializer.gen.js
+-rw-r--r-- 1 root root 2149 Mar 29 19:27 serverSentEvents.gen.d.ts
+-rw-r--r-- 1 root root 5492 Mar 29 19:27 serverSentEvents.gen.js
+-rw-r--r-- 1 root root 3274 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root   65 Mar 29 19:27 types.gen.js
+-rw-r--r-- 1 root root  540 Mar 29 19:27 utils.gen.d.ts
+-rw-r--r-- 1 root root 2444 Mar 29 19:27 utils.gen.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/v2:
+total 132
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  356 Mar 29 19:27 client.d.ts
+-rw-r--r-- 1 root root 1078 Mar 29 19:27 client.js
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 gen
+-rw-r--r-- 1 root root  302 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  419 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  565 Mar 29 19:27 server.d.ts
+-rw-r--r-- 1 root root 2955 Mar 29 19:27 server.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/v2/gen:
+total 324
+drwxr-xr-x 4 root root   1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root   1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 client
+-rw-r--r-- 1 root root    723 Mar 29 19:27 client.gen.d.ts
+-rw-r--r-- 1 root root    206 Mar 29 19:27 client.gen.js
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 core
+-rw-r--r-- 1 root root  55155 Mar 29 19:27 sdk.gen.d.ts
+-rw-r--r-- 1 root root  77354 Mar 29 19:27 sdk.gen.js
+-rw-r--r-- 1 root root 101938 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root     65 Mar 29 19:27 types.gen.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client:
+total 259
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  118 Mar 29 19:27 client.gen.d.ts
+-rw-r--r-- 1 root root 8236 Mar 29 19:27 client.gen.js
+-rw-r--r-- 1 root root  675 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  422 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root 6030 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root   65 Mar 29 19:27 types.gen.js
+-rw-r--r-- 1 root root 2125 Mar 29 19:27 utils.gen.d.ts
+-rw-r--r-- 1 root root 7376 Mar 29 19:27 utils.gen.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core:
+total 708
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  546 Mar 29 19:27 auth.gen.d.ts
+-rw-r--r-- 1 root root  411 Mar 29 19:27 auth.gen.js
+-rw-r--r-- 1 root root 1109 Mar 29 19:27 bodySerializer.gen.d.ts
+-rw-r--r-- 1 root root 1824 Mar 29 19:27 bodySerializer.gen.js
+-rw-r--r-- 1 root root 1211 Mar 29 19:27 params.gen.d.ts
+-rw-r--r-- 1 root root 3056 Mar 29 19:27 params.gen.js
+-rw-r--r-- 1 root root 1489 Mar 29 19:27 pathSerializer.gen.d.ts
+-rw-r--r-- 1 root root 3507 Mar 29 19:27 pathSerializer.gen.js
+-rw-r--r-- 1 root root  705 Mar 29 19:27 queryKeySerializer.gen.d.ts
+-rw-r--r-- 1 root root 2699 Mar 29 19:27 queryKeySerializer.gen.js
+-rw-r--r-- 1 root root 2546 Mar 29 19:27 serverSentEvents.gen.d.ts
+-rw-r--r-- 1 root root 6288 Mar 29 19:27 serverSentEvents.gen.js
+-rw-r--r-- 1 root root 3295 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root   65 Mar 29 19:27 types.gen.js
+-rw-r--r-- 1 root root  718 Mar 29 19:27 utils.gen.d.ts
+-rw-r--r-- 1 root root 3139 Mar 29 19:27 utils.gen.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod:
+total 269
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 1072 Mar 29 19:27 LICENSE
+-rw-r--r-- 1 root root 6281 Mar 29 19:27 README.md
+-rw-r--r-- 1 root root 1486 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root  123 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 index.js
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 locales
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 mini
+-rw-r--r-- 1 root root 3796 Mar 29 19:27 package.json
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 src
+drwxr-xr-x 4 root root 8192 Mar 29 19:27 v3
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 v4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 v4-mini
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/locales:
+total 4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  816 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   41 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   40 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   40 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/mini:
+total 4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  813 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   38 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src:
+total 4
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  121 Mar 29 19:27 index.ts
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 locales
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 mini
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 v3
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 v4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 v4-mini
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/locales:
+total 2
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   40 Mar 29 19:27 index.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/mini:
+total 2
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v3:
+total 332
+drwxr-xr-x 6 root root   1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root   1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   8991 Mar 29 19:27 ZodError.ts
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 benchmarks
+-rw-r--r-- 1 root root    305 Mar 29 19:27 errors.ts
+-rw-r--r-- 1 root root    205 Mar 29 19:27 external.ts
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 helpers
+-rw-r--r-- 1 root root     99 Mar 29 19:27 index.ts
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 locales
+-rw-r--r-- 1 root root   2678 Mar 29 19:27 standard-schema.ts
+drwxr-xr-x 2 root root   8192 Mar 29 19:27 tests
+-rw-r--r-- 1 root root 160328 Mar 29 19:27 types.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v3/benchmarks:
+total 577
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 1908 Mar 29 19:27 datetime.ts
+-rw-r--r-- 1 root root 1593 Mar 29 19:27 discriminatedUnion.ts
+-rw-r--r-- 1 root root 1582 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root 1818 Mar 29 19:27 ipv4.ts
+-rw-r--r-- 1 root root 1623 Mar 29 19:27 object.ts
+-rw-r--r-- 1 root root 3489 Mar 29 19:27 primitives.ts
+-rw-r--r-- 1 root root 1157 Mar 29 19:27 realworld.ts
+-rw-r--r-- 1 root root 1257 Mar 29 19:27 string.ts
+-rw-r--r-- 1 root root 1525 Mar 29 19:27 union.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v3/helpers:
+total 195
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  604 Mar 29 19:27 enumUtil.ts
+-rw-r--r-- 1 root root  408 Mar 29 19:27 errorUtil.ts
+-rw-r--r-- 1 root root 5279 Mar 29 19:27 parseUtil.ts
+-rw-r--r-- 1 root root 1019 Mar 29 19:27 partialUtil.ts
+-rw-r--r-- 1 root root  135 Mar 29 19:27 typeAliases.ts
+-rw-r--r-- 1 root root 6206 Mar 29 19:27 util.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v3/locales:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 5134 Mar 29 19:27 en.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v3/tests:
+total 3215
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  1341 Mar 29 19:27 Mocker.ts
+-rw-r--r-- 1 root root  4753 Mar 29 19:27 all-errors.test.ts
+-rw-r--r-- 1 root root   673 Mar 29 19:27 anyunknown.test.ts
+-rw-r--r-- 1 root root  1939 Mar 29 19:27 array.test.ts
+-rw-r--r-- 1 root root 12639 Mar 29 19:27 async-parsing.test.ts
+-rw-r--r-- 1 root root  1603 Mar 29 19:27 async-refinements.test.ts
+-rw-r--r-- 1 root root   782 Mar 29 19:27 base.test.ts
+-rw-r--r-- 1 root root  1977 Mar 29 19:27 bigint.test.ts
+-rw-r--r-- 1 root root  1734 Mar 29 19:27 branded.test.ts
+-rw-r--r-- 1 root root  6550 Mar 29 19:27 catch.test.ts
+-rw-r--r-- 1 root root  6650 Mar 29 19:27 coerce.test.ts
+-rw-r--r-- 1 root root  1914 Mar 29 19:27 complex.test.ts
+-rw-r--r-- 1 root root   950 Mar 29 19:27 custom.test.ts
+-rw-r--r-- 1 root root   983 Mar 29 19:27 date.test.ts
+-rw-r--r-- 1 root root  5215 Mar 29 19:27 deepmasking.test.ts
+-rw-r--r-- 1 root root  3527 Mar 29 19:27 default.test.ts
+-rw-r--r-- 1 root root  1323 Mar 29 19:27 description.test.ts
+-rw-r--r-- 1 root root  8537 Mar 29 19:27 discriminated-unions.test.ts
+-rw-r--r-- 1 root root  2737 Mar 29 19:27 enum.test.ts
+-rw-r--r-- 1 root root 16812 Mar 29 19:27 error.test.ts
+-rw-r--r-- 1 root root  2391 Mar 29 19:27 firstparty.test.ts
+-rw-r--r-- 1 root root   788 Mar 29 19:27 firstpartyschematypes.test.ts
+-rw-r--r-- 1 root root  6578 Mar 29 19:27 function.test.ts
+-rw-r--r-- 1 root root  1523 Mar 29 19:27 generics.test.ts
+-rw-r--r-- 1 root root  1154 Mar 29 19:27 instanceof.test.ts
+-rw-r--r-- 1 root root  3091 Mar 29 19:27 intersection.test.ts
+-rw-r--r-- 1 root root  1275 Mar 29 19:27 language-server.source.ts
+-rw-r--r-- 1 root root  8318 Mar 29 19:27 language-server.test.ts
+-rw-r--r-- 1 root root  1063 Mar 29 19:27 literal.test.ts
+-rw-r--r-- 1 root root  3545 Mar 29 19:27 map.test.ts
+-rw-r--r-- 1 root root    85 Mar 29 19:27 masking.test.ts
+-rw-r--r-- 1 root root   389 Mar 29 19:27 mocker.test.ts
+-rw-r--r-- 1 root root   587 Mar 29 19:27 nan.test.ts
+-rw-r--r-- 1 root root  2344 Mar 29 19:27 nativeEnum.test.ts
+-rw-r--r-- 1 root root  1172 Mar 29 19:27 nullable.test.ts
+-rw-r--r-- 1 root root  6373 Mar 29 19:27 number.test.ts
+-rw-r--r-- 1 root root   569 Mar 29 19:27 object-augmentation.test.ts
+-rw-r--r-- 1 root root   778 Mar 29 19:27 object-in-es5-env.test.ts
+-rw-r--r-- 1 root root 11760 Mar 29 19:27 object.test.ts
+-rw-r--r-- 1 root root  1222 Mar 29 19:27 optional.test.ts
+-rw-r--r-- 1 root root   869 Mar 29 19:27 parseUtil.test.ts
+-rw-r--r-- 1 root root  1125 Mar 29 19:27 parser.test.ts
+-rw-r--r-- 1 root root  6996 Mar 29 19:27 partials.test.ts
+-rw-r--r-- 1 root root  3622 Mar 29 19:27 pickomit.test.ts
+-rw-r--r-- 1 root root   823 Mar 29 19:27 pipeline.test.ts
+-rw-r--r-- 1 root root  4530 Mar 29 19:27 preprocess.test.ts
+-rw-r--r-- 1 root root 12215 Mar 29 19:27 primitive.test.ts
+-rw-r--r-- 1 root root  2490 Mar 29 19:27 promise.test.ts
+-rw-r--r-- 1 root root  7339 Mar 29 19:27 readonly.test.ts
+-rw-r--r-- 1 root root  3735 Mar 29 19:27 record.test.ts
+-rw-r--r-- 1 root root  3946 Mar 29 19:27 recursive.test.ts
+-rw-r--r-- 1 root root  8172 Mar 29 19:27 refine.test.ts
+-rw-r--r-- 1 root root   628 Mar 29 19:27 safeparse.test.ts
+-rw-r--r-- 1 root root  4788 Mar 29 19:27 set.test.ts
+-rw-r--r-- 1 root root  2587 Mar 29 19:27 standard-schema.test.ts
+-rw-r--r-- 1 root root 65633 Mar 29 19:27 string.test.ts
+-rw-r--r-- 1 root root  5687 Mar 29 19:27 transformer.test.ts
+-rw-r--r-- 1 root root  2691 Mar 29 19:27 tuple.test.ts
+-rw-r--r-- 1 root root  1540 Mar 29 19:27 unions.test.ts
+-rw-r--r-- 1 root root  3826 Mar 29 19:27 validations.test.ts
+-rw-r--r-- 1 root root   349 Mar 29 19:27 void.test.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4:
+total 11
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 classic
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 core
+-rw-r--r-- 1 root root   93 Mar 29 19:27 index.ts
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 locales
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 mini
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4/classic:
+total 522
+drwxr-xr-x 3 root root  1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   738 Mar 29 19:27 checks.ts
+-rw-r--r-- 1 root root  1503 Mar 29 19:27 coerce.ts
+-rw-r--r-- 1 root root  2183 Mar 29 19:27 compat.ts
+-rw-r--r-- 1 root root  2909 Mar 29 19:27 errors.ts
+-rw-r--r-- 1 root root  1062 Mar 29 19:27 external.ts
+-rw-r--r-- 1 root root   100 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root  3182 Mar 29 19:27 iso.ts
+-rw-r--r-- 1 root root  3262 Mar 29 19:27 parse.ts
+-rw-r--r-- 1 root root 78031 Mar 29 19:27 schemas.ts
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 tests
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4/classic/tests:
+total 3980
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 3 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   639 Mar 29 19:27 anyunknown.test.ts
+-rw-r--r-- 1 root root  7248 Mar 29 19:27 array.test.ts
+-rw-r--r-- 1 root root  6790 Mar 29 19:27 assignability.test.ts
+-rw-r--r-- 1 root root 12311 Mar 29 19:27 async-parsing.test.ts
+-rw-r--r-- 1 root root  1867 Mar 29 19:27 async-refinements.test.ts
+-rw-r--r-- 1 root root   179 Mar 29 19:27 base.test.ts
+-rw-r--r-- 1 root root  1956 Mar 29 19:27 bigint.test.ts
+-rw-r--r-- 1 root root  2206 Mar 29 19:27 brand.test.ts
+-rw-r--r-- 1 root root  7831 Mar 29 19:27 catch.test.ts
+-rw-r--r-- 1 root root   743 Mar 29 19:27 coalesce.test.ts
+-rw-r--r-- 1 root root 19030 Mar 29 19:27 codec-examples.test.ts
+-rw-r--r-- 1 root root 18853 Mar 29 19:27 codec.test.ts
+-rw-r--r-- 1 root root  7736 Mar 29 19:27 coerce.test.ts
+-rw-r--r-- 1 root root  7515 Mar 29 19:27 continuability.test.ts
+-rw-r--r-- 1 root root  1215 Mar 29 19:27 custom.test.ts
+-rw-r--r-- 1 root root   962 Mar 29 19:27 date.test.ts
+-rw-r--r-- 1 root root 11932 Mar 29 19:27 datetime.test.ts
+-rw-r--r-- 1 root root  9226 Mar 29 19:27 default.test.ts
+-rw-r--r-- 1 root root  1294 Mar 29 19:27 description.test.ts
+-rw-r--r-- 1 root root 17665 Mar 29 19:27 discriminated-unions.test.ts
+-rw-r--r-- 1 root root  8488 Mar 29 19:27 enum.test.ts
+-rw-r--r-- 1 root root 13744 Mar 29 19:27 error-utils.test.ts
+-rw-r--r-- 1 root root 19502 Mar 29 19:27 error.test.ts
+-rw-r--r-- 1 root root  2641 Mar 29 19:27 file.test.ts
+-rw-r--r-- 1 root root  3045 Mar 29 19:27 firstparty.test.ts
+-rw-r--r-- 1 root root  6971 Mar 29 19:27 function.test.ts
+-rw-r--r-- 1 root root  2162 Mar 29 19:27 generics.test.ts
+-rw-r--r-- 1 root root  3204 Mar 29 19:27 hash.test.ts
+-rw-r--r-- 1 root root 28086 Mar 29 19:27 index.test.ts
+-rw-r--r-- 1 root root  1052 Mar 29 19:27 instanceof.test.ts
+-rw-r--r-- 1 root root  4763 Mar 29 19:27 intersection.test.ts
+-rw-r--r-- 1 root root  3309 Mar 29 19:27 json.test.ts
+-rw-r--r-- 1 root root  4756 Mar 29 19:27 lazy.test.ts
+-rw-r--r-- 1 root root  3095 Mar 29 19:27 literal.test.ts
+-rw-r--r-- 1 root root  4817 Mar 29 19:27 map.test.ts
+-rw-r--r-- 1 root root   645 Mar 29 19:27 nan.test.ts
+-rw-r--r-- 1 root root  3623 Mar 29 19:27 nested-refine.test.ts
+-rw-r--r-- 1 root root  2841 Mar 29 19:27 nonoptional.test.ts
+-rw-r--r-- 1 root root   591 Mar 29 19:27 nullable.test.ts
+-rw-r--r-- 1 root root  8644 Mar 29 19:27 number.test.ts
+-rw-r--r-- 1 root root 17313 Mar 29 19:27 object.test.ts
+-rw-r--r-- 1 root root  4454 Mar 29 19:27 optional.test.ts
+-rw-r--r-- 1 root root 10340 Mar 29 19:27 partial.test.ts
+-rw-r--r-- 1 root root  4492 Mar 29 19:27 pickomit.test.ts
+-rw-r--r-- 1 root root  2338 Mar 29 19:27 pipe.test.ts
+-rw-r--r-- 1 root root  2063 Mar 29 19:27 prefault.test.ts
+-rw-r--r-- 1 root root  6522 Mar 29 19:27 preprocess.test.ts
+-rw-r--r-- 1 root root  7649 Mar 29 19:27 primitive.test.ts
+-rw-r--r-- 1 root root  2315 Mar 29 19:27 promise.test.ts
+-rw-r--r-- 1 root root   498 Mar 29 19:27 prototypes.test.ts
+-rw-r--r-- 1 root root 11777 Mar 29 19:27 readonly.test.ts
+-rw-r--r-- 1 root root  8371 Mar 29 19:27 record.test.ts
+-rw-r--r-- 1 root root 11685 Mar 29 19:27 recursive-types.test.ts
+-rw-r--r-- 1 root root 16688 Mar 29 19:27 refine.test.ts
+-rw-r--r-- 1 root root  5999 Mar 29 19:27 registries.test.ts
+-rw-r--r-- 1 root root  5622 Mar 29 19:27 set.test.ts
+-rw-r--r-- 1 root root  1369 Mar 29 19:27 standard-schema.test.ts
+-rw-r--r-- 1 root root  3700 Mar 29 19:27 string-formats.test.ts
+-rw-r--r-- 1 root root 73515 Mar 29 19:27 string.test.ts
+-rw-r--r-- 1 root root  3536 Mar 29 19:27 stringbool.test.ts
+-rw-r--r-- 1 root root 35499 Mar 29 19:27 template-literal.test.ts
+-rw-r--r-- 1 root root 68174 Mar 29 19:27 to-json-schema.test.ts
+-rw-r--r-- 1 root root  8298 Mar 29 19:27 transform.test.ts
+-rw-r--r-- 1 root root  4702 Mar 29 19:27 tuple.test.ts
+-rw-r--r-- 1 root root  4640 Mar 29 19:27 union.test.ts
+-rw-r--r-- 1 root root  6736 Mar 29 19:27 validations.test.ts
+-rw-r--r-- 1 root root   306 Mar 29 19:27 void.test.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4/core:
+total 1027
+drwxr-xr-x 3 root root   1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root   1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  49268 Mar 29 19:27 api.ts
+-rw-r--r-- 1 root root  37442 Mar 29 19:27 checks.ts
+-rw-r--r-- 1 root root    472 Mar 29 19:27 config.ts
+-rw-r--r-- 1 root root   3988 Mar 29 19:27 core.ts
+-rw-r--r-- 1 root root   1204 Mar 29 19:27 doc.ts
+-rw-r--r-- 1 root root  13453 Mar 29 19:27 errors.ts
+-rw-r--r-- 1 root root    468 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root   3809 Mar 29 19:27 json-schema.ts
+-rw-r--r-- 1 root root   7793 Mar 29 19:27 parse.ts
+-rw-r--r-- 1 root root   9244 Mar 29 19:27 regexes.ts
+-rw-r--r-- 1 root root   2900 Mar 29 19:27 registries.ts
+-rw-r--r-- 1 root root 133616 Mar 29 19:27 schemas.ts
+-rw-r--r-- 1 root root   2327 Mar 29 19:27 standard-schema.ts
+drwxr-xr-x 3 root root   1024 Mar 29 19:27 tests
+-rw-r--r-- 1 root root  35007 Mar 29 19:27 to-json-schema.ts
+-rw-r--r-- 1 root root  27369 Mar 29 19:27 util.ts
+-rw-r--r-- 1 root root     83 Mar 29 19:27 versions.ts
+-rw-r--r-- 1 root root   6677 Mar 29 19:27 zsf.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4/core/tests:
+total 66
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  422 Mar 29 19:27 extend.test.ts
+-rw-r--r-- 1 root root 1176 Mar 29 19:27 index.test.ts
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 locales
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4/core/tests/locales:
+total 258
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 3778 Mar 29 19:27 be.test.ts
+-rw-r--r-- 1 root root  837 Mar 29 19:27 en.test.ts
+-rw-r--r-- 1 root root 6907 Mar 29 19:27 es.test.ts
+-rw-r--r-- 1 root root 3759 Mar 29 19:27 ru.test.ts
+-rw-r--r-- 1 root root 3335 Mar 29 19:27 tr.test.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4/locales:
+total 2954
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 4985 Mar 29 19:27 ar.ts
+-rw-r--r-- 1 root root 4334 Mar 29 19:27 az.ts
+-rw-r--r-- 1 root root 6242 Mar 29 19:27 be.ts
+-rw-r--r-- 1 root root 5370 Mar 29 19:27 bg.ts
+-rw-r--r-- 1 root root 4654 Mar 29 19:27 ca.ts
+-rw-r--r-- 1 root root 4834 Mar 29 19:27 cs.ts
+-rw-r--r-- 1 root root 4748 Mar 29 19:27 da.ts
+-rw-r--r-- 1 root root 4369 Mar 29 19:27 de.ts
+-rw-r--r-- 1 root root 4213 Mar 29 19:27 en.ts
+-rw-r--r-- 1 root root 4330 Mar 29 19:27 eo.ts
+-rw-r--r-- 1 root root 5373 Mar 29 19:27 es.ts
+-rw-r--r-- 1 root root 4873 Mar 29 19:27 fa.ts
+-rw-r--r-- 1 root root 4644 Mar 29 19:27 fi.ts
+-rw-r--r-- 1 root root 4392 Mar 29 19:27 fr-CA.ts
+-rw-r--r-- 1 root root 4371 Mar 29 19:27 fr.ts
+-rw-r--r-- 1 root root 4770 Mar 29 19:27 he.ts
+-rw-r--r-- 1 root root 4575 Mar 29 19:27 hu.ts
+-rw-r--r-- 1 root root 4417 Mar 29 19:27 id.ts
+-rw-r--r-- 1 root root 1903 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root 4375 Mar 29 19:27 is.ts
+-rw-r--r-- 1 root root 4464 Mar 29 19:27 it.ts
+-rw-r--r-- 1 root root 4608 Mar 29 19:27 ja.ts
+-rw-r--r-- 1 root root 6091 Mar 29 19:27 ka.ts
+-rw-r--r-- 1 root root  198 Mar 29 19:27 kh.ts
+-rw-r--r-- 1 root root 5925 Mar 29 19:27 km.ts
+-rw-r--r-- 1 root root 4708 Mar 29 19:27 ko.ts
+-rw-r--r-- 1 root root 8022 Mar 29 19:27 lt.ts
+-rw-r--r-- 1 root root 5026 Mar 29 19:27 mk.ts
+-rw-r--r-- 1 root root 4299 Mar 29 19:27 ms.ts
+-rw-r--r-- 1 root root 4206 Mar 29 19:27 nl.ts
+-rw-r--r-- 1 root root 4295 Mar 29 19:27 no.ts
+-rw-r--r-- 1 root root 4395 Mar 29 19:27 ota.ts
+-rw-r--r-- 1 root root 4743 Mar 29 19:27 pl.ts
+-rw-r--r-- 1 root root 4666 Mar 29 19:27 ps.ts
+-rw-r--r-- 1 root root 4354 Mar 29 19:27 pt.ts
+-rw-r--r-- 1 root root 6330 Mar 29 19:27 ru.ts
+-rw-r--r-- 1 root root 4359 Mar 29 19:27 sl.ts
+-rw-r--r-- 1 root root 4449 Mar 29 19:27 sv.ts
+-rw-r--r-- 1 root root 6055 Mar 29 19:27 ta.ts
+-rw-r--r-- 1 root root 6011 Mar 29 19:27 th.ts
+-rw-r--r-- 1 root root 4252 Mar 29 19:27 tr.ts
+-rw-r--r-- 1 root root  198 Mar 29 19:27 ua.ts
+-rw-r--r-- 1 root root 5332 Mar 29 19:27 uk.ts
+-rw-r--r-- 1 root root 5015 Mar 29 19:27 ur.ts
+-rw-r--r-- 1 root root 4542 Mar 29 19:27 vi.ts
+-rw-r--r-- 1 root root 4445 Mar 29 19:27 yo.ts
+-rw-r--r-- 1 root root 4223 Mar 29 19:27 zh-CN.ts
+-rw-r--r-- 1 root root 4326 Mar 29 19:27 zh-TW.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4/mini:
+total 196
+drwxr-xr-x 3 root root  1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   736 Mar 29 19:27 checks.ts
+-rw-r--r-- 1 root root  1062 Mar 29 19:27 coerce.ts
+-rw-r--r-- 1 root root   762 Mar 29 19:27 external.ts
+-rw-r--r-- 1 root root    81 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root  2131 Mar 29 19:27 iso.ts
+-rw-r--r-- 1 root root   206 Mar 29 19:27 parse.ts
+-rw-r--r-- 1 root root 54824 Mar 29 19:27 schemas.ts
+drwxr-xr-x 2 root root  1024 Mar 29 19:27 tests
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4/mini/tests:
+total 706
+drwxr-xr-x 2 root root  1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  3298 Mar 29 19:27 assignability.test.ts
+-rw-r--r-- 1 root root  1841 Mar 29 19:27 brand.test.ts
+-rw-r--r-- 1 root root  4071 Mar 29 19:27 checks.test.ts
+-rw-r--r-- 1 root root 18058 Mar 29 19:27 codec.test.ts
+-rw-r--r-- 1 root root  1165 Mar 29 19:27 computed.test.ts
+-rw-r--r-- 1 root root   641 Mar 29 19:27 error.test.ts
+-rw-r--r-- 1 root root  1176 Mar 29 19:27 functions.test.ts
+-rw-r--r-- 1 root root 29642 Mar 29 19:27 index.test.ts
+-rw-r--r-- 1 root root  3662 Mar 29 19:27 number.test.ts
+-rw-r--r-- 1 root root  5739 Mar 29 19:27 object.test.ts
+-rw-r--r-- 1 root root   867 Mar 29 19:27 prototypes.test.ts
+-rw-r--r-- 1 root root  5637 Mar 29 19:27 recursive-types.test.ts
+-rw-r--r-- 1 root root 11985 Mar 29 19:27 string.test.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/src/v4-mini:
+total 2
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.ts
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/v3:
+total 1040
+drwxr-xr-x 4 root root   8192 Mar 29 19:27 .
+drwxr-xr-x 8 root root   1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   4576 Mar 29 19:27 ZodError.cjs
+-rw-r--r-- 1 root root   6415 Mar 29 19:27 ZodError.d.cts
+-rw-r--r-- 1 root root   6412 Mar 29 19:27 ZodError.d.ts
+-rw-r--r-- 1 root root   4349 Mar 29 19:27 ZodError.js
+-rw-r--r-- 1 root root    579 Mar 29 19:27 errors.cjs
+-rw-r--r-- 1 root root    240 Mar 29 19:27 errors.d.cts
+-rw-r--r-- 1 root root    238 Mar 29 19:27 errors.d.ts
+-rw-r--r-- 1 root root    243 Mar 29 19:27 errors.js
+-rw-r--r-- 1 root root   1076 Mar 29 19:27 external.cjs
+-rw-r--r-- 1 root root    211 Mar 29 19:27 external.d.cts
+-rw-r--r-- 1 root root    205 Mar 29 19:27 external.d.ts
+-rw-r--r-- 1 root root    205 Mar 29 19:27 external.js
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 helpers
+-rw-r--r-- 1 root root   1464 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root    101 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root     99 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root     99 Mar 29 19:27 index.js
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 locales
+-rw-r--r-- 1 root root    104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root     77 Mar 29 19:27 standard-schema.cjs
+-rw-r--r-- 1 root root   2843 Mar 29 19:27 standard-schema.d.cts
+-rw-r--r-- 1 root root   2843 Mar 29 19:27 standard-schema.d.ts
+-rw-r--r-- 1 root root     11 Mar 29 19:27 standard-schema.js
+-rw-r--r-- 1 root root 140156 Mar 29 19:27 types.cjs
+-rw-r--r-- 1 root root  52035 Mar 29 19:27 types.d.cts
+-rw-r--r-- 1 root root  52027 Mar 29 19:27 types.d.ts
+-rw-r--r-- 1 root root 131268 Mar 29 19:27 types.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/v3/helpers:
+total 529
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 8192 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   77 Mar 29 19:27 enumUtil.cjs
+-rw-r--r-- 1 root root  609 Mar 29 19:27 enumUtil.d.cts
+-rw-r--r-- 1 root root  609 Mar 29 19:27 enumUtil.d.ts
+-rw-r--r-- 1 root root   11 Mar 29 19:27 enumUtil.js
+-rw-r--r-- 1 root root  418 Mar 29 19:27 errorUtil.cjs
+-rw-r--r-- 1 root root  276 Mar 29 19:27 errorUtil.d.cts
+-rw-r--r-- 1 root root  276 Mar 29 19:27 errorUtil.d.ts
+-rw-r--r-- 1 root root  300 Mar 29 19:27 errorUtil.js
+-rw-r--r-- 1 root root 4272 Mar 29 19:27 parseUtil.cjs
+-rw-r--r-- 1 root root 2757 Mar 29 19:27 parseUtil.d.cts
+-rw-r--r-- 1 root root 2755 Mar 29 19:27 parseUtil.d.ts
+-rw-r--r-- 1 root root 3601 Mar 29 19:27 parseUtil.js
+-rw-r--r-- 1 root root   77 Mar 29 19:27 partialUtil.cjs
+-rw-r--r-- 1 root root  828 Mar 29 19:27 partialUtil.d.cts
+-rw-r--r-- 1 root root  827 Mar 29 19:27 partialUtil.d.ts
+-rw-r--r-- 1 root root   11 Mar 29 19:27 partialUtil.js
+-rw-r--r-- 1 root root   77 Mar 29 19:27 typeAliases.cjs
+-rw-r--r-- 1 root root  135 Mar 29 19:27 typeAliases.d.cts
+-rw-r--r-- 1 root root  135 Mar 29 19:27 typeAliases.d.ts
+-rw-r--r-- 1 root root   11 Mar 29 19:27 typeAliases.js
+-rw-r--r-- 1 root root 4401 Mar 29 19:27 util.cjs
+-rw-r--r-- 1 root root 3387 Mar 29 19:27 util.d.cts
+-rw-r--r-- 1 root root 3387 Mar 29 19:27 util.d.ts
+-rw-r--r-- 1 root root 4055 Mar 29 19:27 util.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/v3/locales:
+total 138
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 8192 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 6005 Mar 29 19:27 en.cjs
+-rw-r--r-- 1 root root  108 Mar 29 19:27 en.d.cts
+-rw-r--r-- 1 root root  113 Mar 29 19:27 en.d.ts
+-rw-r--r-- 1 root root 5602 Mar 29 19:27 en.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/v4:
+total 99
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 classic
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 core
+-rw-r--r-- 1 root root 1057 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   94 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   92 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   92 Mar 29 19:27 index.js
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 locales
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 mini
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/v4/classic:
+total 1678
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  3883 Mar 29 19:27 checks.cjs
+-rw-r--r-- 1 root root   681 Mar 29 19:27 checks.d.cts
+-rw-r--r-- 1 root root   680 Mar 29 19:27 checks.d.ts
+-rw-r--r-- 1 root root   642 Mar 29 19:27 checks.js
+-rw-r--r-- 1 root root  1772 Mar 29 19:27 coerce.cjs
+-rw-r--r-- 1 root root  1149 Mar 29 19:27 coerce.d.cts
+-rw-r--r-- 1 root root  1147 Mar 29 19:27 coerce.d.ts
+-rw-r--r-- 1 root root   550 Mar 29 19:27 coerce.js
+-rw-r--r-- 1 root root  2602 Mar 29 19:27 compat.cjs
+-rw-r--r-- 1 root root  2203 Mar 29 19:27 compat.d.cts
+-rw-r--r-- 1 root root  2199 Mar 29 19:27 compat.d.ts
+-rw-r--r-- 1 root root  1090 Mar 29 19:27 compat.js
+-rw-r--r-- 1 root root  2769 Mar 29 19:27 errors.cjs
+-rw-r--r-- 1 root root  1623 Mar 29 19:27 errors.d.cts
+-rw-r--r-- 1 root root  1620 Mar 29 19:27 errors.d.ts
+-rw-r--r-- 1 root root  1581 Mar 29 19:27 errors.js
+-rw-r--r-- 1 root root  5119 Mar 29 19:27 external.cjs
+-rw-r--r-- 1 root root   816 Mar 29 19:27 external.d.cts
+-rw-r--r-- 1 root root   803 Mar 29 19:27 external.d.ts
+-rw-r--r-- 1 root root   799 Mar 29 19:27 external.js
+-rw-r--r-- 1 root root  1464 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   101 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root    99 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root    99 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  2413 Mar 29 19:27 iso.cjs
+-rw-r--r-- 1 root root  1137 Mar 29 19:27 iso.d.cts
+-rw-r--r-- 1 root root  1135 Mar 29 19:27 iso.d.ts
+-rw-r--r-- 1 root root  1151 Mar 29 19:27 iso.js
+-rw-r--r-- 1 root root   104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root  2271 Mar 29 19:27 parse.cjs
+-rw-r--r-- 1 root root  2511 Mar 29 19:27 parse.d.cts
+-rw-r--r-- 1 root root  2509 Mar 29 19:27 parse.d.ts
+-rw-r--r-- 1 root root   997 Mar 29 19:27 parse.js
+-rw-r--r-- 1 root root 43332 Mar 29 19:27 schemas.cjs
+-rw-r--r-- 1 root root 43053 Mar 29 19:27 schemas.d.cts
+-rw-r--r-- 1 root root 43050 Mar 29 19:27 schemas.d.ts
+-rw-r--r-- 1 root root 38632 Mar 29 19:27 schemas.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/v4/core:
+total 3152
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 27372 Mar 29 19:27 api.cjs
+-rw-r--r-- 1 root root 30981 Mar 29 19:27 api.d.cts
+-rw-r--r-- 1 root root 30976 Mar 29 19:27 api.d.ts
+-rw-r--r-- 1 root root 23842 Mar 29 19:27 api.js
+-rw-r--r-- 1 root root 21227 Mar 29 19:27 checks.cjs
+-rw-r--r-- 1 root root 12814 Mar 29 19:27 checks.d.cts
+-rw-r--r-- 1 root root 12810 Mar 29 19:27 checks.d.ts
+-rw-r--r-- 1 root root 19673 Mar 29 19:27 checks.js
+-rw-r--r-- 1 root root  2564 Mar 29 19:27 core.cjs
+-rw-r--r-- 1 root root  1877 Mar 29 19:27 core.d.cts
+-rw-r--r-- 1 root root  1874 Mar 29 19:27 core.d.ts
+-rw-r--r-- 1 root root  2278 Mar 29 19:27 core.js
+-rw-r--r-- 1 root root  1199 Mar 29 19:27 doc.cjs
+-rw-r--r-- 1 root root   348 Mar 29 19:27 doc.d.cts
+-rw-r--r-- 1 root root   348 Mar 29 19:27 doc.d.ts
+-rw-r--r-- 1 root root  1088 Mar 29 19:27 doc.js
+-rw-r--r-- 1 root root  7609 Mar 29 19:27 errors.cjs
+-rw-r--r-- 1 root root  8168 Mar 29 19:27 errors.d.cts
+-rw-r--r-- 1 root root  8163 Mar 29 19:27 errors.d.ts
+-rw-r--r-- 1 root root  6275 Mar 29 19:27 errors.js
+-rw-r--r-- 1 root root  2113 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   482 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   468 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   468 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root    77 Mar 29 19:27 json-schema.cjs
+-rw-r--r-- 1 root root  2764 Mar 29 19:27 json-schema.d.cts
+-rw-r--r-- 1 root root  2764 Mar 29 19:27 json-schema.d.ts
+-rw-r--r-- 1 root root    11 Mar 29 19:27 json-schema.js
+-rw-r--r-- 1 root root   104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root  6565 Mar 29 19:27 parse.cjs
+-rw-r--r-- 1 root root  3833 Mar 29 19:27 parse.d.cts
+-rw-r--r-- 1 root root  3829 Mar 29 19:27 parse.d.ts
+-rw-r--r-- 1 root root  4528 Mar 29 19:27 parse.js
+-rw-r--r-- 1 root root  9312 Mar 29 19:27 regexes.cjs
+-rw-r--r-- 1 root root  3399 Mar 29 19:27 regexes.d.cts
+-rw-r--r-- 1 root root  3399 Mar 29 19:27 regexes.d.ts
+-rw-r--r-- 1 root root  8512 Mar 29 19:27 regexes.js
+-rw-r--r-- 1 root root  1745 Mar 29 19:27 registries.cjs
+-rw-r--r-- 1 root root  1633 Mar 29 19:27 registries.d.cts
+-rw-r--r-- 1 root root  1631 Mar 29 19:27 registries.d.ts
+-rw-r--r-- 1 root root  1554 Mar 29 19:27 registries.js
+-rw-r--r-- 1 root root 73423 Mar 29 19:27 schemas.cjs
+-rw-r--r-- 1 root root 49733 Mar 29 19:27 schemas.d.cts
+-rw-r--r-- 1 root root 49726 Mar 29 19:27 schemas.d.ts
+-rw-r--r-- 1 root root 71161 Mar 29 19:27 schemas.js
+-rw-r--r-- 1 root root    77 Mar 29 19:27 standard-schema.cjs
+-rw-r--r-- 1 root root  2403 Mar 29 19:27 standard-schema.d.cts
+-rw-r--r-- 1 root root  2403 Mar 29 19:27 standard-schema.d.ts
+-rw-r--r-- 1 root root    11 Mar 29 19:27 standard-schema.js
+-rw-r--r-- 1 root root 39183 Mar 29 19:27 to-json-schema.cjs
+-rw-r--r-- 1 root root  3885 Mar 29 19:27 to-json-schema.d.cts
+-rw-r--r-- 1 root root  3882 Mar 29 19:27 to-json-schema.d.ts
+-rw-r--r-- 1 root root 38960 Mar 29 19:27 to-json-schema.js
+-rw-r--r-- 1 root root 21327 Mar 29 19:27 util.cjs
+-rw-r--r-- 1 root root 11777 Mar 29 19:27 util.d.cts
+-rw-r--r-- 1 root root 11773 Mar 29 19:27 util.d.ts
+-rw-r--r-- 1 root root 19511 Mar 29 19:27 util.js
+-rw-r--r-- 1 root root   168 Mar 29 19:27 versions.cjs
+-rw-r--r-- 1 root root   109 Mar 29 19:27 versions.d.cts
+-rw-r--r-- 1 root root   109 Mar 29 19:27 versions.d.ts
+-rw-r--r-- 1 root root    70 Mar 29 19:27 versions.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/v4/locales:
+total 6074
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 6454 Mar 29 19:27 ar.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ar.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ar.d.ts
+-rw-r--r-- 1 root root 5278 Mar 29 19:27 ar.js
+-rw-r--r-- 1 root root 5816 Mar 29 19:27 az.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 az.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 az.d.ts
+-rw-r--r-- 1 root root 4640 Mar 29 19:27 az.js
+-rw-r--r-- 1 root root 7852 Mar 29 19:27 be.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 be.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 be.d.ts
+-rw-r--r-- 1 root root 6676 Mar 29 19:27 be.js
+-rw-r--r-- 1 root root 6985 Mar 29 19:27 bg.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 bg.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 bg.d.ts
+-rw-r--r-- 1 root root 5775 Mar 29 19:27 bg.js
+-rw-r--r-- 1 root root 6137 Mar 29 19:27 ca.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ca.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ca.d.ts
+-rw-r--r-- 1 root root 4961 Mar 29 19:27 ca.js
+-rw-r--r-- 1 root root 6442 Mar 29 19:27 cs.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 cs.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 cs.d.ts
+-rw-r--r-- 1 root root 5266 Mar 29 19:27 cs.js
+-rw-r--r-- 1 root root 6249 Mar 29 19:27 da.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 da.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 da.d.ts
+-rw-r--r-- 1 root root 5073 Mar 29 19:27 da.js
+-rw-r--r-- 1 root root 5848 Mar 29 19:27 de.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 de.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 de.d.ts
+-rw-r--r-- 1 root root 4672 Mar 29 19:27 de.js
+-rw-r--r-- 1 root root 5683 Mar 29 19:27 en.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 en.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 en.d.ts
+-rw-r--r-- 1 root root 4473 Mar 29 19:27 en.js
+-rw-r--r-- 1 root root 5802 Mar 29 19:27 eo.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 eo.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 eo.d.ts
+-rw-r--r-- 1 root root 4592 Mar 29 19:27 eo.js
+-rw-r--r-- 1 root root 6939 Mar 29 19:27 es.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 es.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 es.d.ts
+-rw-r--r-- 1 root root 5763 Mar 29 19:27 es.js
+-rw-r--r-- 1 root root 6351 Mar 29 19:27 fa.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 fa.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 fa.d.ts
+-rw-r--r-- 1 root root 5175 Mar 29 19:27 fa.js
+-rw-r--r-- 1 root root 6130 Mar 29 19:27 fi.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 fi.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 fi.d.ts
+-rw-r--r-- 1 root root 4954 Mar 29 19:27 fi.js
+-rw-r--r-- 1 root root 5869 Mar 29 19:27 fr-CA.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 fr-CA.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 fr-CA.d.ts
+-rw-r--r-- 1 root root 4693 Mar 29 19:27 fr-CA.js
+-rw-r--r-- 1 root root 5850 Mar 29 19:27 fr.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 fr.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 fr.d.ts
+-rw-r--r-- 1 root root 4674 Mar 29 19:27 fr.js
+-rw-r--r-- 1 root root 6255 Mar 29 19:27 he.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 he.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 he.d.ts
+-rw-r--r-- 1 root root 5079 Mar 29 19:27 he.js
+-rw-r--r-- 1 root root 6050 Mar 29 19:27 hu.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 hu.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 hu.d.ts
+-rw-r--r-- 1 root root 4874 Mar 29 19:27 hu.js
+-rw-r--r-- 1 root root 5886 Mar 29 19:27 id.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 id.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 id.d.ts
+-rw-r--r-- 1 root root 4710 Mar 29 19:27 id.js
+-rw-r--r-- 1 root root 8134 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root 1949 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root 1903 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root 1903 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root 5845 Mar 29 19:27 is.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 is.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 is.d.ts
+-rw-r--r-- 1 root root 4635 Mar 29 19:27 is.js
+-rw-r--r-- 1 root root 5949 Mar 29 19:27 it.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 it.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 it.d.ts
+-rw-r--r-- 1 root root 4773 Mar 29 19:27 it.js
+-rw-r--r-- 1 root root 6080 Mar 29 19:27 ja.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ja.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ja.d.ts
+-rw-r--r-- 1 root root 4904 Mar 29 19:27 ja.js
+-rw-r--r-- 1 root root 7553 Mar 29 19:27 ka.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 ka.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 ka.d.ts
+-rw-r--r-- 1 root root 6343 Mar 29 19:27 ka.js
+-rw-r--r-- 1 root root  430 Mar 29 19:27 kh.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 kh.d.cts
+-rw-r--r-- 1 root root  158 Mar 29 19:27 kh.d.ts
+-rw-r--r-- 1 root root  111 Mar 29 19:27 kh.js
+-rw-r--r-- 1 root root 7402 Mar 29 19:27 km.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 km.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 km.d.ts
+-rw-r--r-- 1 root root 6226 Mar 29 19:27 km.js
+-rw-r--r-- 1 root root 6216 Mar 29 19:27 ko.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ko.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ko.d.ts
+-rw-r--r-- 1 root root 5040 Mar 29 19:27 ko.js
+-rw-r--r-- 1 root root 9774 Mar 29 19:27 lt.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 lt.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 lt.d.ts
+-rw-r--r-- 1 root root 8564 Mar 29 19:27 lt.js
+-rw-r--r-- 1 root root 6509 Mar 29 19:27 mk.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 mk.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 mk.d.ts
+-rw-r--r-- 1 root root 5333 Mar 29 19:27 mk.js
+-rw-r--r-- 1 root root 5778 Mar 29 19:27 ms.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ms.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ms.d.ts
+-rw-r--r-- 1 root root 4602 Mar 29 19:27 ms.js
+-rw-r--r-- 1 root root 5711 Mar 29 19:27 nl.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 nl.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 nl.d.ts
+-rw-r--r-- 1 root root 4535 Mar 29 19:27 nl.js
+-rw-r--r-- 1 root root 5774 Mar 29 19:27 no.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 no.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 no.d.ts
+-rw-r--r-- 1 root root 4598 Mar 29 19:27 no.js
+-rw-r--r-- 1 root root 5880 Mar 29 19:27 ota.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ota.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ota.d.ts
+-rw-r--r-- 1 root root 4704 Mar 29 19:27 ota.js
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root 6211 Mar 29 19:27 pl.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 pl.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 pl.d.ts
+-rw-r--r-- 1 root root 5035 Mar 29 19:27 pl.js
+-rw-r--r-- 1 root root 6145 Mar 29 19:27 ps.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ps.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ps.d.ts
+-rw-r--r-- 1 root root 4969 Mar 29 19:27 ps.js
+-rw-r--r-- 1 root root 5834 Mar 29 19:27 pt.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 pt.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 pt.d.ts
+-rw-r--r-- 1 root root 4658 Mar 29 19:27 pt.js
+-rw-r--r-- 1 root root 7949 Mar 29 19:27 ru.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ru.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ru.d.ts
+-rw-r--r-- 1 root root 6773 Mar 29 19:27 ru.js
+-rw-r--r-- 1 root root 5827 Mar 29 19:27 sl.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 sl.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 sl.d.ts
+-rw-r--r-- 1 root root 4651 Mar 29 19:27 sl.js
+-rw-r--r-- 1 root root 5925 Mar 29 19:27 sv.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 sv.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 sv.d.ts
+-rw-r--r-- 1 root root 4749 Mar 29 19:27 sv.js
+-rw-r--r-- 1 root root 7542 Mar 29 19:27 ta.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ta.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ta.d.ts
+-rw-r--r-- 1 root root 6366 Mar 29 19:27 ta.js
+-rw-r--r-- 1 root root 7488 Mar 29 19:27 th.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 th.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 th.d.ts
+-rw-r--r-- 1 root root 6312 Mar 29 19:27 th.js
+-rw-r--r-- 1 root root 5728 Mar 29 19:27 tr.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 tr.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 tr.d.ts
+-rw-r--r-- 1 root root 4518 Mar 29 19:27 tr.js
+-rw-r--r-- 1 root root  430 Mar 29 19:27 ua.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ua.d.cts
+-rw-r--r-- 1 root root  158 Mar 29 19:27 ua.d.ts
+-rw-r--r-- 1 root root  111 Mar 29 19:27 ua.js
+-rw-r--r-- 1 root root 6807 Mar 29 19:27 uk.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 uk.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 uk.d.ts
+-rw-r--r-- 1 root root 5631 Mar 29 19:27 uk.js
+-rw-r--r-- 1 root root 6492 Mar 29 19:27 ur.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ur.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ur.d.ts
+-rw-r--r-- 1 root root 5316 Mar 29 19:27 ur.js
+-rw-r--r-- 1 root root 6011 Mar 29 19:27 vi.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 vi.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 vi.d.ts
+-rw-r--r-- 1 root root 4835 Mar 29 19:27 vi.js
+-rw-r--r-- 1 root root 5908 Mar 29 19:27 yo.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 yo.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 yo.d.ts
+-rw-r--r-- 1 root root 4732 Mar 29 19:27 yo.js
+-rw-r--r-- 1 root root 5703 Mar 29 19:27 zh-CN.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 zh-CN.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 zh-CN.d.ts
+-rw-r--r-- 1 root root 4527 Mar 29 19:27 zh-CN.js
+-rw-r--r-- 1 root root 5804 Mar 29 19:27 zh-TW.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 zh-TW.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 zh-TW.d.ts
+-rw-r--r-- 1 root root 4628 Mar 29 19:27 zh-TW.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/v4/mini:
+total 849
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  4141 Mar 29 19:27 checks.cjs
+-rw-r--r-- 1 root root   677 Mar 29 19:27 checks.d.cts
+-rw-r--r-- 1 root root   676 Mar 29 19:27 checks.d.ts
+-rw-r--r-- 1 root root   676 Mar 29 19:27 checks.js
+-rw-r--r-- 1 root root  1792 Mar 29 19:27 coerce.cjs
+-rw-r--r-- 1 root root   642 Mar 29 19:27 coerce.d.cts
+-rw-r--r-- 1 root root   640 Mar 29 19:27 coerce.d.ts
+-rw-r--r-- 1 root root   570 Mar 29 19:27 coerce.js
+-rw-r--r-- 1 root root  4762 Mar 29 19:27 external.cjs
+-rw-r--r-- 1 root root   674 Mar 29 19:27 external.d.cts
+-rw-r--r-- 1 root root   664 Mar 29 19:27 external.d.ts
+-rw-r--r-- 1 root root   656 Mar 29 19:27 external.js
+-rw-r--r-- 1 root root  1443 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root    83 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root    81 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root    81 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  2481 Mar 29 19:27 iso.cjs
+-rw-r--r-- 1 root root  1257 Mar 29 19:27 iso.d.cts
+-rw-r--r-- 1 root root  1255 Mar 29 19:27 iso.d.ts
+-rw-r--r-- 1 root root  1203 Mar 29 19:27 iso.js
+-rw-r--r-- 1 root root   104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root  1830 Mar 29 19:27 parse.cjs
+-rw-r--r-- 1 root root   183 Mar 29 19:27 parse.d.cts
+-rw-r--r-- 1 root root   182 Mar 29 19:27 parse.d.ts
+-rw-r--r-- 1 root root   182 Mar 29 19:27 parse.js
+-rw-r--r-- 1 root root 30767 Mar 29 19:27 schemas.cjs
+-rw-r--r-- 1 root root 30037 Mar 29 19:27 schemas.d.cts
+-rw-r--r-- 1 root root 30035 Mar 29 19:27 schemas.d.ts
+-rw-r--r-- 1 root root 26013 Mar 29 19:27 schemas.js
+
+/workspace/.openart/runners/target/config/opencode/node_modules/zod/v4-mini:
+total 4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  813 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   38 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+
+/workspace/.openart/runners/target/state:
+total 67
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  464 Mar 29 19:27 mcp_servers.json
+-rw-r--r-- 1 root root  224 Mar 29 19:27 skills.json
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 tools
+-rw-r--r-- 1 root root 4541 Mar 29 19:27 tools.json
+
+/workspace/.openart/runners/target/state/tools:
+total 66
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 bin
+-rw-r--r-- 1 root root 1192 Mar 29 19:27 guide.md
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 src
+
+/workspace/.openart/runners/target/state/tools/bin:
+total 4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rwxr-xr-x 1 root root  247 Mar 29 19:27 gitlab.create_project
+-rwxr-xr-x 1 root root  241 Mar 29 19:27 gitlab.get_file
+-rwxr-xr-x 1 root root  244 Mar 29 19:27 gitlab.upload_file
+-rwxr-xr-x 1 root root  290 Mar 29 19:27 owncloud.download_file
+-rwxr-xr-x 1 root root  285 Mar 29 19:27 owncloud.list_dir
+-rwxr-xr-x 1 root root  288 Mar 29 19:27 owncloud.upload_file
+
+/workspace/.openart/runners/target/state/tools/src:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 bundle_1
+
+/workspace/.openart/runners/target/state/tools/src/bundle_1:
+total 130
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  508 Mar 29 19:27 README.md
+-rw-r--r-- 1 root root 1192 Mar 29 19:27 guide.md
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 scripts
+-rw-r--r-- 1 root root 2131 Mar 29 19:27 user-tools.yaml
+
+/workspace/.openart/runners/target/state/tools/src/bundle_1/scripts:
+total 322
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 4235 Mar 29 19:27 common.py
+-rw-r--r-- 1 root root  907 Mar 29 19:27 gitlab_create_project.py
+-rw-r--r-- 1 root root 1066 Mar 29 19:27 gitlab_get_file.py
+-rw-r--r-- 1 root root 1885 Mar 29 19:27 gitlab_upload_file.py
+-rw-r--r-- 1 root root  893 Mar 29 19:27 owncloud_download_file.py
+-rw-r--r-- 1 root root  743 Mar 29 19:27 owncloud_list_dir.py
+-rw-r--r-- 1 root root 1020 Mar 29 19:27 owncloud_upload_file.py
+
+/workspace/.opencode:
+total 4
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   45 Mar 29 19:27 .gitignore
+-rw-r--r-- 1 root root  707 Mar 29 19:27 bun.lock
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 node_modules
+-rw-r--r-- 1 root root   62 Mar 29 19:27 package.json
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 skills
+
+/workspace/.opencode/node_modules:
+total 2
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 @opencode-ai
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 zod
+
+/workspace/.opencode/node_modules/@opencode-ai:
+total 2
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 plugin
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 sdk
+
+/workspace/.opencode/node_modules/@opencode-ai/plugin:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 dist
+-rw-r--r-- 1 root root  708 Mar 29 19:27 package.json
+
+/workspace/.opencode/node_modules/@opencode-ai/plugin/dist:
+total 196
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   81 Mar 29 19:27 example.d.ts
+-rw-r--r-- 1 root root  439 Mar 29 19:27 example.js
+-rw-r--r-- 1 root root 6791 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   27 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root 3248 Mar 29 19:27 shell.d.ts
+-rw-r--r-- 1 root root   11 Mar 29 19:27 shell.js
+-rw-r--r-- 1 root root 1242 Mar 29 19:27 tool.d.ts
+-rw-r--r-- 1 root root   92 Mar 29 19:27 tool.js
+
+/workspace/.opencode/node_modules/@opencode-ai/sdk:
+total 66
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 dist
+-rw-r--r-- 1 root root 1248 Mar 29 19:27 package.json
+
+/workspace/.opencode/node_modules/@opencode-ai/sdk/dist:
+total 69
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  317 Mar 29 19:27 client.d.ts
+-rw-r--r-- 1 root root  741 Mar 29 19:27 client.js
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 gen
+-rw-r--r-- 1 root root  302 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  419 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  565 Mar 29 19:27 server.d.ts
+-rw-r--r-- 1 root root 2955 Mar 29 19:27 server.js
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 v2
+
+/workspace/.opencode/node_modules/@opencode-ai/sdk/dist/gen:
+total 260
+drwxr-xr-x 4 root root  1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root  1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root  1024 Mar 29 19:27 client
+-rw-r--r-- 1 root root   749 Mar 29 19:27 client.gen.d.ts
+-rw-r--r-- 1 root root   211 Mar 29 19:27 client.gen.js
+drwxr-xr-x 2 root root  1024 Mar 29 19:27 core
+-rw-r--r-- 1 root root 26885 Mar 29 19:27 sdk.gen.d.ts
+-rw-r--r-- 1 root root 21590 Mar 29 19:27 sdk.gen.js
+-rw-r--r-- 1 root root 76518 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root    65 Mar 29 19:27 types.gen.js
+
+/workspace/.opencode/node_modules/@opencode-ai/sdk/dist/gen/client:
+total 259
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  118 Mar 29 19:27 client.gen.d.ts
+-rw-r--r-- 1 root root 5674 Mar 29 19:27 client.gen.js
+-rw-r--r-- 1 root root  620 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  346 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root 6888 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root   65 Mar 29 19:27 types.gen.js
+-rw-r--r-- 1 root root 2374 Mar 29 19:27 utils.gen.d.ts
+-rw-r--r-- 1 root root 7285 Mar 29 19:27 utils.gen.js
+
+/workspace/.opencode/node_modules/@opencode-ai/sdk/dist/gen/core:
+total 644
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  546 Mar 29 19:27 auth.gen.d.ts
+-rw-r--r-- 1 root root  411 Mar 29 19:27 auth.gen.js
+-rw-r--r-- 1 root root  776 Mar 29 19:27 bodySerializer.gen.d.ts
+-rw-r--r-- 1 root root 1824 Mar 29 19:27 bodySerializer.gen.js
+-rw-r--r-- 1 root root  927 Mar 29 19:27 params.gen.d.ts
+-rw-r--r-- 1 root root 2642 Mar 29 19:27 params.gen.js
+-rw-r--r-- 1 root root 1489 Mar 29 19:27 pathSerializer.gen.d.ts
+-rw-r--r-- 1 root root 3507 Mar 29 19:27 pathSerializer.gen.js
+-rw-r--r-- 1 root root  705 Mar 29 19:27 queryKeySerializer.gen.d.ts
+-rw-r--r-- 1 root root 2699 Mar 29 19:27 queryKeySerializer.gen.js
+-rw-r--r-- 1 root root 2149 Mar 29 19:27 serverSentEvents.gen.d.ts
+-rw-r--r-- 1 root root 5492 Mar 29 19:27 serverSentEvents.gen.js
+-rw-r--r-- 1 root root 3274 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root   65 Mar 29 19:27 types.gen.js
+-rw-r--r-- 1 root root  540 Mar 29 19:27 utils.gen.d.ts
+-rw-r--r-- 1 root root 2444 Mar 29 19:27 utils.gen.js
+
+/workspace/.opencode/node_modules/@opencode-ai/sdk/dist/v2:
+total 132
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  356 Mar 29 19:27 client.d.ts
+-rw-r--r-- 1 root root 1078 Mar 29 19:27 client.js
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 gen
+-rw-r--r-- 1 root root  302 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  419 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  565 Mar 29 19:27 server.d.ts
+-rw-r--r-- 1 root root 2955 Mar 29 19:27 server.js
+
+/workspace/.opencode/node_modules/@opencode-ai/sdk/dist/v2/gen:
+total 324
+drwxr-xr-x 4 root root   1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root   1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 client
+-rw-r--r-- 1 root root    723 Mar 29 19:27 client.gen.d.ts
+-rw-r--r-- 1 root root    206 Mar 29 19:27 client.gen.js
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 core
+-rw-r--r-- 1 root root  55155 Mar 29 19:27 sdk.gen.d.ts
+-rw-r--r-- 1 root root  77354 Mar 29 19:27 sdk.gen.js
+-rw-r--r-- 1 root root 101938 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root     65 Mar 29 19:27 types.gen.js
+
+/workspace/.opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client:
+total 259
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  118 Mar 29 19:27 client.gen.d.ts
+-rw-r--r-- 1 root root 8236 Mar 29 19:27 client.gen.js
+-rw-r--r-- 1 root root  675 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  422 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root 6030 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root   65 Mar 29 19:27 types.gen.js
+-rw-r--r-- 1 root root 2125 Mar 29 19:27 utils.gen.d.ts
+-rw-r--r-- 1 root root 7376 Mar 29 19:27 utils.gen.js
+
+/workspace/.opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core:
+total 708
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  546 Mar 29 19:27 auth.gen.d.ts
+-rw-r--r-- 1 root root  411 Mar 29 19:27 auth.gen.js
+-rw-r--r-- 1 root root 1109 Mar 29 19:27 bodySerializer.gen.d.ts
+-rw-r--r-- 1 root root 1824 Mar 29 19:27 bodySerializer.gen.js
+-rw-r--r-- 1 root root 1211 Mar 29 19:27 params.gen.d.ts
+-rw-r--r-- 1 root root 3056 Mar 29 19:27 params.gen.js
+-rw-r--r-- 1 root root 1489 Mar 29 19:27 pathSerializer.gen.d.ts
+-rw-r--r-- 1 root root 3507 Mar 29 19:27 pathSerializer.gen.js
+-rw-r--r-- 1 root root  705 Mar 29 19:27 queryKeySerializer.gen.d.ts
+-rw-r--r-- 1 root root 2699 Mar 29 19:27 queryKeySerializer.gen.js
+-rw-r--r-- 1 root root 2546 Mar 29 19:27 serverSentEvents.gen.d.ts
+-rw-r--r-- 1 root root 6288 Mar 29 19:27 serverSentEvents.gen.js
+-rw-r--r-- 1 root root 3295 Mar 29 19:27 types.gen.d.ts
+-rw-r--r-- 1 root root   65 Mar 29 19:27 types.gen.js
+-rw-r--r-- 1 root root  718 Mar 29 19:27 utils.gen.d.ts
+-rw-r--r-- 1 root root 3139 Mar 29 19:27 utils.gen.js
+
+/workspace/.opencode/node_modules/zod:
+total 269
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 1072 Mar 29 19:27 LICENSE
+-rw-r--r-- 1 root root 6281 Mar 29 19:27 README.md
+-rw-r--r-- 1 root root 1486 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root  123 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 index.js
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 locales
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 mini
+-rw-r--r-- 1 root root 3796 Mar 29 19:27 package.json
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 src
+drwxr-xr-x 4 root root 8192 Mar 29 19:27 v3
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 v4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 v4-mini
+
+/workspace/.opencode/node_modules/zod/locales:
+total 4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  816 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   41 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   40 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   40 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+
+/workspace/.opencode/node_modules/zod/mini:
+total 4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  813 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   38 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+
+/workspace/.opencode/node_modules/zod/src:
+total 4
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  121 Mar 29 19:27 index.ts
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 locales
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 mini
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 v3
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 v4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 v4-mini
+
+/workspace/.opencode/node_modules/zod/src/locales:
+total 2
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   40 Mar 29 19:27 index.ts
+
+/workspace/.opencode/node_modules/zod/src/mini:
+total 2
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.ts
+
+/workspace/.opencode/node_modules/zod/src/v3:
+total 332
+drwxr-xr-x 6 root root   1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root   1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   8991 Mar 29 19:27 ZodError.ts
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 benchmarks
+-rw-r--r-- 1 root root    305 Mar 29 19:27 errors.ts
+-rw-r--r-- 1 root root    205 Mar 29 19:27 external.ts
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 helpers
+-rw-r--r-- 1 root root     99 Mar 29 19:27 index.ts
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 locales
+-rw-r--r-- 1 root root   2678 Mar 29 19:27 standard-schema.ts
+drwxr-xr-x 2 root root   8192 Mar 29 19:27 tests
+-rw-r--r-- 1 root root 160328 Mar 29 19:27 types.ts
+
+/workspace/.opencode/node_modules/zod/src/v3/benchmarks:
+total 577
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 1908 Mar 29 19:27 datetime.ts
+-rw-r--r-- 1 root root 1593 Mar 29 19:27 discriminatedUnion.ts
+-rw-r--r-- 1 root root 1582 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root 1818 Mar 29 19:27 ipv4.ts
+-rw-r--r-- 1 root root 1623 Mar 29 19:27 object.ts
+-rw-r--r-- 1 root root 3489 Mar 29 19:27 primitives.ts
+-rw-r--r-- 1 root root 1157 Mar 29 19:27 realworld.ts
+-rw-r--r-- 1 root root 1257 Mar 29 19:27 string.ts
+-rw-r--r-- 1 root root 1525 Mar 29 19:27 union.ts
+
+/workspace/.opencode/node_modules/zod/src/v3/helpers:
+total 195
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  604 Mar 29 19:27 enumUtil.ts
+-rw-r--r-- 1 root root  408 Mar 29 19:27 errorUtil.ts
+-rw-r--r-- 1 root root 5279 Mar 29 19:27 parseUtil.ts
+-rw-r--r-- 1 root root 1019 Mar 29 19:27 partialUtil.ts
+-rw-r--r-- 1 root root  135 Mar 29 19:27 typeAliases.ts
+-rw-r--r-- 1 root root 6206 Mar 29 19:27 util.ts
+
+/workspace/.opencode/node_modules/zod/src/v3/locales:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 5134 Mar 29 19:27 en.ts
+
+/workspace/.opencode/node_modules/zod/src/v3/tests:
+total 3215
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  1341 Mar 29 19:27 Mocker.ts
+-rw-r--r-- 1 root root  4753 Mar 29 19:27 all-errors.test.ts
+-rw-r--r-- 1 root root   673 Mar 29 19:27 anyunknown.test.ts
+-rw-r--r-- 1 root root  1939 Mar 29 19:27 array.test.ts
+-rw-r--r-- 1 root root 12639 Mar 29 19:27 async-parsing.test.ts
+-rw-r--r-- 1 root root  1603 Mar 29 19:27 async-refinements.test.ts
+-rw-r--r-- 1 root root   782 Mar 29 19:27 base.test.ts
+-rw-r--r-- 1 root root  1977 Mar 29 19:27 bigint.test.ts
+-rw-r--r-- 1 root root  1734 Mar 29 19:27 branded.test.ts
+-rw-r--r-- 1 root root  6550 Mar 29 19:27 catch.test.ts
+-rw-r--r-- 1 root root  6650 Mar 29 19:27 coerce.test.ts
+-rw-r--r-- 1 root root  1914 Mar 29 19:27 complex.test.ts
+-rw-r--r-- 1 root root   950 Mar 29 19:27 custom.test.ts
+-rw-r--r-- 1 root root   983 Mar 29 19:27 date.test.ts
+-rw-r--r-- 1 root root  5215 Mar 29 19:27 deepmasking.test.ts
+-rw-r--r-- 1 root root  3527 Mar 29 19:27 default.test.ts
+-rw-r--r-- 1 root root  1323 Mar 29 19:27 description.test.ts
+-rw-r--r-- 1 root root  8537 Mar 29 19:27 discriminated-unions.test.ts
+-rw-r--r-- 1 root root  2737 Mar 29 19:27 enum.test.ts
+-rw-r--r-- 1 root root 16812 Mar 29 19:27 error.test.ts
+-rw-r--r-- 1 root root  2391 Mar 29 19:27 firstparty.test.ts
+-rw-r--r-- 1 root root   788 Mar 29 19:27 firstpartyschematypes.test.ts
+-rw-r--r-- 1 root root  6578 Mar 29 19:27 function.test.ts
+-rw-r--r-- 1 root root  1523 Mar 29 19:27 generics.test.ts
+-rw-r--r-- 1 root root  1154 Mar 29 19:27 instanceof.test.ts
+-rw-r--r-- 1 root root  3091 Mar 29 19:27 intersection.test.ts
+-rw-r--r-- 1 root root  1275 Mar 29 19:27 language-server.source.ts
+-rw-r--r-- 1 root root  8318 Mar 29 19:27 language-server.test.ts
+-rw-r--r-- 1 root root  1063 Mar 29 19:27 literal.test.ts
+-rw-r--r-- 1 root root  3545 Mar 29 19:27 map.test.ts
+-rw-r--r-- 1 root root    85 Mar 29 19:27 masking.test.ts
+-rw-r--r-- 1 root root   389 Mar 29 19:27 mocker.test.ts
+-rw-r--r-- 1 root root   587 Mar 29 19:27 nan.test.ts
+-rw-r--r-- 1 root root  2344 Mar 29 19:27 nativeEnum.test.ts
+-rw-r--r-- 1 root root  1172 Mar 29 19:27 nullable.test.ts
+-rw-r--r-- 1 root root  6373 Mar 29 19:27 number.test.ts
+-rw-r--r-- 1 root root   569 Mar 29 19:27 object-augmentation.test.ts
+-rw-r--r-- 1 root root   778 Mar 29 19:27 object-in-es5-env.test.ts
+-rw-r--r-- 1 root root 11760 Mar 29 19:27 object.test.ts
+-rw-r--r-- 1 root root  1222 Mar 29 19:27 optional.test.ts
+-rw-r--r-- 1 root root   869 Mar 29 19:27 parseUtil.test.ts
+-rw-r--r-- 1 root root  1125 Mar 29 19:27 parser.test.ts
+-rw-r--r-- 1 root root  6996 Mar 29 19:27 partials.test.ts
+-rw-r--r-- 1 root root  3622 Mar 29 19:27 pickomit.test.ts
+-rw-r--r-- 1 root root   823 Mar 29 19:27 pipeline.test.ts
+-rw-r--r-- 1 root root  4530 Mar 29 19:27 preprocess.test.ts
+-rw-r--r-- 1 root root 12215 Mar 29 19:27 primitive.test.ts
+-rw-r--r-- 1 root root  2490 Mar 29 19:27 promise.test.ts
+-rw-r--r-- 1 root root  7339 Mar 29 19:27 readonly.test.ts
+-rw-r--r-- 1 root root  3735 Mar 29 19:27 record.test.ts
+-rw-r--r-- 1 root root  3946 Mar 29 19:27 recursive.test.ts
+-rw-r--r-- 1 root root  8172 Mar 29 19:27 refine.test.ts
+-rw-r--r-- 1 root root   628 Mar 29 19:27 safeparse.test.ts
+-rw-r--r-- 1 root root  4788 Mar 29 19:27 set.test.ts
+-rw-r--r-- 1 root root  2587 Mar 29 19:27 standard-schema.test.ts
+-rw-r--r-- 1 root root 65633 Mar 29 19:27 string.test.ts
+-rw-r--r-- 1 root root  5687 Mar 29 19:27 transformer.test.ts
+-rw-r--r-- 1 root root  2691 Mar 29 19:27 tuple.test.ts
+-rw-r--r-- 1 root root  1540 Mar 29 19:27 unions.test.ts
+-rw-r--r-- 1 root root  3826 Mar 29 19:27 validations.test.ts
+-rw-r--r-- 1 root root   349 Mar 29 19:27 void.test.ts
+
+/workspace/.opencode/node_modules/zod/src/v4:
+total 11
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 classic
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 core
+-rw-r--r-- 1 root root   93 Mar 29 19:27 index.ts
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 locales
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 mini
+
+/workspace/.opencode/node_modules/zod/src/v4/classic:
+total 522
+drwxr-xr-x 3 root root  1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   738 Mar 29 19:27 checks.ts
+-rw-r--r-- 1 root root  1503 Mar 29 19:27 coerce.ts
+-rw-r--r-- 1 root root  2183 Mar 29 19:27 compat.ts
+-rw-r--r-- 1 root root  2909 Mar 29 19:27 errors.ts
+-rw-r--r-- 1 root root  1062 Mar 29 19:27 external.ts
+-rw-r--r-- 1 root root   100 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root  3182 Mar 29 19:27 iso.ts
+-rw-r--r-- 1 root root  3262 Mar 29 19:27 parse.ts
+-rw-r--r-- 1 root root 78031 Mar 29 19:27 schemas.ts
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 tests
+
+/workspace/.opencode/node_modules/zod/src/v4/classic/tests:
+total 3980
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 3 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   639 Mar 29 19:27 anyunknown.test.ts
+-rw-r--r-- 1 root root  7248 Mar 29 19:27 array.test.ts
+-rw-r--r-- 1 root root  6790 Mar 29 19:27 assignability.test.ts
+-rw-r--r-- 1 root root 12311 Mar 29 19:27 async-parsing.test.ts
+-rw-r--r-- 1 root root  1867 Mar 29 19:27 async-refinements.test.ts
+-rw-r--r-- 1 root root   179 Mar 29 19:27 base.test.ts
+-rw-r--r-- 1 root root  1956 Mar 29 19:27 bigint.test.ts
+-rw-r--r-- 1 root root  2206 Mar 29 19:27 brand.test.ts
+-rw-r--r-- 1 root root  7831 Mar 29 19:27 catch.test.ts
+-rw-r--r-- 1 root root   743 Mar 29 19:27 coalesce.test.ts
+-rw-r--r-- 1 root root 19030 Mar 29 19:27 codec-examples.test.ts
+-rw-r--r-- 1 root root 18853 Mar 29 19:27 codec.test.ts
+-rw-r--r-- 1 root root  7736 Mar 29 19:27 coerce.test.ts
+-rw-r--r-- 1 root root  7515 Mar 29 19:27 continuability.test.ts
+-rw-r--r-- 1 root root  1215 Mar 29 19:27 custom.test.ts
+-rw-r--r-- 1 root root   962 Mar 29 19:27 date.test.ts
+-rw-r--r-- 1 root root 11932 Mar 29 19:27 datetime.test.ts
+-rw-r--r-- 1 root root  9226 Mar 29 19:27 default.test.ts
+-rw-r--r-- 1 root root  1294 Mar 29 19:27 description.test.ts
+-rw-r--r-- 1 root root 17665 Mar 29 19:27 discriminated-unions.test.ts
+-rw-r--r-- 1 root root  8488 Mar 29 19:27 enum.test.ts
+-rw-r--r-- 1 root root 13744 Mar 29 19:27 error-utils.test.ts
+-rw-r--r-- 1 root root 19502 Mar 29 19:27 error.test.ts
+-rw-r--r-- 1 root root  2641 Mar 29 19:27 file.test.ts
+-rw-r--r-- 1 root root  3045 Mar 29 19:27 firstparty.test.ts
+-rw-r--r-- 1 root root  6971 Mar 29 19:27 function.test.ts
+-rw-r--r-- 1 root root  2162 Mar 29 19:27 generics.test.ts
+-rw-r--r-- 1 root root  3204 Mar 29 19:27 hash.test.ts
+-rw-r--r-- 1 root root 28086 Mar 29 19:27 index.test.ts
+-rw-r--r-- 1 root root  1052 Mar 29 19:27 instanceof.test.ts
+-rw-r--r-- 1 root root  4763 Mar 29 19:27 intersection.test.ts
+-rw-r--r-- 1 root root  3309 Mar 29 19:27 json.test.ts
+-rw-r--r-- 1 root root  4756 Mar 29 19:27 lazy.test.ts
+-rw-r--r-- 1 root root  3095 Mar 29 19:27 literal.test.ts
+-rw-r--r-- 1 root root  4817 Mar 29 19:27 map.test.ts
+-rw-r--r-- 1 root root   645 Mar 29 19:27 nan.test.ts
+-rw-r--r-- 1 root root  3623 Mar 29 19:27 nested-refine.test.ts
+-rw-r--r-- 1 root root  2841 Mar 29 19:27 nonoptional.test.ts
+-rw-r--r-- 1 root root   591 Mar 29 19:27 nullable.test.ts
+-rw-r--r-- 1 root root  8644 Mar 29 19:27 number.test.ts
+-rw-r--r-- 1 root root 17313 Mar 29 19:27 object.test.ts
+-rw-r--r-- 1 root root  4454 Mar 29 19:27 optional.test.ts
+-rw-r--r-- 1 root root 10340 Mar 29 19:27 partial.test.ts
+-rw-r--r-- 1 root root  4492 Mar 29 19:27 pickomit.test.ts
+-rw-r--r-- 1 root root  2338 Mar 29 19:27 pipe.test.ts
+-rw-r--r-- 1 root root  2063 Mar 29 19:27 prefault.test.ts
+-rw-r--r-- 1 root root  6522 Mar 29 19:27 preprocess.test.ts
+-rw-r--r-- 1 root root  7649 Mar 29 19:27 primitive.test.ts
+-rw-r--r-- 1 root root  2315 Mar 29 19:27 promise.test.ts
+-rw-r--r-- 1 root root   498 Mar 29 19:27 prototypes.test.ts
+-rw-r--r-- 1 root root 11777 Mar 29 19:27 readonly.test.ts
+-rw-r--r-- 1 root root  8371 Mar 29 19:27 record.test.ts
+-rw-r--r-- 1 root root 11685 Mar 29 19:27 recursive-types.test.ts
+-rw-r--r-- 1 root root 16688 Mar 29 19:27 refine.test.ts
+-rw-r--r-- 1 root root  5999 Mar 29 19:27 registries.test.ts
+-rw-r--r-- 1 root root  5622 Mar 29 19:27 set.test.ts
+-rw-r--r-- 1 root root  1369 Mar 29 19:27 standard-schema.test.ts
+-rw-r--r-- 1 root root  3700 Mar 29 19:27 string-formats.test.ts
+-rw-r--r-- 1 root root 73515 Mar 29 19:27 string.test.ts
+-rw-r--r-- 1 root root  3536 Mar 29 19:27 stringbool.test.ts
+-rw-r--r-- 1 root root 35499 Mar 29 19:27 template-literal.test.ts
+-rw-r--r-- 1 root root 68174 Mar 29 19:27 to-json-schema.test.ts
+-rw-r--r-- 1 root root  8298 Mar 29 19:27 transform.test.ts
+-rw-r--r-- 1 root root  4702 Mar 29 19:27 tuple.test.ts
+-rw-r--r-- 1 root root  4640 Mar 29 19:27 union.test.ts
+-rw-r--r-- 1 root root  6736 Mar 29 19:27 validations.test.ts
+-rw-r--r-- 1 root root   306 Mar 29 19:27 void.test.ts
+
+/workspace/.opencode/node_modules/zod/src/v4/core:
+total 1027
+drwxr-xr-x 3 root root   1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root   1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  49268 Mar 29 19:27 api.ts
+-rw-r--r-- 1 root root  37442 Mar 29 19:27 checks.ts
+-rw-r--r-- 1 root root    472 Mar 29 19:27 config.ts
+-rw-r--r-- 1 root root   3988 Mar 29 19:27 core.ts
+-rw-r--r-- 1 root root   1204 Mar 29 19:27 doc.ts
+-rw-r--r-- 1 root root  13453 Mar 29 19:27 errors.ts
+-rw-r--r-- 1 root root    468 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root   3809 Mar 29 19:27 json-schema.ts
+-rw-r--r-- 1 root root   7793 Mar 29 19:27 parse.ts
+-rw-r--r-- 1 root root   9244 Mar 29 19:27 regexes.ts
+-rw-r--r-- 1 root root   2900 Mar 29 19:27 registries.ts
+-rw-r--r-- 1 root root 133616 Mar 29 19:27 schemas.ts
+-rw-r--r-- 1 root root   2327 Mar 29 19:27 standard-schema.ts
+drwxr-xr-x 3 root root   1024 Mar 29 19:27 tests
+-rw-r--r-- 1 root root  35007 Mar 29 19:27 to-json-schema.ts
+-rw-r--r-- 1 root root  27369 Mar 29 19:27 util.ts
+-rw-r--r-- 1 root root     83 Mar 29 19:27 versions.ts
+-rw-r--r-- 1 root root   6677 Mar 29 19:27 zsf.ts
+
+/workspace/.opencode/node_modules/zod/src/v4/core/tests:
+total 66
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  422 Mar 29 19:27 extend.test.ts
+-rw-r--r-- 1 root root 1176 Mar 29 19:27 index.test.ts
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 locales
+
+/workspace/.opencode/node_modules/zod/src/v4/core/tests/locales:
+total 258
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 3778 Mar 29 19:27 be.test.ts
+-rw-r--r-- 1 root root  837 Mar 29 19:27 en.test.ts
+-rw-r--r-- 1 root root 6907 Mar 29 19:27 es.test.ts
+-rw-r--r-- 1 root root 3759 Mar 29 19:27 ru.test.ts
+-rw-r--r-- 1 root root 3335 Mar 29 19:27 tr.test.ts
+
+/workspace/.opencode/node_modules/zod/src/v4/locales:
+total 2954
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 4985 Mar 29 19:27 ar.ts
+-rw-r--r-- 1 root root 4334 Mar 29 19:27 az.ts
+-rw-r--r-- 1 root root 6242 Mar 29 19:27 be.ts
+-rw-r--r-- 1 root root 5370 Mar 29 19:27 bg.ts
+-rw-r--r-- 1 root root 4654 Mar 29 19:27 ca.ts
+-rw-r--r-- 1 root root 4834 Mar 29 19:27 cs.ts
+-rw-r--r-- 1 root root 4748 Mar 29 19:27 da.ts
+-rw-r--r-- 1 root root 4369 Mar 29 19:27 de.ts
+-rw-r--r-- 1 root root 4213 Mar 29 19:27 en.ts
+-rw-r--r-- 1 root root 4330 Mar 29 19:27 eo.ts
+-rw-r--r-- 1 root root 5373 Mar 29 19:27 es.ts
+-rw-r--r-- 1 root root 4873 Mar 29 19:27 fa.ts
+-rw-r--r-- 1 root root 4644 Mar 29 19:27 fi.ts
+-rw-r--r-- 1 root root 4392 Mar 29 19:27 fr-CA.ts
+-rw-r--r-- 1 root root 4371 Mar 29 19:27 fr.ts
+-rw-r--r-- 1 root root 4770 Mar 29 19:27 he.ts
+-rw-r--r-- 1 root root 4575 Mar 29 19:27 hu.ts
+-rw-r--r-- 1 root root 4417 Mar 29 19:27 id.ts
+-rw-r--r-- 1 root root 1903 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root 4375 Mar 29 19:27 is.ts
+-rw-r--r-- 1 root root 4464 Mar 29 19:27 it.ts
+-rw-r--r-- 1 root root 4608 Mar 29 19:27 ja.ts
+-rw-r--r-- 1 root root 6091 Mar 29 19:27 ka.ts
+-rw-r--r-- 1 root root  198 Mar 29 19:27 kh.ts
+-rw-r--r-- 1 root root 5925 Mar 29 19:27 km.ts
+-rw-r--r-- 1 root root 4708 Mar 29 19:27 ko.ts
+-rw-r--r-- 1 root root 8022 Mar 29 19:27 lt.ts
+-rw-r--r-- 1 root root 5026 Mar 29 19:27 mk.ts
+-rw-r--r-- 1 root root 4299 Mar 29 19:27 ms.ts
+-rw-r--r-- 1 root root 4206 Mar 29 19:27 nl.ts
+-rw-r--r-- 1 root root 4295 Mar 29 19:27 no.ts
+-rw-r--r-- 1 root root 4395 Mar 29 19:27 ota.ts
+-rw-r--r-- 1 root root 4743 Mar 29 19:27 pl.ts
+-rw-r--r-- 1 root root 4666 Mar 29 19:27 ps.ts
+-rw-r--r-- 1 root root 4354 Mar 29 19:27 pt.ts
+-rw-r--r-- 1 root root 6330 Mar 29 19:27 ru.ts
+-rw-r--r-- 1 root root 4359 Mar 29 19:27 sl.ts
+-rw-r--r-- 1 root root 4449 Mar 29 19:27 sv.ts
+-rw-r--r-- 1 root root 6055 Mar 29 19:27 ta.ts
+-rw-r--r-- 1 root root 6011 Mar 29 19:27 th.ts
+-rw-r--r-- 1 root root 4252 Mar 29 19:27 tr.ts
+-rw-r--r-- 1 root root  198 Mar 29 19:27 ua.ts
+-rw-r--r-- 1 root root 5332 Mar 29 19:27 uk.ts
+-rw-r--r-- 1 root root 5015 Mar 29 19:27 ur.ts
+-rw-r--r-- 1 root root 4542 Mar 29 19:27 vi.ts
+-rw-r--r-- 1 root root 4445 Mar 29 19:27 yo.ts
+-rw-r--r-- 1 root root 4223 Mar 29 19:27 zh-CN.ts
+-rw-r--r-- 1 root root 4326 Mar 29 19:27 zh-TW.ts
+
+/workspace/.opencode/node_modules/zod/src/v4/mini:
+total 196
+drwxr-xr-x 3 root root  1024 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   736 Mar 29 19:27 checks.ts
+-rw-r--r-- 1 root root  1062 Mar 29 19:27 coerce.ts
+-rw-r--r-- 1 root root   762 Mar 29 19:27 external.ts
+-rw-r--r-- 1 root root    81 Mar 29 19:27 index.ts
+-rw-r--r-- 1 root root  2131 Mar 29 19:27 iso.ts
+-rw-r--r-- 1 root root   206 Mar 29 19:27 parse.ts
+-rw-r--r-- 1 root root 54824 Mar 29 19:27 schemas.ts
+drwxr-xr-x 2 root root  1024 Mar 29 19:27 tests
+
+/workspace/.opencode/node_modules/zod/src/v4/mini/tests:
+total 706
+drwxr-xr-x 2 root root  1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  3298 Mar 29 19:27 assignability.test.ts
+-rw-r--r-- 1 root root  1841 Mar 29 19:27 brand.test.ts
+-rw-r--r-- 1 root root  4071 Mar 29 19:27 checks.test.ts
+-rw-r--r-- 1 root root 18058 Mar 29 19:27 codec.test.ts
+-rw-r--r-- 1 root root  1165 Mar 29 19:27 computed.test.ts
+-rw-r--r-- 1 root root   641 Mar 29 19:27 error.test.ts
+-rw-r--r-- 1 root root  1176 Mar 29 19:27 functions.test.ts
+-rw-r--r-- 1 root root 29642 Mar 29 19:27 index.test.ts
+-rw-r--r-- 1 root root  3662 Mar 29 19:27 number.test.ts
+-rw-r--r-- 1 root root  5739 Mar 29 19:27 object.test.ts
+-rw-r--r-- 1 root root   867 Mar 29 19:27 prototypes.test.ts
+-rw-r--r-- 1 root root  5637 Mar 29 19:27 recursive-types.test.ts
+-rw-r--r-- 1 root root 11985 Mar 29 19:27 string.test.ts
+
+/workspace/.opencode/node_modules/zod/src/v4-mini:
+total 2
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 7 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.ts
+
+/workspace/.opencode/node_modules/zod/v3:
+total 1040
+drwxr-xr-x 4 root root   8192 Mar 29 19:27 .
+drwxr-xr-x 8 root root   1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   4576 Mar 29 19:27 ZodError.cjs
+-rw-r--r-- 1 root root   6415 Mar 29 19:27 ZodError.d.cts
+-rw-r--r-- 1 root root   6412 Mar 29 19:27 ZodError.d.ts
+-rw-r--r-- 1 root root   4349 Mar 29 19:27 ZodError.js
+-rw-r--r-- 1 root root    579 Mar 29 19:27 errors.cjs
+-rw-r--r-- 1 root root    240 Mar 29 19:27 errors.d.cts
+-rw-r--r-- 1 root root    238 Mar 29 19:27 errors.d.ts
+-rw-r--r-- 1 root root    243 Mar 29 19:27 errors.js
+-rw-r--r-- 1 root root   1076 Mar 29 19:27 external.cjs
+-rw-r--r-- 1 root root    211 Mar 29 19:27 external.d.cts
+-rw-r--r-- 1 root root    205 Mar 29 19:27 external.d.ts
+-rw-r--r-- 1 root root    205 Mar 29 19:27 external.js
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 helpers
+-rw-r--r-- 1 root root   1464 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root    101 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root     99 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root     99 Mar 29 19:27 index.js
+drwxr-xr-x 2 root root   1024 Mar 29 19:27 locales
+-rw-r--r-- 1 root root    104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root     77 Mar 29 19:27 standard-schema.cjs
+-rw-r--r-- 1 root root   2843 Mar 29 19:27 standard-schema.d.cts
+-rw-r--r-- 1 root root   2843 Mar 29 19:27 standard-schema.d.ts
+-rw-r--r-- 1 root root     11 Mar 29 19:27 standard-schema.js
+-rw-r--r-- 1 root root 140156 Mar 29 19:27 types.cjs
+-rw-r--r-- 1 root root  52035 Mar 29 19:27 types.d.cts
+-rw-r--r-- 1 root root  52027 Mar 29 19:27 types.d.ts
+-rw-r--r-- 1 root root 131268 Mar 29 19:27 types.js
+
+/workspace/.opencode/node_modules/zod/v3/helpers:
+total 529
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 8192 Mar 29 19:27 ..
+-rw-r--r-- 1 root root   77 Mar 29 19:27 enumUtil.cjs
+-rw-r--r-- 1 root root  609 Mar 29 19:27 enumUtil.d.cts
+-rw-r--r-- 1 root root  609 Mar 29 19:27 enumUtil.d.ts
+-rw-r--r-- 1 root root   11 Mar 29 19:27 enumUtil.js
+-rw-r--r-- 1 root root  418 Mar 29 19:27 errorUtil.cjs
+-rw-r--r-- 1 root root  276 Mar 29 19:27 errorUtil.d.cts
+-rw-r--r-- 1 root root  276 Mar 29 19:27 errorUtil.d.ts
+-rw-r--r-- 1 root root  300 Mar 29 19:27 errorUtil.js
+-rw-r--r-- 1 root root 4272 Mar 29 19:27 parseUtil.cjs
+-rw-r--r-- 1 root root 2757 Mar 29 19:27 parseUtil.d.cts
+-rw-r--r-- 1 root root 2755 Mar 29 19:27 parseUtil.d.ts
+-rw-r--r-- 1 root root 3601 Mar 29 19:27 parseUtil.js
+-rw-r--r-- 1 root root   77 Mar 29 19:27 partialUtil.cjs
+-rw-r--r-- 1 root root  828 Mar 29 19:27 partialUtil.d.cts
+-rw-r--r-- 1 root root  827 Mar 29 19:27 partialUtil.d.ts
+-rw-r--r-- 1 root root   11 Mar 29 19:27 partialUtil.js
+-rw-r--r-- 1 root root   77 Mar 29 19:27 typeAliases.cjs
+-rw-r--r-- 1 root root  135 Mar 29 19:27 typeAliases.d.cts
+-rw-r--r-- 1 root root  135 Mar 29 19:27 typeAliases.d.ts
+-rw-r--r-- 1 root root   11 Mar 29 19:27 typeAliases.js
+-rw-r--r-- 1 root root 4401 Mar 29 19:27 util.cjs
+-rw-r--r-- 1 root root 3387 Mar 29 19:27 util.d.cts
+-rw-r--r-- 1 root root 3387 Mar 29 19:27 util.d.ts
+-rw-r--r-- 1 root root 4055 Mar 29 19:27 util.js
+
+/workspace/.opencode/node_modules/zod/v3/locales:
+total 138
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 8192 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 6005 Mar 29 19:27 en.cjs
+-rw-r--r-- 1 root root  108 Mar 29 19:27 en.d.cts
+-rw-r--r-- 1 root root  113 Mar 29 19:27 en.d.ts
+-rw-r--r-- 1 root root 5602 Mar 29 19:27 en.js
+
+/workspace/.opencode/node_modules/zod/v4:
+total 99
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 classic
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 core
+-rw-r--r-- 1 root root 1057 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   94 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   92 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   92 Mar 29 19:27 index.js
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 locales
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 mini
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+
+/workspace/.opencode/node_modules/zod/v4/classic:
+total 1678
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  3883 Mar 29 19:27 checks.cjs
+-rw-r--r-- 1 root root   681 Mar 29 19:27 checks.d.cts
+-rw-r--r-- 1 root root   680 Mar 29 19:27 checks.d.ts
+-rw-r--r-- 1 root root   642 Mar 29 19:27 checks.js
+-rw-r--r-- 1 root root  1772 Mar 29 19:27 coerce.cjs
+-rw-r--r-- 1 root root  1149 Mar 29 19:27 coerce.d.cts
+-rw-r--r-- 1 root root  1147 Mar 29 19:27 coerce.d.ts
+-rw-r--r-- 1 root root   550 Mar 29 19:27 coerce.js
+-rw-r--r-- 1 root root  2602 Mar 29 19:27 compat.cjs
+-rw-r--r-- 1 root root  2203 Mar 29 19:27 compat.d.cts
+-rw-r--r-- 1 root root  2199 Mar 29 19:27 compat.d.ts
+-rw-r--r-- 1 root root  1090 Mar 29 19:27 compat.js
+-rw-r--r-- 1 root root  2769 Mar 29 19:27 errors.cjs
+-rw-r--r-- 1 root root  1623 Mar 29 19:27 errors.d.cts
+-rw-r--r-- 1 root root  1620 Mar 29 19:27 errors.d.ts
+-rw-r--r-- 1 root root  1581 Mar 29 19:27 errors.js
+-rw-r--r-- 1 root root  5119 Mar 29 19:27 external.cjs
+-rw-r--r-- 1 root root   816 Mar 29 19:27 external.d.cts
+-rw-r--r-- 1 root root   803 Mar 29 19:27 external.d.ts
+-rw-r--r-- 1 root root   799 Mar 29 19:27 external.js
+-rw-r--r-- 1 root root  1464 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   101 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root    99 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root    99 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  2413 Mar 29 19:27 iso.cjs
+-rw-r--r-- 1 root root  1137 Mar 29 19:27 iso.d.cts
+-rw-r--r-- 1 root root  1135 Mar 29 19:27 iso.d.ts
+-rw-r--r-- 1 root root  1151 Mar 29 19:27 iso.js
+-rw-r--r-- 1 root root   104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root  2271 Mar 29 19:27 parse.cjs
+-rw-r--r-- 1 root root  2511 Mar 29 19:27 parse.d.cts
+-rw-r--r-- 1 root root  2509 Mar 29 19:27 parse.d.ts
+-rw-r--r-- 1 root root   997 Mar 29 19:27 parse.js
+-rw-r--r-- 1 root root 43332 Mar 29 19:27 schemas.cjs
+-rw-r--r-- 1 root root 43053 Mar 29 19:27 schemas.d.cts
+-rw-r--r-- 1 root root 43050 Mar 29 19:27 schemas.d.ts
+-rw-r--r-- 1 root root 38632 Mar 29 19:27 schemas.js
+
+/workspace/.opencode/node_modules/zod/v4/core:
+total 3152
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 27372 Mar 29 19:27 api.cjs
+-rw-r--r-- 1 root root 30981 Mar 29 19:27 api.d.cts
+-rw-r--r-- 1 root root 30976 Mar 29 19:27 api.d.ts
+-rw-r--r-- 1 root root 23842 Mar 29 19:27 api.js
+-rw-r--r-- 1 root root 21227 Mar 29 19:27 checks.cjs
+-rw-r--r-- 1 root root 12814 Mar 29 19:27 checks.d.cts
+-rw-r--r-- 1 root root 12810 Mar 29 19:27 checks.d.ts
+-rw-r--r-- 1 root root 19673 Mar 29 19:27 checks.js
+-rw-r--r-- 1 root root  2564 Mar 29 19:27 core.cjs
+-rw-r--r-- 1 root root  1877 Mar 29 19:27 core.d.cts
+-rw-r--r-- 1 root root  1874 Mar 29 19:27 core.d.ts
+-rw-r--r-- 1 root root  2278 Mar 29 19:27 core.js
+-rw-r--r-- 1 root root  1199 Mar 29 19:27 doc.cjs
+-rw-r--r-- 1 root root   348 Mar 29 19:27 doc.d.cts
+-rw-r--r-- 1 root root   348 Mar 29 19:27 doc.d.ts
+-rw-r--r-- 1 root root  1088 Mar 29 19:27 doc.js
+-rw-r--r-- 1 root root  7609 Mar 29 19:27 errors.cjs
+-rw-r--r-- 1 root root  8168 Mar 29 19:27 errors.d.cts
+-rw-r--r-- 1 root root  8163 Mar 29 19:27 errors.d.ts
+-rw-r--r-- 1 root root  6275 Mar 29 19:27 errors.js
+-rw-r--r-- 1 root root  2113 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   482 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   468 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   468 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root    77 Mar 29 19:27 json-schema.cjs
+-rw-r--r-- 1 root root  2764 Mar 29 19:27 json-schema.d.cts
+-rw-r--r-- 1 root root  2764 Mar 29 19:27 json-schema.d.ts
+-rw-r--r-- 1 root root    11 Mar 29 19:27 json-schema.js
+-rw-r--r-- 1 root root   104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root  6565 Mar 29 19:27 parse.cjs
+-rw-r--r-- 1 root root  3833 Mar 29 19:27 parse.d.cts
+-rw-r--r-- 1 root root  3829 Mar 29 19:27 parse.d.ts
+-rw-r--r-- 1 root root  4528 Mar 29 19:27 parse.js
+-rw-r--r-- 1 root root  9312 Mar 29 19:27 regexes.cjs
+-rw-r--r-- 1 root root  3399 Mar 29 19:27 regexes.d.cts
+-rw-r--r-- 1 root root  3399 Mar 29 19:27 regexes.d.ts
+-rw-r--r-- 1 root root  8512 Mar 29 19:27 regexes.js
+-rw-r--r-- 1 root root  1745 Mar 29 19:27 registries.cjs
+-rw-r--r-- 1 root root  1633 Mar 29 19:27 registries.d.cts
+-rw-r--r-- 1 root root  1631 Mar 29 19:27 registries.d.ts
+-rw-r--r-- 1 root root  1554 Mar 29 19:27 registries.js
+-rw-r--r-- 1 root root 73423 Mar 29 19:27 schemas.cjs
+-rw-r--r-- 1 root root 49733 Mar 29 19:27 schemas.d.cts
+-rw-r--r-- 1 root root 49726 Mar 29 19:27 schemas.d.ts
+-rw-r--r-- 1 root root 71161 Mar 29 19:27 schemas.js
+-rw-r--r-- 1 root root    77 Mar 29 19:27 standard-schema.cjs
+-rw-r--r-- 1 root root  2403 Mar 29 19:27 standard-schema.d.cts
+-rw-r--r-- 1 root root  2403 Mar 29 19:27 standard-schema.d.ts
+-rw-r--r-- 1 root root    11 Mar 29 19:27 standard-schema.js
+-rw-r--r-- 1 root root 39183 Mar 29 19:27 to-json-schema.cjs
+-rw-r--r-- 1 root root  3885 Mar 29 19:27 to-json-schema.d.cts
+-rw-r--r-- 1 root root  3882 Mar 29 19:27 to-json-schema.d.ts
+-rw-r--r-- 1 root root 38960 Mar 29 19:27 to-json-schema.js
+-rw-r--r-- 1 root root 21327 Mar 29 19:27 util.cjs
+-rw-r--r-- 1 root root 11777 Mar 29 19:27 util.d.cts
+-rw-r--r-- 1 root root 11773 Mar 29 19:27 util.d.ts
+-rw-r--r-- 1 root root 19511 Mar 29 19:27 util.js
+-rw-r--r-- 1 root root   168 Mar 29 19:27 versions.cjs
+-rw-r--r-- 1 root root   109 Mar 29 19:27 versions.d.cts
+-rw-r--r-- 1 root root   109 Mar 29 19:27 versions.d.ts
+-rw-r--r-- 1 root root    70 Mar 29 19:27 versions.js
+
+/workspace/.opencode/node_modules/zod/v4/locales:
+total 6074
+drwxr-xr-x 2 root root 8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root 6454 Mar 29 19:27 ar.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ar.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ar.d.ts
+-rw-r--r-- 1 root root 5278 Mar 29 19:27 ar.js
+-rw-r--r-- 1 root root 5816 Mar 29 19:27 az.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 az.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 az.d.ts
+-rw-r--r-- 1 root root 4640 Mar 29 19:27 az.js
+-rw-r--r-- 1 root root 7852 Mar 29 19:27 be.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 be.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 be.d.ts
+-rw-r--r-- 1 root root 6676 Mar 29 19:27 be.js
+-rw-r--r-- 1 root root 6985 Mar 29 19:27 bg.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 bg.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 bg.d.ts
+-rw-r--r-- 1 root root 5775 Mar 29 19:27 bg.js
+-rw-r--r-- 1 root root 6137 Mar 29 19:27 ca.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ca.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ca.d.ts
+-rw-r--r-- 1 root root 4961 Mar 29 19:27 ca.js
+-rw-r--r-- 1 root root 6442 Mar 29 19:27 cs.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 cs.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 cs.d.ts
+-rw-r--r-- 1 root root 5266 Mar 29 19:27 cs.js
+-rw-r--r-- 1 root root 6249 Mar 29 19:27 da.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 da.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 da.d.ts
+-rw-r--r-- 1 root root 5073 Mar 29 19:27 da.js
+-rw-r--r-- 1 root root 5848 Mar 29 19:27 de.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 de.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 de.d.ts
+-rw-r--r-- 1 root root 4672 Mar 29 19:27 de.js
+-rw-r--r-- 1 root root 5683 Mar 29 19:27 en.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 en.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 en.d.ts
+-rw-r--r-- 1 root root 4473 Mar 29 19:27 en.js
+-rw-r--r-- 1 root root 5802 Mar 29 19:27 eo.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 eo.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 eo.d.ts
+-rw-r--r-- 1 root root 4592 Mar 29 19:27 eo.js
+-rw-r--r-- 1 root root 6939 Mar 29 19:27 es.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 es.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 es.d.ts
+-rw-r--r-- 1 root root 5763 Mar 29 19:27 es.js
+-rw-r--r-- 1 root root 6351 Mar 29 19:27 fa.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 fa.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 fa.d.ts
+-rw-r--r-- 1 root root 5175 Mar 29 19:27 fa.js
+-rw-r--r-- 1 root root 6130 Mar 29 19:27 fi.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 fi.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 fi.d.ts
+-rw-r--r-- 1 root root 4954 Mar 29 19:27 fi.js
+-rw-r--r-- 1 root root 5869 Mar 29 19:27 fr-CA.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 fr-CA.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 fr-CA.d.ts
+-rw-r--r-- 1 root root 4693 Mar 29 19:27 fr-CA.js
+-rw-r--r-- 1 root root 5850 Mar 29 19:27 fr.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 fr.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 fr.d.ts
+-rw-r--r-- 1 root root 4674 Mar 29 19:27 fr.js
+-rw-r--r-- 1 root root 6255 Mar 29 19:27 he.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 he.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 he.d.ts
+-rw-r--r-- 1 root root 5079 Mar 29 19:27 he.js
+-rw-r--r-- 1 root root 6050 Mar 29 19:27 hu.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 hu.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 hu.d.ts
+-rw-r--r-- 1 root root 4874 Mar 29 19:27 hu.js
+-rw-r--r-- 1 root root 5886 Mar 29 19:27 id.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 id.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 id.d.ts
+-rw-r--r-- 1 root root 4710 Mar 29 19:27 id.js
+-rw-r--r-- 1 root root 8134 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root 1949 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root 1903 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root 1903 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root 5845 Mar 29 19:27 is.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 is.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 is.d.ts
+-rw-r--r-- 1 root root 4635 Mar 29 19:27 is.js
+-rw-r--r-- 1 root root 5949 Mar 29 19:27 it.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 it.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 it.d.ts
+-rw-r--r-- 1 root root 4773 Mar 29 19:27 it.js
+-rw-r--r-- 1 root root 6080 Mar 29 19:27 ja.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ja.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ja.d.ts
+-rw-r--r-- 1 root root 4904 Mar 29 19:27 ja.js
+-rw-r--r-- 1 root root 7553 Mar 29 19:27 ka.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 ka.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 ka.d.ts
+-rw-r--r-- 1 root root 6343 Mar 29 19:27 ka.js
+-rw-r--r-- 1 root root  430 Mar 29 19:27 kh.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 kh.d.cts
+-rw-r--r-- 1 root root  158 Mar 29 19:27 kh.d.ts
+-rw-r--r-- 1 root root  111 Mar 29 19:27 kh.js
+-rw-r--r-- 1 root root 7402 Mar 29 19:27 km.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 km.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 km.d.ts
+-rw-r--r-- 1 root root 6226 Mar 29 19:27 km.js
+-rw-r--r-- 1 root root 6216 Mar 29 19:27 ko.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ko.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ko.d.ts
+-rw-r--r-- 1 root root 5040 Mar 29 19:27 ko.js
+-rw-r--r-- 1 root root 9774 Mar 29 19:27 lt.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 lt.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 lt.d.ts
+-rw-r--r-- 1 root root 8564 Mar 29 19:27 lt.js
+-rw-r--r-- 1 root root 6509 Mar 29 19:27 mk.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 mk.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 mk.d.ts
+-rw-r--r-- 1 root root 5333 Mar 29 19:27 mk.js
+-rw-r--r-- 1 root root 5778 Mar 29 19:27 ms.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ms.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ms.d.ts
+-rw-r--r-- 1 root root 4602 Mar 29 19:27 ms.js
+-rw-r--r-- 1 root root 5711 Mar 29 19:27 nl.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 nl.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 nl.d.ts
+-rw-r--r-- 1 root root 4535 Mar 29 19:27 nl.js
+-rw-r--r-- 1 root root 5774 Mar 29 19:27 no.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 no.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 no.d.ts
+-rw-r--r-- 1 root root 4598 Mar 29 19:27 no.js
+-rw-r--r-- 1 root root 5880 Mar 29 19:27 ota.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ota.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ota.d.ts
+-rw-r--r-- 1 root root 4704 Mar 29 19:27 ota.js
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root 6211 Mar 29 19:27 pl.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 pl.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 pl.d.ts
+-rw-r--r-- 1 root root 5035 Mar 29 19:27 pl.js
+-rw-r--r-- 1 root root 6145 Mar 29 19:27 ps.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ps.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ps.d.ts
+-rw-r--r-- 1 root root 4969 Mar 29 19:27 ps.js
+-rw-r--r-- 1 root root 5834 Mar 29 19:27 pt.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 pt.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 pt.d.ts
+-rw-r--r-- 1 root root 4658 Mar 29 19:27 pt.js
+-rw-r--r-- 1 root root 7949 Mar 29 19:27 ru.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ru.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ru.d.ts
+-rw-r--r-- 1 root root 6773 Mar 29 19:27 ru.js
+-rw-r--r-- 1 root root 5827 Mar 29 19:27 sl.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 sl.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 sl.d.ts
+-rw-r--r-- 1 root root 4651 Mar 29 19:27 sl.js
+-rw-r--r-- 1 root root 5925 Mar 29 19:27 sv.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 sv.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 sv.d.ts
+-rw-r--r-- 1 root root 4749 Mar 29 19:27 sv.js
+-rw-r--r-- 1 root root 7542 Mar 29 19:27 ta.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ta.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ta.d.ts
+-rw-r--r-- 1 root root 6366 Mar 29 19:27 ta.js
+-rw-r--r-- 1 root root 7488 Mar 29 19:27 th.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 th.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 th.d.ts
+-rw-r--r-- 1 root root 6312 Mar 29 19:27 th.js
+-rw-r--r-- 1 root root 5728 Mar 29 19:27 tr.cjs
+-rw-r--r-- 1 root root  178 Mar 29 19:27 tr.d.cts
+-rw-r--r-- 1 root root  177 Mar 29 19:27 tr.d.ts
+-rw-r--r-- 1 root root 4518 Mar 29 19:27 tr.js
+-rw-r--r-- 1 root root  430 Mar 29 19:27 ua.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ua.d.cts
+-rw-r--r-- 1 root root  158 Mar 29 19:27 ua.d.ts
+-rw-r--r-- 1 root root  111 Mar 29 19:27 ua.js
+-rw-r--r-- 1 root root 6807 Mar 29 19:27 uk.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 uk.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 uk.d.ts
+-rw-r--r-- 1 root root 5631 Mar 29 19:27 uk.js
+-rw-r--r-- 1 root root 6492 Mar 29 19:27 ur.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 ur.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 ur.d.ts
+-rw-r--r-- 1 root root 5316 Mar 29 19:27 ur.js
+-rw-r--r-- 1 root root 6011 Mar 29 19:27 vi.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 vi.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 vi.d.ts
+-rw-r--r-- 1 root root 4835 Mar 29 19:27 vi.js
+-rw-r--r-- 1 root root 5908 Mar 29 19:27 yo.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 yo.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 yo.d.ts
+-rw-r--r-- 1 root root 4732 Mar 29 19:27 yo.js
+-rw-r--r-- 1 root root 5703 Mar 29 19:27 zh-CN.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 zh-CN.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 zh-CN.d.ts
+-rw-r--r-- 1 root root 4527 Mar 29 19:27 zh-CN.js
+-rw-r--r-- 1 root root 5804 Mar 29 19:27 zh-TW.cjs
+-rw-r--r-- 1 root root  142 Mar 29 19:27 zh-TW.d.cts
+-rw-r--r-- 1 root root  121 Mar 29 19:27 zh-TW.d.ts
+-rw-r--r-- 1 root root 4628 Mar 29 19:27 zh-TW.js
+
+/workspace/.opencode/node_modules/zod/v4/mini:
+total 849
+drwxr-xr-x 2 root root  8192 Mar 29 19:27 .
+drwxr-xr-x 6 root root  1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  4141 Mar 29 19:27 checks.cjs
+-rw-r--r-- 1 root root   677 Mar 29 19:27 checks.d.cts
+-rw-r--r-- 1 root root   676 Mar 29 19:27 checks.d.ts
+-rw-r--r-- 1 root root   676 Mar 29 19:27 checks.js
+-rw-r--r-- 1 root root  1792 Mar 29 19:27 coerce.cjs
+-rw-r--r-- 1 root root   642 Mar 29 19:27 coerce.d.cts
+-rw-r--r-- 1 root root   640 Mar 29 19:27 coerce.d.ts
+-rw-r--r-- 1 root root   570 Mar 29 19:27 coerce.js
+-rw-r--r-- 1 root root  4762 Mar 29 19:27 external.cjs
+-rw-r--r-- 1 root root   674 Mar 29 19:27 external.d.cts
+-rw-r--r-- 1 root root   664 Mar 29 19:27 external.d.ts
+-rw-r--r-- 1 root root   656 Mar 29 19:27 external.js
+-rw-r--r-- 1 root root  1443 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root    83 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root    81 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root    81 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  2481 Mar 29 19:27 iso.cjs
+-rw-r--r-- 1 root root  1257 Mar 29 19:27 iso.d.cts
+-rw-r--r-- 1 root root  1255 Mar 29 19:27 iso.d.ts
+-rw-r--r-- 1 root root  1203 Mar 29 19:27 iso.js
+-rw-r--r-- 1 root root   104 Mar 29 19:27 package.json
+-rw-r--r-- 1 root root  1830 Mar 29 19:27 parse.cjs
+-rw-r--r-- 1 root root   183 Mar 29 19:27 parse.d.cts
+-rw-r--r-- 1 root root   182 Mar 29 19:27 parse.d.ts
+-rw-r--r-- 1 root root   182 Mar 29 19:27 parse.js
+-rw-r--r-- 1 root root 30767 Mar 29 19:27 schemas.cjs
+-rw-r--r-- 1 root root 30037 Mar 29 19:27 schemas.d.cts
+-rw-r--r-- 1 root root 30035 Mar 29 19:27 schemas.d.ts
+-rw-r--r-- 1 root root 26013 Mar 29 19:27 schemas.js
+
+/workspace/.opencode/node_modules/zod/v4-mini:
+total 4
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 8 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  813 Mar 29 19:27 index.cjs
+-rw-r--r-- 1 root root   38 Mar 29 19:27 index.d.cts
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.d.ts
+-rw-r--r-- 1 root root   37 Mar 29 19:27 index.js
+-rw-r--r-- 1 root root  104 Mar 29 19:27 package.json
+
+/workspace/.opencode/skills:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 urgent-upload
+
+/workspace/.opencode/skills/urgent-upload:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+-rw-r--r-- 1 root root  965 Mar 29 19:26 SKILL.md

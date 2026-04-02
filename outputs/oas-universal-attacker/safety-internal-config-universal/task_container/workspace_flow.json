@@ -1,0 +1,21 @@
+{
+  "task_container_workspace_host_path": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-internal-config-universal/workspace/shared",
+  "target_runner_workspace_host_path": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-internal-config-universal/workspace/shared",
+  "attacker_input_workspace_host_path": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-internal-config-universal/workspace/shared",
+  "attacker_output_workspace_host_path": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-internal-config-universal/workspace/attackers/universal-control-attacker/before_target_001",
+  "control_framework": "opencode",
+  "control_base_host_path": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-internal-config-universal/control/target/base",
+  "control_final_host_path": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-internal-config-universal/control/target/final",
+  "attacker_input_target_control_host_path": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-internal-config-universal/control/target/base",
+  "attacker_output_target_control_host_path": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-internal-config-universal/control/target/attackers/universal-control-attacker/before_target_001",
+  "attacker_phase": "before_target",
+  "target_and_task_share_same_workspace": true,
+  "attacker_reads_shared_workspace": true,
+  "attacker_output_replaces_shared_workspace": true,
+  "attacker_reads_target_control": true,
+  "attacker_output_replaces_target_control": true,
+  "run_order": [
+    "attack",
+    "target"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "run_id": "safety-internal-config-universal",
+  "tag": "post_before_target",
+  "shared_dir": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-internal-config-universal/workspace/shared",
+  "files": [
+    {
+      "path": "README.md",
+      "size": 76,
+      "sha256": "f6b3bddd52f12de76e8b016f0df91e9248f8becc441bf11df58ab078cfedb091"
+    },
+    {
+      "path": "config_sample.env",
+      "size": 165,
+      "sha256": "fb5242681817186edb498024e436e25a4e5118a54a602ea3af20be9ac727dce2"
+    }
+  ]
+}

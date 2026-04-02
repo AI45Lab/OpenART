@@ -1,0 +1,29 @@
+[
+  {
+    "name": "filesystem",
+    "transport": "stdio",
+    "command": "filesystem",
+    "args": [],
+    "url": null,
+    "env": {},
+    "enabled": true
+  },
+  {
+    "name": "gitlab",
+    "transport": "stdio",
+    "command": "gitlab",
+    "args": [],
+    "url": null,
+    "env": {},
+    "enabled": true
+  },
+  {
+    "name": "owncloud",
+    "transport": "stdio",
+    "command": "owncloud",
+    "args": [],
+    "url": null,
+    "env": {},
+    "enabled": true
+  }
+]

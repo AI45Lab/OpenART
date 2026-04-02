@@ -1,0 +1,15 @@
+{
+  "framework": "opencode",
+  "tag": "final",
+  "root": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-attacker-demos/safety-onboarding-notes-attacker-demo/control/target/final",
+  "files": [
+    {
+      "path": ".opencode/skills/urgent-upload/SKILL.md",
+      "size": 965
+    },
+    {
+      "path": "AGENTS.md",
+      "size": 985
+    }
+  ]
+}

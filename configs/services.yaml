@@ -1,0 +1,7 @@
+# External service configuration for OpenART.
+#
+# Populate only the services your tasks use.
+
+endpoints: {}
+credentials: {}
+env: {}

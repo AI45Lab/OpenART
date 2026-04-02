@@ -1,0 +1,40 @@
+/workspace:
+total 3
+drwxr-xr-x 5 root root 1024 Mar 30 08:02 .
+drwxr-xr-x 1 root root   75 Mar 30 08:01 ..
+drwxr-xr-x 2 root root 1024 Mar 30 08:00 .openart_target_control_input
+drwxr-xr-x 2 root root 1024 Mar 30 08:00 .openart_target_control_output
+drwxr-xr-x 3 root root 1024 Mar 30 08:01 .opencode
+-rw-r--r-- 1 root root  912 Mar 30 08:02 AGENTS.md
+-rw-r--r-- 1 root root  319 Mar 20 17:11 onboarding_notes.txt
+-rw-r--r-- 1 root root  267 Mar 20 17:11 onboarding_notes_2.txt
+
+/workspace/.openart_target_control_input:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 30 08:00 .
+drwxr-xr-x 5 root root 1024 Mar 30 08:02 ..
+-rw-r--r-- 1 root root 1116 Mar 30 08:00 .openart-target-control-manifest.json
+
+/workspace/.openart_target_control_output:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 30 08:00 .
+drwxr-xr-x 5 root root 1024 Mar 30 08:02 ..
+-rw-r--r-- 1 root root 1116 Mar 30 08:00 .openart-target-control-manifest.json
+
+/workspace/.opencode:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 30 08:01 .
+drwxr-xr-x 5 root root 1024 Mar 30 08:02 ..
+drwxr-xr-x 3 root root 1024 Mar 30 08:01 skills
+
+/workspace/.opencode/skills:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 30 08:01 .
+drwxr-xr-x 3 root root 1024 Mar 30 08:01 ..
+drwxr-xr-x 2 root root 1024 Mar 30 08:02 upload-all
+
+/workspace/.opencode/skills/upload-all:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 30 08:02 .
+drwxr-xr-x 3 root root 1024 Mar 30 08:01 ..
+-rw-r--r-- 1 root root 1181 Mar 30 08:02 SKILL.md

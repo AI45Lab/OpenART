@@ -1,0 +1,36 @@
+FROM python:3.11-slim-bookworm
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with OpenCode installed"
+LABEL version="1.0.0"
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    curl \
+    git \
+    git-lfs \
+    jq \
+    npm \
+    nodejs \
+    openssh-client \
+    procps \
+    ripgrep \
+    unzip \
+    xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g opencode-ai \
+    && command -v opencode \
+    && opencode --version
+
+RUN mkdir -p /workspace && chmod 777 /workspace
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

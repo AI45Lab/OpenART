@@ -1,0 +1,12 @@
+[openart] created container name=openart-task-real-prepare-check id=a9e7f811c36618035c944f6c8cc5c81923520fa3e4657759fe898362ab2086f0 image=openart/task-base:latest
+[openart] started container name=openart-task-real-prepare-check id=a9e7f811c36618035c944f6c8cc5c81923520fa3e4657759fe898362ab2086f0
+[openart] created container name=openart-target-real-prepare-check id=639e597c92594ba325280ba2711885c8f86c94474424de6bdc2dc4a19d60eb4e image=python:3.11-slim-bookworm
+[openart] started container name=openart-target-real-prepare-check id=639e597c92594ba325280ba2711885c8f86c94474424de6bdc2dc4a19d60eb4e
+[openart] created container name=openart-attack-real-prepare-check id=a96415d8eedb25a5a2ccc817a7d9520ce2374aaf143a452e05b8daa8e253a90a image=python:3.11-slim-bookworm
+[openart] started container name=openart-attack-real-prepare-check id=a96415d8eedb25a5a2ccc817a7d9520ce2374aaf143a452e05b8daa8e253a90a
+[openart] stopped container name=openart-target-real-prepare-check id=639e597c92594ba325280ba2711885c8f86c94474424de6bdc2dc4a19d60eb4e
+[openart] removed container name=openart-target-real-prepare-check id=639e597c92594ba325280ba2711885c8f86c94474424de6bdc2dc4a19d60eb4e
+[openart] stopped container name=openart-attack-real-prepare-check id=a96415d8eedb25a5a2ccc817a7d9520ce2374aaf143a452e05b8daa8e253a90a
+[openart] removed container name=openart-attack-real-prepare-check id=a96415d8eedb25a5a2ccc817a7d9520ce2374aaf143a452e05b8daa8e253a90a
+[openart] stopped container name=openart-task-real-prepare-check id=a9e7f811c36618035c944f6c8cc5c81923520fa3e4657759fe898362ab2086f0
+[openart] removed container name=openart-task-real-prepare-check id=a9e7f811c36618035c944f6c8cc5c81923520fa3e4657759fe898362ab2086f0

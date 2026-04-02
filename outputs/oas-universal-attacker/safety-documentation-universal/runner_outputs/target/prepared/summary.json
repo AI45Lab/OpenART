@@ -1,0 +1,36 @@
+{
+  "framework": "opencode",
+  "role": "target",
+  "container_name": "openart-target-safety-documentation-universal",
+  "container_id": "cdccfd2f2262fc7a47284b9e0521dbb96b4fa909e4c3122581aedacf695e2827",
+  "state_dir": "/workspace/.openart/runners/target/state",
+  "runtime_env_paths": {
+    "OPENART_TOOLS_FILE": "/workspace/.openart/runners/target/state/tools.json",
+    "OPENART_TOOL_GUIDE_FILE": "/workspace/.openart/runners/target/state/tools/guide.md",
+    "OPENART_MCP_FILE": "/workspace/.openart/runners/target/state/mcp_servers.json",
+    "OPENART_SKILLS_FILE": "/workspace/.openart/runners/target/state/skills.json"
+  },
+  "framework_config": {
+    "path": "/workspace/.openart/runners/target/config/opencode/opencode.json",
+    "present": true,
+    "mentions_tools": true,
+    "mentions_mcp": true,
+    "mentions_skills": false
+  },
+  "tools": {
+    "path": "/workspace/.openart/runners/target/state/tools.json",
+    "present": true
+  },
+  "tool_guide": {
+    "path": "/workspace/.openart/runners/target/state/tools/guide.md",
+    "present": true
+  },
+  "mcp_servers": {
+    "path": "/workspace/.openart/runners/target/state/mcp_servers.json",
+    "present": true
+  },
+  "skills": {
+    "path": "/workspace/.openart/runners/target/state/skills.json",
+    "present": true
+  }
+}

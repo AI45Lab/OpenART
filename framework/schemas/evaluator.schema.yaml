@@ -1,0 +1,7 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: EvaluatorConfig
+type: object
+required: [evaluator]
+properties:
+  evaluator:
+    type: object

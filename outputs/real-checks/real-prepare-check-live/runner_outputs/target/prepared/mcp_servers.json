@@ -1,0 +1,11 @@
+[
+  {
+    "name": "filesystem",
+    "transport": "stdio",
+    "command": "filesystem",
+    "args": [],
+    "url": null,
+    "env": {},
+    "enabled": true
+  }
+]

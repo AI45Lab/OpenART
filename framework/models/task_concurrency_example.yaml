@@ -1,0 +1,6 @@
+concurrency:
+  mode: shared_service
+  resource_keys:
+    - "gitlab:root/internal-api-client"
+    - "owncloud:Documents"
+  max_parallel_for_task: 1
