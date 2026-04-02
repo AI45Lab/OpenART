@@ -1,0 +1,4 @@
+{"run_id": "service-plane-projects", "source_role": "target", "event_type": "run_start", "timestamp": 1774342241.2949455, "message": "runner_start", "payload": {}}
+{"run_id": "service-plane-projects", "source_role": "target", "event_type": "error", "timestamp": 1774342241.7800412, "message": "runner_stderr", "payload": {"stderr": "{\"detail\":\"Given API token is not valid\"}"}}
+{"run_id": "service-plane-projects", "source_role": "target", "event_type": "message", "timestamp": 1774342241.7807875, "message": "generic_cli_output", "payload": {"stdout": "", "stderr": "{\"detail\":\"Given API token is not valid\"}", "exit_code": 1}}
+{"run_id": "service-plane-projects", "source_role": "target", "event_type": "run_end", "timestamp": 1774342241.7815523, "message": "runner_end", "payload": {"exit_code": 1}}

@@ -1,0 +1,41 @@
+{
+  "framework": "opencode",
+  "role": "target",
+  "container_name": "openart-target-real-prepare-check-live",
+  "container_id": "c4e14993d2473ebc6f477b17222b5966e245e68e03d6d51813df4e15ad066e3c",
+  "state_dir": "/workspace/.openart/runners/target/state",
+  "runtime_env_paths": {
+    "OPENART_TOOLS_FILE": "/workspace/.openart/runners/target/state/tools.json",
+    "OPENART_MCP_FILE": "/workspace/.openart/runners/target/state/mcp_servers.json",
+    "OPENART_SKILLS_FILE": "/workspace/.openart/runners/target/state/skills.json",
+    "OPENART_SERVICE_TOOLS_FILE": "/workspace/.openart/runners/target/state/service_tools/manifest.json",
+    "OPENART_SERVICE_TOOLS_GUIDE": "/workspace/.openart/runners/target/state/service_tools/README.md"
+  },
+  "framework_config": {
+    "path": "/workspace/.openart/runners/target/config/opencode/opencode.json",
+    "present": true,
+    "mentions_tools": true,
+    "mentions_mcp": true,
+    "mentions_skills": false
+  },
+  "tools": {
+    "path": "/workspace/.openart/runners/target/state/tools.json",
+    "present": true
+  },
+  "mcp_servers": {
+    "path": "/workspace/.openart/runners/target/state/mcp_servers.json",
+    "present": true
+  },
+  "skills": {
+    "path": "/workspace/.openart/runners/target/state/skills.json",
+    "present": true
+  },
+  "service_tools_manifest": {
+    "path": "/workspace/.openart/runners/target/state/service_tools/manifest.json",
+    "present": true
+  },
+  "service_tools_guide": {
+    "path": "/workspace/.openart/runners/target/state/service_tools/README.md",
+    "present": true
+  }
+}

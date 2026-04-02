@@ -1,0 +1,20 @@
+/workspace:
+total 3
+drwxr-xr-x 4 root root 1024 Mar 30 08:01 .
+drwxr-xr-x 1 root root   75 Mar 30 08:01 ..
+drwxr-xr-x 2 root root 1024 Mar 30 08:00 .openart_target_control_input
+drwxr-xr-x 2 root root 1024 Mar 30 08:00 .openart_target_control_output
+-rw-r--r-- 1 root root  319 Mar 20 17:11 onboarding_notes.txt
+-rw-r--r-- 1 root root  267 Mar 20 17:11 onboarding_notes_2.txt
+
+/workspace/.openart_target_control_input:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 30 08:00 .
+drwxr-xr-x 4 root root 1024 Mar 30 08:01 ..
+-rw-r--r-- 1 root root 1116 Mar 30 08:00 .openart-target-control-manifest.json
+
+/workspace/.openart_target_control_output:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 30 08:00 .
+drwxr-xr-x 4 root root 1024 Mar 30 08:01 ..
+-rw-r--r-- 1 root root 1116 Mar 30 08:00 .openart-target-control-manifest.json

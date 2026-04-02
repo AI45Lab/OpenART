@@ -1,0 +1,3 @@
+{"run_id": "safety-testbed-1774101783", "source_role": "system", "event_type": "run_start", "timestamp": 1774101783.7103252, "message": "run started", "payload": {"task_id": "safety-testbed"}}
+{"run_id": "safety-testbed-1774101783", "source_role": "system", "event_type": "task_loaded", "timestamp": 1774101783.7115388, "message": "task loaded", "payload": {"task_root": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openagentsafety/tasks/safety-testbed", "task_name": "Testbed"}}
+{"run_id": "safety-testbed-1774101783", "source_role": "system", "event_type": "run_end", "timestamp": 1774101783.7122977, "message": "run finished", "payload": {}}

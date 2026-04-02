@@ -1,0 +1,23 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: TaskBundle
+type: object
+required: [task_id, name, env, instructions]
+properties:
+  task_id:
+    type: string
+  name:
+    type: string
+  env:
+    type: object
+  instructions:
+    type: object
+  attacker:
+    type: object
+  services:
+    type: object
+  seeds:
+    type: object
+  evaluation:
+    type: object
+  runtime:
+    type: object

@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import base64
+import json
+import os
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+
+def _usage() -> int:
+    sys.stderr.write(
+        "usage: openart-service-request <gitlab|owncloud|plane> <METHOD> <PATH> [JSON_BODY]\n"
+    )
+    return 2
+
+
+def _service_endpoints() -> dict[str, str]:
+    raw = os.environ.get("OPENART_SERVICE_ENDPOINTS", "")
+    if not raw:
+        return {}
+    try:
+        data = json.loads(raw)
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _join(base: str, path: str) -> str:
+    if path.startswith("http://") or path.startswith("https://"):
+        return path
+    return base.rstrip("/") + "/" + path.lstrip("/")
+
+
+def _base_url(service: str, path: str, endpoints: dict[str, str]) -> str:
+    if service == "gitlab":
+        api = endpoints.get("gitlab.api")
+        web = os.environ.get("GITLAB_BASEURL", "").rstrip("/")
+        return api or (web + "/api/v4" if web else "")
+    if service == "plane":
+        api = endpoints.get("plane.api")
+        web = os.environ.get("PLANE_BASEURL", "").rstrip("/")
+        return api or (web + "/api" if web else "")
+    if service == "owncloud":
+        dav = endpoints.get("owncloud.dav")
+        web = endpoints.get("owncloud.web") or os.environ.get("OWNCLOUD_URL", "")
+        if path.startswith("remote.php/") or path.startswith("/remote.php/"):
+            return web.rstrip("/")
+        return dav or web.rstrip("/")
+    return ""
+
+
+def _headers(service: str) -> dict[str, str]:
+    headers = {"Accept": "application/json"}
+    if service == "gitlab":
+        token = os.environ.get("GITLAB_ACCESS_TOKEN") or os.environ.get("GITLAB_TOKEN") or ""
+        if token:
+            headers["PRIVATE-TOKEN"] = token
+    elif service == "plane":
+        api_key = os.environ.get("PLANE_API_KEY", "")
+        if api_key:
+            headers["x-api-key"] = api_key
+            headers["Content-Type"] = "application/json"
+    elif service == "owncloud":
+        username = os.environ.get("OWNCLOUD_USERNAME", "")
+        password = os.environ.get("OWNCLOUD_PASSWORD", "")
+        if username or password:
+            token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+            headers["Authorization"] = f"Basic {token}"
+    return headers
+
+
+def main() -> int:
+    if len(sys.argv) < 4:
+        return _usage()
+    service = sys.argv[1].strip().lower()
+    method = sys.argv[2].strip().upper() or "GET"
+    path = sys.argv[3].strip()
+    body_arg = sys.argv[4] if len(sys.argv) > 4 else ""
+
+    endpoints = _service_endpoints()
+    base_url = _base_url(service, path, endpoints)
+    if not base_url:
+        sys.stderr.write(f"missing service base url for {service}\n")
+        return 1
+
+    target_url = _join(base_url, path)
+    body = None
+    headers = _headers(service)
+    if body_arg:
+        body = body_arg.encode("utf-8")
+        headers.setdefault("Content-Type", "application/json")
+
+    request = urllib.request.Request(target_url, data=body, method=method, headers=headers)
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            sys.stdout.write(response.read().decode("utf-8", errors="replace"))
+            return 0
+    except urllib.error.HTTPError as exc:
+        sys.stderr.write(exc.read().decode("utf-8", errors="replace"))
+        return 1
+    except Exception as exc:
+        sys.stderr.write(str(exc) + "\n")
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,90 @@
+# OpenART Task Base Image
+# A well-designed default environment for task execution
+#
+# Includes:
+# - Python 3.11 with pip
+# - Common CLI tools: git, curl, wget, jq, yq
+# - File utilities: rsync, tree, unzip, zip
+# - Network utilities: netcat, nmap
+# - Text processing: sed, awk, grep
+#
+# Usage:
+#   docker build -t openart/task-base:latest .
+#   docker push openart/task-base:latest
+
+FROM python:3.11-slim-bookworm
+
+LABEL maintainer="OpenART Framework"
+LABEL description="Default task execution environment for OpenART framework"
+LABEL version="1.0.0"
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Version control
+    git \
+    git-lfs \
+    # Download tools
+    curl \
+    wget \
+    # JSON/YAML processing
+    jq \
+    yq \
+    # File utilities
+    rsync \
+    tree \
+    unzip \
+    zip \
+    gzip \
+    # Text processing
+    sed \
+    gawk \
+    grep \
+    # Network utilities
+    netcat-openbsd \
+    nmap \
+    iputils-ping \
+    # Process management
+    procps \
+    htop \
+    # Build essentials (for pip packages)
+    build-essential \
+    # SSH client (for git operations)
+    openssh-client \
+    # Editor
+    nano \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install common Python packages
+RUN pip install --no-cache-dir \
+    # HTTP client
+    requests \
+    httpx \
+    # Data processing
+    pandas \
+    numpy \
+    # JSON/YAML
+    pyyaml \
+    # CLI tools
+    click \
+    rich \
+    # Testing
+    pytest \
+    # Code formatting
+    black \
+    ruff
+
+# Create workspace directory
+RUN mkdir -p /workspace && chmod 777 /workspace
+
+# Set working directory
+WORKDIR /workspace
+
+# Set default command
+CMD ["/bin/bash"]

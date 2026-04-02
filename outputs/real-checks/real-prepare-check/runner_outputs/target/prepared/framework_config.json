@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "test-target-model",
+  "mcp": {
+    "filesystem": {
+      "command": "filesystem",
+      "args": [],
+      "env": {}
+    }
+  },
+  "tools": {
+    "bash": true,
+    "read": true
+  },
+  "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "http://34.13.73.248:3888/v1"
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+python3 /attacker_config/run_opencode_attacker.py --target-instruction /task/task.md --attacker-instruction /attacker_config/attacker.md --input-workspace /input_workspace --output-workspace /workspace --input-target-control /workspace/.openart_target_control_input --output-target-control /workspace/.openart_target_control_output

@@ -1,0 +1,25 @@
+{
+  "gitlab": {
+    "mode": "external",
+    "endpoints": {
+      "web": "http://100.100.194.4:8929",
+      "api": "http://100.100.194.4:8929/api/v4"
+    },
+    "healthy": true,
+    "health": {
+      "web": {
+        "ok": true,
+        "http_code": 200,
+        "latency_ms": 59,
+        "error": ""
+      },
+      "api": {
+        "ok": true,
+        "http_code": 404,
+        "latency_ms": 17,
+        "error": ""
+      }
+    },
+    "snapshot_time": 1774857802
+  }
+}

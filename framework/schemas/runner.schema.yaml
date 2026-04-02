@@ -1,0 +1,8 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: RunnerConfig
+type: object
+properties:
+  target:
+    type: object
+  attack:
+    type: object

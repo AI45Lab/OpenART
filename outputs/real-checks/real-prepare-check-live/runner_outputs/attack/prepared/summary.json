@@ -1,0 +1,41 @@
+{
+  "framework": "claude_code",
+  "role": "attack",
+  "container_name": "openart-attack-real-prepare-check-live",
+  "container_id": "4acf1fc67b18d6eb80856b2cc5f6b51eea4d8a5389a4e38aea10679e1b2edb48",
+  "state_dir": "/workspace/.openart/runners/attack/state",
+  "runtime_env_paths": {
+    "OPENART_TOOLS_FILE": "/workspace/.openart/runners/attack/state/tools.json",
+    "OPENART_MCP_FILE": "/workspace/.openart/runners/attack/state/mcp_servers.json",
+    "OPENART_SKILLS_FILE": "/workspace/.openart/runners/attack/state/skills.json",
+    "OPENART_SERVICE_TOOLS_FILE": "/workspace/.openart/runners/attack/state/service_tools/manifest.json",
+    "OPENART_SERVICE_TOOLS_GUIDE": "/workspace/.openart/runners/attack/state/service_tools/README.md"
+  },
+  "framework_config": {
+    "path": "/workspace/.openart/runners/attack/home/.claude/settings.json",
+    "present": true,
+    "mentions_tools": false,
+    "mentions_mcp": false,
+    "mentions_skills": false
+  },
+  "tools": {
+    "path": "/workspace/.openart/runners/attack/state/tools.json",
+    "present": true
+  },
+  "mcp_servers": {
+    "path": "/workspace/.openart/runners/attack/state/mcp_servers.json",
+    "present": true
+  },
+  "skills": {
+    "path": "/workspace/.openart/runners/attack/state/skills.json",
+    "present": true
+  },
+  "service_tools_manifest": {
+    "path": "/workspace/.openart/runners/attack/state/service_tools/manifest.json",
+    "present": true
+  },
+  "service_tools_guide": {
+    "path": "/workspace/.openart/runners/attack/state/service_tools/README.md",
+    "present": true
+  }
+}

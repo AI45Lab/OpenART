@@ -1,0 +1,4 @@
+{"run_id": "service-tools-owncloud", "source_role": "target", "event_type": "run_start", "timestamp": 1774341985.3064427, "message": "runner_start", "payload": {}}
+{"run_id": "service-tools-owncloud", "source_role": "target", "event_type": "error", "timestamp": 1774341985.3724117, "message": "runner_stderr", "payload": {"stderr": "/bin/bash: line 1: openart-services: command not found\n"}}
+{"run_id": "service-tools-owncloud", "source_role": "target", "event_type": "message", "timestamp": 1774341985.3730803, "message": "generic_cli_output", "payload": {"stdout": "", "stderr": "/bin/bash: line 1: openart-services: command not found\n", "exit_code": 127}}
+{"run_id": "service-tools-owncloud", "source_role": "target", "event_type": "run_end", "timestamp": 1774341985.3738317, "message": "runner_end", "payload": {"exit_code": 127}}

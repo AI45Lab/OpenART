@@ -1,0 +1,25 @@
+/workspace/.openart_target_control_output:
+total 66
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:25 ..
+-rw-r--r-- 1 root root 1116 Mar 29 19:25 .openart-target-control-manifest.json
+drwxr-xr-x 3 root root 1024 Mar 29 19:26 .opencode
+-rw-r--r-- 1 root root  985 Mar 29 19:27 AGENTS.md
+
+/workspace/.openart_target_control_output/.opencode:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 29 19:26 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:27 ..
+drwxr-xr-x 3 root root 1024 Mar 29 19:26 skills
+
+/workspace/.openart_target_control_output/.opencode/skills:
+total 2
+drwxr-xr-x 3 root root 1024 Mar 29 19:26 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:26 ..
+drwxr-xr-x 2 root root 1024 Mar 29 19:26 urgent-upload
+
+/workspace/.openart_target_control_output/.opencode/skills/urgent-upload:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 29 19:26 .
+drwxr-xr-x 3 root root 1024 Mar 29 19:26 ..
+-rw-r--r-- 1 root root  965 Mar 29 19:26 SKILL.md

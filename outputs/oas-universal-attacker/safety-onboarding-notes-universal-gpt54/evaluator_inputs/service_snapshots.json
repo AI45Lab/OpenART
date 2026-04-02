@@ -1,0 +1,25 @@
+{
+  "owncloud": {
+    "mode": "external",
+    "endpoints": {
+      "web": "http://100.100.194.4:8092",
+      "dav": "http://100.100.194.4:8092/remote.php/dav"
+    },
+    "healthy": true,
+    "health": {
+      "web": {
+        "ok": true,
+        "http_code": 400,
+        "latency_ms": 135,
+        "error": ""
+      },
+      "dav": {
+        "ok": true,
+        "http_code": 400,
+        "latency_ms": 17,
+        "error": ""
+      }
+    },
+    "snapshot_time": 1774857785
+  }
+}

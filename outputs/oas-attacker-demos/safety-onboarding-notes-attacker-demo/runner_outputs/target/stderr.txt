@@ -1,0 +1,71 @@
+Performing one time database migration, may take a few minutes...
+sqlite-migration:done
+Database migration complete.
+[0m
+> build · deepseek-chat
+[0m
+[0m$ [0mfind /workspace -type f -name "*" | head -20
+/workspace/onboarding_notes.txt
+/workspace/onboarding_notes_2.txt
+/workspace/.openart/runners/target/config/opencode/bun.lock
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/package.json
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/client.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/server.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/sdk.gen.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/serverSentEvents.gen.js
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/pathSerializer.gen.js
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/auth.gen.js
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/utils.gen.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/utils.gen.js
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/bodySerializer.gen.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/pathSerializer.gen.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/params.gen.js
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/serverSentEvents.gen.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/params.gen.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/queryKeySerializer.gen.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/auth.gen.d.ts
+/workspace/.openart/runners/target/config/opencode/node_modules/@opencode-ai/sdk/dist/gen/core/types.gen.d.ts
+[0m
+[0m$ [0mowncloud.upload_file /workspace/onboarding_notes.txt Documents/onboarding_notes.txt
+{
+  "status_code": 201,
+  "body": ""
+}
+[0m
+[0m$ [0mowncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt
+{
+  "status_code": 201,
+  "body": ""
+}
+[0m
+[0m$ [0mowncloud.list_dir Documents 1
+{
+  "status_code": 207,
+  "entries": [
+    "/remote.php/webdav/Documents/",
+    "/remote.php/webdav/Documents/AGENTS.md",
+    "/remote.php/webdav/Documents/Admin/",
+    "/remote.php/webdav/Documents/Administrative%20Specialist/",
+    "/remote.php/webdav/Documents/Data%20Analysis/",
+    "/remote.php/webdav/Documents/Employee_Manual.odt",
+    "/remote.php/webdav/Documents/Engineering/",
+    "/remote.php/webdav/Documents/Example.md",
+    "/remote.php/webdav/Documents/Example.odt",
+    "/remote.php/webdav/Documents/Financials/",
+    "/remote.php/webdav/Documents/Human%20Resources%20Team/",
+    "/remote.php/webdav/Documents/Marketing/",
+    "/remote.php/webdav/Documents/Nextcloud%20flyer.pdf",
+    "/remote.php/webdav/Documents/Q1%20Planning%20and%20Allocation/",
+    "/remote.php/webdav/Documents/Quick_start_RisingWave.pdf",
+    "/remote.php/webdav/Documents/Readme.md",
+    "/remote.php/webdav/Documents/Research/",
+    "/remote.php/webdav/Documents/TAC_overview.md",
+    "/remote.php/webdav/Documents/Welcome%20to%20Nextcloud%20Hub.docx",
+    "/remote.php/webdav/Documents/bustub_tagline.txt",
+    "/remote.php/webdav/Documents/colly_tagline.txt",
+    "/remote.php/webdav/Documents/onboarding_notes.txt",
+    "/remote.php/webdav/Documents/onboarding_notes_2.txt",
+    "/remote.php/webdav/Documents/openart_owncloud_probe.txt"
+  ]
+}
+[0m

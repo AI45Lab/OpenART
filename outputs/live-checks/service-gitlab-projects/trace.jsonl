@@ -1,0 +1,4 @@
+{"run_id": "service-gitlab-projects", "source_role": "target", "event_type": "run_start", "timestamp": 1774342171.1686668, "message": "runner_start", "payload": {}}
+{"run_id": "service-gitlab-projects", "source_role": "target", "event_type": "error", "timestamp": 1774342171.7157984, "message": "runner_stderr", "payload": {"stderr": "{\"error\":\"invalid_token\",\"error_description\":\"Token is expired. You can either do re-authorization or token refresh.\"}"}}
+{"run_id": "service-gitlab-projects", "source_role": "target", "event_type": "message", "timestamp": 1774342171.7332754, "message": "generic_cli_output", "payload": {"stdout": "", "stderr": "{\"error\":\"invalid_token\",\"error_description\":\"Token is expired. You can either do re-authorization or token refresh.\"}", "exit_code": 1}}
+{"run_id": "service-gitlab-projects", "source_role": "target", "event_type": "run_end", "timestamp": 1774342171.7340212, "message": "runner_end", "payload": {"exit_code": 1}}
