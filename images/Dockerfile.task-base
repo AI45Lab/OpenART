@@ -18,11 +18,19 @@ LABEL maintainer="OpenART Framework"
 LABEL description="Default task execution environment for OpenART framework"
 LABEL version="1.0.0"
 
+ARG PIP_INDEX_URL=https://pypi.org/simple
+ARG PIP_EXTRA_INDEX_URL=
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
+ENV VIRTUAL_ENV=/opt/openart-venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+ENV PIP_INDEX_URL=${PIP_INDEX_URL}
+ENV PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}
+ENV PIP_DEFAULT_TIMEOUT=120
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -32,6 +40,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Download tools
     curl \
     wget \
+    file \
+    # PDF/OCR tooling
+    ghostscript \
+    imagemagick \
+    poppler-utils \
+    qpdf \
+    sqlite3 \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-osd \
+    zbar-tools \
     # JSON/YAML processing
     jq \
     yq \
@@ -54,6 +73,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     htop \
     # Build essentials (for pip packages)
     build-essential \
+    libgl1 \
+    libglib2.0-0 \
     # SSH client (for git operations)
     openssh-client \
     # Editor
@@ -61,8 +82,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
-# Install common Python packages
-RUN pip install --no-cache-dir \
+# Install common Python packages in a dedicated venv.
+RUN python -m venv --copies ${VIRTUAL_ENV} \
+    && ${VIRTUAL_ENV}/bin/pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && ${VIRTUAL_ENV}/bin/pip install --no-cache-dir \
     # HTTP client
     requests \
     httpx \
@@ -71,6 +94,27 @@ RUN pip install --no-cache-dir \
     numpy \
     # JSON/YAML
     pyyaml \
+    # OCR / documents
+    pdfminer.six \
+    pypdf \
+    PyPDF2 \
+    pdfplumber \
+    pillow \
+    pytesseract \
+    opencv-python-headless \
+    pyzbar \
+    beautifulsoup4 \
+    lxml \
+    python-docx \
+    python-pptx \
+    openpyxl \
+    odfpy \
+    pymupdf \
+    pikepdf \
+    duckdb \
+    pyarrow \
+    boto3 \
+    flask \
     # CLI tools
     click \
     rich \
@@ -78,9 +122,16 @@ RUN pip install --no-cache-dir \
     pytest \
     # Code formatting
     black \
-    ruff
+    ruff \
+    && ln -sf ${VIRTUAL_ENV}/bin/python3 /usr/local/bin/python3 \
+    && ln -sf ${VIRTUAL_ENV}/bin/python3 /usr/local/bin/python \
+    && ln -sf ${VIRTUAL_ENV}/bin/pip /usr/local/bin/pip \
+    && ln -sf ${VIRTUAL_ENV}/bin/pip /usr/local/bin/pip3 \
+    && printf 'export VIRTUAL_ENV=%s\nexport PATH="%s/bin:$PATH"\n' "${VIRTUAL_ENV}" "${VIRTUAL_ENV}" > /etc/profile.d/openart-python.sh
 
 # Create workspace directory
+COPY openagentsafety_utils/scripts/ /opt/openart-tools/scripts/
+
 RUN mkdir -p /workspace && chmod 777 /workspace
 
 # Set working directory

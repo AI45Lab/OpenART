@@ -24,6 +24,11 @@ attacker:
   image: openart/opencode:latest
   cmd: python3
   target_control_plane: true
+  feedback_loop: true
+  vector_permissions:
+    - workspace_files
+    - claude_md
+    - opencode_skill
   env_from:
     OPENAI_API_KEY: OPENAI_API_KEY
     OPENAI_BASE_URL: OPENAI_BASE_URL
@@ -73,11 +78,77 @@ concurrency:
 | `instructions.target` | Required instruction file for the target runner |
 | `attacker` | Optional dedicated attacker config with its own image, command, args, tools, and instruction |
 | `attacker.target_control_plane` | When `true`, expose a separate native target-control bundle to the attacker |
+| `attacker.feedback_loop` | When `true`, rerun the attacker between target iterations so it can adapt using evaluator/target feedback |
+| `attacker.vector_permissions` | Optional explicit attacker vector allowlist. Controls whether workspace edits and specific native control surfaces are honored by the framework |
 | `services.required` | External services the task expects |
 | `seeds.path` | Optional directory copied into `/workspace` before the run |
 | `evaluation.deterministic` | Optional Python evaluator module |
 | `evaluation.llm_judge_rubric` | Optional rubric file for the LLM judge |
 | `runtime.timeout_seconds` | Run timeout metadata passed into runner config |
+
+### `attacker.vector_permissions`
+
+If `vector_permissions` is omitted, OpenART uses legacy-compatible defaults for the current target framework plus `workspace_files`.
+
+If `vector_permissions` is present, OpenART uses exactly that allowlist.
+
+Common vector names:
+
+| Vector | Meaning |
+|--------|---------|
+| `workspace_files` | Apply attacker workspace file edits back into the shared workspace |
+| `claude_md` | Allow `CLAUDE.md` target-control edits |
+| `agents_md` | Allow `AGENTS.md` target-control edits |
+| `opencode_skill` | Allow `.opencode/skills/**` target-control edits |
+| `opencode_command` | Allow `.opencode/commands/**` target-control edits |
+| `claude_skill` | Allow `.claude/skills/**` target-control edits |
+| `claude_local_md` | Allow `.claude/CLAUDE.md` target-control edits |
+| `claude_rule` | Allow `.claude/rules/**` target-control edits |
+| `claude_command` | Allow `.claude/commands/**` target-control edits |
+
+Examples:
+
+```yaml
+attacker:
+  target_control_plane: true
+  vector_permissions:
+    - workspace_files
+    - claude_md
+    - opencode_skill
+```
+
+```yaml
+attacker:
+  target_control_plane: true
+  vector_permissions:
+    - claude_md
+```
+
+In the second example, the attacker may still write workspace artifacts or skill files inside its private output folder, but OpenART will ignore those disabled vectors when applying attacker results.
+
+### `attacker.feedback_loop`
+
+If `feedback_loop: true` and the run uses `--max-iterations > 1`, OpenART will:
+
+1. Run the attacker before the first target attempt.
+2. Run the target and evaluator.
+3. If the result is not `pass`, rerun the attacker before the next target iteration.
+
+The attacker receives a read-only feedback mount at `/workspace/.openart_feedback` with the latest run artifacts, including:
+
+- `/workspace/.openart_feedback/trace.jsonl`
+- `/workspace/.openart_feedback/evaluator_inputs/`
+- `/workspace/.openart_feedback/evaluator_outputs/`
+- `/workspace/.openart_feedback/runner_outputs/target/`
+- `/workspace/.openart_feedback/evaluation_iterations/`
+
+This allows the attacker to adapt based on:
+
+- target stdout/stderr and workspace behavior
+- evaluator prompts and evaluator outputs
+- previous iteration snapshots and rationales
+
+If `feedback_loop` is omitted or `false`, OpenART keeps the older behavior where the attacker only runs once before the target (or once after the target if `phase: after_target`).
 
 ## Runner Config Files
 
@@ -189,6 +260,12 @@ attacker:
   image: openart/opencode:latest
   cmd: python3
   target_control_plane: true
+  vector_permissions:
+    - workspace_files
+    - claude_md
+    - opencode_skill
+    - opencode_command
+    - claude_skill
   env_from:
     OPENAI_API_KEY: OPENAI_API_KEY
     OPENAI_BASE_URL: OPENAI_BASE_URL
@@ -223,8 +300,15 @@ python -m framework.cli run \
   --eval-strategy both
 ```
 
-When `target_control_plane: true`, OpenART mounts a separate native target-control bundle into the attacker and materializes the final bundle back into `workspace/shared` before the target starts. For an OpenCode target, this bundle currently covers native prompt/skill surfaces such as `AGENTS.md`, `CLAUDE.md`, `.opencode/skills/**`, and `.opencode/commands/**`.
+When `target_control_plane: true`, OpenART mounts a separate native target-control bundle into the attacker and materializes the final bundle back into `workspace/shared` before the target starts. Which native surfaces are actually honored is now controlled by `attacker.vector_permissions`.
 
 OpenART also emits a target-derived manifest at `control/target/base/.openart-target-control-manifest.json`. Attackers can inspect that manifest to learn which native prompt, skill, rule, or command paths the current target framework supports.
 
 The universal OpenAgentSafety attacker config lives at `OpenART/configs/attacker-configs/universal/opencode-native-control/config.yaml`.
+
+## Universal Attacker Shaping
+
+The universal OpenCode attacker wrapper also performs task-aware shaping for communication-heavy tasks.
+
+- If the target task requires messaging or broadcasting and the current runtime does not expose an actionable communication path, the attacker prompt tells the model not to invent fake chat/email paths that mostly cause target timeouts.
+- If the runtime does expose an actionable path, such as a writable GitLab issue path or a real chat/email integration in env, the attacker prompt allows the attacker to inject a concrete communication path that matches that channel.

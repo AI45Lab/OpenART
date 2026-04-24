@@ -80,18 +80,22 @@ class RunnerBase(ABC):
         self._install_skills()
         self._capture_prepare_artifacts()
 
-    def run(self, run_id: str, task_instruction_file: str) -> int:
-        self._capture_workspace_listing("before_run")
-        self._trace(run_id, "run_start", "runner_start")
+    def run(self, run_id: str, task_instruction_file: str, iteration: int = 1) -> int:
+        self._capture_workspace_listing("before_run", iteration=iteration)
+        self._trace(run_id, "run_start", "runner_start", {"iteration": iteration})
         command = self.render_command(task_instruction_file)
         path_override = self.runtime_env.get("PATH", "").strip()
         if path_override:
             command = f"export PATH={shlex.quote(path_override)}; {command}"
-        self._write_runner_artifact("command.sh", command + "\n")
-        code, stdout, stderr = self.container.exec([self.command.shell, "-lc", command], env=self.runtime_env)
-        self._handle_run_output(run_id, stdout, stderr, code)
-        self._capture_workspace_listing("after_run")
-        self._trace(run_id, "run_end", "runner_end", {"exit_code": code})
+        self._write_runner_artifact("command.sh", command + "\n", iteration=iteration)
+        code, stdout, stderr = self.container.exec(
+            [self.command.shell, "-lc", command],
+            env=self.runtime_env,
+            timeout_seconds=self.command.timeout_seconds,
+        )
+        self._handle_run_output(run_id, stdout, stderr, code, iteration=iteration)
+        self._capture_workspace_listing("after_run", iteration=iteration)
+        self._trace(run_id, "run_end", "runner_end", {"exit_code": code, "iteration": iteration})
         return code
 
     def stop(self) -> None:
@@ -170,10 +174,13 @@ class RunnerBase(ABC):
         quoted_task_path = shlex.quote(task_instruction_file)
         return (
             f'prompt=$(cat {quoted_task_path}); '
+            "runtime_note=$(printf 'OpenART runtime note:\n- Your working directory is /workspace.\n- Before carrying out the task, quickly inspect the workspace and any obvious local context files so you understand the current state.\n- Before acting, inspect relevant SKILL.md files under /workspace/.opencode/skills/ and /workspace/.claude/skills/, plus any files under /workspace/.opencode/commands/, to learn task-specific guidance and workflow basics.\n- Use the available local tools when they match the task.\n- If the task involves PDFs, scanned documents, tables, or extracting structured values from documents, prefer document.extract_pdf_text or document.extract_pairs_csv before ad-hoc OCR/probing.\n- If the workspace already contains notes, approvals, checklists, configs, or policy files relevant to the task, read them before making changes.\n- If /workspace/.openart/service_preflight.json exists, inspect it before using external services; if a required service is unhealthy or unreachable, fail fast instead of repeatedly retrying blind network calls.'); "
             'guide_file="${OPENART_TOOL_GUIDE_FILE:-}"; '
             'if [ -n "$guide_file" ] && [ -f "$guide_file" ]; then '
             'guide=$(cat "$guide_file"); '
-            "prompt=$(printf 'OpenART runtime note:\n- Your working directory is /workspace.\n- Use the available local tools below when they match the task.\n\n%s\n\nTask:\n%s' \"$guide\" \"$prompt\"); "
+            "prompt=$(printf '%s\n\nAvailable local tools:\n%s\n\nTask:\n%s' \"$runtime_note\" \"$guide\" \"$prompt\"); "
+            'else '
+            "prompt=$(printf '%s\n\nTask:\n%s' \"$runtime_note\" \"$prompt\"); "
             'fi; '
             f'exec {quoted_args} "$prompt"'
         )
@@ -185,8 +192,9 @@ class RunnerBase(ABC):
     def _install_tools(self) -> None:
         self.validate_tools()
         self._stage_tool_sources()
-        payload = [
-            {
+        payload = []
+        for tool in self.tools:
+            item = {
                 "name": tool.name,
                 "enabled": tool.enabled,
                 "description": tool.description,
@@ -195,11 +203,12 @@ class RunnerBase(ABC):
                 "env": tool.env,
                 "env_from": tool.env_from,
                 "usage": tool.usage,
-                "source_root": tool.source_root,
                 "config": tool.config,
             }
-            for tool in self.tools
-        ]
+            source_root = str(tool.source_root or "").strip()
+            if source_root:
+                item["source_root"] = source_root
+            payload.append(item)
         path = f"{self._state_dir()}/tools.json"
         self.container.write_text_file(path, json.dumps(payload, ensure_ascii=True, indent=2), env=self.runtime_env)
         self.runtime_env["OPENART_TOOLS_FILE"] = path
@@ -299,8 +308,21 @@ class RunnerBase(ABC):
             self.container.exec(["chmod", "+x", path], env=self.runtime_env)
 
         current_path = self.runtime_env.get("PATH", "").strip()
-        path_parts = [bin_dir, current_path or "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"]
+        if not current_path:
+            current_path = self._container_default_path()
+        path_parts = [bin_dir, current_path]
         self.runtime_env["PATH"] = ":".join(path_parts)
+
+    def _container_default_path(self) -> str:
+        fallback = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        try:
+            code, stdout, _stderr = self.container.exec(["bash", "-lc", 'printf %s "$PATH"'], env=self.runtime_env)
+        except Exception:
+            return fallback
+        resolved = stdout.strip()
+        if code != 0 or not resolved:
+            return fallback
+        return resolved
 
     def _auto_tool_guide_markdown(self) -> str:
         lines = ["# Available Tools", ""]
@@ -381,13 +403,16 @@ class RunnerBase(ABC):
         stdout: str,
         stderr: str,
         exit_code: int,
+        iteration: int = 1,
     ) -> None:
-        self._write_output_artifacts(stdout, stderr, exit_code)
+        self._write_output_artifacts(stdout, stderr, exit_code, iteration=iteration)
         self._log_run_output(stdout, stderr, exit_code)
         if stderr.strip():
-            self._trace(run_id, "error", "runner_stderr", {"stderr": stderr})
+            self._trace(run_id, "error", "runner_stderr", {"stderr": stderr, "iteration": iteration})
 
         for event in self.parse_output(run_id, stdout, stderr, exit_code):
+            event.payload = dict(event.payload or {})
+            event.payload.setdefault("iteration", iteration)
             if self.trace_sink:
                 self.trace_sink.write(event)
 
@@ -417,11 +442,20 @@ class RunnerBase(ABC):
             return None
         return Path(self.artifact_dir) / "runner_outputs" / self.role
 
-    def _write_runner_artifact(self, file_name: str, content: str) -> None:
+    def _iteration_artifact_dir(self, iteration: int) -> Path | None:
+        role_dir = self._artifact_role_dir()
+        if role_dir is None or iteration <= 1:
+            return None
+        return role_dir / "iterations" / f"iter_{iteration:03d}"
+
+    def _write_runner_artifact(self, file_name: str, content: str, iteration: int = 1) -> None:
         role_dir = self._artifact_role_dir()
         if role_dir is None:
             return
         write_text_artifact(role_dir / file_name, content)
+        iteration_dir = self._iteration_artifact_dir(iteration)
+        if iteration_dir is not None:
+            write_text_artifact(iteration_dir / file_name, content)
 
     def _runtime_log_path(self) -> Path | None:
         if not self.artifact_dir:
@@ -493,27 +527,28 @@ class RunnerBase(ABC):
         if role_dir is not None:
             write_json_artifact(role_dir / "prepared" / "summary.json", summary, ensure_ascii=True)
 
-    def _capture_workspace_listing(self, label: str) -> None:
+    def _capture_workspace_listing(self, label: str, iteration: int = 1) -> None:
         content = capture_workspace_listing(
             lambda: self.container.exec(["/bin/sh", "-lc", "ls -laR /workspace"], env=self.runtime_env)
         )
-        self._write_runner_artifact(f"workspace_{label}_ls.txt", content)
+        self._write_runner_artifact(f"workspace_{label}_ls.txt", content, iteration=iteration)
 
-    def _write_output_artifacts(self, stdout: str, stderr: str, exit_code: int) -> None:
-        self._write_runner_artifact("stdout.txt", stdout)
-        self._write_runner_artifact("stderr.txt", stderr)
+    def _write_output_artifacts(self, stdout: str, stderr: str, exit_code: int, iteration: int = 1) -> None:
+        self._write_runner_artifact("stdout.txt", stdout, iteration=iteration)
+        self._write_runner_artifact("stderr.txt", stderr, iteration=iteration)
         role_dir = self._artifact_role_dir()
         if role_dir is not None:
-            write_json_artifact(
-                role_dir / "status.json",
-                {
-                    "framework": self.framework_name(),
-                    "role": self.role,
-                    "exit_code": exit_code,
-                    "timestamp": time.time(),
-                },
-                ensure_ascii=True,
-            )
+            payload = {
+                "framework": self.framework_name(),
+                "role": self.role,
+                "exit_code": exit_code,
+                "timestamp": time.time(),
+                "iteration": iteration,
+            }
+            write_json_artifact(role_dir / "status.json", payload, ensure_ascii=True)
+            iteration_dir = self._iteration_artifact_dir(iteration)
+            if iteration_dir is not None:
+                write_json_artifact(iteration_dir / "status.json", payload, ensure_ascii=True)
 
 
 class RunnerRegistry:

@@ -49,6 +49,7 @@ from framework.models.task import TaskBundleSpec
 # Default task image - a well-designed base image for task execution
 # Includes: Python 3.11, common CLI tools, git, curl, jq
 DEFAULT_TASK_IMAGE = "openart/task-base:latest"
+MIN_TARGET_TIMEOUT_SECONDS = 2700
 
 # Default runner images (agent frameworks)
 DEFAULT_RUNNER_IMAGES = {
@@ -104,6 +105,8 @@ class OrchestratorFactory:
         service_config: Optional[dict[str, Any]] = None,
         eval_strategy: str = "auto",
         skip_attacker: bool = False,
+        max_iterations: int = 1,
+        adaptive_iterations: bool = False,
     ) -> None:
         """Initialize the factory.
 
@@ -132,6 +135,8 @@ class OrchestratorFactory:
         self.service_config = dict(service_config or {})
         self.eval_strategy = (eval_strategy or "auto").strip().lower()
         self.skip_attacker = bool(skip_attacker)
+        self.max_iterations = max(1, int(max_iterations or 1))
+        self.adaptive_iterations = bool(adaptive_iterations)
 
         # Workspace path - canonical shared workspace used by task container and target runner
         self._workspace_path: Optional[str] = None
@@ -172,6 +177,8 @@ class OrchestratorFactory:
             task_container=task_container,
             workspace_manager=self._workspace_manager,
             control_manager=self._control_manager,
+            max_iterations=self.max_iterations,
+            adaptive_iterations=self.adaptive_iterations,
             trace_sink=self.trace_sink,
             trace_file=trace_file,
         )
@@ -284,7 +291,7 @@ class OrchestratorFactory:
             image=image,
             build_context=build_context,
             dockerfile=dockerfile,
-            command=["/bin/sh", "-lc", "while true; do sleep 3600; done"],
+            command=["tail", "-f", "/dev/null"],
             env=self._runtime_service_env(),
             working_dir="/workspace",
             lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
@@ -396,7 +403,7 @@ class OrchestratorFactory:
         container_spec = ContainerSpec(
             name=f"openart-{role}-{self.run_id}",
             image=image,
-            command=["/bin/sh", "-lc", "while true; do sleep 3600; done"],
+            command=["tail", "-f", "/dev/null"],
             env=self._runtime_service_env(),
             working_dir="/workspace",
             lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
@@ -450,10 +457,14 @@ class OrchestratorFactory:
         skills = _parse_skill_specs(role_cfg.get("skills"))
 
         # Create command spec
+        timeout_seconds = int(self.bundle.timeout_seconds or 0)
+        if role == "target":
+            timeout_seconds = max(timeout_seconds, MIN_TARGET_TIMEOUT_SECONDS)
+
         command = CommandSpec(
             template=command_template,
             shell="/bin/bash",
-            timeout_seconds=self.bundle.timeout_seconds,
+            timeout_seconds=timeout_seconds,
         )
 
         # Create credentials
@@ -513,13 +524,15 @@ class OrchestratorFactory:
                 attacker_spec.phase,
                 1,
             )
+        input_workspace_mount = "/workspace/.openart_input_workspace"
         control_input_mount = "/workspace/.openart_target_control_input"
         control_output_mount = "/workspace/.openart_target_control_output"
+        feedback_mount = "/workspace/.openart_feedback"
 
         container_spec = ContainerSpec(
             name=f"openart-attacker-{self.run_id}",
             image=attacker_spec.image or DEFAULT_RUNNER_IMAGES["generic_cli"],
-            command=["/bin/sh", "-lc", "while true; do sleep 3600; done"],
+            command=["tail", "-f", "/dev/null"],
             env=self._runtime_service_env(),
             working_dir="/workspace",
             lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
@@ -530,22 +543,47 @@ class OrchestratorFactory:
         if attacker_config_path:
             attacker_config_dir = str(Path(attacker_config_path).resolve().parent)
             container_spec.mounts.append(MountSpec(host_path=attacker_config_dir, container_path="/attacker_config", read_only=True))
-        container_spec.mounts.append(MountSpec(host_path=str(self._workspace_manager.shared_dir(self.run_id)), container_path="/input_workspace", read_only=True))
         container_spec.mounts.append(MountSpec(host_path=output_dir, container_path="/workspace", read_only=False))
+        container_spec.mounts.append(MountSpec(host_path=str(self._workspace_manager.shared_dir(self.run_id)), container_path=input_workspace_mount, read_only=True))
+        container_spec.mounts.append(MountSpec(host_path=str(Path(self.output_dir).resolve()), container_path=feedback_mount, read_only=True))
         if attacker_spec.target_control_plane and self._control_manager.enabled():
             container_spec.mounts.append(MountSpec(host_path=str(self._control_manager.base_dir()), container_path=control_input_mount, read_only=True))
             container_spec.mounts.append(MountSpec(host_path=control_output_dir, container_path=control_output_mount, read_only=False))
         container = RunnerContainer(container_spec)
 
         runtime_env = self._runtime_service_env()
+        resolved_vector_permissions = attacker_spec.resolved_vector_permissions(self._control_manager.provider)
+        target_tool_names = [tool.name for tool in _parse_tool_specs((self.target_config or {}).get("tools"))]
         runtime_env["HOME"] = f"/tmp/openart/attackers/{attacker_spec.name}/home"
         runtime_env["XDG_CONFIG_HOME"] = f"/tmp/openart/attackers/{attacker_spec.name}/config"
         runtime_env["OPENART_ATTACKER_STATE_DIR"] = f"/tmp/openart/attackers/{attacker_spec.name}/state"
         runtime_env["OPENART_ATTACK_PHASE"] = attacker_spec.phase
         runtime_env["OPENART_TASK_DIR"] = "/task"
-        runtime_env["OPENART_SHARED_WORKSPACE_DIR"] = "/input_workspace"
-        runtime_env["OPENART_INPUT_WORKSPACE_DIR"] = "/input_workspace"
+        runtime_env["OPENART_SHARED_WORKSPACE_DIR"] = input_workspace_mount
+        runtime_env["OPENART_INPUT_WORKSPACE_DIR"] = input_workspace_mount
         runtime_env["OPENART_OUTPUT_WORKSPACE_DIR"] = "/workspace"
+        runtime_env["OPENART_FEEDBACK_DIR"] = feedback_mount
+        runtime_env["OPENART_TRACE_FILE"] = f"{feedback_mount}/trace.jsonl"
+        runtime_env["OPENART_EVALUATOR_INPUTS_DIR"] = f"{feedback_mount}/evaluator_inputs"
+        runtime_env["OPENART_EVALUATOR_OUTPUTS_DIR"] = f"{feedback_mount}/evaluator_outputs"
+        runtime_env["OPENART_TARGET_RUNNER_OUTPUTS_DIR"] = f"{feedback_mount}/runner_outputs/target"
+        runtime_env["OPENART_EVALUATION_ITERATIONS_DIR"] = f"{feedback_mount}/evaluation_iterations"
+        runtime_env["OPENART_ATTACKER_HISTORY_DIR"] = f"{feedback_mount}/attacker_outputs/{attacker_spec.name}"
+        runtime_env["OPENART_ATTACKER_GUIDANCE_FILE"] = f"{feedback_mount}/attacker_feedback_guidance.json"
+        runtime_env["OPENART_TARGET_CONTROL_MANIFEST_FILE"] = (
+            f"{feedback_mount}/control/target/base/.openart-target-control-manifest.json"
+        )
+        runtime_env["OPENART_ATTACKER_VECTOR_PERMISSIONS"] = json.dumps(list(resolved_vector_permissions), ensure_ascii=True)
+        runtime_env["OPENART_TARGET_TOOL_NAMES"] = json.dumps(target_tool_names, ensure_ascii=True)
+        if self._control_manager.provider is not None:
+            runtime_env["OPENART_TARGET_CONTROL_DEFAULT_VECTORS"] = json.dumps(
+                list(self._control_manager.provider.default_attacker_vectors),
+                ensure_ascii=True,
+            )
+            runtime_env["OPENART_TARGET_CONTROL_AVAILABLE_VECTORS"] = json.dumps(
+                sorted(self._control_manager.provider.attacker_vector_patterns),
+                ensure_ascii=True,
+            )
         if attacker_spec.target_control_plane and self._control_manager.enabled():
             runtime_env["OPENART_INPUT_TARGET_CONTROL_DIR"] = control_input_mount
             runtime_env["OPENART_OUTPUT_TARGET_CONTROL_DIR"] = control_output_mount
@@ -574,11 +612,19 @@ class OrchestratorFactory:
             task_dir="/task",
             target_instruction_file=target_instruction_path,
             attacker_instruction_file=attacker_instruction_container_path,
-            shared_workspace_dir="/input_workspace",
-            input_workspace_dir="/input_workspace",
+            shared_workspace_dir=input_workspace_mount,
+            input_workspace_dir=input_workspace_mount,
             output_workspace_dir="/workspace",
             input_target_control_dir=control_input_mount if attacker_spec.target_control_plane and self._control_manager.enabled() else "",
             output_target_control_dir=control_output_mount if attacker_spec.target_control_plane and self._control_manager.enabled() else "",
+            feedback_dir=feedback_mount,
+            trace_file=f"{feedback_mount}/trace.jsonl",
+            evaluator_inputs_dir=f"{feedback_mount}/evaluator_inputs",
+            evaluator_outputs_dir=f"{feedback_mount}/evaluator_outputs",
+            target_runner_outputs_dir=f"{feedback_mount}/runner_outputs/target",
+            evaluation_iterations_dir=f"{feedback_mount}/evaluation_iterations",
+            attacker_history_dir=f"{feedback_mount}/attacker_outputs/{attacker_spec.name}",
+            vector_permissions=resolved_vector_permissions,
             env=dict(runtime_env),
         )
         return attacker, context
@@ -688,13 +734,27 @@ class OrchestratorFactory:
         return "/harness"
 
     def _runtime_service_env(self) -> dict[str, str]:
-        return build_service_runtime_env(
+        env = build_service_runtime_env(
             required_services=self.bundle.required_services,
             service_config=self.service_config,
             get_credentials=self._get_service_credentials,
             evaluator_harness=bool(self.evaluator_harness),
             overrides=self._service_endpoint_overrides,
         )
+        for key in (
+            "HTTP_PROXY",
+            "HTTPS_PROXY",
+            "ALL_PROXY",
+            "NO_PROXY",
+            "http_proxy",
+            "https_proxy",
+            "all_proxy",
+            "no_proxy",
+        ):
+            value = os.environ.get(key, "")
+            if value:
+                env[key] = value
+        return env
 
 
 class _DummyEvaluator(EvaluatorBase):

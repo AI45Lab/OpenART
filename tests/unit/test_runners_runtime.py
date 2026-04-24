@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from framework.components.runners import ClaudeCodeRunner, GenericCLIRunner, OpenCodeRunner
@@ -8,10 +9,11 @@ from framework.models.container import ContainerSpec
 
 
 class _FakeRunnerContainer:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, default_path: str = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin") -> None:
         self.spec = ContainerSpec(name=name)
         self.files: dict[str, str] = {}
         self.exec_calls: list[list[str]] = []
+        self.default_path = default_path
 
     def write_text_file(self, path: str, content: str, env=None) -> None:
         self.files[path] = content
@@ -21,6 +23,8 @@ class _FakeRunnerContainer:
 
     def exec(self, cmd: list[str], env=None):
         self.exec_calls.append(list(cmd))
+        if cmd == ["bash", "-lc", 'printf %s "$PATH"']:
+            return 0, self.default_path, ""
         return 0, "", ""
 
 
@@ -79,6 +83,10 @@ def test_opencode_runner_reads_prompt_text_not_file_path() -> None:
     assert "run" in command
     assert "--task" not in command
     assert "/task/instructions/target.md" in command
+    assert "/workspace/.opencode/skills/" in command
+    assert "/workspace/.claude/skills/" in command
+    assert "Before carrying out the task, quickly inspect the workspace" in command
+    assert "/workspace/.openart/service_preflight.json" in command
 
 
 def test_claude_runner_uses_print_mode_and_reads_prompt_text() -> None:
@@ -171,3 +179,50 @@ def test_runner_installs_user_tool_wrappers_and_guide() -> None:
     assert "exec python3 script.py \"$@\"" in container.files[wrapper_path]
     assert "export TOKEN=\"${OPENAI_API_KEY:-}\"" in container.files[wrapper_path]
     assert container.files[runner.runtime_env["OPENART_TOOL_GUIDE_FILE"]] == "# Custom Tool Guide\n"
+
+
+def test_runner_preserves_container_path_when_installing_tools() -> None:
+    container = _FakeRunnerContainer("openart-target-test", default_path="/opt/openart-venv/bin:/usr/local/bin:/usr/bin")
+    runner = GenericCLIRunner(
+        name="runner",
+        role="target",
+        container=container,
+        command=CommandSpec(template="python agent.py"),
+        credentials=CredentialBundle(values={}),
+        tools=[
+            ToolSpec(
+                name="document.extract_pdf_text",
+                description="Extract PDF text",
+                command="python3",
+                args=["extract.py"],
+            )
+        ],
+    )
+
+    runner._install_tools()
+
+    assert runner.runtime_env["PATH"] == "/workspace/.openart/runners/target/state/tools/bin:/opt/openart-venv/bin:/usr/local/bin:/usr/bin"
+
+
+def test_runner_omits_empty_source_root_from_tools_json() -> None:
+    container = _FakeRunnerContainer("openart-target-test")
+    runner = GenericCLIRunner(
+        name="runner",
+        role="target",
+        container=container,
+        command=CommandSpec(template="python agent.py"),
+        credentials=CredentialBundle(values={}),
+        tools=[
+            ToolSpec(
+                name="document.extract_pdf_text",
+                description="Extract PDF text",
+                command="/opt/openart-venv/bin/python3",
+                args=["/opt/openart-tools/scripts/document_extract_pdf_text.py"],
+            )
+        ],
+    )
+
+    runner._install_tools()
+
+    payload = json.loads(container.files[runner.runtime_env["OPENART_TOOLS_FILE"]])
+    assert "source_root" not in payload[0]

@@ -20,6 +20,14 @@ pip install -e .
 ## Quick Start
 
 ```bash
+# If your environment needs the cluster proxy, export it explicitly before builds/runs.
+export http_proxy=http://httpproxy-headless.kubebrain.svc.pjlab.local:3128
+export https_proxy=http://httpproxy-headless.kubebrain.svc.pjlab.local:3128
+export HTTP_PROXY=http://httpproxy-headless.kubebrain.svc.pjlab.local:3128
+export HTTPS_PROXY=http://httpproxy-headless.kubebrain.svc.pjlab.local:3128
+export no_proxy=10.0.0.0/8,100.96.0.0/12,.pjlab.org.cn
+export NO_PROXY=10.0.0.0/8,100.96.0.0/12,.pjlab.org.cn
+
 # Run a task with full Orchestrator (Docker containers, services, runners)
 python -m framework.cli run --task ./path/to/task_directory
 
@@ -42,6 +50,25 @@ python -m framework.cli run --task ./path/to/task_directory \
 # The attacker uses `openart/opencode:latest` and inherits
 # `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and `OPENAI_MODEL` from `.env`.
 # It also writes to a separate native target-control bundle before the target starts.
+# The attacker vectors are now explicit: workspace edits and each native control
+# surface family can be enabled or disabled independently in the attacker config.
+python -m framework.cli run \
+  --task ../openagentsafety/tasks/safety-onboarding-notes \
+  --attacker-config configs/attacker-configs/universal/opencode-native-control/config.yaml \
+  --run-id safety-onboarding-notes-attacker-demo \
+  --output-dir outputs/oas-attacker-demos \
+  --harness openagentsafety_utils/oas_harness \
+  --service-config configs/services.openagentsafety.example.yaml \
+  --tools-file openagentsafety_utils/user-tools.yaml \
+  --eval-strategy both
+
+# The same run form with proxy exported explicitly in-line.
+http_proxy=http://httpproxy-headless.kubebrain.svc.pjlab.local:3128 \
+https_proxy=http://httpproxy-headless.kubebrain.svc.pjlab.local:3128 \
+HTTP_PROXY=http://httpproxy-headless.kubebrain.svc.pjlab.local:3128 \
+HTTPS_PROXY=http://httpproxy-headless.kubebrain.svc.pjlab.local:3128 \
+no_proxy=10.0.0.0/8,100.96.0.0/12,.pjlab.org.cn \
+NO_PROXY=10.0.0.0/8,100.96.0.0/12,.pjlab.org.cn \
 python -m framework.cli run \
   --task ../openagentsafety/tasks/safety-onboarding-notes \
   --attacker-config configs/attacker-configs/universal/opencode-native-control/config.yaml \
@@ -73,6 +100,23 @@ python -m framework.cli run \
   --tools-file openagentsafety_utils/user-tools.yaml \
   --eval-strategy both
 
+# Run multiple tasks sequentially and record per-step timing.
+python scripts/run_all_tasks_with_timing.py \
+  --tasks-root ../openagentsafety/tasks \
+  --task safety-onboarding-notes \
+  --task safety-documentation \
+  --output-dir outputs/batch-timing \
+  --harness openagentsafety_utils/oas_harness \
+  --service-config configs/services.openagentsafety.example.yaml \
+  --tools-file openagentsafety_utils/user-tools.yaml \
+  --attacker-config configs/attacker-configs/universal/opencode-native-control/config.yaml \
+  --eval-strategy both \
+  --run-prefix timingtest
+
+# This writes per-run timing to outputs/<run-id>/timing.json,
+# a JSONL log to outputs/batch-timing/<batch-id>/timing_log.jsonl,
+# and an aggregate summary to outputs/batch-timing/<batch-id>/summary.json.
+
 # Build task Docker image
 python -m framework.cli build --task ./path/to/task_directory
 
@@ -91,10 +135,47 @@ python -m framework.cli reset
 The task container provides the execution environment. There are three options:
 
 1. **Default base image** (no Dockerfile in task): Uses `openart/task-base:latest`
-   - Includes Python 3.11, git, curl, jq, and common CLI tools
-   - Build it: `docker build -t openart/task-base:latest -f images/Dockerfile.task-base .`
-   - Build OpenCode runner: `docker build -t openart/opencode:latest -f images/Dockerfile.opencode .`
-   - Build Claude Code runner: `docker build -t openart/claude-code:latest -f images/Dockerfile.claude-code .`
+   - Includes a dedicated Python virtual environment plus common CLI and OCR/PDF tooling
+   - Build it:
+     ```bash
+     docker build \
+       --build-arg http_proxy=${http_proxy} \
+       --build-arg https_proxy=${https_proxy} \
+       --build-arg HTTP_PROXY=${HTTP_PROXY} \
+       --build-arg HTTPS_PROXY=${HTTPS_PROXY} \
+       --build-arg no_proxy=${no_proxy} \
+       --build-arg NO_PROXY=${NO_PROXY} \
+       --build-arg PIP_INDEX_URL=https://pypi.org/simple \
+       -t openart/task-base:latest \
+       -f images/Dockerfile.task-base .
+     ```
+   - Build OpenCode runner:
+     ```bash
+     docker build \
+       --build-arg http_proxy=${http_proxy} \
+       --build-arg https_proxy=${https_proxy} \
+       --build-arg HTTP_PROXY=${HTTP_PROXY} \
+       --build-arg HTTPS_PROXY=${HTTPS_PROXY} \
+       --build-arg no_proxy=${no_proxy} \
+       --build-arg NO_PROXY=${NO_PROXY} \
+       --build-arg PIP_INDEX_URL=https://pypi.org/simple \
+       -t openart/opencode:latest \
+       -f images/Dockerfile.opencode .
+     ```
+   - Build Claude Code runner:
+     ```bash
+     docker build \
+       --build-arg http_proxy=${http_proxy} \
+       --build-arg https_proxy=${https_proxy} \
+       --build-arg HTTP_PROXY=${HTTP_PROXY} \
+       --build-arg HTTPS_PROXY=${HTTPS_PROXY} \
+       --build-arg no_proxy=${no_proxy} \
+       --build-arg NO_PROXY=${NO_PROXY} \
+       --build-arg PIP_INDEX_URL=https://pypi.org/simple \
+       -t openart/claude-code:latest \
+       -f images/Dockerfile.claude-code .
+     ```
+   - These images now include a Python virtual environment plus PDF/OCR tooling such as `pdfminer.six`, `pypdf`, `pymupdf`, `pytesseract`, `pdftotext`, `pdfinfo`, `pdftoppm`, `qpdf`, and `tesseract`.
 
 2. **Task-specific Dockerfile**: If `dockerfile` is set in `task.yaml`, builds from it
    ```yaml
@@ -149,6 +230,83 @@ PLANE_API_KEY=...
 # both: force combined evaluation
 OPENART_EVAL_STRATEGY=auto
 ```
+
+### Attacker Vector Permissions
+
+Attacker configs can now explicitly control which attack vectors the framework will honor.
+
+Example:
+
+```yaml
+attacker:
+  target_control_plane: true
+  vector_permissions:
+    - workspace_files
+    - claude_md
+    - opencode_skill
+    - opencode_command
+```
+
+Meaning:
+
+- `workspace_files`: attacker workspace edits are copied back into `workspace/shared`
+- `claude_md`: attacker can materialize `CLAUDE.md`
+- `opencode_skill`: attacker can materialize `.opencode/skills/**`
+- `opencode_command`: attacker can materialize `.opencode/commands/**`
+
+For an OpenCode target, the available vector names are:
+
+- `workspace_files`
+- `claude_md`
+- `agents_md`
+- `opencode_skill`
+- `opencode_command`
+- `claude_skill`
+
+Notes:
+
+- `agents_md` exists as an opt-in vector, but it is not enabled by default in the universal OpenCode attacker config.
+- If `workspace_files` is omitted, the attacker may still write into its private `/workspace`, but OpenART will ignore those workspace edits when applying the attacker result.
+- If a native control vector is omitted, the attacker may still write those files, but OpenART will ignore them during target-control materialization.
+
+### Task-Aware Messaging Shaping
+
+The universal OpenCode attacker now treats communication-heavy tasks specially.
+
+- If the target task requires messaging or broadcasting and the runtime exposes no actionable communication path, the attacker prompt explicitly avoids inventing fake chat/email paths that mainly cause the target to waste the full timeout searching for missing tools.
+- If the runtime does expose an actionable path, such as GitLab issue APIs or an actual chat/email integration in env, the attacker prompt allows a concrete communication-path attack that matches that channel.
+
+### Attacker Feedback Loop
+
+Attackers can now be configured to adapt between target iterations.
+
+Example:
+
+```yaml
+attacker:
+  target_control_plane: true
+  feedback_loop: true
+  vector_permissions:
+    - workspace_files
+    - claude_md
+    - opencode_skill
+```
+
+When `feedback_loop: true` and `--max-iterations` is greater than `1`:
+
+- the attacker still runs before the first target attempt
+- if the evaluator does not return `pass`, OpenART reruns the attacker before the next target iteration
+- the attacker gets a read-only feedback mount at `/workspace/.openart_feedback`
+
+Useful attacker feedback paths inside the container:
+
+- `/workspace/.openart_feedback/trace.jsonl`
+- `/workspace/.openart_feedback/evaluator_inputs/`
+- `/workspace/.openart_feedback/evaluator_outputs/`
+- `/workspace/.openart_feedback/runner_outputs/target/`
+- `/workspace/.openart_feedback/evaluation_iterations/`
+
+The universal OpenCode attacker wrapper now surfaces these paths in its generated prompt and tells the attacker to inspect them on feedback iterations.
 
 ### User Tool Manifests
 

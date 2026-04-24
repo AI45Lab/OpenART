@@ -5,6 +5,7 @@ from pathlib import Path
 from framework.cli import commands
 from framework.models.specs import EvaluatorResult
 from framework.models.task import TaskBundleSpec
+from framework.tasks import loader as task_loader
 from framework.tasks.loader import load_task_bundle
 
 
@@ -182,6 +183,7 @@ def test_load_harness_config_env_does_not_backfill_service_credentials(monkeypat
 def test_load_tools_manifest_reads_tools_and_guide_file(tmp_path: Path) -> None:
     guide = tmp_path / "tools.md"
     guide.write_text("# Tool Guide\n", encoding="utf-8")
+    (tmp_path / "script.py").write_text("print('ok')\n", encoding="utf-8")
     manifest = tmp_path / "tools.yaml"
     manifest.write_text(
         "tools:\n"
@@ -196,7 +198,38 @@ def test_load_tools_manifest_reads_tools_and_guide_file(tmp_path: Path) -> None:
     loaded = commands._load_tools_manifest(str(manifest))
 
     assert loaded["tools"][0]["name"] == "gitlab.create_project"
+    assert loaded["tools"][0]["source_root"] == str(tmp_path.resolve())
     assert loaded["tool_guide_markdown"] == "# Tool Guide"
+
+
+def test_load_tools_manifest_skips_source_root_for_absolute_in_image_paths(tmp_path: Path) -> None:
+    manifest = tmp_path / "tools.yaml"
+    manifest.write_text(
+        "tools:\n"
+        "  - name: document.extract_pdf_text\n"
+        "    command: /opt/openart-venv/bin/python3\n"
+        "    args: [/opt/openart-tools/scripts/document_extract_pdf_text.py]\n",
+        encoding="utf-8",
+    )
+
+    loaded = commands._load_tools_manifest(str(manifest))
+
+    assert "source_root" not in loaded["tools"][0]
+
+
+def test_task_loader_skips_source_root_for_absolute_in_image_paths(tmp_path: Path) -> None:
+    manifest = tmp_path / "tools.yaml"
+    manifest.write_text(
+        "tools:\n"
+        "  - name: document.extract_pdf_text\n"
+        "    command: /opt/openart-venv/bin/python3\n"
+        "    args: [/opt/openart-tools/scripts/document_extract_pdf_text.py]\n",
+        encoding="utf-8",
+    )
+
+    loaded = task_loader._load_tools_manifest(manifest)
+
+    assert "source_root" not in loaded["tools"][0]
 
 
 def test_apply_tools_manifest_merges_shared_and_role_tools() -> None:
@@ -226,6 +259,10 @@ def test_load_task_bundle_applies_attacker_config_to_openagentsafety_task(tmp_pa
         "  image: python:3.11-slim\n"
         "  cmd: python3\n"
         "  target_control_plane: true\n"
+        "  feedback_loop: true\n"
+        "  vector_permissions:\n"
+        "    - workspace_files\n"
+        "    - claude_md\n"
         "  args:\n"
         "    - attacker.py\n",
         encoding="utf-8",
@@ -238,4 +275,6 @@ def test_load_task_bundle_applies_attacker_config_to_openagentsafety_task(tmp_pa
     assert bundle.attacker.name == "overlay-attacker"
     assert bundle.attacker.instruction == "attacker.md"
     assert bundle.attacker.target_control_plane is True
+    assert bundle.attacker.feedback_loop is True
+    assert bundle.attacker.vector_permissions == ["workspace_files", "claude_md"]
     assert bundle.metadata["attacker_config"] == str(overlay.resolve())

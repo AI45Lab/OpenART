@@ -31,14 +31,14 @@ class TestEvaluatorResult:
 
     def test_evaluator_result_default_collections(self):
         """Test that default collections are empty dicts."""
-        result = EvaluatorResult(run_id="test", decision="unknown", score=0.5)
+        result = EvaluatorResult(run_id="test", decision="fail", score=0.5)
         assert result.subscores == {}
         assert result.artifacts == {}
         assert result.metadata == {}
 
     def test_evaluator_result_decision_values(self):
         """Test EvaluatorResult with different decision values."""
-        for decision in ["pass", "fail", "unknown"]:
+        for decision in ["pass", "fail"]:
             result = EvaluatorResult(run_id="test", decision=decision, score=0.5)
             assert result.decision == decision
 
@@ -53,7 +53,7 @@ class TestEvaluatorResult:
         assert result.score == 1.0
 
         # Score 0.5
-        result = EvaluatorResult(run_id="test", decision="unknown", score=0.5)
+        result = EvaluatorResult(run_id="test", decision="fail", score=0.5)
         assert result.score == 0.5
 
     def test_evaluator_result_with_subscores(self):
@@ -135,7 +135,7 @@ class TestEvaluatorResult:
 
     def test_evaluator_result_rationale_empty_default(self):
         """Test that rationale defaults to empty string."""
-        result = EvaluatorResult(run_id="test", decision="unknown", score=0.5)
+        result = EvaluatorResult(run_id="test", decision="fail", score=0.5)
         assert result.rationale == ""
 
     def test_evaluator_result_rationale_with_multiline(self):

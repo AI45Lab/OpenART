@@ -138,11 +138,22 @@ def _to_optional_str(value: Any) -> str | None:
 def _tool_items_with_source_root(raw_tools: Any, source_root: Path) -> list[Any]:
     if not isinstance(raw_tools, list):
         return []
+
+    def _tool_needs_source_root(item: dict[str, Any]) -> bool:
+        for value in [item.get("command"), *(item.get("args", []) if isinstance(item.get("args"), list) else [])]:
+            text = str(value or "").strip()
+            if not text or text.startswith("/"):
+                continue
+            if (source_root / text).exists():
+                return True
+        return False
+
     result: list[Any] = []
     for item in raw_tools:
         if isinstance(item, dict):
             payload = dict(item)
-            payload.setdefault("source_root", str(source_root.resolve()))
+            if "source_root" not in payload and _tool_needs_source_root(payload):
+                payload["source_root"] = str(source_root.resolve())
             result.append(payload)
         else:
             result.append(item)
@@ -233,6 +244,10 @@ def _load_attacker_spec(
     raw_env = raw_attacker.get("env") if isinstance(raw_attacker.get("env"), dict) else {}
     raw_env_from = raw_attacker.get("env_from") if isinstance(raw_attacker.get("env_from"), dict) else {}
     raw_metadata = raw_attacker.get("metadata") if isinstance(raw_attacker.get("metadata"), dict) else {}
+    raw_vector_permissions = raw_attacker.get("vector_permissions")
+    if raw_vector_permissions is None:
+        raw_vector_permissions = raw_attacker.get("allowed_vectors")
+    vector_permissions = [str(item) for item in raw_vector_permissions] if isinstance(raw_vector_permissions, list) else None
 
     return AttackerSpec(
         name=name,
@@ -248,6 +263,8 @@ def _load_attacker_spec(
         tools=tools,
         tool_guide_markdown=guide_markdown,
         timeout_seconds=int(raw_attacker.get("timeout_seconds", runtime.get("timeout_seconds", 1800))),
+        feedback_loop=bool(raw_attacker.get("feedback_loop", False)),
+        vector_permissions=vector_permissions,
         metadata={str(key): value for key, value in raw_metadata.items()},
     )
 

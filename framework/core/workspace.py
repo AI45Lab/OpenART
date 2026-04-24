@@ -10,6 +10,13 @@ from framework.models.specs import WorkspaceDiff
 
 
 class WorkspaceManager:
+    INTERNAL_RUNTIME_DIRS = {
+        ".openart_feedback",
+        ".openart_input_workspace",
+        ".openart_target_control_input",
+        ".openart_target_control_output",
+    }
+
     def __init__(self, root_dir: str) -> None:
         self.root_dir = Path(root_dir)
 
@@ -25,6 +32,16 @@ class WorkspaceManager:
 
     def attacker_output_dir(self, run_id: str, attacker_name: str, phase: str, index: int = 1) -> Path:
         return self.attackers_dir(run_id) / attacker_name / f"{phase}_{index:03d}"
+
+    def attacker_internal_dir(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        internal_dir_name: str,
+        index: int = 1,
+    ) -> Path:
+        return self.attacker_output_dir(run_id, attacker_name, phase, index) / internal_dir_name
 
     def ensure_run_layout(self, run_id: str) -> None:
         self.shared_dir(run_id).mkdir(parents=True, exist_ok=True)
@@ -63,6 +80,20 @@ class WorkspaceManager:
         self._copy_dir_contents(shared_dir, output_dir)
         return str(output_dir)
 
+    def sync_attacker_internal_dir_from(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        internal_dir_name: str,
+        source_dir: str | Path,
+        index: int = 1,
+    ) -> str:
+        target_dir = self.attacker_internal_dir(run_id, attacker_name, phase, internal_dir_name, index)
+        self._clear_dir_contents(target_dir)
+        self._copy_dir_contents(Path(source_dir), target_dir)
+        return str(target_dir)
+
     def diff_attacker_output_against_shared(self, run_id: str, attacker_name: str, phase: str, index: int = 1) -> WorkspaceDiff:
         shared_dir = self.shared_dir(run_id)
         output_dir = self.attacker_output_dir(run_id, attacker_name, phase, index)
@@ -89,6 +120,24 @@ class WorkspaceManager:
         self._copy_dir_contents(output_dir, shared_dir)
         return diff
 
+    def apply_attacker_output_to_shared(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        index: int = 1,
+        allow_workspace_files: bool = True,
+    ) -> tuple[WorkspaceDiff, list[str]]:
+        diff = self.diff_attacker_output_against_shared(run_id, attacker_name, phase, index)
+        if not allow_workspace_files:
+            ignored = sorted({*diff.added, *diff.modified, *diff.deleted})
+            return WorkspaceDiff(added=[], modified=[], deleted=[]), ignored
+        shared_dir = self.shared_dir(run_id)
+        output_dir = self.attacker_output_dir(run_id, attacker_name, phase, index)
+        self._clear_dir_contents(shared_dir)
+        self._copy_dir_contents(output_dir, shared_dir)
+        return diff, []
+
     def cleanup_run(self, run_id: str) -> None:
         run_dir = self._run_dir(run_id)
         if run_dir.exists():
@@ -108,6 +157,8 @@ class WorkspaceManager:
             return
         for path in sorted(src.rglob("*")):
             rel = path.relative_to(src)
+            if rel.parts and rel.parts[0] in self.INTERNAL_RUNTIME_DIRS:
+                continue
             target = dst / rel
             if path.is_dir():
                 target.mkdir(parents=True, exist_ok=True)

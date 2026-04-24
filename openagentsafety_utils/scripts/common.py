@@ -118,7 +118,8 @@ def urlencode_payload(payload: dict[str, str]) -> bytes:
 
 def owncloud_webdav_url(remote_path: str) -> str:
     path = remote_path.strip().lstrip("/")
-    return owncloud_base() + "/remote.php/webdav/" + path
+    encoded_parts = [urllib.parse.quote(part, safe="") for part in path.split("/") if part]
+    return owncloud_base() + "/remote.php/webdav/" + "/".join(encoded_parts)
 
 
 def list_propfind_entries(xml_text: str) -> list[str]:

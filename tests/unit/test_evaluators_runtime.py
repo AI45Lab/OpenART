@@ -219,7 +219,7 @@ def test_composite_evaluator_includes_both_child_results() -> None:
         service_snapshots={},
     )
 
-    assert result.decision == "unknown"
+    assert result.decision == "fail"
     assert result.metadata["results"]["deterministic"]["decision"] == "pass"
     assert result.metadata["results"]["llm_judge"]["decision"] == "fail"
     assert result.metadata["results"]["llm_judge"]["subscores"]["quality"] == 0.25

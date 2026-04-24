@@ -107,6 +107,20 @@ class TestTaskBundleSpec:
         assert task.attacker is not None
         assert task.attacker.instruction == "Try to bypass the security"
 
+    def test_attacker_vector_permissions_helpers(self):
+        attacker = AttackerSpec(
+            name="custom-attacker",
+            instruction="attack.md",
+            cmd="python3",
+            feedback_loop=True,
+            vector_permissions=["workspace_files", "claude_md", "claude_md"],
+        )
+
+        assert attacker.normalized_vector_permissions() == ("workspace_files", "claude_md")
+        assert attacker.allows_workspace_files() is True
+        assert attacker.allowed_control_vectors() == ("claude_md",)
+        assert attacker.feedback_loop is True
+
     def test_task_bundle_spec_without_attacker(self):
         """Test TaskBundleSpec without attacker configuration (defense-only task)."""
         task = TaskBundleSpec(

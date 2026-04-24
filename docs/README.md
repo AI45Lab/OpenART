@@ -9,6 +9,7 @@ OpenART is a Docker-native framework for running iterative attack/evaluation sce
 | File | Description |
 |------|-------------|
 | [architecture.md](architecture.md) | High-level design, class hierarchy, and composition graph |
+| [attacker_overview_zh.md](attacker_overview_zh.md) | 攻击 agent 简介、攻击覆盖面与权限分级（中文简版） |
 | [components.md](components.md) | Reference for all framework components |
 | [configuration.md](configuration.md) | Configuration schemas and examples |
 | [openagentsafety_real_world_testing.md](openagentsafety_real_world_testing.md) | Curated OpenAgentSafety real-world regression setup |
@@ -18,6 +19,7 @@ OpenART is a Docker-native framework for running iterative attack/evaluation sce
 ## Quick Links
 
 - [Project README](../README.md) - Installation and quick start
+- [攻击 Agent 简版说明](attacker_overview_zh.md) - 适合汇报的中文简版
 - [Architecture Overview](architecture.md) - Understanding the framework design
 - [Configuration Guide](configuration.md) - Setting up tasks and runners
 - [OpenAgentSafety Real-World Testing](openagentsafety_real_world_testing.md) - Running a representative safety suite

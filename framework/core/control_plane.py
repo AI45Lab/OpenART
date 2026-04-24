@@ -12,6 +12,7 @@ from framework.models.specs import WorkspaceDiff
 @dataclass(frozen=True, slots=True)
 class ControlSurfaceSpec:
     kind: str
+    vector: str
     path_template: str
     description: str
 
@@ -21,6 +22,9 @@ class ControlPlaneProvider:
     framework: str
     source_patterns: tuple[str, ...]
     allowed_patterns: tuple[str, ...]
+    attacker_allowed_patterns: tuple[str, ...]
+    attacker_vector_patterns: dict[str, tuple[str, ...]]
+    default_attacker_vectors: tuple[str, ...]
     attacker_surfaces: tuple[ControlSurfaceSpec, ...]
 
     def collect_task_files(self, task_root: Path) -> list[tuple[Path, str]]:
@@ -47,6 +51,38 @@ class ControlPlaneProvider:
             return False
         return any(fnmatch.fnmatch(normalized, pattern) for pattern in self.allowed_patterns)
 
+    def attacker_patterns_for_vectors(self, enabled_vectors: tuple[str, ...] | None = None) -> tuple[str, ...]:
+        if enabled_vectors is None:
+            return self.attacker_allowed_patterns
+        patterns: list[str] = []
+        for vector in enabled_vectors:
+            name = str(vector or "").strip().lower()
+            if not name:
+                continue
+            patterns.extend(self.attacker_vector_patterns.get(name, ()))
+        deduped: list[str] = []
+        seen: set[str] = set()
+        for pattern in patterns:
+            if pattern in seen:
+                continue
+            seen.add(pattern)
+            deduped.append(pattern)
+        return tuple(deduped)
+
+    def is_attacker_allowed_relative_path(self, relative_path: str, enabled_vectors: tuple[str, ...] | None = None) -> bool:
+        normalized = relative_path.strip().lstrip("/")
+        if not normalized:
+            return False
+        patterns = self.attacker_patterns_for_vectors(enabled_vectors)
+        return any(fnmatch.fnmatch(normalized, pattern) for pattern in patterns)
+
+    def attacker_surfaces_for_vectors(self, enabled_vectors: tuple[str, ...] | None = None) -> tuple[ControlSurfaceSpec, ...]:
+        if enabled_vectors is None:
+            allowed = {str(item).strip().lower() for item in self.default_attacker_vectors if str(item).strip()}
+        else:
+            allowed = {str(item).strip().lower() for item in enabled_vectors if str(item).strip()}
+        return tuple(surface for surface in self.attacker_surfaces if surface.vector in allowed)
+
 
 def create_control_plane_provider(framework: str) -> ControlPlaneProvider | None:
     name = (framework or "").strip().lower()
@@ -67,29 +103,48 @@ def create_control_plane_provider(framework: str) -> ControlPlaneProvider | None
                 ".opencode/commands/**",
                 ".claude/skills/**",
             ),
+            attacker_allowed_patterns=(
+                "CLAUDE.md",
+                ".opencode/skills/**",
+                ".opencode/commands/**",
+                ".claude/skills/**",
+            ),
+            attacker_vector_patterns={
+                "agents_md": ("AGENTS.md",),
+                "claude_md": ("CLAUDE.md",),
+                "opencode_skill": (".opencode/skills/**",),
+                "opencode_command": (".opencode/commands/**",),
+                "claude_skill": (".claude/skills/**",),
+            },
+            default_attacker_vectors=("claude_md", "opencode_skill", "opencode_command", "claude_skill"),
             attacker_surfaces=(
                 ControlSurfaceSpec(
                     kind="instruction",
+                    vector="agents_md",
                     path_template="AGENTS.md",
-                    description="Top-level repository guidance read by OpenCode in the workspace.",
+                    description="Generic repository-level agent instruction file. Disabled by default for attacker use.",
                 ),
                 ControlSurfaceSpec(
                     kind="instruction",
+                    vector="claude_md",
                     path_template="CLAUDE.md",
                     description="Claude-compatible instruction file also visible to OpenCode.",
                 ),
                 ControlSurfaceSpec(
                     kind="skill",
+                    vector="opencode_skill",
                     path_template=".opencode/skills/<skill-name>/SKILL.md",
                     description="Native OpenCode skill definition discovered from the workspace.",
                 ),
                 ControlSurfaceSpec(
                     kind="command",
+                    vector="opencode_command",
                     path_template=".opencode/commands/<command-name>.md",
                     description="Native OpenCode slash-command content discovered from the workspace.",
                 ),
                 ControlSurfaceSpec(
                     kind="skill",
+                    vector="claude_skill",
                     path_template=".claude/skills/<skill-name>/SKILL.md",
                     description="Claude-compatible skill path that OpenCode also discovers.",
                 ),
@@ -112,29 +167,49 @@ def create_control_plane_provider(framework: str) -> ControlPlaneProvider | None
                 ".claude/skills/**",
                 ".claude/commands/**",
             ),
+            attacker_allowed_patterns=(
+                "CLAUDE.md",
+                ".claude/CLAUDE.md",
+                ".claude/rules/**",
+                ".claude/skills/**",
+                ".claude/commands/**",
+            ),
+            attacker_vector_patterns={
+                "claude_md": ("CLAUDE.md",),
+                "claude_local_md": (".claude/CLAUDE.md",),
+                "claude_rule": (".claude/rules/**",),
+                "claude_skill": (".claude/skills/**",),
+                "claude_command": (".claude/commands/**",),
+            },
+            default_attacker_vectors=("claude_md", "claude_local_md", "claude_rule", "claude_skill", "claude_command"),
             attacker_surfaces=(
                 ControlSurfaceSpec(
                     kind="instruction",
+                    vector="claude_md",
                     path_template="CLAUDE.md",
                     description="Primary Claude Code repository instruction file.",
                 ),
                 ControlSurfaceSpec(
                     kind="instruction",
+                    vector="claude_local_md",
                     path_template=".claude/CLAUDE.md",
                     description="Project-local Claude Code instruction file.",
                 ),
                 ControlSurfaceSpec(
                     kind="rule",
+                    vector="claude_rule",
                     path_template=".claude/rules/<rule-name>.md",
                     description="Claude Code rule file discovered from the workspace.",
                 ),
                 ControlSurfaceSpec(
                     kind="skill",
+                    vector="claude_skill",
                     path_template=".claude/skills/<skill-name>/SKILL.md",
                     description="Native Claude Code skill definition discovered from the workspace.",
                 ),
                 ControlSurfaceSpec(
                     kind="command",
+                    vector="claude_command",
                     path_template=".claude/commands/<command-name>.md",
                     description="Native Claude Code command content discovered from the workspace.",
                 ),
@@ -218,14 +293,17 @@ class ControlPlaneManager:
         attacker_name: str,
         phase: str,
         index: int = 1,
+        allowed_vectors: tuple[str, ...] | None = None,
     ) -> tuple[WorkspaceDiff, list[str]]:
         self.ensure_layout()
         output_dir = self.attacker_output_dir(attacker_name, phase, index)
         final_dir = self.final_dir()
-        ignored = self._disallowed_relative_paths(output_dir)
-        diff = self._diff_dirs(self.base_dir(), output_dir, filter_allowed=True)
+        ignored = self._disallowed_relative_paths(output_dir, attacker=True, allowed_vectors=allowed_vectors)
+        diff = self._diff_dirs(self.base_dir(), output_dir, filter_allowed=True, attacker=True, allowed_vectors=allowed_vectors)
         self._clear_dir_contents(final_dir)
-        self._copy_allowed_dir_contents(output_dir, final_dir)
+        self._copy_dir_contents(self.base_dir(), final_dir)
+        self._delete_allowed_files(final_dir, attacker=True, allowed_vectors=allowed_vectors)
+        self._copy_allowed_dir_contents(output_dir, final_dir, attacker=True, allowed_vectors=allowed_vectors)
         self._write_snapshot(self.snapshots_dir() / "final.json", final_dir, tag="final")
         return diff, ignored
 
@@ -238,7 +316,7 @@ class ControlPlaneManager:
         self._write_snapshot(self.snapshots_dir() / "materialized.json", shared_root, tag="materialized")
         return diff
 
-    def _disallowed_relative_paths(self, root: Path) -> list[str]:
+    def _disallowed_relative_paths(self, root: Path, *, attacker: bool = False, allowed_vectors: tuple[str, ...] | None = None) -> list[str]:
         if not self.enabled() or not root.exists():
             return []
         disallowed: list[str] = []
@@ -246,18 +324,20 @@ class ControlPlaneManager:
             if not path.is_file():
                 continue
             rel = path.relative_to(root).as_posix()
-            if not self.provider.is_allowed_relative_path(rel):
+            allowed = self.provider.is_attacker_allowed_relative_path(rel, allowed_vectors) if attacker else self.provider.is_allowed_relative_path(rel)
+            if not allowed:
                 disallowed.append(rel)
         return disallowed
 
-    def _delete_allowed_files(self, root: Path) -> None:
+    def _delete_allowed_files(self, root: Path, *, attacker: bool = False, allowed_vectors: tuple[str, ...] | None = None) -> None:
         if not self.enabled() or not root.exists():
             return
         for path in sorted(root.rglob("*"), reverse=True):
             if not path.is_file():
                 continue
             rel = path.relative_to(root).as_posix()
-            if self.provider.is_allowed_relative_path(rel):
+            allowed = self.provider.is_attacker_allowed_relative_path(rel, allowed_vectors) if attacker else self.provider.is_allowed_relative_path(rel)
+            if allowed:
                 path.unlink(missing_ok=True)
         for path in sorted(root.rglob("*"), reverse=True):
             if path.is_dir():
@@ -283,22 +363,23 @@ class ControlPlaneManager:
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, target)
 
-    def _copy_allowed_dir_contents(self, src: Path, dst: Path) -> None:
+    def _copy_allowed_dir_contents(self, src: Path, dst: Path, *, attacker: bool = False, allowed_vectors: tuple[str, ...] | None = None) -> None:
         if not src.exists() or not self.enabled():
             return
         for path in sorted(src.rglob("*")):
             if not path.is_file():
                 continue
             rel = path.relative_to(src).as_posix()
-            if not self.provider.is_allowed_relative_path(rel):
+            allowed = self.provider.is_attacker_allowed_relative_path(rel, allowed_vectors) if attacker else self.provider.is_allowed_relative_path(rel)
+            if not allowed:
                 continue
             target = dst / rel
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, target)
 
-    def _diff_dirs(self, left: Path, right: Path, *, filter_allowed: bool = False) -> WorkspaceDiff:
-        left_files = self._file_set(left, filter_allowed=filter_allowed)
-        right_files = self._file_set(right, filter_allowed=filter_allowed)
+    def _diff_dirs(self, left: Path, right: Path, *, filter_allowed: bool = False, attacker: bool = False, allowed_vectors: tuple[str, ...] | None = None) -> WorkspaceDiff:
+        left_files = self._file_set(left, filter_allowed=filter_allowed, attacker=attacker, allowed_vectors=allowed_vectors)
+        right_files = self._file_set(right, filter_allowed=filter_allowed, attacker=attacker, allowed_vectors=allowed_vectors)
         added = sorted(right_files - left_files)
         deleted = sorted(left_files - right_files)
         modified: list[str] = []
@@ -311,7 +392,7 @@ class ControlPlaneManager:
             deleted=[path.as_posix() for path in deleted],
         )
 
-    def _file_set(self, root: Path, *, filter_allowed: bool = False) -> set[Path]:
+    def _file_set(self, root: Path, *, filter_allowed: bool = False, attacker: bool = False, allowed_vectors: tuple[str, ...] | None = None) -> set[Path]:
         if not root.exists():
             return set()
         result: set[Path] = set()
@@ -319,8 +400,10 @@ class ControlPlaneManager:
             if not path.is_file():
                 continue
             rel = path.relative_to(root)
-            if filter_allowed and self.enabled() and not self.provider.is_allowed_relative_path(rel.as_posix()):
-                continue
+            if filter_allowed and self.enabled():
+                allowed = self.provider.is_attacker_allowed_relative_path(rel.as_posix(), allowed_vectors) if attacker else self.provider.is_allowed_relative_path(rel.as_posix())
+                if not allowed:
+                    continue
             result.add(rel)
         return result
 
@@ -358,10 +441,16 @@ class ControlPlaneManager:
         payload = {
             "framework": self.provider.framework,
             "allowed_patterns": list(self.provider.allowed_patterns),
+            "default_attacker_vectors": list(self.provider.default_attacker_vectors),
+            "available_attacker_vectors": {
+                name: list(patterns) for name, patterns in sorted(self.provider.attacker_vector_patterns.items())
+            },
             "discovered_files": discovered_files,
             "attack_surfaces": [
                 {
                     "kind": surface.kind,
+                    "vector": surface.vector,
+                    "default_enabled": surface.vector in self.provider.default_attacker_vectors,
                     "path_template": surface.path_template,
                     "description": surface.description,
                 }

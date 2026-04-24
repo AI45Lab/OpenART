@@ -3,8 +3,8 @@ guide_file: guide.md
 tools:
   - name: gitlab.create_project
     description: Create a GitLab project with the configured token.
-    command: python3
-    args: [scripts/gitlab_create_project.py]
+    command: /opt/openart-venv/bin/python3
+    args: [/opt/openart-tools/scripts/gitlab_create_project.py]
     env_from:
       GITLAB_BASEURL: GITLAB_BASEURL
       GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
@@ -12,8 +12,8 @@ tools:
 
   - name: gitlab.upload_file
     description: Upload or update a text file in a GitLab repository.
-    command: python3
-    args: [scripts/gitlab_upload_file.py]
+    command: /opt/openart-venv/bin/python3
+    args: [/opt/openart-tools/scripts/gitlab_upload_file.py]
     env_from:
       GITLAB_BASEURL: GITLAB_BASEURL
       GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
@@ -21,8 +21,8 @@ tools:
 
   - name: gitlab.get_file
     description: Read a file from a GitLab repository at a given ref.
-    command: python3
-    args: [scripts/gitlab_get_file.py]
+    command: /opt/openart-venv/bin/python3
+    args: [/opt/openart-tools/scripts/gitlab_get_file.py]
     env_from:
       GITLAB_BASEURL: GITLAB_BASEURL
       GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
@@ -30,8 +30,8 @@ tools:
 
   - name: owncloud.list_dir
     description: List files in an ownCloud directory through WebDAV.
-    command: python3
-    args: [scripts/owncloud_list_dir.py]
+    command: /opt/openart-venv/bin/python3
+    args: [/opt/openart-tools/scripts/owncloud_list_dir.py]
     env_from:
       OWNCLOUD_URL: OWNCLOUD_URL
       OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
@@ -40,8 +40,8 @@ tools:
 
   - name: owncloud.upload_file
     description: Upload a local file into ownCloud WebDAV.
-    command: python3
-    args: [scripts/owncloud_upload_file.py]
+    command: /opt/openart-venv/bin/python3
+    args: [/opt/openart-tools/scripts/owncloud_upload_file.py]
     env_from:
       OWNCLOUD_URL: OWNCLOUD_URL
       OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
@@ -50,10 +50,22 @@ tools:
 
   - name: owncloud.download_file
     description: Download a file from ownCloud WebDAV.
-    command: python3
-    args: [scripts/owncloud_download_file.py]
+    command: /opt/openart-venv/bin/python3
+    args: [/opt/openart-tools/scripts/owncloud_download_file.py]
     env_from:
       OWNCLOUD_URL: OWNCLOUD_URL
       OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
       OWNCLOUD_PASSWORD: OWNCLOUD_PASSWORD
     usage: owncloud.download_file Documents/report.txt /workspace/report.txt
+
+  - name: document.extract_pdf_text
+    description: Extract text from a PDF into stdout or a text file.
+    command: /opt/openart-venv/bin/python3
+    args: [/opt/openart-tools/scripts/document_extract_pdf_text.py]
+    usage: document.extract_pdf_text /workspace/input.pdf /workspace/output.txt
+
+  - name: document.extract_pairs_csv
+    description: Extract simple label-number pairs from a PDF into a CSV.
+    command: /opt/openart-venv/bin/python3
+    args: [/opt/openart-tools/scripts/document_extract_pairs_csv.py]
+    usage: document.extract_pairs_csv /workspace/drinks_survey.pdf /workspace/drinks_survey.csv --col1 drink --col2 quantity
