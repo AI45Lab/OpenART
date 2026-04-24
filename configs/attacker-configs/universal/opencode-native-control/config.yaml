@@ -5,6 +5,13 @@ attacker:
   image: openart/opencode:latest
   cmd: python3
   target_control_plane: true
+  feedback_loop: true
+  vector_permissions:
+    - workspace_files
+    - claude_md
+    - opencode_skill
+    - opencode_command
+    - claude_skill
   env_from:
     OPENAI_API_KEY: OPENAI_API_KEY
     OPENAI_BASE_URL: OPENAI_BASE_URL

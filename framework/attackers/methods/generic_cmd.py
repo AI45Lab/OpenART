@@ -16,6 +16,15 @@ class GenericCommandAttacker(AttackerBase):
             "{{output_workspace_dir}}": context.output_workspace_dir,
             "{{input_target_control_dir}}": context.input_target_control_dir,
             "{{output_target_control_dir}}": context.output_target_control_dir,
+            "{{feedback_dir}}": context.feedback_dir,
+            "{{trace_file}}": context.trace_file,
+            "{{evaluator_inputs_dir}}": context.evaluator_inputs_dir,
+            "{{evaluator_outputs_dir}}": context.evaluator_outputs_dir,
+            "{{target_runner_outputs_dir}}": context.target_runner_outputs_dir,
+            "{{evaluation_iterations_dir}}": context.evaluation_iterations_dir,
+            "{{attacker_history_dir}}": context.attacker_history_dir,
+            "{{attack_iteration}}": str(context.attack_iteration),
+            "{{feedback_iteration}}": str(context.feedback_iteration),
             "{{task_dir}}": context.task_dir,
             "{{run_id}}": context.run_id,
             "{{attack_phase}}": context.phase,
@@ -30,23 +39,35 @@ class GenericCommandAttacker(AttackerBase):
             expanded.append(value)
 
         command = " ".join(shlex.quote(part) for part in expanded if part)
-        self._capture_workspace_listing("before_run")
+        self._capture_workspace_listing("before_run", attack_iteration=context.attack_iteration)
         if context.output_target_control_dir:
             control_dir = shlex.quote(context.output_target_control_dir)
             code, stdout, stderr = self.container.exec(["/bin/sh", "-lc", f"ls -laR {control_dir}"], env=self.runtime_env)
-            self._write_artifact("control_before_run_ls.txt", stdout if code == 0 else stderr)
-        self._write_artifact("command.sh", command + "\n")
+            self._write_artifact(
+                "control_before_run_ls.txt",
+                stdout if code == 0 else stderr,
+                attack_iteration=context.attack_iteration,
+            )
+        self._write_artifact("command.sh", command + "\n", attack_iteration=context.attack_iteration)
         self._trace(context.run_id, "run_start", "attacker_start", {"name": self.spec.name, "phase": self.spec.phase})
-        code, stdout, stderr = self.container.exec(["/bin/bash", "-lc", command], env=self.runtime_env)
-        self._write_artifact("stdout.txt", stdout)
-        self._write_artifact("stderr.txt", stderr)
-        self._write_status(code)
+        code, stdout, stderr = self.container.exec(
+            ["/bin/bash", "-lc", command],
+            env=self.runtime_env,
+            timeout_seconds=self.spec.timeout_seconds,
+        )
+        self._write_artifact("stdout.txt", stdout, attack_iteration=context.attack_iteration)
+        self._write_artifact("stderr.txt", stderr, attack_iteration=context.attack_iteration)
+        self._write_status(code, attack_iteration=context.attack_iteration)
         self._log_output(stdout, stderr, code)
-        self._capture_workspace_listing("after_run")
+        self._capture_workspace_listing("after_run", attack_iteration=context.attack_iteration)
         if context.output_target_control_dir:
             control_dir = shlex.quote(context.output_target_control_dir)
             list_code, list_stdout, list_stderr = self.container.exec(["/bin/sh", "-lc", f"ls -laR {control_dir}"], env=self.runtime_env)
-            self._write_artifact("control_after_run_ls.txt", list_stdout if list_code == 0 else list_stderr)
+            self._write_artifact(
+                "control_after_run_ls.txt",
+                list_stdout if list_code == 0 else list_stderr,
+                attack_iteration=context.attack_iteration,
+            )
         self._trace(
             context.run_id,
             "run_end",

@@ -60,6 +60,7 @@ class ContainerBase(ABC):
         self,
         cmd: list[str],
         env: Optional[dict[str, str]] = None,
+        timeout_seconds: Optional[int] = None,
     ) -> tuple[int, str, str]:
         ...
 
@@ -126,6 +127,14 @@ class DockerContainer(ContainerBase):
         image = self.spec.image
         if not image:
             raise ValueError("ContainerSpec.image is required for create")
+
+        inspect_code, _, _ = self._run(["docker", "inspect", self.spec.name])
+        if inspect_code == 0:
+            self._log_event(f"removing stale container before create name={self.spec.name}")
+            rm_code, _, rm_stderr = self._run(["docker", "rm", "-f", self.spec.name])
+            if rm_code != 0:
+                self.state = ContainerState.FAILED.value
+                raise RuntimeError(f"docker rm failed before create: {rm_stderr.strip()}")
 
         cmd = ["docker", "create", "--name", self.spec.name]
 
@@ -211,12 +220,20 @@ class DockerContainer(ContainerBase):
         self,
         cmd: list[str],
         env: Optional[dict[str, str]] = None,
+        timeout_seconds: Optional[int] = None,
     ) -> tuple[int, str, str]:
         docker_cmd = ["docker", "exec"]
         if env:
             for key, value in env.items():
                 docker_cmd.extend(["-e", f"{key}={value}"])
         docker_cmd.append(self._target())
+        if timeout_seconds and timeout_seconds > 0:
+            docker_cmd.extend([
+                "/usr/bin/timeout",
+                "--signal=TERM",
+                "--kill-after=10s",
+                f"{int(timeout_seconds)}s",
+            ])
         docker_cmd.extend(cmd)
         return self._run(docker_cmd)
 
@@ -318,6 +335,12 @@ class TaskContainer(DockerContainer):
 
     def snapshot(self) -> dict[str, str]:
         return self.snapshot_workspace()
+
+    def host_workspace_root(self, workspace_path: str = "/workspace") -> str | None:
+        for mount in self.spec.mounts:
+            if mount.container_path == workspace_path:
+                return mount.host_path
+        return None
 
 
 class RunnerContainer(DockerContainer):

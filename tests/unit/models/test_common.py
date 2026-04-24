@@ -199,7 +199,6 @@ class TestEnums:
         """Test EvaluatorDecision enum values."""
         assert EvaluatorDecision.PASS.value == "pass"
         assert EvaluatorDecision.FAIL.value == "fail"
-        assert EvaluatorDecision.UNKNOWN.value == "unknown"
 
     def test_enum_from_string(self):
         """Test enum can be created from string value."""

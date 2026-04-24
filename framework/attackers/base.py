@@ -74,11 +74,20 @@ class AttackerBase(ABC):
             return None
         return Path(self.artifact_dir) / "attacker_outputs" / self.spec.name
 
-    def _write_artifact(self, file_name: str, content: str) -> None:
+    def _iteration_artifact_dir(self, attack_iteration: int) -> Path | None:
+        artifact_dir = self._artifact_dir()
+        if artifact_dir is None or attack_iteration <= 1:
+            return None
+        return artifact_dir / "iterations" / f"iter_{attack_iteration:03d}"
+
+    def _write_artifact(self, file_name: str, content: str, attack_iteration: int = 1) -> None:
         artifact_dir = self._artifact_dir()
         if artifact_dir is None:
             return
         write_text_artifact(artifact_dir / file_name, content)
+        iteration_dir = self._iteration_artifact_dir(attack_iteration)
+        if iteration_dir is not None:
+            write_text_artifact(iteration_dir / file_name, content)
 
     def _append_runtime_log(self, line: str) -> None:
         if not self.artifact_dir:
@@ -153,8 +162,9 @@ class AttackerBase(ABC):
 
     def _install_tools(self) -> None:
         self._stage_tool_sources()
-        payload = [
-            {
+        payload = []
+        for tool in self.tools:
+            item = {
                 "name": tool.name,
                 "enabled": tool.enabled,
                 "description": tool.description,
@@ -163,11 +173,12 @@ class AttackerBase(ABC):
                 "env": tool.env,
                 "env_from": tool.env_from,
                 "usage": tool.usage,
-                "source_root": tool.source_root,
                 "config": tool.config,
             }
-            for tool in self.tools
-        ]
+            source_root = str(tool.source_root or "").strip()
+            if source_root:
+                item["source_root"] = source_root
+            payload.append(item)
         path = f"{self._state_dir()}/tools.json"
         self.container.write_text_file(path, json.dumps(payload, ensure_ascii=True, indent=2), env=self.runtime_env)
         self.runtime_env["OPENART_TOOLS_FILE"] = path
@@ -180,7 +191,10 @@ class AttackerBase(ABC):
                 tool_path = f"{bin_dir}/{tool.name}"
                 self.container.write_text_file(tool_path, self._tool_wrapper_script(tool), env=self.runtime_env)
                 self.container.exec(["chmod", "+x", tool_path], env=self.runtime_env)
-            path_parts = [bin_dir, self.runtime_env.get("PATH", "") or "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"]
+            current_path = self.runtime_env.get("PATH", "").strip()
+            if not current_path:
+                current_path = self._container_default_path()
+            path_parts = [bin_dir, current_path]
             self.runtime_env["PATH"] = ":".join(path_parts)
 
         guide = (self.spec.tool_guide_markdown or "").strip()
@@ -200,6 +214,17 @@ class AttackerBase(ABC):
             self.container.ensure_dir(str(Path(guide_path).parent), env=self.runtime_env)
             self.container.write_text_file(guide_path, guide + "\n", env=self.runtime_env)
             self.runtime_env["OPENART_TOOL_GUIDE_FILE"] = guide_path
+
+    def _container_default_path(self) -> str:
+        fallback = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        try:
+            code, stdout, _stderr = self.container.exec(["bash", "-lc", 'printf %s "$PATH"'], env=self.runtime_env)
+        except Exception:
+            return fallback
+        resolved = stdout.strip()
+        if code != 0 or not resolved:
+            return fallback
+        return resolved
 
     def _capture_prepare_artifacts(self) -> None:
         artifact_dir = self._artifact_dir()
@@ -231,26 +256,26 @@ class AttackerBase(ABC):
                 summary["tool_guide_error"] = str(exc)
         write_json_artifact(artifact_dir / "prepared" / "summary.json", summary, ensure_ascii=True)
 
-    def _capture_workspace_listing(self, label: str) -> None:
+    def _capture_workspace_listing(self, label: str, attack_iteration: int = 1) -> None:
         content = capture_workspace_listing(
             lambda: self.container.exec(["/bin/sh", "-lc", "ls -laR /workspace"], env=self.runtime_env)
         )
-        self._write_artifact(f"workspace_{label}_ls.txt", content)
+        self._write_artifact(f"workspace_{label}_ls.txt", content, attack_iteration=attack_iteration)
 
-    def _write_status(self, exit_code: int) -> None:
+    def _write_status(self, exit_code: int, attack_iteration: int = 1) -> None:
         artifact_dir = self._artifact_dir()
         if artifact_dir is None:
             return
-        write_json_artifact(
-            artifact_dir / "status.json",
-            {
-                "name": self.spec.name,
-                "phase": self.spec.phase,
-                "exit_code": exit_code,
-                "timestamp": time.time(),
-            },
-            ensure_ascii=True,
-        )
+        payload = {
+            "name": self.spec.name,
+            "phase": self.spec.phase,
+            "exit_code": exit_code,
+            "timestamp": time.time(),
+        }
+        write_json_artifact(artifact_dir / "status.json", payload, ensure_ascii=True)
+        iteration_dir = self._iteration_artifact_dir(attack_iteration)
+        if iteration_dir is not None:
+            write_json_artifact(iteration_dir / "status.json", payload, ensure_ascii=True)
 
     def _trace(self, run_id: str, event_type: str, message: str, payload: Optional[dict[str, Any]] = None) -> None:
         if not self.trace_sink:

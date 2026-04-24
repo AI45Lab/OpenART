@@ -6,7 +6,7 @@ from pathlib import Path
 from framework.attackers.models import AttackerSpec
 from framework.components.evaluators import DeterministicEvaluator
 from framework.components.services import ExternalService
-from framework.core.factory import DEFAULT_COMMAND_TEMPLATES, DEFAULT_RUNNER_IMAGES, OrchestratorFactory
+from framework.core.factory import DEFAULT_COMMAND_TEMPLATES, DEFAULT_RUNNER_IMAGES, MIN_TARGET_TIMEOUT_SECONDS, OrchestratorFactory
 from framework.models.task import TaskBundleSpec
 
 
@@ -168,6 +168,8 @@ def test_factory_creates_attacker_with_separate_workspace(monkeypatch, tmp_path:
             cmd="python3",
             args=["{{attacker_instruction_file}}", "{{input_workspace_dir}}", "{{output_workspace_dir}}"],
             target_control_plane=True,
+            feedback_loop=True,
+            vector_permissions=["workspace_files", "claude_md"],
             env_from={"OPENAI_BASE_URL": "OPENAI_BASE_URL"},
         ),
     )
@@ -192,10 +194,38 @@ def test_factory_creates_attacker_with_separate_workspace(monkeypatch, tmp_path:
     assert context.target_instruction_file == "/task/task.md"
     assert context.attacker_instruction_file == "/attacker_config/attacker.md"
     mounts = {mount.container_path: mount.host_path for mount in attacker.container.spec.mounts}
-    assert mounts["/input_workspace"].endswith("workspace/shared")
+    assert mounts["/workspace/.openart_input_workspace"].endswith("workspace/shared")
     assert "/workspace/attackers/setup-attacker/before_target_001" in mounts["/workspace"]
+    assert mounts["/workspace/.openart_feedback"].endswith("out")
     assert mounts["/attacker_config"].endswith("attacker-config")
     assert mounts["/workspace/.openart_target_control_input"].endswith("control/target/base")
     assert mounts["/workspace/.openart_target_control_output"].endswith("control/target/attackers/setup-attacker/before_target_001")
+    assert context.input_workspace_dir == "/workspace/.openart_input_workspace"
     assert context.input_target_control_dir == "/workspace/.openart_target_control_input"
     assert context.output_target_control_dir == "/workspace/.openart_target_control_output"
+    assert context.feedback_dir == "/workspace/.openart_feedback"
+    assert context.trace_file == "/workspace/.openart_feedback/trace.jsonl"
+    assert context.evaluator_inputs_dir == "/workspace/.openart_feedback/evaluator_inputs"
+    assert context.evaluator_outputs_dir == "/workspace/.openart_feedback/evaluator_outputs"
+    assert context.target_runner_outputs_dir == "/workspace/.openart_feedback/runner_outputs/target"
+    assert context.attacker_history_dir == "/workspace/.openart_feedback/attacker_outputs/setup-attacker"
+    assert context.vector_permissions == ("workspace_files", "claude_md")
+    assert json.loads(attacker.runtime_env["OPENART_ATTACKER_VECTOR_PERMISSIONS"]) == ["workspace_files", "claude_md"]
+    assert attacker.runtime_env["OPENART_FEEDBACK_DIR"] == "/workspace/.openart_feedback"
+    assert attacker.runtime_env["OPENART_ATTACKER_HISTORY_DIR"] == "/workspace/.openart_feedback/attacker_outputs/setup-attacker"
+    assert attacker.runtime_env["OPENART_ATTACKER_GUIDANCE_FILE"] == "/workspace/.openart_feedback/attacker_feedback_guidance.json"
+    assert attacker.runtime_env["OPENART_TARGET_CONTROL_MANIFEST_FILE"] == "/workspace/.openart_feedback/control/target/base/.openart-target-control-manifest.json"
+
+
+def test_factory_increases_target_timeout_floor(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    runner = factory._create_runner("target")
+
+    assert runner.command.timeout_seconds == MIN_TARGET_TIMEOUT_SECONDS

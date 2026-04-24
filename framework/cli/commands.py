@@ -227,12 +227,26 @@ def _load_tools_manifest(path: str | None) -> dict[str, Any]:
     else:
         loaded = yaml.safe_load(text)
 
+    def _tool_needs_source_root(item: dict[str, Any]) -> bool:
+        for value in [item.get("command"), *(item.get("args", []) if isinstance(item.get("args"), list) else [])]:
+            text = str(value or "").strip()
+            if not text or text.startswith("/"):
+                continue
+            if (target.parent / text).exists():
+                return True
+        return False
+
+    def _with_default_source_root(item: Any) -> Any:
+        if not isinstance(item, dict):
+            return item
+        payload = dict(item)
+        if "source_root" not in payload and _tool_needs_source_root(payload):
+            payload["source_root"] = str(target.parent.resolve())
+        return payload
+
     if isinstance(loaded, list):
         return {
-            "tools": [
-                ({**tool, "source_root": str(target.parent.resolve())} if isinstance(tool, dict) else tool)
-                for tool in loaded
-            ]
+            "tools": [_with_default_source_root(tool) for tool in loaded]
         }
     if not isinstance(loaded, dict):
         return {}
@@ -240,10 +254,7 @@ def _load_tools_manifest(path: str | None) -> dict[str, Any]:
     result: dict[str, Any] = {}
     tools = loaded.get("tools")
     if isinstance(tools, list):
-        result["tools"] = [
-            ({**tool, "source_root": str(target.parent.resolve())} if isinstance(tool, dict) else tool)
-            for tool in tools
-        ]
+        result["tools"] = [_with_default_source_root(tool) for tool in tools]
     guide_markdown = str(loaded.get("guide_markdown", "") or "").strip()
     guide_file = str(loaded.get("guide_file", "") or "").strip()
     if guide_file:
@@ -936,6 +947,17 @@ def run_main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Do not launch the attacker even if the task defines one",
     )
+    parser.add_argument(
+        "--max-iterations",
+        type=int,
+        default=1,
+        help="Maximum number of target attempts per task run (default: 1)",
+    )
+    parser.add_argument(
+        "--adaptive-iterations",
+        action="store_true",
+        help="Only retry another target iteration when the current result looks incomplete or partially successful",
+    )
     args = parser.parse_args(argv)
 
     # Load task bundle
@@ -995,6 +1017,8 @@ def run_main(argv: list[str] | None = None) -> int:
             service_config=service_config,
             eval_strategy=args.eval_strategy,
             skip_attacker=args.skip_attacker,
+            max_iterations=max(1, int(args.max_iterations or 1)),
+            adaptive_iterations=args.adaptive_iterations,
         )
         orchestrator = factory.build()
 

@@ -19,3 +19,10 @@ Required environment variables:
 - `OWNCLOUD_PASSWORD`
 
 These tools are generic local wrappers. OpenART copies this folder into the runner and adds the generated wrapper commands to `PATH`.
+
+Document-heavy tasks can use:
+
+- `document.extract_pdf_text`
+- `document.extract_pairs_csv`
+
+These are intended to avoid slow OCR-style trial-and-error when the PDF contains extractable text.
