@@ -87,6 +87,7 @@ RUN npm install -g @anthropic-ai/claude-code \
     && claude --version
 
 COPY openagentsafety_utils/scripts/ /opt/openart-tools/scripts/
+COPY scripts/anthropic_proxy.py /opt/openart-tools/scripts/anthropic_proxy.py
 
 RUN mkdir -p /workspace && chmod 777 /workspace
 WORKDIR /workspace

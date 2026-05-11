@@ -26,11 +26,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--service-config", default="configs/services.openagentsafety.example.yaml", help="Service config yaml/json")
     parser.add_argument("--tools-file", default="openagentsafety_utils/user-tools.yaml", help="Tools manifest path")
     parser.add_argument("--attacker-config", default="", help="Optional universal attacker config")
+    parser.add_argument("--target-config", default="", help="Optional target runner config yaml/json")
+    parser.add_argument("--runner-framework", default="", help="Optional runner framework override")
+    parser.add_argument("--runner-model", default="", help="Optional runner model override")
     parser.add_argument("--eval-strategy", choices=["auto", "deterministic", "llm", "both"], default="both")
     parser.add_argument("--task", action="append", dest="tasks", default=[], help="Specific task directory name; repeatable")
     parser.add_argument("--limit", type=int, default=0, help="Maximum number of tasks to run")
     parser.add_argument("--max-iterations", type=int, default=1, help="Maximum number of target attempts per task run")
     parser.add_argument("--adaptive-iterations", action="store_true", help="Only retry target iterations when the current result looks incomplete")
+    parser.add_argument("--skip-attacker", action="store_true", help="Skip attacker execution even when configured")
     parser.add_argument("--parallelism", type=int, default=4, help="Maximum number of task subprocesses to run concurrently")
     parser.add_argument("--run-prefix", default="batch", help="Prefix for generated run ids")
     parser.add_argument("--batch-id", default="", help="Optional explicit batch id for output directory naming")
@@ -112,6 +116,14 @@ def build_run_command(repo_root: Path, args: argparse.Namespace, task_dir: Path,
         cmd.append("--adaptive-iterations")
     if args.attacker_config:
         cmd.extend(["--attacker-config", str((repo_root / args.attacker_config).resolve())])
+    if args.target_config:
+        cmd.extend(["--target-config", str((repo_root / args.target_config).resolve())])
+    if args.runner_framework:
+        cmd.extend(["--runner-framework", str(args.runner_framework)])
+    if args.runner_model:
+        cmd.extend(["--runner-model", str(args.runner_model)])
+    if args.skip_attacker:
+        cmd.append("--skip-attacker")
     return cmd
 
 
@@ -250,9 +262,13 @@ def main() -> int:
         "service_config": str((repo_root / args.service_config).resolve()),
         "tools_file": str((repo_root / args.tools_file).resolve()),
         "attacker_config": str((repo_root / args.attacker_config).resolve()) if args.attacker_config else "",
+        "target_config": str((repo_root / args.target_config).resolve()) if args.target_config else "",
+        "runner_framework": str(args.runner_framework or ""),
+        "runner_model": str(args.runner_model or ""),
         "eval_strategy": args.eval_strategy,
         "max_iterations": max(1, int(args.max_iterations or 1)),
         "adaptive_iterations": bool(args.adaptive_iterations),
+        "skip_attacker": bool(args.skip_attacker),
         "parallelism": max(1, int(args.parallelism or 1)),
         "rerun_from_batch": str(rerun_batch) if rerun_batch else "",
         "rerun_statuses": sorted(rerun_statuses),

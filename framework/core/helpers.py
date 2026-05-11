@@ -2,11 +2,15 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
+
+
+_ENV_REF_PATTERN = re.compile(r"\$\{([^}]+)\}")
 
 
 def first_non_empty(*values: Any) -> str:
@@ -19,9 +23,9 @@ def first_non_empty(*values: Any) -> str:
 
 def resolve_env_value(value: Any) -> str:
     text = str(value or "").strip()
-    if text.startswith("${") and text.endswith("}") and len(text) > 3:
-        return os.environ.get(text[2:-1], "")
-    return text
+    if not text:
+        return text
+    return _ENV_REF_PATTERN.sub(lambda match: os.environ.get(match.group(1), ""), text)
 
 
 def resolve_nested_env_values(value: Any) -> Any:
@@ -29,7 +33,7 @@ def resolve_nested_env_values(value: Any) -> Any:
         return {str(key): resolve_nested_env_values(item) for key, item in value.items()}
     if isinstance(value, list):
         return [resolve_nested_env_values(item) for item in value]
-    if isinstance(value, (str, int, float, bool)):
+    if isinstance(value, str):
         return resolve_env_value(value)
     return value
 

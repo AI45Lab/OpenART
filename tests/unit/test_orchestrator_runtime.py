@@ -143,8 +143,9 @@ class _FakeTaskContainer:
 
 
 class _FakeWorkspaceManager:
-    def __init__(self) -> None:
+    def __init__(self, shared_root: Path | None = None) -> None:
         self.calls: list[tuple] = []
+        self._shared_root = shared_root or Path("/tmp/shared")
 
     def snapshot_shared(self, run_id: str, tag: str):
         self.calls.append(("snapshot", run_id, tag))
@@ -192,7 +193,7 @@ class _FakeWorkspaceManager:
 
     def shared_dir(self, run_id: str):
         _ = run_id
-        return Path("/tmp/shared")
+        return self._shared_root
 
 
 class _FakeControlManager:
@@ -200,6 +201,7 @@ class _FakeControlManager:
         self._enabled = enabled
         self.calls: list[tuple] = []
         self.provider = type("P", (), {"framework": "opencode"})() if enabled else None
+        self.final_entries: list[tuple[Path, str]] = []
 
     def enabled(self) -> bool:
         return self._enabled
@@ -233,6 +235,10 @@ class _FakeControlManager:
 
     def final_dir(self):
         return Path("/tmp/control/final")
+
+    def final_allowed_file_entries(self):
+        self.calls.append(("final_allowed_file_entries",))
+        return list(self.final_entries)
 
 
 class _FakeTraceSink:
@@ -362,6 +368,47 @@ def test_orchestrator_runs_before_target_attacker_first(tmp_path: Path) -> None:
         "snapshot",
     ]
     assert [call[0] for call in orchestrator.control_manager.calls] == ["build_base", "copy_base", "attacker_output_dir", "finalize", "materialize"]
+
+
+def test_orchestrator_can_mount_control_plane_without_materializing_workspace(tmp_path: Path) -> None:
+    shared_root = tmp_path / "shared"
+    shared_root.mkdir(parents=True, exist_ok=True)
+    control_file = tmp_path / "control" / "target" / "final" / "CLAUDE.md"
+    control_file.parent.mkdir(parents=True, exist_ok=True)
+    control_file.write_text("Use the migration workflow.\n", encoding="utf-8")
+
+    control_manager = _FakeControlManager(enabled=True)
+    control_manager.final_entries = [(control_file, "CLAUDE.md")]
+    workspace_manager = _FakeWorkspaceManager(shared_root=shared_root)
+    target_runner = _FakeRunner(exit_code=0)
+
+    orchestrator = Orchestrator(
+        service_manager=_FakeServiceManager(),
+        target_runner=target_runner,
+        attacker=None,
+        attacker_context=None,
+        evaluator=_FakeEvaluator(),
+        task_container=_FakeTaskContainer(),
+        workspace_manager=workspace_manager,
+        control_manager=control_manager,
+        max_iterations=1,
+        adaptive_iterations=False,
+        trace_sink=_FakeTraceSink(),
+        trace_file=str(tmp_path / "trace.jsonl"),
+        target_control_plane_mount_mode="mounted",
+    )
+
+    result = orchestrator.run(
+        run_id="run-1",
+        target_instruction_file="/task/target.md",
+        attack_instruction_file=None,
+    )
+
+    assert result.decision == "pass"
+    assert "materialize" not in [call[0] for call in control_manager.calls]
+    assert (shared_root / "CLAUDE.md").exists() is False
+    mounts = {(mount.container_path, mount.host_path, mount.read_only) for mount in target_runner.container.spec.mounts}
+    assert ("/workspace/CLAUDE.md", str(control_file), True) in mounts
 
 
 def test_orchestrator_skips_workspace_replacement_when_workspace_vector_disabled(tmp_path: Path) -> None:

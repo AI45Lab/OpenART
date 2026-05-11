@@ -1,0 +1,15 @@
+FROM node:20-bookworm-slim
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with Pi coding agent installed"
+LABEL version="1.0.0"
+
+RUN apt-get update && apt-get install -y --no-install-recommends python3 \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g @mariozechner/pi-coding-agent \
+    && command -v pi \
+    && pi --version
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

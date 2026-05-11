@@ -161,11 +161,16 @@ Example:
 ```yaml
 target:
   framework: opencode
+  control_plane: opencode
+  control_plane_mount_mode: workspace
   runner_image: openart/opencode:latest
   launch_cmd: opencode run
-  model: anthropic/claude-sonnet-4
-  base_url: ${TARGET_BASE_URL}
-  api_key: ${TARGET_API_KEY}
+  model_integration:
+    env:
+      OPENAI_API_KEY: ${TARGET_API_KEY}
+    config_json:
+      source: repo:configs/target-model-json/opencode.openai-compatible.json
+      destination: XDG_CONFIG_HOME/opencode/opencode.json
   tools:
     - bash
     - read
@@ -179,23 +184,137 @@ Supported top-level fields:
 
 | Field | Description |
 |-------|-------------|
-| `framework` | `opencode`, `claude_code`, `iflow`, or `generic_cli` |
+| `framework` | `opencode`, `claude_code`, `iflow`, `prompt_cli`, or `generic_cli` |
+| `control_plane` | Native control-plane family to model. Can be a built-in family name or an inline custom provider object |
+| `control_plane_mount_mode` | `workspace` to merge native control files into `workspace/shared`, or `mounted` to keep them in `control/target/final` and mount them read-only into the target container |
 | `runner_image` | Runner Docker image |
 | `launch_cmd` | Shell command template |
-| `model` | Model name exposed to the runner |
-| `base_url` | Optional API base URL |
-| `api_key` / `api_key_env` | API credential source |
+| `model_integration.env` | Exact environment variables to inject into the target runner |
+| `model_integration.config_json` | Optional user-managed JSON config source plus symbolic destination |
 | `tools` | Tool allowlist or tool config objects |
 | `mcp_servers` | MCP server definitions |
 | `skills` | Skill names or skill config objects |
 | `config_overlay` | Framework-specific config overlay |
+
+Legacy top-level target model fields are no longer supported:
+
+- `model`
+- `base_url`
+- `api_base_url`
+- `api_key`
+- `api_key_env`
+
+Use `target.model_integration.env` and/or `target.model_integration.config_json` instead.
+
+### `model_integration`
+
+`target.model_integration` lets the user control native model wiring directly without asking OpenART to understand every framework's full config schema.
+
+Supported sections:
+
+```yaml
+target:
+  model_integration:
+    env:
+      ENV_NAME: value
+    config_json:
+      source: repo:configs/target-model-json/opencode.openai-compatible.json
+      destination: XDG_CONFIG_HOME/opencode/opencode.json
+```
+
+`model_integration.env`:
+
+- injects exactly the environment variables you specify
+- resolves `${VAR}` placeholders before injection
+
+`model_integration.config_json`:
+
+- `source` must be a valid JSON file
+- OpenART reads it on the host, resolves `${...}` placeholders inside it, stages it, mounts it into the runner container, and copies it to the requested destination
+- when present, OpenART treats the framework config as user-managed and skips its own managed framework config generation for that runner
+
+Supported `source` prefixes:
+
+- `target:...` relative to the target config file directory
+- `repo:...` relative to the OpenART repo root
+- `abs:...` absolute host path
+
+Supported symbolic destination roots:
+
+- `HOME/`
+- `XDG_CONFIG_HOME/`
+- `XDG_DATA_HOME/`
+- `XDG_CACHE_HOME/`
+- `WORKSPACE/`
+- `RUNNER_STATE_DIR/`
+
+Typical destinations:
+
+- Claude Code: `HOME/.claude/settings.json`
+- OpenCode: `XDG_CONFIG_HOME/opencode/opencode.json`
+- Gemini CLI: `HOME/.gemini/settings.json` or `WORKSPACE/.gemini/settings.json`
+- iFlow: `HOME/.iflow/settings.json`
 
 For `claude_code`, build the local runner image first:
 
 ```bash
 docker build -t openart/opencode:latest -f images/Dockerfile.opencode .
 docker build -t openart/claude-code:latest -f images/Dockerfile.claude-code .
+docker build -t openart/iflow:latest -f images/Dockerfile.iflow .
+docker build -t openart/codex:latest -f images/Dockerfile.codex .
+docker build -t openart/gemini:latest -f images/Dockerfile.gemini .
 ```
+
+### Built-in control-plane families
+
+OpenART currently ships these validated built-in control-plane families:
+
+| Family | Official native surfaces modeled |
+|--------|----------------------------------|
+| `claude_code` | `CLAUDE.md`, `.claude/CLAUDE.md`, `.claude/rules/**`, `.claude/skills/**`, `.claude/commands/**` |
+| `opencode` | `AGENTS.md`, `CLAUDE.md`, `.opencode/skills/**`, `.opencode/commands/**`, `.claude/skills/**`, `.agents/skills/**` |
+| `gemini` | `GEMINI.md`, nested `GEMINI.md`, `.gemini/skills/**`, `.agents/skills/**`, `.gemini/commands/**/*.toml` |
+| `codex` | `AGENTS.md`, `AGENTS.override.md`, `.agents/skills/**`, `.codex/rules/**/*.rules` |
+| `cursor` | `AGENTS.md`, nested `AGENTS.md`, `.cursor/rules/**` |
+| `prompt_cli` | Broad compatibility family for prompt-first CLIs when you do not yet have a target-specific provider |
+
+Example target configs in this repo:
+
+- `configs/target.yaml` for OpenCode
+- `configs/target.claude-code.yaml` for Claude Code
+- `configs/target.codex.yaml` for Codex
+- `configs/target.gemini.yaml` for Gemini CLI
+- `configs/target.iflow.yaml` for iFlow
+- `configs/target.cursor.yaml` for Cursor-style experimental targets
+
+### Physical isolation with `control_plane_mount_mode`
+
+By default, OpenART uses `control_plane_mount_mode: workspace`:
+
+- filtered native control files are copied back into `workspace/shared`
+- the target sees one merged workspace tree
+
+If you want physical separation between normal workspace files and native control files, use:
+
+```yaml
+target:
+  framework: prompt_cli
+  control_plane: codex
+  control_plane_mount_mode: mounted
+```
+
+In `mounted` mode:
+
+- attacker-produced native control files stay under `control/target/final/`
+- OpenART mounts those files read-only into the target container at `/workspace/<original-path>`
+- `workspace/shared` remains free of those native control artifacts
+
+This gives you cleaner ablation experiments for:
+
+- workspace-only attacks
+- instruction-file-only attacks
+- skills-only attacks
+- rules / commands-only attacks
 
 ## `configs/services.yaml`
 
@@ -300,7 +419,21 @@ python -m framework.cli run \
   --eval-strategy both
 ```
 
-When `target_control_plane: true`, OpenART mounts a separate native target-control bundle into the attacker and materializes the final bundle back into `workspace/shared` before the target starts. Which native surfaces are actually honored is now controlled by `attacker.vector_permissions`.
+When `target_control_plane: true`, OpenART mounts a separate native target-control bundle into the attacker. Which native surfaces are actually honored is controlled by `attacker.vector_permissions`.
+
+How the final target sees those files depends on the target config:
+
+- `control_plane_mount_mode: workspace`: filtered native control files are materialized back into `workspace/shared`
+- `control_plane_mount_mode: mounted`: filtered native control files stay under `control/target/final/` and are mounted read-only into the target container at their original paths
+
+For example:
+
+```yaml
+target:
+  framework: prompt_cli
+  control_plane: gemini
+  control_plane_mount_mode: mounted
+```
 
 OpenART also emits a target-derived manifest at `control/target/base/.openart-target-control-manifest.json`. Attackers can inspect that manifest to learn which native prompt, skill, rule, or command paths the current target framework supports.
 

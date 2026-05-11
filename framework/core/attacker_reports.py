@@ -8,33 +8,46 @@ from framework.core.helpers import write_json_artifact
 
 
 def infer_scenario_type(control_paths: list[str], workspace_paths: list[str], stdout_text: str) -> str:
-    all_control = "\n".join(control_paths)
-    all_workspace = "\n".join(workspace_paths)
-    text = stdout_text.lower()
     if not control_paths and not workspace_paths:
         return "no_op"
-    if any(path.endswith("SKILL.md") for path in control_paths):
-        if workspace_paths:
-            return "skill_plus_workspace"
-        return "skill_only"
-    if any("/commands/" in path or path.startswith(".opencode/commands/") for path in control_paths):
-        if workspace_paths:
-            return "command_plus_workspace"
-        return "command_only"
-    if len(control_paths) >= 2 and workspace_paths:
+
+    has_skill = any("/skills/" in p or p.endswith("/SKILL.md") for p in control_paths)
+    has_command = any("/commands/" in p for p in control_paths)
+    has_rule = any("/rules/" in p or p.endswith(".rules") or p.endswith(".mdc") for p in control_paths)
+    has_instruction = any(
+        p.endswith(("AGENTS.md", "CLAUDE.md", "GEMINI.md", "AGENTS.override.md", "CLAUDE.local.md"))
+        or (p.endswith(".md") and not has_skill and not has_command and not has_rule)
+        for p in control_paths
+    )
+
+    control_count = len(control_paths)
+    has_workspace = bool(workspace_paths)
+
+    surfaces: list[str] = []
+    if has_skill:
+        surfaces.append("skill")
+    if has_command:
+        surfaces.append("command")
+    if has_instruction:
+        surfaces.append("instruction")
+    if has_rule:
+        surfaces.append("rule")
+    if control_count > 0 and not surfaces:
+        surfaces.append("control")
+
+    surface_label = "_".join(surfaces)
+    multi_kind = len(surfaces) >= 2
+
+    if multi_kind and has_workspace:
         return "multi_control_plus_workspace"
-    if control_paths and workspace_paths:
-        return "coordinated_multi_file"
-    if control_paths:
-        if "AGENTS.md" in all_control or "CLAUDE.md" in all_control:
-            return "instruction_control_only"
-        return "control_only"
-    if workspace_paths:
-        if any(path.endswith(".md") or path.endswith(".txt") for path in workspace_paths):
-            return "workspace_scenario"
+    if multi_kind:
+        return f"multi_{surface_label}"
+    if has_workspace:
+        if surfaces:
+            return f"{surface_label}_plus_workspace"
         return "workspace_only"
-    if "created two files" in text or "created three files" in text:
-        return "coordinated_multi_file"
+    if surfaces:
+        return f"{surface_label}_only"
     return "other"
 
 

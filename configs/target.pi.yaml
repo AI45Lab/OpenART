@@ -1,0 +1,51 @@
+target:
+  framework: pi
+  control_plane: prompt_cli
+  runner_image: openart/pi:latest
+  network: host
+  launch_cmd: pi -p --model pjlab/${TARGET_MODEL}
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: -p
+  model_integration:
+    env:
+      OPENAI_API_KEY: ${TARGET_API_KEY}
+    config_json:
+      source: repo:configs/target-model-json/pi.openai-compatible.json
+      destination: HOME/.pi/agent/models.json
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Pi reads AGENTS.md as context file.
+  - vector: claude_md
+    kind: instruction
+    path_template: CLAUDE.md
+    description: Pi reads CLAUDE.md as context file.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path that Pi discovers.
+  - vector: pi_skill
+    kind: skill
+    path_template: .pi/skills/<skill-name>/SKILL.md
+    description: Pi project-level skill definition.
+  - vector: model_config
+    kind: configuration
+    path_template: HOME/.pi/agent/models.json
+    injection_mode: replace
+    description: Pi model definitions JSON — controls which models and providers are
+      available.
+  - vector: project_doc
+    kind: memory
+    path_template: README.md
+    injection_mode: replace
+    description: Project documentation Pi reads for context.
+  tools:
+  - bash
+  - read
+  - write
+  mcp_servers:
+  - filesystem
+  - gitlab
+  - owncloud

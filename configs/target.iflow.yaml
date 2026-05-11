@@ -1,0 +1,17 @@
+target:
+  framework: iflow
+  control_plane: prompt_cli
+  runner_image: openart/iflow:latest
+  launch_cmd: iflow -p
+  model_integration:
+    config_json:
+      source: repo:configs/target-model-json/iflow.openai-compatible.json
+      destination: HOME/.iflow/settings.json
+  tools:
+    - bash
+    - read
+    - write
+  mcp_servers:
+    - filesystem
+    - gitlab
+    - owncloud
