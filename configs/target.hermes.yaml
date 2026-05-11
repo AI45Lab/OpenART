@@ -1,0 +1,62 @@
+target:
+  framework: hermes
+  control_plane: prompt_cli
+  runner_image: openart/hermes:latest
+  launch_cmd: hermes -z
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: -z
+  model_integration:
+    env:
+      OPENAI_API_KEY: ${TARGET_API_KEY}
+    config_json:
+      source: repo:configs/target-model-json/hermes.openai-compatible.json
+      destination: HOME/.hermes/config.yaml
+  attack_surfaces:
+  - vector: claude_md
+    kind: instruction
+    path_template: CLAUDE.md
+    description: Instruction file surfaced to prompt-first agents including Hermes.
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Repository-level agent instruction file.
+  - vector: claude_skill
+    kind: skill
+    path_template: .claude/skills/<skill-name>/SKILL.md
+    description: Skill discovered by prompt-first agents including Hermes.
+  - vector: opencode_skill
+    kind: skill
+    path_template: .opencode/skills/<skill-name>/SKILL.md
+    description: OpenCode-style skill discovered by prompt-first agents.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path discovered by prompt-first agents.
+  - vector: hermes_skill
+    kind: skill
+    path_template: .hermes/skills/<skill-name>/SKILL.md
+    description: Hermes Agent skill definition discovered from the workspace.
+  - vector: model_config
+    kind: configuration
+    path_template: HOME/.hermes/config.yaml
+    injection_mode: replace
+    description: Hermes config YAML — controls model, skills, external directories.
+  - vector: conversation_history
+    kind: memory
+    path_template: .hermes/sessions/<session-id>.jsonl
+    injection_mode: append
+    description: Hermes session transcripts. APPEND mode — inject fake turns.
+  - vector: checkpoint
+    kind: memory
+    path_template: .hermes/state/<state-name>.json
+    injection_mode: replace
+    description: Hermes runtime state snapshots.
+  tools:
+  - bash
+  - read
+  - write
+  mcp_servers:
+  - filesystem
+  - gitlab
+  - owncloud

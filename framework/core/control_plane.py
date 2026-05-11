@@ -3,8 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 import fnmatch
 import json
+import os
+import re
 import shutil
 from pathlib import Path
+from typing import Any
 
 from framework.models.specs import WorkspaceDiff
 
@@ -15,6 +18,7 @@ class ControlSurfaceSpec:
     vector: str
     path_template: str
     description: str
+    injection_mode: str = "replace"
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,138 +88,335 @@ class ControlPlaneProvider:
         return tuple(surface for surface in self.attacker_surfaces if surface.vector in allowed)
 
 
-def create_control_plane_provider(framework: str) -> ControlPlaneProvider | None:
-    name = (framework or "").strip().lower()
-    if name == "opencode":
-        return ControlPlaneProvider(
-            framework="opencode",
-            source_patterns=(
-                "AGENTS.md",
-                "CLAUDE.md",
-                ".opencode/skills/**/*",
-                ".opencode/commands/**/*",
-                ".claude/skills/**/*",
-            ),
-            allowed_patterns=(
-                "AGENTS.md",
-                "CLAUDE.md",
-                ".opencode/skills/**",
-                ".opencode/commands/**",
-                ".claude/skills/**",
-            ),
-            attacker_allowed_patterns=(
-                "CLAUDE.md",
-                ".opencode/skills/**",
-                ".opencode/commands/**",
-                ".claude/skills/**",
-            ),
-            attacker_vector_patterns={
-                "agents_md": ("AGENTS.md",),
-                "claude_md": ("CLAUDE.md",),
-                "opencode_skill": (".opencode/skills/**",),
-                "opencode_command": (".opencode/commands/**",),
-                "claude_skill": (".claude/skills/**",),
-            },
-            default_attacker_vectors=("claude_md", "opencode_skill", "opencode_command", "claude_skill"),
-            attacker_surfaces=(
-                ControlSurfaceSpec(
-                    kind="instruction",
-                    vector="agents_md",
-                    path_template="AGENTS.md",
-                    description="Generic repository-level agent instruction file. Disabled by default for attacker use.",
-                ),
-                ControlSurfaceSpec(
-                    kind="instruction",
-                    vector="claude_md",
-                    path_template="CLAUDE.md",
-                    description="Claude-compatible instruction file also visible to OpenCode.",
-                ),
-                ControlSurfaceSpec(
-                    kind="skill",
-                    vector="opencode_skill",
-                    path_template=".opencode/skills/<skill-name>/SKILL.md",
-                    description="Native OpenCode skill definition discovered from the workspace.",
-                ),
-                ControlSurfaceSpec(
-                    kind="command",
-                    vector="opencode_command",
-                    path_template=".opencode/commands/<command-name>.md",
-                    description="Native OpenCode slash-command content discovered from the workspace.",
-                ),
-                ControlSurfaceSpec(
-                    kind="skill",
-                    vector="claude_skill",
-                    path_template=".claude/skills/<skill-name>/SKILL.md",
-                    description="Claude-compatible skill path that OpenCode also discovers.",
-                ),
-            ),
+_PLACEHOLDER_PATTERN = re.compile(r"<[a-zA-Z][a-zA-Z0-9_-]*>")
+
+
+def _path_template_to_source_patterns(path_template: str) -> list[str]:
+    """Convert a path_template into source file globs.
+    Paths with <placeholder> match all files under the parent directory.
+    ' or '-separated templates are split and each part is handled individually.
+    """
+    template = str(path_template or "").strip()
+    if not template:
+        return []
+    if " or " in template:
+        patterns: list[str] = []
+        for part in (p.strip() for p in template.split(" or ")):
+            patterns.extend(_path_template_to_source_patterns(part))
+        return patterns
+    m = _PLACEHOLDER_PATTERN.search(template)
+    if m:
+        prefix = template[:m.start()].rstrip("/")
+        return [f"{prefix}/**/*"] if prefix else ["**/*"]
+    return [template]
+
+
+def _path_template_to_allowed_pattern(path_template: str) -> list[str]:
+    """Convert a path_template into allowed (directory-level) patterns."""
+    template = str(path_template or "").strip()
+    if not template:
+        return []
+    if " or " in template:
+        patterns: list[str] = []
+        for part in (p.strip() for p in template.split(" or ")):
+            patterns.extend(_path_template_to_allowed_pattern(part))
+        return patterns
+    m = _PLACEHOLDER_PATTERN.search(template)
+    if m:
+        prefix = template[:m.start()].rstrip("/")
+        return [f"{prefix}/**"] if prefix else ["**"]
+    return [template]
+
+
+def _path_template_to_allowed_pattern(path_template: str) -> list[str]:
+    """Convert a path_template into allowed (directory-level) patterns.
+
+    Examples:
+        .opencode/skills/<skill-name>/SKILL.md  ->  .opencode/skills/**
+        CLAUDE.md                                ->  CLAUDE.md
+    """
+    template = str(path_template or "").strip()
+    if not template:
+        return []
+    if " or " in template:
+        parts = [p.strip() for p in template.split(" or ")]
+        patterns: list[str] = []
+        for part in parts:
+            patterns.extend(_path_template_to_allowed_pattern(part))
+        return patterns
+    m = _PLACEHOLDER_PATTERN.search(template)
+    if m:
+        prefix = template[:m.start()].rstrip("/")
+        return [f"{prefix}/**"] if prefix else ["**"]
+    return [template]
+
+
+def _path_template_to_vector_pattern(path_template: str) -> list[str]:
+    """Convert a path_template into a vector glob pattern."""
+    return _path_template_to_allowed_pattern(path_template)
+
+
+def build_provider_from_attack_surfaces(
+    framework: str,
+    surfaces: list[dict[str, str]],
+) -> ControlPlaneProvider:
+    """Build a ControlPlaneProvider from target-config attack_surfaces.
+
+    Each surface dict must have keys: vector, kind, path_template, description.
+    All patterns are auto-derived from the path_template.
+    """
+    framework = str(framework or "").strip().lower()
+    specs: list[ControlSurfaceSpec] = []
+    vectors: list[str] = []
+    source_patterns: list[str] = []
+    allowed_patterns: list[str] = []
+    attacker_allowed_patterns: list[str] = []
+    attacker_vector_patterns: dict[str, tuple[str, ...]] = {}
+
+    for item in surfaces:
+        vector = str(item.get("vector", "") or "").strip().lower()
+        kind = str(item.get("kind", "") or "").strip().lower()
+        path_template = str(item.get("path_template", "") or "").strip()
+        description = str(item.get("description", "") or "").strip()
+        injection_mode = str(item.get("injection_mode", "") or "").strip().lower()
+        if injection_mode not in {"replace", "append", "merge"}:
+            injection_mode = "replace"
+        if not vector or not kind or not path_template:
+            continue
+        specs.append(ControlSurfaceSpec(kind=kind, vector=vector, path_template=path_template, description=description, injection_mode=injection_mode))
+        vectors.append(vector)
+
+        src_pats = _path_template_to_source_patterns(path_template)
+        allowed_pats = _path_template_to_allowed_pattern(path_template)
+        vec_pats = _path_template_to_vector_pattern(path_template)
+
+        for p in src_pats:
+            if p not in source_patterns:
+                source_patterns.append(p)
+        for p in allowed_pats:
+            if p not in allowed_patterns:
+                allowed_patterns.append(p)
+        for p in vec_pats:
+            if p not in attacker_allowed_patterns:
+                attacker_allowed_patterns.append(p)
+        attacker_vector_patterns[vector] = tuple(vec_pats)
+
+    return ControlPlaneProvider(
+        framework=framework,
+        source_patterns=tuple(source_patterns),
+        allowed_patterns=tuple(allowed_patterns),
+        attacker_allowed_patterns=tuple(attacker_allowed_patterns),
+        attacker_vector_patterns=attacker_vector_patterns,
+        default_attacker_vectors=tuple(vectors),
+        attacker_surfaces=tuple(specs),
+    )
+
+
+def derive_probe_paths_from_attack_surfaces(surfaces: list[dict[str, str]]) -> list[str]:
+    """Derive /workspace/-prefixed probe paths from attack_surfaces path_templates.
+
+    Extracts directory prefixes so the target prompt tells the agent exactly
+    which paths to inspect — keeping them in sync with attack_surfaces.
+
+    Examples:
+        .hermes/skills/<skill-name>/SKILL.md  →  /workspace/.hermes/skills/
+        CLAUDE.md                              →  /workspace/CLAUDE.md
+        GEMINI.md or <subdir>/GEMINI.md        →  /workspace/GEMINI.md
+    """
+    paths: list[str] = []
+
+    for item in surfaces:
+        template = str(item.get("path_template", "") or "").strip()
+        if not template:
+            continue
+        # Split on ' or ' and handle each part
+        for part in (p.strip() for p in template.split(" or ")):
+            m = _PLACEHOLDER_PATTERN.search(part)
+            if m:
+                # Directory path: prefix before <placeholder>
+                prefix = part[:m.start()].rstrip("/")
+                if prefix:
+                    paths.append(f"/workspace/{prefix}/")
+                # Skip empty prefix (e.g. <subdir>/GEMINI.md → ** which is too broad)
+            else:
+                # File path: use as-is
+                paths.append(f"/workspace/{part}")
+
+    # Deduplicate, sort, keep order stable
+    seen: set[str] = set()
+    result: list[str] = []
+    for p in paths:
+        if p not in seen:
+            seen.add(p)
+            result.append(p)
+    result.sort()
+    return result
+
+
+class ControlPlaneProviderRegistry:
+    """Registry for framework-native control plane providers."""
+
+    def __init__(self) -> None:
+        self._providers: dict[str, ControlPlaneProvider] = {}
+
+    def register(self, name: str, provider: ControlPlaneProvider) -> None:
+        key = str(name or "").strip().lower()
+        if not key:
+            raise ValueError("control plane provider name is required")
+        self._providers[key] = provider
+
+    def get(self, name: str) -> ControlPlaneProvider:
+        key = str(name or "").strip().lower()
+        if key not in self._providers:
+            raise KeyError(f"Unknown control plane provider: {name}")
+        return self._providers[key]
+
+    def get_optional(self, name: str) -> ControlPlaneProvider | None:
+        key = str(name or "").strip().lower()
+        if not key:
+            return None
+        return self._providers.get(key)
+
+    def names(self) -> tuple[str, ...]:
+        return tuple(sorted(self._providers.keys()))
+
+
+def create_default_control_plane_provider_registry() -> ControlPlaneProviderRegistry:
+    """Creates an empty registry. Providers are built from target config attack_surfaces at runtime."""
+    return ControlPlaneProviderRegistry()
+
+
+_DEFAULT_CONTROL_PLANE_PROVIDER_REGISTRY = create_default_control_plane_provider_registry()
+
+
+def register_control_plane_provider(name: str, provider: ControlPlaneProvider) -> None:
+    _DEFAULT_CONTROL_PLANE_PROVIDER_REGISTRY.register(name, provider)
+
+
+def _normalize_string_tuple(values: Any) -> tuple[str, ...]:
+    if values is None:
+        return ()
+    if isinstance(values, (str, bytes)):
+        text = str(values).strip()
+        return (text,) if text else ()
+    if not isinstance(values, (list, tuple)):
+        return ()
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for item in values:
+        text = str(item or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        normalized.append(text)
+    return tuple(normalized)
+
+
+def _normalize_vector_patterns(values: Any) -> dict[str, tuple[str, ...]]:
+    if not isinstance(values, dict):
+        return {}
+    normalized: dict[str, tuple[str, ...]] = {}
+    for key, patterns in values.items():
+        name = str(key or "").strip().lower()
+        if not name:
+            continue
+        normalized_patterns = _normalize_string_tuple(patterns)
+        if normalized_patterns:
+            normalized[name] = normalized_patterns
+    return normalized
+
+
+def _normalize_surface_specs(values: Any) -> tuple[ControlSurfaceSpec, ...]:
+    if not isinstance(values, list):
+        return ()
+    surfaces: list[ControlSurfaceSpec] = []
+    for item in values:
+        if not isinstance(item, dict):
+            continue
+        kind = str(item.get("kind") or "").strip().lower()
+        vector = str(item.get("vector") or "").strip().lower()
+        path_template = str(item.get("path_template") or "").strip()
+        description = str(item.get("description") or "").strip()
+        if not kind or not vector or not path_template:
+            continue
+        surfaces.append(
+            ControlSurfaceSpec(
+                kind=kind,
+                vector=vector,
+                path_template=path_template,
+                description=description,
+            )
         )
-    if name == "claude_code":
-        return ControlPlaneProvider(
-            framework="claude_code",
-            source_patterns=(
-                "CLAUDE.md",
-                ".claude/CLAUDE.md",
-                ".claude/rules/**/*",
-                ".claude/skills/**/*",
-                ".claude/commands/**/*",
-            ),
-            allowed_patterns=(
-                "CLAUDE.md",
-                ".claude/CLAUDE.md",
-                ".claude/rules/**",
-                ".claude/skills/**",
-                ".claude/commands/**",
-            ),
-            attacker_allowed_patterns=(
-                "CLAUDE.md",
-                ".claude/CLAUDE.md",
-                ".claude/rules/**",
-                ".claude/skills/**",
-                ".claude/commands/**",
-            ),
-            attacker_vector_patterns={
-                "claude_md": ("CLAUDE.md",),
-                "claude_local_md": (".claude/CLAUDE.md",),
-                "claude_rule": (".claude/rules/**",),
-                "claude_skill": (".claude/skills/**",),
-                "claude_command": (".claude/commands/**",),
-            },
-            default_attacker_vectors=("claude_md", "claude_local_md", "claude_rule", "claude_skill", "claude_command"),
-            attacker_surfaces=(
-                ControlSurfaceSpec(
-                    kind="instruction",
-                    vector="claude_md",
-                    path_template="CLAUDE.md",
-                    description="Primary Claude Code repository instruction file.",
-                ),
-                ControlSurfaceSpec(
-                    kind="instruction",
-                    vector="claude_local_md",
-                    path_template=".claude/CLAUDE.md",
-                    description="Project-local Claude Code instruction file.",
-                ),
-                ControlSurfaceSpec(
-                    kind="rule",
-                    vector="claude_rule",
-                    path_template=".claude/rules/<rule-name>.md",
-                    description="Claude Code rule file discovered from the workspace.",
-                ),
-                ControlSurfaceSpec(
-                    kind="skill",
-                    vector="claude_skill",
-                    path_template=".claude/skills/<skill-name>/SKILL.md",
-                    description="Native Claude Code skill definition discovered from the workspace.",
-                ),
-                ControlSurfaceSpec(
-                    kind="command",
-                    vector="claude_command",
-                    path_template=".claude/commands/<command-name>.md",
-                    description="Native Claude Code command content discovered from the workspace.",
-                ),
-            ),
+    return tuple(surfaces)
+
+
+def _provider_from_config(
+    framework: str,
+    config: dict[str, Any],
+    registry: ControlPlaneProviderRegistry,
+) -> ControlPlaneProvider | None:
+    if not config:
+        return registry.get_optional(framework)
+    if config.get("enabled") is False:
+        return None
+
+    base_name = str(config.get("provider") or framework or "").strip().lower()
+    base_provider = registry.get_optional(base_name) if base_name else None
+    if not any(
+        key in config
+        for key in (
+            "framework",
+            "source_patterns",
+            "allowed_patterns",
+            "attacker_allowed_patterns",
+            "attacker_vector_patterns",
+            "default_attacker_vectors",
+            "attacker_surfaces",
         )
-    return None
+    ):
+        return base_provider
+
+    return ControlPlaneProvider(
+        framework=str(
+            config.get("framework")
+            or (base_provider.framework if base_provider else "")
+            or base_name
+            or framework
+        ).strip().lower(),
+        source_patterns=_normalize_string_tuple(config.get("source_patterns")) or (
+            base_provider.source_patterns if base_provider else ()
+        ),
+        allowed_patterns=_normalize_string_tuple(config.get("allowed_patterns")) or (
+            base_provider.allowed_patterns if base_provider else ()
+        ),
+        attacker_allowed_patterns=_normalize_string_tuple(config.get("attacker_allowed_patterns")) or (
+            base_provider.attacker_allowed_patterns if base_provider else ()
+        ),
+        attacker_vector_patterns=_normalize_vector_patterns(config.get("attacker_vector_patterns")) or (
+            dict(base_provider.attacker_vector_patterns) if base_provider else {}
+        ),
+        default_attacker_vectors=_normalize_string_tuple(config.get("default_attacker_vectors")) or (
+            base_provider.default_attacker_vectors if base_provider else ()
+        ),
+        attacker_surfaces=_normalize_surface_specs(config.get("attacker_surfaces")) or (
+            base_provider.attacker_surfaces if base_provider else ()
+        ),
+    )
+
+
+def create_control_plane_provider(
+    framework: str,
+    registry: ControlPlaneProviderRegistry | None = None,
+    config: str | dict[str, Any] | None = None,
+) -> ControlPlaneProvider | None:
+    active_registry = registry or _DEFAULT_CONTROL_PLANE_PROVIDER_REGISTRY
+    if isinstance(config, str):
+        provider_name = str(config).strip().lower()
+        if provider_name:
+            return active_registry.get_optional(provider_name)
+    if isinstance(config, dict):
+        return _provider_from_config(framework, config, active_registry)
+    return active_registry.get_optional(framework)
 
 
 class ControlPlaneManager:
@@ -249,6 +450,19 @@ class ControlPlaneManager:
 
     def manifest_path(self) -> Path:
         return self.base_dir() / self.MANIFEST_FILE_NAME
+
+    def final_allowed_file_entries(self) -> list[tuple[Path, str]]:
+        if not self.enabled() or not self.final_dir().exists():
+            return []
+        files: list[tuple[Path, str]] = []
+        for path in sorted(self.final_dir().rglob("*")):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(self.final_dir()).as_posix()
+            if not self.provider.is_allowed_relative_path(rel):
+                continue
+            files.append((path, rel))
+        return files
 
     def attacker_output_dir(self, attacker_name: str, phase: str, index: int = 1) -> Path:
         return self.attackers_dir() / attacker_name / f"{phase}_{index:03d}"
@@ -304,17 +518,69 @@ class ControlPlaneManager:
         self._copy_dir_contents(self.base_dir(), final_dir)
         self._delete_allowed_files(final_dir, attacker=True, allowed_vectors=allowed_vectors)
         self._copy_allowed_dir_contents(output_dir, final_dir, attacker=True, allowed_vectors=allowed_vectors)
+        self._handle_append_files(output_dir, final_dir, diff.added, allowed_vectors)
         self._write_snapshot(self.snapshots_dir() / "final.json", final_dir, tag="final")
         return diff, ignored
+
+    def _handle_append_files(self, output_dir: Path, final_dir: Path, added_paths: list[str], allowed_vectors: tuple[str, ...] | None) -> None:
+        if not self.enabled() or self.provider is None:
+            return
+        append_vectors: set[str] = set()
+        for surface in self.provider.attacker_surfaces:
+            if surface.injection_mode in {"append", "merge"}:
+                append_vectors.add(surface.vector)
+        if not append_vectors:
+            return
+        allowed = set(allowed_vectors) if allowed_vectors else set()
+        for added in added_paths:
+            output_file = output_dir / added
+            if not output_file.is_file():
+                continue
+            for surface in self.provider.attacker_surfaces:
+                if surface.vector not in allowed and allowed:
+                    continue
+                if surface.injection_mode not in {"append", "merge"}:
+                    continue
+                pattern = _path_template_to_vector_pattern(surface.path_template)
+                if any(fnmatch.fnmatch(added, p) for p in pattern):
+                    final_file = final_dir / added
+                    existing = final_file.read_text(encoding="utf-8") if final_file.is_file() else ""
+                    appended = output_file.read_text(encoding="utf-8")
+                    final_file.write_text(existing + "\n" + appended, encoding="utf-8")
+                    break
 
     def materialize_final_to_workspace(self, workspace_dir: str) -> WorkspaceDiff:
         shared_root = Path(workspace_dir)
         shared_root.mkdir(parents=True, exist_ok=True)
         diff = self._diff_dirs(shared_root, self.final_dir(), filter_allowed=True)
         self._delete_allowed_files(shared_root)
-        self._copy_dir_contents(self.final_dir(), shared_root)
+        self._copy_allowed_dir_contents(self.final_dir(), shared_root)
+        self._materialize_home_files(shared_root)
         self._write_snapshot(self.snapshots_dir() / "materialized.json", shared_root, tag="materialized")
         return diff
+
+    def _materialize_home_files(self, workspace_root: Path) -> None:
+        home_dir = os.environ.get("HOME", "")
+        if not home_dir or not self.enabled():
+            return
+        home_prefix = "HOME/"
+        for path in sorted(workspace_root.rglob("*")):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(workspace_root).as_posix()
+            if not rel.startswith(home_prefix):
+                continue
+            rel_path = rel[len(home_prefix):]
+            dest = Path(home_dir) / rel_path
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, dest)
+            path.unlink(missing_ok=True)
+        for path in sorted(workspace_root.rglob("*"), reverse=True):
+            if path.is_dir() and path.relative_to(workspace_root).as_posix() == "HOME":
+                try:
+                    shutil.rmtree(path)
+                except OSError:
+                    pass
 
     def _disallowed_relative_paths(self, root: Path, *, attacker: bool = False, allowed_vectors: tuple[str, ...] | None = None) -> list[str]:
         if not self.enabled() or not root.exists():
@@ -453,6 +719,7 @@ class ControlPlaneManager:
                     "default_enabled": surface.vector in self.provider.default_attacker_vectors,
                     "path_template": surface.path_template,
                     "description": surface.description,
+                    "injection_mode": surface.injection_mode,
                 }
                 for surface in self.provider.attacker_surfaces
             ],
@@ -461,4 +728,12 @@ class ControlPlaneManager:
         manifest_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-__all__ = ["ControlPlaneManager", "ControlPlaneProvider", "ControlSurfaceSpec", "create_control_plane_provider"]
+__all__ = [
+    "ControlPlaneManager",
+    "ControlPlaneProvider",
+    "ControlPlaneProviderRegistry",
+    "ControlSurfaceSpec",
+    "create_control_plane_provider",
+    "create_default_control_plane_provider_registry",
+    "register_control_plane_provider",
+]

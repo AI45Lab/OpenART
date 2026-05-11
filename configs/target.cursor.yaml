@@ -1,0 +1,28 @@
+target:
+  framework: generic_cli
+  control_plane: cursor
+  control_plane_mount_mode: mounted
+  runner_image: python:3.11-slim
+  launch_cmd: cursor-agent {{task_instruction_file}}
+  model_integration:
+    env:
+      OPENAI_API_KEY: ${TARGET_API_KEY}
+      OPENAI_BASE_URL: ${TARGET_BASE_URL}
+      OPENAI_MODEL: ${TARGET_MODEL}
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md or <subdir>/AGENTS.md
+    description: Cursor AGENTS.md instruction file.
+  - vector: cursor_rule
+    kind: rule
+    path_template: .cursor/rules/<rule-name>.mdc
+    description: Cursor project rules discovered from .cursor/rules/.
+  tools:
+  - bash
+  - read
+  - write
+  mcp_servers:
+  - filesystem
+  - gitlab
+  - owncloud

@@ -1,0 +1,17 @@
+FROM openart/opencode:latest
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with iFlow CLI installed"
+LABEL version="1.0.0"
+
+RUN npm install -g n \
+    && n 20.19.0 \
+    && node --version \
+    && npm --version \
+    && npm install -g @iflow-ai/iflow-cli \
+    && command -v iflow \
+    && iflow --version
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

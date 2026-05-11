@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from framework.components.runners import ClaudeCodeRunner, GenericCLIRunner, OpenCodeRunner
+from framework.components.runners import ClaudeCodeRunner, GenericCLIRunner, IFlowRunner, OpenCodeRunner, PromptCLIRunner
 from framework.models.common import CommandSpec, CredentialBundle, MCPServerSpec, ToolSpec
 from framework.models.container import ContainerSpec
 
@@ -15,11 +15,25 @@ class _FakeRunnerContainer:
         self.exec_calls: list[list[str]] = []
         self.default_path = default_path
 
+    def build(self) -> None:
+        return
+
+    def create(self) -> None:
+        return
+
+    def start(self) -> None:
+        return
+
     def write_text_file(self, path: str, content: str, env=None) -> None:
         self.files[path] = content
 
     def ensure_dir(self, path: str, env=None) -> None:
         self.files.setdefault(path.rstrip("/") + "/", "")
+
+    def read_text_file(self, path: str, env=None) -> str:
+        if path not in self.files:
+            raise FileNotFoundError(path)
+        return self.files[path]
 
     def exec(self, cmd: list[str], env=None):
         self.exec_calls.append(list(cmd))
@@ -89,6 +103,22 @@ def test_opencode_runner_reads_prompt_text_not_file_path() -> None:
     assert "/workspace/.openart/service_preflight.json" in command
 
 
+def test_opencode_runner_mentions_extra_control_plane_probe_paths() -> None:
+    runner = OpenCodeRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="opencode run"),
+        credentials=CredentialBundle(values={}),
+        runtime_env={"OPENART_CONTROL_PLANE_PROBE_PATHS": json.dumps(["/workspace/GEMINI.md", "/workspace/.gemini/skills/"])},
+    )
+
+    command = runner.render_command("/task/instructions/target.md")
+
+    assert "/workspace/GEMINI.md" in command
+    assert "/workspace/.gemini/skills/" in command
+
+
 def test_claude_runner_uses_print_mode_and_reads_prompt_text() -> None:
     runner = ClaudeCodeRunner(
         name="runner",
@@ -104,6 +134,52 @@ def test_claude_runner_uses_print_mode_and_reads_prompt_text() -> None:
     assert "-p" in command or "--print" in command
     assert "--task" not in command
     assert "/task/instructions/attacker.md" in command
+
+
+def test_iflow_runner_uses_prompt_mode_and_writes_openai_compatible_settings() -> None:
+    runner = IFlowRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="iflow run --task {{task_instruction_file}}"),
+        credentials=CredentialBundle(values={"api_key": "dummy"}),
+        base_url="http://llm.internal/v1",
+        model="glm-5",
+    )
+
+    config = runner.make_framework_config()
+    command = runner.render_command("/task/instructions/target.md")
+
+    assert config["selectedAuthType"] == "openai-compatible"
+    assert config["apiKey"] == "dummy"
+    assert config["baseUrl"] == "http://llm.internal/v1"
+    assert config["modelName"] == "glm-5"
+    assert "exec iflow -p \"$prompt\"" in command
+    assert "run --task" not in command
+
+
+def test_runner_installs_user_model_config_json_and_skips_managed_framework_config() -> None:
+    container = _FakeRunnerContainer("openart-target-test")
+    source_path = "/workspace/.openart_model_integration_target.json"
+    destination_path = "/workspace/.openart/runners/target/home/.iflow/settings.json"
+    container.files[source_path] = '{"selectedAuthType": "openai-compatible"}\n'
+    runner = IFlowRunner(
+        name="runner",
+        role="target",
+        container=container,
+        command=CommandSpec(template="iflow -p"),
+        credentials=CredentialBundle(values={}),
+        runtime_env={
+            "OPENART_MODEL_CONFIG_JSON_SOURCE_FILE": source_path,
+            "OPENART_MODEL_CONFIG_JSON_DESTINATION": destination_path,
+        },
+    )
+
+    runner._install_user_model_config_json()
+    runner._install_framework_config()
+
+    assert container.files[destination_path] == '{"selectedAuthType": "openai-compatible"}\n'
+    assert container.files[destination_path] != json.dumps(runner.make_framework_config(), indent=2)
 
 
 def test_opencode_runner_builds_custom_openai_compatible_provider_config() -> None:
@@ -226,3 +302,35 @@ def test_runner_omits_empty_source_root_from_tools_json() -> None:
 
     payload = json.loads(container.files[runner.runtime_env["OPENART_TOOLS_FILE"]])
     assert "source_root" not in payload[0]
+
+
+def test_prompt_cli_runner_argv_transport_uses_prompt_flag() -> None:
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="gemini"),
+        credentials=CredentialBundle(values={}),
+        extra_config={"prompt_transport": "argv", "prompt_flag": "-p"},
+    )
+
+    command = runner.render_command("/task/instructions/target.md")
+
+    assert "exec gemini -p \"$prompt\"" in command
+    assert "/task/instructions/target.md" in command
+
+
+def test_prompt_cli_runner_stdin_transport_pipes_prompt() -> None:
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="gemini --sandbox"),
+        credentials=CredentialBundle(values={}),
+        extra_config={"prompt_transport": "stdin"},
+    )
+
+    command = runner.render_command("/task/instructions/target.md")
+
+    assert "printf '%s' \"$prompt\" | exec gemini --sandbox" in command
+    assert "/task/instructions/target.md" in command

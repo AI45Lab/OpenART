@@ -1,0 +1,13 @@
+FROM openart/opencode:latest
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with nanobot installed"
+LABEL version="1.0.0"
+
+RUN pip install --no-cache-dir nanobot-ai \
+    && command -v nanobot \
+    && nanobot --version
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

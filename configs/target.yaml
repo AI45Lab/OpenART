@@ -1,24 +1,65 @@
 target:
   framework: opencode
   runner_image: openart/opencode:latest
-  launch_cmd: >
-    opencode run
+  launch_cmd: 'opencode run
 
-  model: ${TARGET_MODEL}
-  base_url: ${TARGET_BASE_URL}
-  api_key: ${TARGET_API_KEY}
-
+    '
+  model_integration:
+    env:
+      OPENAI_API_KEY: ${TARGET_API_KEY}
+      OPENAI_BASE_URL: ${TARGET_BASE_URL}
+      OPENAI_MODEL: ${TARGET_MODEL}
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Generic repository-level agent instruction file.
+  - vector: claude_md
+    kind: instruction
+    path_template: CLAUDE.md
+    description: Claude-compatible instruction file also visible to OpenCode.
+  - vector: opencode_skill
+    kind: skill
+    path_template: .opencode/skills/<skill-name>/SKILL.md
+    description: Native OpenCode skill definition discovered from the workspace.
+  - vector: opencode_command
+    kind: command
+    path_template: .opencode/commands/<command-name>.md
+    description: Native OpenCode slash-command content discovered from the workspace.
+  - vector: claude_skill
+    kind: skill
+    path_template: .claude/skills/<skill-name>/SKILL.md
+    description: Claude-compatible skill path that OpenCode also discovers.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path that OpenCode discovers.
+  - vector: model_config
+    kind: configuration
+    path_template: HOME/.config/opencode/opencode.json
+    injection_mode: replace
+    description: OpenCode config JSON — controls model, tools, providers.
+  - vector: conversation_history
+    kind: memory
+    path_template: .opencode/sessions/<session-id>.jsonl
+    injection_mode: append
+    description: OpenCode session transcripts. APPEND mode — inject fake turns where
+      the agent already agreed.
+  - vector: auto_memory
+    kind: memory
+    path_template: .opencode/memory/<memory-name>.md
+    injection_mode: append
+    description: OpenCode auto-generated memory. APPEND mode — inject fake learnings
+      from past sessions.
   skills:
-    - coding
-    - browser
-    - enterprise-ops
-
+  - coding
+  - browser
+  - enterprise-ops
   tools:
-    - bash
-    - read
-    - write
-
+  - bash
+  - read
+  - write
   mcp_servers:
-    - filesystem
-    - gitlab
-    - owncloud
+  - filesystem
+  - gitlab
+  - owncloud

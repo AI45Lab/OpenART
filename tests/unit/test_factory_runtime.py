@@ -229,3 +229,238 @@ def test_factory_increases_target_timeout_floor(tmp_path: Path) -> None:
     runner = factory._create_runner("target")
 
     assert runner.command.timeout_seconds == MIN_TARGET_TIMEOUT_SECONDS
+
+
+def test_factory_unknown_runner_framework_raises(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        runner_framework="nonexistent_framework",
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    try:
+        factory._create_runner("target")
+    except ValueError as exc:
+        assert "Unsupported runner framework" in str(exc)
+        assert "nonexistent_framework" in str(exc)
+    else:
+        raise AssertionError("expected ValueError for unknown runner framework")
+
+
+def test_factory_prompt_cli_uses_defaults(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        runner_framework="prompt_cli",
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    runner = factory._create_runner("target")
+
+    assert runner.framework_name() == "prompt_cli"
+    assert runner.container.spec.image == DEFAULT_RUNNER_IMAGES["prompt_cli"]
+    assert runner.command.template == DEFAULT_COMMAND_TEMPLATES["prompt_cli"]
+
+
+def test_factory_runner_override_does_not_change_target_control_plane_family(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        runner_framework="generic_cli",
+        target_config={
+            "framework": "opencode",
+            "runner_image": "openart/opencode:latest",
+            "launch_cmd": "opencode run {{task_instruction_file}}",
+        },
+    )
+
+    assert factory._target_framework == "opencode"
+    assert factory._control_manager.provider is not None
+    assert factory._control_manager.provider.framework == "opencode"
+
+
+def test_factory_allows_explicit_control_plane_override_for_target(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "generic_cli",
+            "control_plane": {
+                "framework": "codex",
+                "source_patterns": ["AGENTS.md", "CODEX.md"],
+                "allowed_patterns": ["AGENTS.md", "CODEX.md"],
+                "attacker_allowed_patterns": ["CODEX.md"],
+                "attacker_vector_patterns": {"codex_md": ["CODEX.md"]},
+                "default_attacker_vectors": ["codex_md"],
+                "attacker_surfaces": [
+                    {
+                        "kind": "instruction",
+                        "vector": "codex_md",
+                        "path_template": "CODEX.md",
+                        "description": "Codex-specific instruction file.",
+                    }
+                ],
+            },
+        },
+    )
+
+    assert factory._target_framework == "generic_cli"
+    assert factory._control_manager.provider is not None
+    assert factory._control_manager.provider.framework == "codex"
+    assert factory._control_manager.provider.is_attacker_allowed_relative_path("CODEX.md")
+
+
+def test_factory_sets_iflow_runtime_env_and_control_plane_probe_paths(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "iflow",
+            "runner_image": "openart/iflow:latest",
+            "launch_cmd": "iflow -p",
+            "model_integration": {
+                "env": {
+                    "IFLOW_SELECTED_AUTH_TYPE": "openai-compatible",
+                    "IFLOW_API_KEY": "dummy",
+                    "IFLOW_BASE_URL": "http://llm.internal/v1",
+                    "IFLOW_MODEL_NAME": "glm-5",
+                }
+            },
+            "control_plane_probe_paths": ["/workspace/GEMINI.md", "/workspace/.gemini/skills/"],
+        },
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    runner = factory._create_runner("target")
+
+    assert runner.runtime_env["IFLOW_SELECTED_AUTH_TYPE"] == "openai-compatible"
+    assert runner.runtime_env["IFLOW_API_KEY"] == "dummy"
+    assert runner.runtime_env["IFLOW_BASE_URL"] == "http://llm.internal/v1"
+    assert runner.runtime_env["IFLOW_MODEL_NAME"] == "glm-5"
+    assert json.loads(runner.runtime_env["OPENART_CONTROL_PLANE_PROBE_PATHS"]) == [
+        "/workspace/GEMINI.md",
+        "/workspace/.gemini/skills/",
+    ]
+
+
+def test_factory_rejects_legacy_target_model_fields(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "claude_code",
+            "model": "glm-5",
+            "base_url": "http://llm.internal/v1",
+            "api_key": "dummy",
+        },
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    try:
+        factory._create_runner("target")
+    except ValueError as exc:
+        assert "legacy target model fields" in str(exc)
+        assert "model" in str(exc)
+        assert "base_url" in str(exc)
+        assert "api_key" in str(exc)
+    else:
+        raise AssertionError("expected ValueError for legacy target model fields")
+
+
+def test_factory_resolves_env_placeholders_in_launch_command(monkeypatch, tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "claude_code",
+            "runner_image": "openart/claude-code:latest",
+            "launch_cmd": "claude -p --model ${TARGET_MODEL}",
+        },
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    runner = factory._create_runner("target")
+
+    assert runner.command.template == "claude -p --model glm-5"
+
+
+def test_factory_applies_model_integration_env_and_config_json(monkeypatch, tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    target_config_path = config_dir / "target.custom.yaml"
+    target_config_path.write_text("target: {}\n", encoding="utf-8")
+    native_dir = config_dir / "native"
+    native_dir.mkdir(parents=True, exist_ok=True)
+    (native_dir / "opencode.json").write_text(
+        json.dumps(
+            {
+                "$schema": "https://opencode.ai/config.json",
+                "model": "openart/${TARGET_MODEL}",
+                "provider": {
+                    "openart": {
+                        "options": {
+                            "baseURL": "${TARGET_BASE_URL}",
+                            "apiKey": "{env:OPENAI_API_KEY}",
+                        }
+                    }
+                },
+            },
+            ensure_ascii=True,
+            indent=2,
+        ) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("TARGET_API_KEY", "dummy")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "opencode",
+            "runner_image": "openart/opencode:latest",
+            "launch_cmd": "opencode run",
+            "model_integration": {
+                "env": {
+                    "OPENAI_API_KEY": "${TARGET_API_KEY}",
+                },
+                "config_json": {
+                    "source": "target:native/opencode.json",
+                    "destination": "XDG_CONFIG_HOME/opencode/opencode.json",
+                },
+            },
+        },
+        target_config_path=str(target_config_path),
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    runner = factory._create_runner("target")
+
+    assert runner.runtime_env["OPENAI_API_KEY"] == "dummy"
+    assert "ANTHROPIC_API_KEY" not in runner.runtime_env
+    assert runner.runtime_env["OPENART_MODEL_CONFIG_JSON_SOURCE_FILE"] == "/workspace/.openart_model_integration_target.json"
+    assert runner.runtime_env["OPENART_MODEL_CONFIG_JSON_DESTINATION"] == "/workspace/.openart/runners/target/config/opencode/opencode.json"
+    mounts = {mount.container_path: mount.host_path for mount in runner.container.spec.mounts}
+    assert mounts["/workspace/.openart_model_integration_target.json"].endswith("model_integration/target/opencode.json")
+    staged_text = Path(mounts["/workspace/.openart_model_integration_target.json"]).read_text(encoding="utf-8")
+    staged = json.loads(staged_text)
+    assert staged["model"] == "openart/glm-5"
+    assert staged["provider"]["openart"]["options"]["baseURL"] == "http://llm.internal/v1"

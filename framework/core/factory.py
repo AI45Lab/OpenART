@@ -13,11 +13,9 @@ from framework.attackers.models import AttackerContext
 from framework.components.containers import RunnerContainer, TaskContainer
 from framework.components.evaluators import CompositeEvaluator, DeterministicEvaluator, EvaluatorBase, LLMJudgeEvaluator
 from framework.components.runners import (
-    ClaudeCodeRunner,
-    GenericCLIRunner,
-    IFlowRunner,
-    OpenCodeRunner,
     RunnerBase,
+    RunnerRegistry,
+    create_default_runner_registry,
 )
 from framework.components.services import (
     ExternalService,
@@ -25,7 +23,12 @@ from framework.components.services import (
     ServiceManager,
 )
 from framework.components.trace import JsonlTraceSink
-from framework.core.control_plane import ControlPlaneManager, create_control_plane_provider
+from framework.core.control_plane import (
+    ControlPlaneManager,
+    ControlPlaneProviderRegistry,
+    create_control_plane_provider,
+    create_default_control_plane_provider_registry,
+)
 from framework.core.helpers import first_non_empty, resolve_env_value, resolve_nested_env_values
 from framework.core.orchestrator import Orchestrator
 from framework.core.workspace import WorkspaceManager
@@ -54,18 +57,36 @@ MIN_TARGET_TIMEOUT_SECONDS = 2700
 # Default runner images (agent frameworks)
 DEFAULT_RUNNER_IMAGES = {
     "claude_code": "openart/claude-code:latest",
+    "hermes": "openart/hermes:latest",
+    "nanobot": "openart/nanobot:latest",
     "opencode": "openart/opencode:latest",
-    "iflow": "iflow/iflow:latest",
+    "pi": "openart/pi:latest",
     "generic_cli": "python:3.11-slim",
+    "prompt_cli": "python:3.11-slim",
 }
 
 # Default command templates for each framework
 DEFAULT_COMMAND_TEMPLATES = {
     "claude_code": "claude -p",
+    "hermes": "hermes -z",
+    "nanobot": "nanobot agent",
     "opencode": "opencode run",
-    "iflow": "iflow run --task {{task_instruction_file}}",
+    "pi": "pi -p",
     "generic_cli": "python {{task_instruction_file}}",
+    "prompt_cli": "python {{task_instruction_file}}",
 }
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MODEL_CONFIG_JSON_MOUNT_PATH_TEMPLATE = "/workspace/.openart_model_integration_{role}.json"
+_SYMBOLIC_DESTINATION_ROOTS = {
+    "HOME": lambda env: str(env.get("HOME", "") or ""),
+    "XDG_CONFIG_HOME": lambda env: str(env.get("XDG_CONFIG_HOME", "") or ""),
+    "XDG_DATA_HOME": lambda env: str(env.get("XDG_DATA_HOME", "") or ""),
+    "XDG_CACHE_HOME": lambda env: str(env.get("XDG_CACHE_HOME", "") or ""),
+    "WORKSPACE": lambda env: "/workspace",
+    "RUNNER_STATE_DIR": lambda env: str(env.get("OPENART_RUNNER_STATE_DIR", "") or ""),
+}
+_LEGACY_TARGET_MODEL_FIELDS = ("model", "base_url", "api_base_url", "api_key", "api_key_env")
 
 
 # =============================================================================
@@ -102,11 +123,14 @@ class OrchestratorFactory:
         runner_command: Optional[str] = None,
         runner_model: Optional[str] = None,
         target_config: Optional[dict[str, Any]] = None,
+        target_config_path: Optional[str] = None,
         service_config: Optional[dict[str, Any]] = None,
         eval_strategy: str = "auto",
         skip_attacker: bool = False,
         max_iterations: int = 1,
         adaptive_iterations: bool = False,
+        runner_registry: Optional[RunnerRegistry] = None,
+        control_plane_registry: Optional[ControlPlaneProviderRegistry] = None,
     ) -> None:
         """Initialize the factory.
 
@@ -132,11 +156,20 @@ class OrchestratorFactory:
         self.runner_command = (runner_command or "").strip()
         self.runner_model = (runner_model or "").strip()
         self.target_config = dict(target_config or {})
+        self.target_config_path = str(target_config_path or "").strip()
         self.service_config = dict(service_config or {})
         self.eval_strategy = (eval_strategy or "auto").strip().lower()
         self.skip_attacker = bool(skip_attacker)
         self.max_iterations = max(1, int(max_iterations or 1))
         self.adaptive_iterations = bool(adaptive_iterations)
+        self._runner_registry = runner_registry or create_default_runner_registry()
+        self._control_plane_registry = control_plane_registry or create_default_control_plane_provider_registry()
+        self._target_control_plane_mount_mode = str(
+            resolve_env_value((self.target_config or {}).get("control_plane_mount_mode"))
+            if isinstance((self.target_config or {}).get("control_plane_mount_mode"), str)
+            else (self.target_config or {}).get("control_plane_mount_mode")
+            or "workspace"
+        ).strip().lower()
 
         # Workspace path - canonical shared workspace used by task container and target runner
         self._workspace_path: Optional[str] = None
@@ -145,7 +178,7 @@ class OrchestratorFactory:
         self._control_manager = ControlPlaneManager(
             root_dir=str(Path(self.output_dir) / "control" / "target"),
             source_root=str(self._workspace_manager.shared_dir(self.run_id)),
-            provider=create_control_plane_provider(self._target_framework),
+            provider=self._resolve_target_control_plane_provider(),
         )
 
     def build(self) -> Orchestrator:
@@ -177,6 +210,7 @@ class OrchestratorFactory:
             task_container=task_container,
             workspace_manager=self._workspace_manager,
             control_manager=self._control_manager,
+            target_control_plane_mount_mode=self._target_control_plane_mount_mode,
             max_iterations=self.max_iterations,
             adaptive_iterations=self.adaptive_iterations,
             trace_sink=self.trace_sink,
@@ -329,8 +363,34 @@ class OrchestratorFactory:
 
     def _resolve_target_framework_name(self) -> str:
         target_framework = str((self.target_config or {}).get("framework") or "").strip().lower()
-        framework = str(self.runner_framework or target_framework or "claude_code").strip().lower()
-        return framework or "claude_code"
+        if target_framework:
+            return target_framework
+        framework = str(self.runner_framework or "").strip().lower()
+        if framework:
+            return framework
+        return "claude_code"
+
+    def _resolve_target_control_plane_provider(self):
+        # Check for target-config attack_surfaces first (primary path)
+        attack_surfaces = (self.target_config or {}).get("attack_surfaces")
+        if isinstance(attack_surfaces, list) and attack_surfaces:
+            from framework.core.control_plane import build_provider_from_attack_surfaces
+            return build_provider_from_attack_surfaces(self._target_framework, attack_surfaces)
+
+        # Legacy: control_plane string/dict config
+        raw_config = (self.target_config or {}).get("control_plane")
+        control_plane_config: str | dict[str, Any] | None
+        if isinstance(raw_config, dict):
+            control_plane_config = resolve_nested_env_values(raw_config)
+        elif isinstance(raw_config, str):
+            control_plane_config = resolve_env_value(raw_config)
+        else:
+            control_plane_config = None
+        return create_control_plane_provider(
+            self._target_framework,
+            registry=self._control_plane_registry,
+            config=control_plane_config,
+        )
 
     def _create_runner(self, role: str) -> RunnerBase:
         """Create a runner for the given role (target/attack).
@@ -342,14 +402,23 @@ class OrchestratorFactory:
         - Persist changes for evaluation
         """
         role_cfg = self.target_config if role == "target" else {}
+        if role == "target":
+            self._validate_no_legacy_target_model_fields(role_cfg)
         role_framework = str(role_cfg.get("framework") or "").strip().lower()
-        role_env_prefix = role.upper()
 
         framework = str(
             self.runner_framework
             or role_framework
-            or "claude_code"
+            or ""
         ).strip().lower()
+        if not framework:
+            framework = "claude_code"
+
+        if framework not in self._runner_registry.names():
+            known = ", ".join(self._runner_registry.names()) or "<none>"
+            raise ValueError(
+                f"Unsupported runner framework: {framework}. Registered frameworks: {known}"
+            )
 
         use_role_runner_profile = not self.runner_framework or not role_framework or framework == role_framework
 
@@ -360,54 +429,39 @@ class OrchestratorFactory:
         ).strip()
 
         command_template = str(
-            self.runner_command
-            or (role_cfg.get("launch_cmd") if use_role_runner_profile else "")
-            or DEFAULT_COMMAND_TEMPLATES.get(framework, "")
+            resolve_env_value(
+                self.runner_command
+                or (role_cfg.get("launch_cmd") if use_role_runner_profile else "")
+                or DEFAULT_COMMAND_TEMPLATES.get(framework, "")
+            )
         ).strip()
 
-        base_url = _first_resolved_value(
-            role_cfg.get("base_url"),
-            role_cfg.get("api_base_url"),
-            os.environ.get(f"{role_env_prefix}_BASE_URL"),
-            os.environ.get("TARGET_BASE_URL"),
-            os.environ.get("ANTHROPIC_BASE_URL"),
-            os.environ.get("OPENAI_BASE_URL"),
-        )
+        base_url = ""
+        model = first_non_empty(self.runner_model)
+        api_key = ""
 
-        model = first_non_empty(
-            self.runner_model,
-            resolve_env_value(role_cfg.get("model")),
-            os.environ.get(f"{role_env_prefix}_MODEL"),
-            os.environ.get("OPENAI_MODEL"),
-            os.environ.get("DEFAULT_MODEL"),
-            "claude-sonnet-4-6",
-        )
+        runner_network = str(
+            resolve_env_value(role_cfg.get("network"))
+            if use_role_runner_profile and isinstance(role_cfg.get("network"), str)
+            else ""
+        ).strip() or None
 
-        api_key_value = role_cfg.get("api_key")
-        api_key_env_name = role_cfg.get("api_key_env")
-        if api_key_value:
-            api_key = resolve_env_value(api_key_value)
-        elif api_key_env_name:
-            api_key = os.environ.get(str(api_key_env_name), "")
-        else:
-            api_key = (
-                os.environ.get(f"{role_env_prefix}_API_KEY")
-                or os.environ.get("TARGET_API_KEY")
-                or os.environ.get("ANTHROPIC_API_KEY")
-                or os.environ.get("OPENAI_API_KEY")
-                or os.environ.get("OPENAI_KEY")
-                or ""
-            )
-
-        # Create runner container spec
         container_spec = ContainerSpec(
             name=f"openart-{role}-{self.run_id}",
             image=image,
             command=["tail", "-f", "/dev/null"],
             env=self._runtime_service_env(),
             working_dir="/workspace",
+            network=runner_network,
             lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
         )
+
+        if "codex" in command_template.split():
+            for key in (
+                "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+                "http_proxy", "https_proxy", "all_proxy",
+            ):
+                container_spec.env.pop(key, None)
 
         # Mount task assets (read-only) - for instruction files
         task_root = Path(self.bundle.root_dir)
@@ -429,22 +483,47 @@ class OrchestratorFactory:
         container = RunnerContainer(container_spec)
 
         runtime_env = self._runtime_service_env()
+        if "codex" in command_template.split():
+            for key in (
+                "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+                "http_proxy", "https_proxy", "all_proxy",
+            ):
+                runtime_env.pop(key, None)
         runtime_env["HOME"] = f"/workspace/.openart/runners/{role}/home"
         runtime_env["XDG_CONFIG_HOME"] = f"/workspace/.openart/runners/{role}/config"
         runtime_env["OPENART_RUNNER_STATE_DIR"] = f"/workspace/.openart/runners/{role}/state"
-        if framework == "opencode":
+        if framework in {"opencode", "prompt_cli"}:
             runtime_env["HOME"] = f"/tmp/openart/runners/{role}/home"
             runtime_env["XDG_DATA_HOME"] = f"/tmp/openart/runners/{role}/data"
             runtime_env["XDG_CACHE_HOME"] = f"/tmp/openart/runners/{role}/cache"
-            runtime_env.setdefault("OPENCODE_DISABLE_AUTOUPDATE", "1")
-        if api_key:
-            runtime_env.setdefault("ANTHROPIC_API_KEY", api_key)
-            runtime_env.setdefault("OPENAI_API_KEY", api_key)
-        if base_url:
-            runtime_env.setdefault("ANTHROPIC_BASE_URL", base_url)
-            runtime_env.setdefault("OPENAI_BASE_URL", base_url)
-        if model:
-            runtime_env["OPENART_RUNNER_MODEL"] = model
+            if framework == "opencode":
+                runtime_env.setdefault("OPENCODE_DISABLE_AUTOUPDATE", "1")
+        explicit_model_integration = self._role_model_integration(role_cfg)
+        if explicit_model_integration:
+            runtime_env.update(self._resolve_model_integration_env(explicit_model_integration))
+        probe_paths = role_cfg.get("control_plane_probe_paths") if isinstance(role_cfg, dict) else None
+        if isinstance(probe_paths, (list, tuple)):
+            cleaned_probe_paths = [str(path).strip() for path in probe_paths if str(path).strip()]
+        elif role == "target":
+            surfaces = (role_cfg or {}).get("attack_surfaces")
+            if isinstance(surfaces, list) and surfaces:
+                from framework.core.control_plane import derive_probe_paths_from_attack_surfaces
+                cleaned_probe_paths = derive_probe_paths_from_attack_surfaces(surfaces)
+            else:
+                cleaned_probe_paths = []
+        else:
+            cleaned_probe_paths = []
+        if cleaned_probe_paths:
+            runtime_env["OPENART_CONTROL_PLANE_PROBE_PATHS"] = json.dumps(cleaned_probe_paths, ensure_ascii=True)
+        config_json_spec = self._resolve_model_integration_config_json(explicit_model_integration, role, runtime_env)
+        if config_json_spec is not None:
+            container_spec.mounts.append(MountSpec(
+                host_path=config_json_spec["host_path"],
+                container_path=config_json_spec["mount_path"],
+                read_only=True,
+            ))
+            runtime_env["OPENART_MODEL_CONFIG_JSON_SOURCE_FILE"] = config_json_spec["mount_path"]
+            runtime_env["OPENART_MODEL_CONFIG_JSON_DESTINATION"] = config_json_spec["destination"]
 
         role_overlay = (
             resolve_nested_env_values(role_cfg.get("config_overlay"))
@@ -489,14 +568,98 @@ class OrchestratorFactory:
             "artifact_dir": self.output_dir,
         }
 
-        if framework == "opencode":
-            return OpenCodeRunner(**runner_kwargs)
-        elif framework == "iflow":
-            return IFlowRunner(**runner_kwargs)
-        elif framework == "generic_cli":
-            return GenericCLIRunner(**runner_kwargs)
+        return self._runner_registry.create(framework, **runner_kwargs)
+
+    def _role_model_integration(self, role_cfg: dict[str, Any]) -> dict[str, Any]:
+        raw = role_cfg.get("model_integration") if isinstance(role_cfg, dict) else None
+        return dict(raw) if isinstance(raw, dict) else {}
+
+    def _validate_no_legacy_target_model_fields(self, role_cfg: dict[str, Any]) -> None:
+        legacy_fields = [name for name in _LEGACY_TARGET_MODEL_FIELDS if role_cfg.get(name) not in (None, "", [], {}, ())]
+        if not legacy_fields:
+            return
+        raise ValueError(
+            "legacy target model fields are no longer supported: "
+            + ", ".join(legacy_fields)
+            + ". Use target.model_integration.env and/or target.model_integration.config_json instead."
+        )
+
+    def _resolve_model_integration_env(self, integration_cfg: dict[str, Any]) -> dict[str, str]:
+        raw_env = integration_cfg.get("env")
+        if not isinstance(raw_env, dict):
+            return {}
+        resolved = resolve_nested_env_values(raw_env)
+        payload: dict[str, str] = {}
+        for key, value in resolved.items():
+            env_name = str(key or "").strip()
+            if not env_name:
+                continue
+            payload[env_name] = str(value or "")
+        return payload
+
+    def _resolve_model_integration_config_json(
+        self,
+        integration_cfg: dict[str, Any],
+        role: str,
+        runtime_env: dict[str, str],
+    ) -> dict[str, str] | None:
+        raw_cfg = integration_cfg.get("config_json")
+        if not isinstance(raw_cfg, dict):
+            return None
+        source_spec = str(resolve_env_value(raw_cfg.get("source")) or "").strip()
+        destination_spec = str(resolve_env_value(raw_cfg.get("destination")) or "").strip()
+        if not source_spec or not destination_spec:
+            raise ValueError("model_integration.config_json requires both source and destination")
+        source_path = self._resolve_model_integration_source_path(source_spec)
+        destination_path = self._expand_model_integration_destination(destination_spec, runtime_env)
+        try:
+            parsed = json.loads(source_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"model_integration.config_json source is not valid JSON: {source_path}") from exc
+        rendered = resolve_nested_env_values(parsed)
+        staged_dir = Path(self.output_dir) / "model_integration" / role
+        staged_dir.mkdir(parents=True, exist_ok=True)
+        staged_path = staged_dir / source_path.name
+        staged_path.write_text(json.dumps(rendered, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+        return {
+            "host_path": str(staged_path),
+            "mount_path": MODEL_CONFIG_JSON_MOUNT_PATH_TEMPLATE.format(role=role),
+            "destination": destination_path,
+        }
+
+    def _resolve_model_integration_source_path(self, source_spec: str) -> Path:
+        if source_spec.startswith("target:"):
+            if not self.target_config_path:
+                raise ValueError("model_integration.config_json source with target: requires target_config_path")
+            base = Path(self.target_config_path).resolve().parent
+            path = base / source_spec[len("target:"):]
+        elif source_spec.startswith("repo:"):
+            path = REPO_ROOT / source_spec[len("repo:"):]
+        elif source_spec.startswith("abs:"):
+            path = Path(source_spec[len("abs:"):])
         else:
-            return ClaudeCodeRunner(**runner_kwargs)
+            raise ValueError("model_integration.config_json source must start with target:, repo:, or abs:")
+        resolved = path.resolve()
+        if not resolved.is_file():
+            raise ValueError(f"model_integration.config_json source does not exist: {resolved}")
+        return resolved
+
+    def _expand_model_integration_destination(self, destination_spec: str, runtime_env: dict[str, str]) -> str:
+        text = destination_spec.strip()
+        if not text:
+            raise ValueError("model_integration.config_json destination is required")
+        if text.startswith("/"):
+            return text
+        root, _, remainder = text.partition("/")
+        if root not in _SYMBOLIC_DESTINATION_ROOTS:
+            raise ValueError(
+                "model_integration.config_json destination must start with one of "
+                + ", ".join(f"{name}/" for name in sorted(_SYMBOLIC_DESTINATION_ROOTS))
+            )
+        base = _SYMBOLIC_DESTINATION_ROOTS[root](runtime_env).strip()
+        if not base:
+            raise ValueError(f"model_integration.config_json destination root is unavailable: {root}")
+        return f"{base.rstrip('/')}/{remainder}" if remainder else base
 
     def _create_attacker(self) -> tuple[AttackerBase | None, AttackerContext | None]:
         attacker_spec = self.bundle.attacker

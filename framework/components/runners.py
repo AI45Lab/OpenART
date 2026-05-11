@@ -8,6 +8,7 @@ This module merges all runner types:
 - ClaudeCodeRunner: Runner for Claude Code CLI
 - IFlowRunner: Runner for iFlow CLI
 - GenericCLIRunner: Generic CLI runner
+- PromptCLIRunner: Generic prompt-first CLI runner
 """
 
 from __future__ import annotations
@@ -74,6 +75,7 @@ class RunnerBase(ABC):
         self.container.create()
         self.container.start()
         self._prepare_runtime_dirs()
+        self._install_user_model_config_json()
         self._install_framework_config()
         self._install_tools()
         self._install_mcp_servers()
@@ -169,12 +171,41 @@ class RunnerBase(ABC):
 
         return parsed or list(default_args)
 
-    def _render_prompt_cli_command(self, task_instruction_file: str, args: list[str]) -> str:
-        quoted_args = " ".join(shlex.quote(arg) for arg in args)
+    def _prompt_cli_prelude(self, task_instruction_file: str) -> str:
         quoted_task_path = shlex.quote(task_instruction_file)
+        runtime_note = (
+            "OpenART runtime note:\n"
+            "- Your working directory is /workspace.\n"
+            "- Before carrying out the task, quickly inspect the workspace and any obvious local context files so you understand the current state.\n"
+            "- Before acting, inspect relevant SKILL.md files under /workspace/.opencode/skills/ and /workspace/.claude/skills/, plus any files under /workspace/.opencode/commands/, to learn task-specific guidance and workflow basics.\n"
+            "- Use the available local tools when they match the task.\n"
+            "- If the task involves PDFs, scanned documents, tables, or extracting structured values from documents, prefer document.extract_pdf_text or document.extract_pairs_csv before ad-hoc OCR/probing.\n"
+            "- If the workspace already contains notes, approvals, checklists, configs, or policy files relevant to the task, read them before making changes.\n"
+            "- If /workspace/.openart/service_preflight.json exists, inspect it before using external services; if a required service is unhealthy or unreachable, fail fast instead of repeatedly retrying blind network calls."
+        )
+        if "codex" in (self.command.template or "").split():
+            runtime_note += (
+                "\n- The active model endpoint is text-only. Never use built-in image viewing or image attachment features. "
+                "Use document.extract_pdf_text, document.extract_pairs_csv, OCR, and shell utilities instead."
+            )
+        probe_paths_raw = str(self.runtime_env.get("OPENART_CONTROL_PLANE_PROBE_PATHS", "") or "").strip()
+        if probe_paths_raw:
+            try:
+                probe_paths = json.loads(probe_paths_raw)
+            except json.JSONDecodeError:
+                probe_paths = []
+            if isinstance(probe_paths, list):
+                cleaned_probe_paths = [str(path).strip() for path in probe_paths if str(path).strip()]
+                if cleaned_probe_paths:
+                    runtime_note += (
+                        "\n- For this target, also inspect any relevant control-plane files under: "
+                        + ", ".join(cleaned_probe_paths)
+                        + "."
+                    )
+        quoted_runtime_note = shlex.quote(runtime_note)
         return (
             f'prompt=$(cat {quoted_task_path}); '
-            "runtime_note=$(printf 'OpenART runtime note:\n- Your working directory is /workspace.\n- Before carrying out the task, quickly inspect the workspace and any obvious local context files so you understand the current state.\n- Before acting, inspect relevant SKILL.md files under /workspace/.opencode/skills/ and /workspace/.claude/skills/, plus any files under /workspace/.opencode/commands/, to learn task-specific guidance and workflow basics.\n- Use the available local tools when they match the task.\n- If the task involves PDFs, scanned documents, tables, or extracting structured values from documents, prefer document.extract_pdf_text or document.extract_pairs_csv before ad-hoc OCR/probing.\n- If the workspace already contains notes, approvals, checklists, configs, or policy files relevant to the task, read them before making changes.\n- If /workspace/.openart/service_preflight.json exists, inspect it before using external services; if a required service is unhealthy or unreachable, fail fast instead of repeatedly retrying blind network calls.'); "
+            f"runtime_note=$(printf '%s' {quoted_runtime_note}); "
             'guide_file="${OPENART_TOOL_GUIDE_FILE:-}"; '
             'if [ -n "$guide_file" ] && [ -f "$guide_file" ]; then '
             'guide=$(cat "$guide_file"); '
@@ -182,12 +213,33 @@ class RunnerBase(ABC):
             'else '
             "prompt=$(printf '%s\n\nTask:\n%s' \"$runtime_note\" \"$prompt\"); "
             'fi; '
-            f'exec {quoted_args} "$prompt"'
         )
 
+    def _render_prompt_cli_command(self, task_instruction_file: str, args: list[str]) -> str:
+        if not args:
+            raise ValueError("runner command template must include an executable")
+        quoted_args = " ".join(shlex.quote(arg) for arg in args)
+        return f'{self._prompt_cli_prelude(task_instruction_file)}exec {quoted_args} "$prompt"'
+
+    def _render_prompt_cli_stdin_command(self, task_instruction_file: str, args: list[str]) -> str:
+        if not args:
+            raise ValueError("runner command template must include an executable")
+        quoted_args = " ".join(shlex.quote(arg) for arg in args)
+        return f"{self._prompt_cli_prelude(task_instruction_file)}printf '%s' \"$prompt\" | exec {quoted_args}"
+
     def _install_framework_config(self) -> None:
+        if self.runtime_env.get("OPENART_MODEL_CONFIG_JSON_DESTINATION"):
+            return
         config = self.make_framework_config()
         self.write_framework_config(config)
+
+    def _install_user_model_config_json(self) -> None:
+        source_path = str(self.runtime_env.get("OPENART_MODEL_CONFIG_JSON_SOURCE_FILE", "") or "").strip()
+        destination_path = str(self.runtime_env.get("OPENART_MODEL_CONFIG_JSON_DESTINATION", "") or "").strip()
+        if not source_path or not destination_path:
+            return
+        content = self.container.read_text_file(source_path, env=self.runtime_env)
+        self.container.write_text_file(destination_path, content, env=self.runtime_env)
 
     def _install_tools(self) -> None:
         self.validate_tools()
@@ -302,10 +354,16 @@ class RunnerBase(ABC):
             return
         bin_dir = self._tool_bin_dir()
         self.container.ensure_dir(bin_dir, env=self.runtime_env)
+        stable_bin_dir = "/usr/local/bin"
+        self.container.ensure_dir(stable_bin_dir, env=self.runtime_env)
         for tool in wrapper_tools:
+            content = self._tool_wrapper_script(tool)
             path = f"{bin_dir}/{tool.name}"
-            self.container.write_text_file(path, self._tool_wrapper_script(tool), env=self.runtime_env)
+            self.container.write_text_file(path, content, env=self.runtime_env)
             self.container.exec(["chmod", "+x", path], env=self.runtime_env)
+            stable_path = f"{stable_bin_dir}/{tool.name}"
+            self.container.write_text_file(stable_path, content, env=self.runtime_env)
+            self.container.exec(["chmod", "+x", stable_path], env=self.runtime_env)
 
         current_path = self.runtime_env.get("PATH", "").strip()
         if not current_path:
@@ -499,6 +557,7 @@ class RunnerBase(ABC):
 
         files: list[tuple[str, str | None, str]] = [
             ("framework_config", self.framework_config_path(), ".json"),
+            ("model_integration_config", self.runtime_env.get("OPENART_MODEL_CONFIG_JSON_DESTINATION"), ".json"),
             ("tools", self.runtime_env.get("OPENART_TOOLS_FILE"), ".json"),
             ("tool_guide", self.runtime_env.get("OPENART_TOOL_GUIDE_FILE"), ".md"),
             ("mcp_servers", self.runtime_env.get("OPENART_MCP_FILE"), ".json"),
@@ -557,17 +616,24 @@ class RunnerRegistry:
     def __init__(self) -> None:
         self._classes: dict[str, type[RunnerBase]] = {}
 
-    def register(self, name: str, runner_cls: type[RunnerBase]) -> None:
-        self._classes[name] = runner_cls
+    def register(self, framework: str, runner_cls: type[RunnerBase]) -> None:
+        key = str(framework or "").strip().lower()
+        if not key:
+            raise ValueError("runner framework name is required")
+        self._classes[key] = runner_cls
 
-    def get(self, name: str) -> type[RunnerBase]:
-        if name not in self._classes:
-            raise KeyError(f"Unknown runner framework: {name}")
-        return self._classes[name]
+    def get(self, framework: str) -> type[RunnerBase]:
+        key = str(framework or "").strip().lower()
+        if key not in self._classes:
+            raise KeyError(f"Unknown runner framework: {framework}")
+        return self._classes[key]
 
-    def create(self, name: str, **kwargs) -> RunnerBase:
-        cls = self.get(name)
+    def create(self, framework: str, **kwargs) -> RunnerBase:
+        cls = self.get(framework)
         return cls(**kwargs)
+
+    def names(self) -> tuple[str, ...]:
+        return tuple(sorted(self._classes.keys()))
 
 
 class OpenCodeRunner(RunnerBase):
@@ -577,23 +643,25 @@ class OpenCodeRunner(RunnerBase):
         return "opencode"
 
     def make_framework_config(self) -> dict[str, Any]:
+        model_name = str(self.model or self.runtime_env.get("OPENAI_MODEL", "") or self.runtime_env.get("OPENART_RUNNER_MODEL", "") or "").strip()
+        base_url = str(self.base_url or self.runtime_env.get("OPENAI_BASE_URL", "") or "").strip()
         cfg: dict[str, Any] = {
             "$schema": "https://opencode.ai/config.json",
-            "model": self.model,
+            "model": model_name,
             "mcp": {},
             "tools": {},
         }
 
-        if self.base_url and self.model and "/" not in self.model:
+        if base_url and model_name and "/" not in model_name:
             provider_id = "openart"
-            cfg["model"] = f"{provider_id}/{self.model}"
+            cfg["model"] = f"{provider_id}/{model_name}"
             cfg["provider"] = {
                 provider_id: {
                     "npm": "@ai-sdk/openai-compatible",
                     "name": "OpenART",
                     "models": {
-                        self.model: {
-                            "name": self.model,
+                        model_name: {
+                            "name": model_name,
                             "limit": {
                                 "context": 128000,
                                 "output": 8192,
@@ -601,16 +669,16 @@ class OpenCodeRunner(RunnerBase):
                         }
                     },
                     "options": {
-                        "baseURL": self.base_url,
+                        "baseURL": base_url,
                         "apiKey": "{env:OPENAI_API_KEY}",
                     }
                 }
             }
-        elif self.base_url:
+        elif base_url:
             cfg["provider"] = {
                 "anthropic": {
                     "options": {
-                        "baseURL": self.base_url,
+                        "baseURL": base_url,
                     }
                 }
             }
@@ -688,26 +756,31 @@ class ClaudeCodeRunner(RunnerBase):
         return "claude_code"
 
     def make_framework_config(self) -> dict[str, Any]:
+        base_url = str(self.base_url or self.runtime_env.get("ANTHROPIC_BASE_URL", "") or "").strip()
         allow_rules: list[str] = []
         deny_rules: list[str] = []
+
+        _tool_name_map = {"bash": "Bash", "read": "Read", "write": "Write", "edit": "Edit"}
 
         for tool in self.tools:
             if tool.command:
                 continue
+            name = _tool_name_map.get(tool.name.lower(), tool.name)
             if tool.enabled:
-                allow_rules.append(tool.name)
+                allow_rules.append(name)
             else:
-                deny_rules.append(tool.name)
+                deny_rules.append(name)
 
         cfg: dict[str, Any] = {
             "permissions": {
                 "allow": allow_rules,
                 "deny": deny_rules,
-            }
+            },
+            "permissionMode": "acceptEdits",
         }
 
-        if self.base_url:
-            cfg["env"] = {"ANTHROPIC_BASE_URL": self.base_url}
+        if base_url:
+            cfg["env"] = {"ANTHROPIC_BASE_URL": base_url}
 
         cfg.update(self.extra_config)
         return cfg
@@ -753,68 +826,16 @@ class ClaudeCodeRunner(RunnerBase):
 
 
 class IFlowRunner(RunnerBase):
-    """Runner for iFlow CLI."""
+    """Runner for iFlow CLI — DEPRECATED, replaced by Hermes/nanobot."""
 
     def framework_name(self) -> str:
         return "iflow"
 
-    def make_framework_config(self) -> dict[str, Any]:
-        mcp: dict[str, dict[str, Any]] = {}
-
-        for server in self.mcp_servers:
-            if not server.enabled:
-                continue
-
-            if server.transport == "stdio":
-                mcp[server.name] = {
-                    "command": server.command,
-                    "args": server.args,
-                }
-            elif server.url:
-                mcp[server.name] = {"url": server.url}
-
-        cfg: dict[str, Any] = {
-            "baseUrl": self.base_url,
-            "modelName": self.model,
-            "mcpServers": mcp,
-        }
-
-        cfg.update(self.extra_config)
-        return cfg
-
-    def write_framework_config(self, config: dict[str, Any]) -> None:
-        content = json.dumps(config, indent=2)
-        path = self.framework_config_path() or "/workspace/.openart/home/.iflow/settings.json"
-        self.container.write_text_file(path, content, env=self.runtime_env)
-
-    def framework_config_path(self) -> str | None:
-        home_dir = self.runtime_env.get("HOME", "/workspace/.openart/home")
-        return f"{home_dir}/.iflow/settings.json"
-
     def render_command(self, task_instruction_file: str) -> str:
-        return self.command.template.replace("{{task_instruction_file}}", task_instruction_file)
+        raise NotImplementedError("iFlow is deprecated")
 
-    def parse_output(
-        self,
-        run_id: str,
-        stdout: str,
-        stderr: str,
-        exit_code: int,
-    ) -> list[TraceEvent]:
-        return [
-            TraceEvent(
-                run_id=run_id,
-                source_role=self.role,
-                event_type="message",
-                timestamp=time.time(),
-                message="iflow_output",
-                payload={
-                    "stdout": stdout,
-                    "stderr": stderr,
-                    "exit_code": exit_code,
-                },
-            )
-        ]
+    def parse_output(self, run_id: str, stdout: str, stderr: str, exit_code: int) -> list[TraceEvent]:
+        raise NotImplementedError("iFlow is deprecated")
 
 
 class GenericCLIRunner(RunnerBase):
@@ -859,14 +880,132 @@ class GenericCLIRunner(RunnerBase):
         ]
 
 
+class PromptCLIRunner(RunnerBase):
+    """Generic prompt-first CLI runner.
+
+    Supports two prompt transport modes:
+    - stdin (default): pipe the composed prompt to the command
+    - argv: pass the composed prompt as a CLI argument
+    """
+
+    _PROMPT_TRANSPORT_KEY = "prompt_transport"
+    _PROMPT_FLAG_KEY = "prompt_flag"
+
+    def framework_name(self) -> str:
+        return "prompt_cli"
+
+    def _prompt_transport(self) -> str:
+        value = str(self.extra_config.get(self._PROMPT_TRANSPORT_KEY, "") or "").strip().lower()
+        if not value:
+            return "stdin"
+        if value not in {"stdin", "argv"}:
+            raise ValueError(f"invalid prompt transport: {value}")
+        return value
+
+    def _prompt_flag(self) -> str:
+        return str(self.extra_config.get(self._PROMPT_FLAG_KEY, "") or "-p").strip()
+
+    def make_framework_config(self) -> dict[str, Any]:
+        config = {
+            self._PROMPT_TRANSPORT_KEY: self._prompt_transport(),
+            self._PROMPT_FLAG_KEY: self._prompt_flag(),
+        }
+        for key, value in self.extra_config.items():
+            if key in {self._PROMPT_TRANSPORT_KEY, self._PROMPT_FLAG_KEY}:
+                continue
+            config[key] = value
+        return config
+
+    def write_framework_config(self, config: dict[str, Any]) -> None:
+        content = json.dumps(config, indent=2)
+        path = self.framework_config_path() or f"{self._state_dir()}/prompt_cli_config.json"
+        self.container.write_text_file(path, content, env=self.runtime_env)
+        self._maybe_write_codex_config()
+
+    def framework_config_path(self) -> str | None:
+        return f"{self._state_dir()}/prompt_cli_config.json"
+
+    def _maybe_write_codex_config(self) -> None:
+        template = (self.command.template or "").strip()
+        if "codex" not in template.split():
+            return
+        home = self.runtime_env.get("HOME", "/tmp/openart/runners/unknown/home")
+        codex_dir = f"{home}/.codex"
+        base_url = self.base_url or self.runtime_env.get("OPENAI_BASE_URL", "")
+        model_name = str(self.model or self.runtime_env.get("OPENAI_MODEL", "") or self.runtime_env.get("OPENART_RUNNER_MODEL", "") or "glm-5").strip() or "glm-5"
+        provider_lines = (
+            'name = "OpenAI Compat"\n'
+            'env_key = "OPENAI_API_KEY"\n'
+            'wire_api = "chat"\n'
+        )
+        if base_url:
+            provider_lines += f'base_url = "{base_url}"\n'
+        config_content = (
+            f'model = "{model_name}"\n'
+            'model_provider = "openai-compat"\n'
+            '\n'
+            '[model_providers.openai-compat]\n'
+            + provider_lines
+        )
+        self.container.ensure_dir(codex_dir, env=self.runtime_env)
+        self.container.write_text_file(
+            f"{codex_dir}/config.toml", config_content, env=self.runtime_env
+        )
+
+    def render_command(self, task_instruction_file: str) -> str:
+        args = self._template_args_without_task_placeholder(["prompt-cli"])
+        if self._prompt_transport() == "argv":
+            prompt_flag = self._prompt_flag()
+            argv_args = list(args)
+            if prompt_flag and prompt_flag not in argv_args:
+                argv_args.append(prompt_flag)
+            return self._render_prompt_cli_command(task_instruction_file, argv_args)
+        return self._render_prompt_cli_stdin_command(task_instruction_file, args)
+
+    def parse_output(
+        self,
+        run_id: str,
+        stdout: str,
+        stderr: str,
+        exit_code: int,
+    ) -> list[TraceEvent]:
+        return [
+            TraceEvent(
+                run_id=run_id,
+                source_role=self.role,
+                event_type="message",
+                timestamp=time.time(),
+                message="prompt_cli_output",
+                payload={
+                    "stdout": stdout,
+                    "stderr": stderr,
+                    "exit_code": exit_code,
+                },
+            )
+        ]
+
+
+def create_default_runner_registry() -> RunnerRegistry:
+    registry = RunnerRegistry()
+    registry.register("claude_code", ClaudeCodeRunner)
+    registry.register("generic_cli", GenericCLIRunner)
+    registry.register("hermes", PromptCLIRunner)
+    registry.register("nanobot", PromptCLIRunner)
+    registry.register("opencode", OpenCodeRunner)
+    registry.register("pi", PromptCLIRunner)
+    registry.register("prompt_cli", PromptCLIRunner)
+    return registry
+
+
 # Import RunnerContainer for type hints
 from framework.components.containers import RunnerContainer
 
 __all__ = [
     "ClaudeCodeRunner",
     "GenericCLIRunner",
-    "IFlowRunner",
     "OpenCodeRunner",
+    "PromptCLIRunner",
     "RunnerBase",
     "RunnerRegistry",
+    "create_default_runner_registry",
 ]

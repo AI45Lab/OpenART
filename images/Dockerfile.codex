@@ -1,7 +1,7 @@
 FROM python:3.11-slim-bookworm
 
 LABEL maintainer="OpenART Framework"
-LABEL description="OpenART runner image with Claude Code installed"
+LABEL description="OpenART runner image with Codex CLI installed"
 LABEL version="1.0.0"
 
 ARG PIP_INDEX_URL=https://pypi.org/simple
@@ -13,7 +13,7 @@ ENV PYTHONUNBUFFERED=1
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 ENV VIRTUAL_ENV=/opt/openart-venv
-ENV PATH="${VIRTUAL_ENV}/bin:/root/.local/bin:${PATH}"
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 ENV PIP_INDEX_URL=${PIP_INDEX_URL}
 ENV PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}
 ENV PIP_DEFAULT_TIMEOUT=120
@@ -82,12 +82,11 @@ RUN python -m venv --copies ${VIRTUAL_ENV} \
     && ln -sf ${VIRTUAL_ENV}/bin/pip /usr/local/bin/pip3 \
     && printf 'export VIRTUAL_ENV=%s\nexport PATH="%s/bin:$PATH"\n' "${VIRTUAL_ENV}" "${VIRTUAL_ENV}" > /etc/profile.d/openart-python.sh
 
-RUN npm install -g @anthropic-ai/claude-code \
-    && command -v claude \
-    && claude --version
+RUN npm install -g @openai/codex \
+    && command -v codex \
+    && codex --version
 
 COPY openagentsafety_utils/scripts/ /opt/openart-tools/scripts/
-COPY scripts/anthropic_proxy.py /opt/openart-tools/scripts/anthropic_proxy.py
 
 RUN mkdir -p /workspace && chmod 777 /workspace
 WORKDIR /workspace

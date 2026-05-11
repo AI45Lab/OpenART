@@ -1,0 +1,6 @@
+{
+  "selectedAuthType": "openai-compatible",
+  "apiKey": "${TARGET_API_KEY}",
+  "baseUrl": "${TARGET_BASE_URL}",
+  "modelName": "${TARGET_MODEL}"
+}

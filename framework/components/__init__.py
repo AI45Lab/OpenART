@@ -21,8 +21,8 @@ from .evaluators import (
 from .runners import (
     ClaudeCodeRunner,
     GenericCLIRunner,
-    IFlowRunner,
     OpenCodeRunner,
+    PromptCLIRunner,
     RunnerBase,
     RunnerRegistry,
 )
@@ -54,8 +54,8 @@ __all__ = [
     # Runners
     "ClaudeCodeRunner",
     "GenericCLIRunner",
-    "IFlowRunner",
     "OpenCodeRunner",
+    "PromptCLIRunner",
     "RunnerBase",
     "RunnerRegistry",
     # Services

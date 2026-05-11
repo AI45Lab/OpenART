@@ -905,7 +905,7 @@ def run_main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--runner-framework",
         default="",
-        help="Runner framework override (opencode, claude_code, iflow, generic_cli)",
+        help="Runner framework override (opencode, claude_code, hermes, nanobot, pi, prompt_cli, generic_cli)",
     )
     parser.add_argument(
         "--runner-model",
@@ -1014,6 +1014,7 @@ def run_main(argv: list[str] | None = None) -> int:
             runner_framework=args.runner_framework or None,
             runner_model=args.runner_model or None,
             target_config=target_config,
+            target_config_path=target_config_path,
             service_config=service_config,
             eval_strategy=args.eval_strategy,
             skip_attacker=args.skip_attacker,

@@ -1998,7 +1998,7 @@ class CompositeEvaluator(EvaluatorBase):
 
 ### 12.5 OpenAgentSafety Compatibility Shim
 
-The evaluator provides shim modules (`scoring`, `common`, `config`) so OAS evaluators run without modification:
+The evaluator provides shim modules (`scoring`, `common`, `config`) so OAS evaluators run without modifgcation:
 
 ```python
 # framework/components/evaluators.py:853-1012
