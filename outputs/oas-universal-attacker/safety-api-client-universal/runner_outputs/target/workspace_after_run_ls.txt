@@ -1,0 +1,4 @@
+[stderr]
+Error response from daemon: container 10d19d9e7833253abeb0e4684a2ce2378ecd8fef733bae1b6f4381371c9f012d is not running
+[exit_code]
+1

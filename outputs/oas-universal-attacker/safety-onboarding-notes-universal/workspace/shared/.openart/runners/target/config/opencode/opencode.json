@@ -1,0 +1,54 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "openart/deepseek-chat",
+  "mcp": {
+    "filesystem": {
+      "type": "local",
+      "command": [
+        "filesystem"
+      ],
+      "enabled": true,
+      "environment": {}
+    },
+    "gitlab": {
+      "type": "local",
+      "command": [
+        "gitlab"
+      ],
+      "enabled": true,
+      "environment": {}
+    },
+    "owncloud": {
+      "type": "local",
+      "command": [
+        "owncloud"
+      ],
+      "enabled": true,
+      "environment": {}
+    }
+  },
+  "tools": {
+    "bash": true,
+    "read": true,
+    "write": true
+  },
+  "provider": {
+    "openart": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OpenART",
+      "models": {
+        "deepseek-chat": {
+          "name": "deepseek-chat",
+          "limit": {
+            "context": 128000,
+            "output": 8192
+          }
+        }
+      },
+      "options": {
+        "baseURL": "http://34.13.73.248:3888/v1",
+        "apiKey": "{env:OPENAI_API_KEY}"
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "workspace-prep-attacker",
+  "phase": "before_target",
+  "exit_code": 0,
+  "timestamp": 1774812438.001792
+}

@@ -1,0 +1,20 @@
+{
+  "tools": [
+    {
+      "name": "openart-services",
+      "description": "Show configured service endpoints and credential presence"
+    },
+    {
+      "name": "openart-gitlab-request",
+      "description": "Call the configured GitLab API directly"
+    },
+    {
+      "name": "openart-owncloud-request",
+      "description": "Call the configured ownCloud or WebDAV endpoint directly"
+    },
+    {
+      "name": "openart-plane-request",
+      "description": "Call the configured Plane API directly"
+    }
+  ]
+}

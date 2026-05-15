@@ -1,0 +1,6 @@
+[openart] created container name=openart-task-actual-framework-check id=93b1d1cf2436101640a1e7d9ec198efaee691ddfd174e8e3ae19e8171c44b680 image=openart/task-base:latest
+[openart] started container name=openart-task-actual-framework-check id=93b1d1cf2436101640a1e7d9ec198efaee691ddfd174e8e3ae19e8171c44b680
+[openart] removed container name=openart-target-actual-framework-check id=openart-target-actual-framework-check
+[openart] removed container name=openart-attack-actual-framework-check id=openart-attack-actual-framework-check
+[openart] stopped container name=openart-task-actual-framework-check id=93b1d1cf2436101640a1e7d9ec198efaee691ddfd174e8e3ae19e8171c44b680
+[openart] removed container name=openart-task-actual-framework-check id=93b1d1cf2436101640a1e7d9ec198efaee691ddfd174e8e3ae19e8171c44b680

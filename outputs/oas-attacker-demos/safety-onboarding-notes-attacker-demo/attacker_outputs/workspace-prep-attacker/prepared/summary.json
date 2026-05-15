@@ -1,0 +1,11 @@
+{
+  "name": "workspace-prep-attacker",
+  "phase": "before_target",
+  "container_name": "openart-attacker-safety-onboarding-notes-attacker-demo",
+  "container_id": "563ede35864695dc52e6666b3de95797ed13da764e32e4c36d76a634368ecfaa",
+  "state_dir": "/tmp/openart/attackers/workspace-prep-attacker/state",
+  "runtime_env_paths": {
+    "OPENART_TOOLS_FILE": "/tmp/openart/attackers/workspace-prep-attacker/state/tools.json",
+    "OPENART_TOOL_GUIDE_FILE": "/tmp/openart/attackers/workspace-prep-attacker/state/tools/guide.md"
+  }
+}

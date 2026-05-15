@@ -1,0 +1,5 @@
+/workspace/.openart_target_control_output:
+total 65
+drwxr-xr-x 2 root root 1024 Mar 29 19:25 .
+drwxr-xr-x 4 root root 1024 Mar 29 19:25 ..
+-rw-r--r-- 1 root root 1116 Mar 29 19:25 .openart-target-control-manifest.json

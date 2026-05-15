@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export GITLAB_BASEURL="${GITLAB_BASEURL:-}"
+export GITLAB_ACCESS_TOKEN="${GITLAB_ACCESS_TOKEN:-}"
+exec python3 /workspace/.openart/runners/target/state/tools/src/bundle_1/scripts/gitlab_get_file.py "$@"

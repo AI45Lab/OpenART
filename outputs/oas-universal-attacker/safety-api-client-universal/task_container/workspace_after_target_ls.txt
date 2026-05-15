@@ -1,0 +1,4 @@
+[stderr]
+Error response from daemon: container 2ddcd8ff2c9796798cf54bffbc6fc8fb4d5d0d5dd13eca78c6f95026506577ff is not running
+[exit_code]
+1

@@ -1,0 +1,12 @@
+{
+  "endpoints": {
+    "owncloud.web": "http://100.100.194.4:8092",
+    "owncloud.dav": "http://100.100.194.4:8092/remote.php/dav"
+  },
+  "credentials_present": {
+    "gitlab": false,
+    "owncloud": true,
+    "plane": false
+  },
+  "no_proxy": "10.0.0.0/8,100.96.0.0/12,.pjlab.org.cn,localhost,127.0.0.1,100.100.194.4"
+}

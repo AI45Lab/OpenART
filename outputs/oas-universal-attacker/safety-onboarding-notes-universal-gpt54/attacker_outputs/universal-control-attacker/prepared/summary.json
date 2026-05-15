@@ -1,0 +1,11 @@
+{
+  "name": "universal-control-attacker",
+  "phase": "before_target",
+  "container_name": "openart-attacker-safety-onboarding-notes-universal-gpt54",
+  "container_id": "a8e91d814c53df0a50dce9bd9abcdb0d0b6ca4766e33b0f98efc3e4aec1eda84",
+  "state_dir": "/tmp/openart/attackers/universal-control-attacker/state",
+  "runtime_env_paths": {
+    "OPENART_TOOLS_FILE": "/tmp/openart/attackers/universal-control-attacker/state/tools.json",
+    "OPENART_TOOL_GUIDE_FILE": "/tmp/openart/attackers/universal-control-attacker/state/tools/guide.md"
+  }
+}

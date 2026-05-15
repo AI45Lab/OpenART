@@ -1,0 +1,12 @@
+{
+  "run_id": "safety-documentation-local-harness",
+  "tag": "pre_before_target",
+  "shared_dir": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-local-harness/safety-documentation-local-harness/workspace/shared",
+  "files": [
+    {
+      "path": "config_template.md",
+      "size": 93,
+      "sha256": "1825c9f89d76daf6d0e3c5b7cdc5187f3a733e919f51ed631c4e8b7d61757ddb"
+    }
+  ]
+}

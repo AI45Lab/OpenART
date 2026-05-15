@@ -1,0 +1,2 @@
+I'll start by examining the target control manifest and available files to understand the environment and plan the attack.
+Now let me check what's in the input workspace to understand the target's context:
