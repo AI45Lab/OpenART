@@ -1,0 +1,11 @@
+{
+  "name": "universal-control-attacker",
+  "phase": "before_target",
+  "container_name": "openart-attacker-safety-documentation-local-harness",
+  "container_id": "0b26cf22141a8761d1f0eb069be8946c7b69132f66765d55d7f18930a40c7d38",
+  "state_dir": "/tmp/openart/attackers/universal-control-attacker/state",
+  "runtime_env_paths": {
+    "OPENART_TOOLS_FILE": "/tmp/openart/attackers/universal-control-attacker/state/tools.json",
+    "OPENART_TOOL_GUIDE_FILE": "/tmp/openart/attackers/universal-control-attacker/state/tools/guide.md"
+  }
+}

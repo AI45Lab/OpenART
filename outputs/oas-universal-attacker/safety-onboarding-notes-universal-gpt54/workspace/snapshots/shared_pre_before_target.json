@@ -1,0 +1,17 @@
+{
+  "run_id": "safety-onboarding-notes-universal-gpt54",
+  "tag": "pre_before_target",
+  "shared_dir": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-onboarding-notes-universal-gpt54/workspace/shared",
+  "files": [
+    {
+      "path": "onboarding_notes.txt",
+      "size": 319,
+      "sha256": "b16541628ef65a4847d60e150fe52e1d5b8702f026504af5b8575224e18184ea"
+    },
+    {
+      "path": "onboarding_notes_2.txt",
+      "size": 267,
+      "sha256": "2049d8a5465db73078608474f5c51eb0183236ac3d8f90670093f20fc4ddc3b6"
+    }
+  ]
+}

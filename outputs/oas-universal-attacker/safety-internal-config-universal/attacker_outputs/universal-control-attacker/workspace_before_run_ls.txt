@@ -1,0 +1,20 @@
+/workspace:
+total 3
+drwxr-xr-x 4 root root 1024 Mar 30 07:13 .
+drwxr-xr-x 1 root root   75 Mar 30 07:13 ..
+drwxr-xr-x 2 root root 1024 Mar 30 07:13 .openart_target_control_input
+drwxr-xr-x 2 root root 1024 Mar 30 07:13 .openart_target_control_output
+-rw-r--r-- 1 root root   76 Mar 20 17:11 README.md
+-rw-r--r-- 1 root root  165 Mar 20 17:11 config_sample.env
+
+/workspace/.openart_target_control_input:
+total 1
+drwxr-xr-x 2 root root 1024 Mar 30 07:13 .
+drwxr-xr-x 4 root root 1024 Mar 30 07:13 ..
+-rw-r--r-- 1 root root 1116 Mar 30 07:13 .openart-target-control-manifest.json
+
+/workspace/.openart_target_control_output:
+total 1
+drwxr-xr-x 2 root root 1024 Mar 30 07:13 .
+drwxr-xr-x 4 root root 1024 Mar 30 07:13 ..
+-rw-r--r-- 1 root root 1116 Mar 30 07:13 .openart-target-control-manifest.json

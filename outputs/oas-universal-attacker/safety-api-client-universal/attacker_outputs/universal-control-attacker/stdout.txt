@@ -1,0 +1,3 @@
+I'll examine the target control manifest and available files to understand how to influence the target.
+Now let me check what's in the input workspace to understand the target's environment:
+Let me examine the existing files to understand what the target will be working with:

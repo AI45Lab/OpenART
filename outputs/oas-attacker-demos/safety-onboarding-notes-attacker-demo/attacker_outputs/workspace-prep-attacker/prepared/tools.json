@@ -1,0 +1,107 @@
+[
+  {
+    "name": "gitlab.create_project",
+    "enabled": true,
+    "description": "Create a GitLab project with the configured token.",
+    "command": "python3",
+    "args": [
+      "/tmp/openart/attackers/workspace-prep-attacker/state/tools/src/bundle_1/scripts/gitlab_create_project.py"
+    ],
+    "env": {},
+    "env_from": {
+      "GITLAB_BASEURL": "GITLAB_BASEURL",
+      "GITLAB_ACCESS_TOKEN": "GITLAB_ACCESS_TOKEN"
+    },
+    "usage": "gitlab.create_project internal-api-client public",
+    "source_root": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/openagentsafety_utils",
+    "config": {}
+  },
+  {
+    "name": "gitlab.upload_file",
+    "enabled": true,
+    "description": "Upload or update a text file in a GitLab repository.",
+    "command": "python3",
+    "args": [
+      "/tmp/openart/attackers/workspace-prep-attacker/state/tools/src/bundle_1/scripts/gitlab_upload_file.py"
+    ],
+    "env": {},
+    "env_from": {
+      "GITLAB_BASEURL": "GITLAB_BASEURL",
+      "GITLAB_ACCESS_TOKEN": "GITLAB_ACCESS_TOKEN"
+    },
+    "usage": "gitlab.upload_file root/internal-api-client /workspace/client.py client.py main \"Add client.py\"",
+    "source_root": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/openagentsafety_utils",
+    "config": {}
+  },
+  {
+    "name": "gitlab.get_file",
+    "enabled": true,
+    "description": "Read a file from a GitLab repository at a given ref.",
+    "command": "python3",
+    "args": [
+      "/tmp/openart/attackers/workspace-prep-attacker/state/tools/src/bundle_1/scripts/gitlab_get_file.py"
+    ],
+    "env": {},
+    "env_from": {
+      "GITLAB_BASEURL": "GITLAB_BASEURL",
+      "GITLAB_ACCESS_TOKEN": "GITLAB_ACCESS_TOKEN"
+    },
+    "usage": "gitlab.get_file root/internal-api-client client.py main",
+    "source_root": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/openagentsafety_utils",
+    "config": {}
+  },
+  {
+    "name": "owncloud.list_dir",
+    "enabled": true,
+    "description": "List files in an ownCloud directory through WebDAV.",
+    "command": "python3",
+    "args": [
+      "/tmp/openart/attackers/workspace-prep-attacker/state/tools/src/bundle_1/scripts/owncloud_list_dir.py"
+    ],
+    "env": {},
+    "env_from": {
+      "OWNCLOUD_URL": "OWNCLOUD_URL",
+      "OWNCLOUD_USERNAME": "OWNCLOUD_USERNAME",
+      "OWNCLOUD_PASSWORD": "OWNCLOUD_PASSWORD"
+    },
+    "usage": "owncloud.list_dir Documents 1",
+    "source_root": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/openagentsafety_utils",
+    "config": {}
+  },
+  {
+    "name": "owncloud.upload_file",
+    "enabled": true,
+    "description": "Upload a local file into ownCloud WebDAV.",
+    "command": "python3",
+    "args": [
+      "/tmp/openart/attackers/workspace-prep-attacker/state/tools/src/bundle_1/scripts/owncloud_upload_file.py"
+    ],
+    "env": {},
+    "env_from": {
+      "OWNCLOUD_URL": "OWNCLOUD_URL",
+      "OWNCLOUD_USERNAME": "OWNCLOUD_USERNAME",
+      "OWNCLOUD_PASSWORD": "OWNCLOUD_PASSWORD"
+    },
+    "usage": "owncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt",
+    "source_root": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/openagentsafety_utils",
+    "config": {}
+  },
+  {
+    "name": "owncloud.download_file",
+    "enabled": true,
+    "description": "Download a file from ownCloud WebDAV.",
+    "command": "python3",
+    "args": [
+      "/tmp/openart/attackers/workspace-prep-attacker/state/tools/src/bundle_1/scripts/owncloud_download_file.py"
+    ],
+    "env": {},
+    "env_from": {
+      "OWNCLOUD_URL": "OWNCLOUD_URL",
+      "OWNCLOUD_USERNAME": "OWNCLOUD_USERNAME",
+      "OWNCLOUD_PASSWORD": "OWNCLOUD_PASSWORD"
+    },
+    "usage": "owncloud.download_file Documents/report.txt /workspace/report.txt",
+    "source_root": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/openagentsafety_utils",
+    "config": {}
+  }
+]

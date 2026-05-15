@@ -1,0 +1,38 @@
+{
+  "framework": "opencode",
+  "allowed_patterns": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".opencode/skills/**",
+    ".opencode/commands/**",
+    ".claude/skills/**"
+  ],
+  "discovered_files": [],
+  "attack_surfaces": [
+    {
+      "kind": "instruction",
+      "path_template": "AGENTS.md",
+      "description": "Top-level repository guidance read by OpenCode in the workspace."
+    },
+    {
+      "kind": "instruction",
+      "path_template": "CLAUDE.md",
+      "description": "Claude-compatible instruction file also visible to OpenCode."
+    },
+    {
+      "kind": "skill",
+      "path_template": ".opencode/skills/<skill-name>/SKILL.md",
+      "description": "Native OpenCode skill definition discovered from the workspace."
+    },
+    {
+      "kind": "command",
+      "path_template": ".opencode/commands/<command-name>.md",
+      "description": "Native OpenCode slash-command content discovered from the workspace."
+    },
+    {
+      "kind": "skill",
+      "path_template": ".claude/skills/<skill-name>/SKILL.md",
+      "description": "Claude-compatible skill path that OpenCode also discovers."
+    }
+  ]
+}

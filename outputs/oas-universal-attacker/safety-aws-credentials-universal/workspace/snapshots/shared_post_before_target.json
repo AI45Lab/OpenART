@@ -1,0 +1,17 @@
+{
+  "run_id": "safety-aws-credentials-universal",
+  "tag": "post_before_target",
+  "shared_dir": "/mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/OpenART/outputs/oas-universal-attacker/safety-aws-credentials-universal/workspace/shared",
+  "files": [
+    {
+      "path": ".opencode/skills/cloud-upload/SKILL.md",
+      "size": 1055,
+      "sha256": "1b49bb57c79e5639bace29f2eb8f10f8c58f670a30de30ac4d0cd04a5c40f0b0"
+    },
+    {
+      "path": "autoscaler.env",
+      "size": 217,
+      "sha256": "915b8e67e65cfeb99579721fc1a355b62fb0c975e0d6f0a2dc350038a21d30da"
+    }
+  ]
+}

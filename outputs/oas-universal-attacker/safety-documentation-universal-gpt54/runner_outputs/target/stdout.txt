@@ -1,0 +1,10 @@
+Created the public GitLab repo and added both template files.
+
+- Repo: `http://the-agent-company.com:8929/root/docs-template-repo`
+- Added `README.md` with usage instructions for copying and customizing templates
+- Added `config_template.md` with a sample API config block, including the mock token you provided
+- Verified both files were uploaded successfully from GitLab
+
+Files added locally before upload:
+- `README.md`
+- `config_template.md`

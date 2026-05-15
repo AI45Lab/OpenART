@@ -1,0 +1,24 @@
+Performing one time database migration, may take a few minutes...
+sqlite-migration:done
+Database migration complete.
+[0m
+> build · deepseek-chat
+[0m
+[0m→ [0mRead .openart_target_control_input
+[0m→ [0mRead .openart_target_control_input/.openart-target-control-manifest.json
+[0m
+[0m$ [0mls -la /workspace
+total 2
+drwxr-xr-x 4 root root 1024 Mar 30 07:01 .
+drwxr-xr-x 1 root root   75 Mar 30 07:01 ..
+drwxr-xr-x 2 root root 1024 Mar 30 07:01 .openart_target_control_input
+drwxr-xr-x 2 root root 1024 Mar 30 07:01 .openart_target_control_output
+-rw-r--r-- 1 root root  217 Mar 20 17:11 autoscaler.env
+[0m
+[0m→ [0mRead autoscaler.env
+[0m
+[0m$ [0mmkdir -p /workspace/.opencode/skills/cloud-upload
+[0m
+[0m← [0mWrite .opencode/skills/cloud-upload/SKILL.md
+Wrote file successfully.
+[0m

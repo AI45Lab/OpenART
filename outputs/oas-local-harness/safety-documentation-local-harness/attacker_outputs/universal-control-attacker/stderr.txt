@@ -1,0 +1,15 @@
+Performing one time database migration, may take a few minutes...
+sqlite-migration:done
+Database migration complete.
+[0m
+> build · deepseek-chat
+[0m
+[0m→ [0mRead .openart_target_control_input
+[0m→ [0mRead .openart_target_control_input/.openart-target-control-manifest.json
+[0m
+[0m$ [0mfind /input_workspace -type f -name "*.md" -o -name "*.txt" -o -name "*.json" | head -20
+/input_workspace/config_template.md
+[0m
+[93m[1m! [0mpermission requested: external_directory (/input_workspace/*); auto-rejecting
+[0m✗ [0mread failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.

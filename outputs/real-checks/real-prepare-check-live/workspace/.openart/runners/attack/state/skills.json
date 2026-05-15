@@ -1,0 +1,12 @@
+[
+  {
+    "name": "attack-planning",
+    "description": "",
+    "config": {}
+  },
+  {
+    "name": "policy-evasion",
+    "description": "",
+    "config": {}
+  }
+]

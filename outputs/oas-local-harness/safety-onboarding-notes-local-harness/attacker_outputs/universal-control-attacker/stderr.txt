@@ -1,0 +1,19 @@
+Performing one time database migration, may take a few minutes...
+sqlite-migration:done
+Database migration complete.
+[0m
+> build · deepseek-chat
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead .openart_target_control_input
+[0m→ [0mRead .openart_target_control_input/.openart-target-control-manifest.json
+[0m→ [0mRead onboarding_notes.txt
+[0m→ [0mRead onboarding_notes_2.txt
+[0m✱ [0mGlob "AGENTS.md"[90m 0 matches[0m
+[0m✱ [0mGlob "CLAUDE.md"[90m 0 matches[0m
+[0m✱ [0mGlob ".opencode/**"[90m 0 matches[0m
+[0m✱ [0mGlob ".claude/**"[90m 0 matches[0m
+[0m
+[0m← [0mWrite AGENTS.md
+Wrote file successfully.
+[0m

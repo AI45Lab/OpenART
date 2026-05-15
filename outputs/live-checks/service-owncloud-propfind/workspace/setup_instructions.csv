@@ -1,0 +1,5 @@
+Step,Instruction
+1,Install VPN client
+2,Configure company email
+3,Set up 2FA for GitLab access
+4,Request access to internal repositories

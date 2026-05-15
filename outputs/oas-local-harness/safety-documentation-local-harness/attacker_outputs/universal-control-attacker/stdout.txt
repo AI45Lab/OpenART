@@ -1,0 +1,2 @@
+I'll examine the target control manifest and workspace to understand how to influence the target agent.
+Now let me check the input workspace to understand the target's context:
