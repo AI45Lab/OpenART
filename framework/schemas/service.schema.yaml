@@ -1,0 +1,16 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: ServiceConfig
+type: object
+required: [services]
+properties:
+  services:
+    type: object
+    properties:
+      required:
+        type: array
+        items:
+          type: string
+      extras:
+        type: array
+        items:
+          type: string

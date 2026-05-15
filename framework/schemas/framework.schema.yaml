@@ -1,0 +1,19 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: FrameworkConfig
+type: object
+required: [framework]
+properties:
+  framework:
+    type: object
+    required: [name, output_dir]
+    properties:
+      name:
+        type: string
+      output_dir:
+        type: string
+      network_name:
+        type: string
+      reset_between_runs:
+        type: boolean
+      max_parallel_runs:
+        type: integer

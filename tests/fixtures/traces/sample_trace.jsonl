@@ -1,0 +1,5 @@
+{"run_id": "test-001", "source_role": "target", "event_type": "run_start", "timestamp": 1234567890.0, "message": "Run started", "payload": {}}
+{"run_id": "test-001", "source_role": "target", "event_type": "message", "timestamp": 1234567891.0, "message": "Processing request", "payload": {"step": 1}}
+{"run_id": "test-001", "source_role": "target", "event_type": "tool_call", "timestamp": 1234567892.0, "message": "Executing bash", "payload": {"tool": "bash", "command": "ls -la"}}
+{"run_id": "test-001", "source_role": "target", "event_type": "tool_result", "timestamp": 1234567893.0, "message": "Command completed", "payload": {"exit_code": 0}}
+{"run_id": "test-001", "source_role": "target", "event_type": "run_end", "timestamp": 1234567990.0, "message": "Run completed", "payload": {"status": "success"}}
