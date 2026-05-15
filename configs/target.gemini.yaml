@@ -1,0 +1,44 @@
+target:
+  framework: prompt_cli
+  control_plane: gemini
+  control_plane_mount_mode: mounted
+  runner_image: openart/gemini:latest
+  launch_cmd: gemini
+  model_integration:
+    env:
+      GEMINI_API_KEY: ${TARGET_API_KEY}
+      GOOGLE_GEMINI_BASE_URL: ${TARGET_BASE_URL}
+      GEMINI_MODEL: ${TARGET_MODEL}
+  attack_surfaces:
+  - vector: gemini_md
+    kind: instruction
+    path_template: GEMINI.md or <subdir>/GEMINI.md
+    description: Gemini CLI context file discovered from the workspace hierarchy.
+  - vector: gemini_skill
+    kind: skill
+    path_template: .gemini/skills/<skill-name>/SKILL.md
+    description: Gemini CLI skill definition discovered from the workspace.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard alias supported by Gemini CLI.
+  - vector: gemini_command
+    kind: command
+    path_template: .gemini/commands/<command-name>.toml
+    description: Gemini CLI custom command definition discovered from the workspace.
+  - vector: model_config
+    kind: configuration
+    path_template: HOME/.gemini/settings.json
+    injection_mode: replace
+    description: Gemini CLI settings JSON — controls model, safety settings.
+  tools:
+  - bash
+  - read
+  - write
+  mcp_servers:
+  - filesystem
+  - gitlab
+  - owncloud
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: -p

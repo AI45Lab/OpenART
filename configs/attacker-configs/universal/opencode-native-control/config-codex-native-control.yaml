@@ -1,0 +1,31 @@
+attacker:
+  name: universal-control-attacker-codex-native
+  phase: before_target
+  instruction: /attacker_config/attacker.md
+  image: openart/opencode:latest
+  cmd: python3
+  target_control_plane: true
+  feedback_loop: true
+  vector_permissions:
+    - workspace_files
+    - agents_md
+    - agents_override_md
+    - agents_skill
+  env_from:
+    OPENAI_API_KEY: OPENAI_API_KEY
+    OPENAI_BASE_URL: OPENAI_BASE_URL
+    OPENAI_MODEL: OPENAI_MODEL
+  args:
+    - /attacker_config/run_opencode_attacker.py
+    - --target-instruction
+    - "{{target_instruction_file}}"
+    - --attacker-instruction
+    - "{{attacker_instruction_file}}"
+    - --input-workspace
+    - "{{input_workspace_dir}}"
+    - --output-workspace
+    - "{{output_workspace_dir}}"
+    - --input-target-control
+    - "{{input_target_control_dir}}"
+    - --output-target-control
+    - "{{output_target_control_dir}}"

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "openart/${TARGET_MODEL}",
+  "provider": {
+    "openart": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OpenART",
+      "models": {
+        "glm-5": {
+          "name": "glm-5"
+        }
+      },
+      "options": {
+        "baseURL": "${TARGET_BASE_URL}",
+        "apiKey": "{env:OPENAI_API_KEY}"
+      }
+    }
+  }
+}

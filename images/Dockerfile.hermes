@@ -1,0 +1,15 @@
+FROM openart/opencode:latest
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with Hermes Agent installed"
+LABEL version="1.0.0"
+
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && pip install --no-cache-dir "hermes-agent @ git+https://github.com/NousResearch/hermes-agent.git" \
+    && command -v hermes && hermes --version \
+    && apt-get purge -y git && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

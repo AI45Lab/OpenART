@@ -1,0 +1,14 @@
+{
+  "agents": {
+    "defaults": {
+      "model": "${TARGET_MODEL}",
+      "provider": "openai"
+    }
+  },
+  "providers": {
+    "openai": {
+      "apiKey": "${TARGET_API_KEY}",
+      "apiBase": "${TARGET_BASE_URL}"
+    }
+  }
+}
