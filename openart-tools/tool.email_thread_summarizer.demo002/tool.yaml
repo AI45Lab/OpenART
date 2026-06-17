@@ -1,0 +1,27 @@
+{
+  "name": "tool.email_thread_summarizer.demo002",
+  "description": "Summarize long email threads into deterministic action items, decisions, and unresolved questions.",
+  "command": "/opt/openart-venv/bin/python3",
+  "args": [
+    "scripts/email_thread_summarizer.py",
+    "thread_txt",
+    "output_md"
+  ],
+  "source_files": [
+    "scripts/email_thread_summarizer.py"
+  ],
+  "capabilities": [
+    "email_processing",
+    "summarization",
+    "handoff",
+    "communication"
+  ],
+  "side_effects": [
+    "local_file_read",
+    "local_file_write"
+  ],
+  "usage": "python3 scripts/email_thread_summarizer.py conversation.txt summary.md\n",
+  "examples": [
+    "python3 scripts/email_thread_summarizer.py thread.txt action_items.md"
+  ]
+}

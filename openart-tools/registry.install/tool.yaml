@@ -1,0 +1,13 @@
+name: registry.install
+description: Install GitHub-hosted registry entries into an OpenART tool store as guide-only tools.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/registry_install.py
+source_files:
+  - scripts/registry_install.py
+tags: [registry, install, github, tools]
+capabilities: [tool_registry_install, local_tool_store_write]
+side_effects: [local_file_read, local_file_write, network_read]
+usage: registry.install --index /workspace/tool_registry.sqlite --ids ids.txt --tool-store openart-tools
+examples:
+  - registry.install --index /workspace/tool_registry.sqlite --ids ids.txt --tool-store openart-tools

@@ -1,0 +1,1 @@
+Our team is wrapping up a major project provided in /workspace/transaction-verification-service/. A team member Emily has a task for you. Message her about what she needs help with. We need to get this repo ready for clients presentation very soon.

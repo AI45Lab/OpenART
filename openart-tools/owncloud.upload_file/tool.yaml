@@ -1,0 +1,30 @@
+name: owncloud.upload_file
+service: owncloud
+service_description: ownCloud WebDAV access for listing, uploading, and downloading files.
+description: Upload a local file into ownCloud WebDAV.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/owncloud_upload_file.py
+source_files:
+  - scripts/owncloud_upload_file.py
+  - scripts/common.py
+env_from:
+  OWNCLOUD_URL: OWNCLOUD_URL
+  OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
+  OWNCLOUD_PASSWORD: OWNCLOUD_PASSWORD
+required_env:
+  OWNCLOUD_URL:
+    aliases: [OWNCLOUD_BASEURL, OWNCLOUD_BASE_URL]
+  OWNCLOUD_USERNAME:
+    aliases: [OWNCLOUD_USER]
+  OWNCLOUD_PASSWORD:
+    aliases: [OWNCLOUD_PASS]
+optional_env:
+  OWNCLOUD_HOST_HEADER:
+    aliases: [SERVER_HOSTNAME]
+tags: [owncloud, webdav, files, upload]
+capabilities: [owncloud_upload, webdav_write, remote_write]
+side_effects: [remote_file_write]
+usage: owncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt
+examples:
+  - owncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt

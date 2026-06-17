@@ -1,0 +1,912 @@
+{
+  "capability_groups": {
+    "availability_matching": [
+      "tool.calendar_slot_planner.demo003"
+    ],
+    "calendar": [
+      "tool.calendar_slot_planner.demo003"
+    ],
+    "commit": [
+      "gitlab.upload_file"
+    ],
+    "communication": [
+      "tool.email_thread_summarizer.demo002"
+    ],
+    "csv": [
+      "document.extract_pairs_csv",
+      "tool.spreadsheet_joiner.demo001"
+    ],
+    "csv_write": [
+      "document.extract_pairs_csv"
+    ],
+    "data_processing": [
+      "tool.spreadsheet_joiner.demo001"
+    ],
+    "document": [
+      "document.extract_pairs_csv",
+      "document.extract_pdf_text"
+    ],
+    "document_processing": [
+      "document.extract_pairs_csv",
+      "document.extract_pdf_text",
+      "tool.email_thread_summarizer.demo002"
+    ],
+    "download": [
+      "gitlab.get_file",
+      "owncloud.download_file"
+    ],
+    "email_processing": [
+      "tool.email_thread_summarizer.demo002"
+    ],
+    "extract": [
+      "document.extract_pairs_csv",
+      "document.extract_pdf_text"
+    ],
+    "file": [
+      "gitlab.get_file",
+      "gitlab.upload_file"
+    ],
+    "files": [
+      "owncloud.download_file",
+      "owncloud.list_dir",
+      "owncloud.upload_file"
+    ],
+    "filesystem": [
+      "document.extract_pairs_csv",
+      "document.extract_pdf_text",
+      "gitlab.get_file",
+      "gitlab.upload_file",
+      "owncloud.download_file",
+      "owncloud.list_dir",
+      "owncloud.upload_file",
+      "registry.install",
+      "registry.run_tool",
+      "registry.search",
+      "registry.show",
+      "skill.pdf"
+    ],
+    "github": [
+      "registry.install"
+    ],
+    "gitlab": [
+      "gitlab.create_project",
+      "gitlab.get_file",
+      "gitlab.upload_file"
+    ],
+    "gitlab_file_read": [
+      "gitlab.get_file"
+    ],
+    "gitlab_file_upload": [
+      "gitlab.upload_file"
+    ],
+    "gitlab_project_create": [
+      "gitlab.create_project"
+    ],
+    "handoff": [
+      "tool.email_thread_summarizer.demo002"
+    ],
+    "inspect": [
+      "registry.show"
+    ],
+    "install": [
+      "registry.install"
+    ],
+    "instruction_lookup": [
+      "registry.run_tool"
+    ],
+    "list": [
+      "owncloud.list_dir"
+    ],
+    "local_read": [
+      "document.extract_pairs_csv",
+      "document.extract_pdf_text"
+    ],
+    "local_tool_store_write": [
+      "registry.install"
+    ],
+    "local_write": [
+      "gitlab.upload_file",
+      "skill.jupyter-notebook"
+    ],
+    "owncloud": [
+      "owncloud.download_file",
+      "owncloud.list_dir",
+      "owncloud.upload_file"
+    ],
+    "owncloud_download": [
+      "owncloud.download_file"
+    ],
+    "owncloud_list": [
+      "owncloud.list_dir"
+    ],
+    "owncloud_upload": [
+      "owncloud.upload_file"
+    ],
+    "pdf": [
+      "document.extract_pairs_csv",
+      "document.extract_pdf_text"
+    ],
+    "pdf_table_extract": [
+      "document.extract_pairs_csv"
+    ],
+    "pdf_text_extract": [
+      "document.extract_pdf_text"
+    ],
+    "project": [
+      "gitlab.create_project"
+    ],
+    "read": [
+      "gitlab.get_file"
+    ],
+    "read_state": [
+      "gitlab.get_file",
+      "owncloud.download_file",
+      "owncloud.list_dir",
+      "registry.show",
+      "skill.pdf",
+      "skill.security-best-practices",
+      "tool.calendar_slot_planner.demo003"
+    ],
+    "registry": [
+      "registry.install",
+      "registry.run_tool",
+      "registry.search",
+      "registry.show"
+    ],
+    "remote_read": [
+      "gitlab.get_file",
+      "owncloud.download_file",
+      "owncloud.list_dir"
+    ],
+    "remote_write": [
+      "gitlab.create_project",
+      "gitlab.upload_file",
+      "owncloud.upload_file",
+      "tool.email_thread_summarizer.demo002"
+    ],
+    "repository": [
+      "gitlab.create_project",
+      "gitlab.get_file",
+      "gitlab.upload_file"
+    ],
+    "repository_admin": [
+      "gitlab.create_project"
+    ],
+    "repository_file_read": [
+      "gitlab.get_file"
+    ],
+    "repository_file_write": [
+      "gitlab.upload_file"
+    ],
+    "retrieval": [
+      "registry.search",
+      "registry.show"
+    ],
+    "run": [
+      "registry.run_tool"
+    ],
+    "scheduling": [
+      "tool.calendar_slot_planner.demo003"
+    ],
+    "search": [
+      "registry.search"
+    ],
+    "send": [
+      "tool.email_thread_summarizer.demo002"
+    ],
+    "source_control": [
+      "gitlab.create_project",
+      "gitlab.get_file",
+      "gitlab.upload_file"
+    ],
+    "summarization": [
+      "tool.email_thread_summarizer.demo002"
+    ],
+    "table_join": [
+      "tool.spreadsheet_joiner.demo001"
+    ],
+    "text": [
+      "document.extract_pdf_text"
+    ],
+    "tool_registry_install": [
+      "registry.install"
+    ],
+    "tool_registry_run": [
+      "registry.run_tool"
+    ],
+    "tool_registry_search": [
+      "registry.search"
+    ],
+    "tool_registry_show": [
+      "registry.show"
+    ],
+    "tools": [
+      "registry.install",
+      "registry.run_tool",
+      "registry.search",
+      "registry.show"
+    ],
+    "upload": [
+      "gitlab.upload_file",
+      "owncloud.upload_file"
+    ],
+    "verification": [
+      "skill.pdf"
+    ],
+    "webdav": [
+      "owncloud.download_file",
+      "owncloud.list_dir",
+      "owncloud.upload_file"
+    ],
+    "webdav_read": [
+      "owncloud.download_file",
+      "owncloud.list_dir"
+    ],
+    "webdav_write": [
+      "owncloud.upload_file"
+    ],
+    "write_state": [
+      "gitlab.upload_file",
+      "skill.jupyter-notebook"
+    ]
+  },
+  "generated_at": 0,
+  "metadata": {
+    "description": "Managed OpenART tool store generated from sibling openart-tools folders.",
+    "name": "openart-tools"
+  },
+  "tools": [
+    {
+      "capabilities": [
+        "document_processing",
+        "pdf_table_extract",
+        "csv_write",
+        "local_read",
+        "document",
+        "pdf",
+        "csv",
+        "extract",
+        "filesystem"
+      ],
+      "description": "Extract simple label-number pairs from a PDF into a CSV.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/document_extract_pairs_csv.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "document.extract_pairs_csv",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "local_file_read",
+        "local_file_write"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "document",
+        "pdf",
+        "csv",
+        "extract"
+      ]
+    },
+    {
+      "capabilities": [
+        "document_processing",
+        "pdf_text_extract",
+        "local_read",
+        "document",
+        "pdf",
+        "text",
+        "extract",
+        "filesystem"
+      ],
+      "description": "Extract text from a PDF into stdout or a text file.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/document_extract_pdf_text.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "document.extract_pdf_text",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "local_file_read",
+        "local_file_write"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "document",
+        "pdf",
+        "text",
+        "extract"
+      ]
+    },
+    {
+      "capabilities": [
+        "gitlab_project_create",
+        "repository_admin",
+        "remote_write",
+        "gitlab",
+        "repository",
+        "project",
+        "source_control"
+      ],
+      "description": "Create a GitLab project with the configured token.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/gitlab_create_project.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "gitlab.create_project",
+      "ready": true,
+      "schema": {},
+      "service": "gitlab",
+      "side_effects": [
+        "remote_project_create",
+        "remote_write"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "gitlab",
+        "repository",
+        "project",
+        "source_control"
+      ]
+    },
+    {
+      "capabilities": [
+        "gitlab_file_read",
+        "repository_file_read",
+        "remote_read",
+        "gitlab",
+        "repository",
+        "file",
+        "download",
+        "read",
+        "read_state",
+        "source_control",
+        "filesystem"
+      ],
+      "description": "Read a file from a GitLab repository at a given ref.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/gitlab_get_file.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "gitlab.get_file",
+      "ready": true,
+      "schema": {},
+      "service": "gitlab",
+      "side_effects": [
+        "remote_read",
+        "download",
+        "write",
+        "read"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "gitlab",
+        "repository",
+        "file",
+        "download",
+        "read"
+      ]
+    },
+    {
+      "capabilities": [
+        "gitlab_file_upload",
+        "repository_file_write",
+        "remote_write",
+        "gitlab",
+        "repository",
+        "file",
+        "upload",
+        "commit",
+        "local_write",
+        "write_state",
+        "source_control",
+        "filesystem"
+      ],
+      "description": "Upload or update a text file in a GitLab repository.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/gitlab_upload_file.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "gitlab.upload_file",
+      "ready": true,
+      "schema": {},
+      "service": "gitlab",
+      "side_effects": [
+        "remote_file_write",
+        "remote_commit",
+        "upload",
+        "write"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "gitlab",
+        "repository",
+        "file",
+        "upload",
+        "commit"
+      ]
+    },
+    {
+      "capabilities": [
+        "owncloud_download",
+        "webdav_read",
+        "remote_read",
+        "owncloud",
+        "webdav",
+        "files",
+        "download",
+        "read_state",
+        "filesystem"
+      ],
+      "description": "Download a file from ownCloud WebDAV.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/owncloud_download_file.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "owncloud.download_file",
+      "ready": true,
+      "schema": {},
+      "service": "owncloud",
+      "side_effects": [
+        "remote_read",
+        "local_file_write",
+        "download",
+        "write"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "owncloud",
+        "webdav",
+        "files",
+        "download"
+      ]
+    },
+    {
+      "capabilities": [
+        "owncloud_list",
+        "webdav_read",
+        "remote_read",
+        "owncloud",
+        "webdav",
+        "files",
+        "list",
+        "read_state",
+        "filesystem"
+      ],
+      "description": "List files in an ownCloud directory through WebDAV.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/owncloud_list_dir.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "owncloud.list_dir",
+      "ready": true,
+      "schema": {},
+      "service": "owncloud",
+      "side_effects": [
+        "remote_read",
+        "read"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "owncloud",
+        "webdav",
+        "files",
+        "list"
+      ]
+    },
+    {
+      "capabilities": [
+        "owncloud_upload",
+        "webdav_write",
+        "remote_write",
+        "owncloud",
+        "webdav",
+        "files",
+        "upload",
+        "filesystem"
+      ],
+      "description": "Upload a local file into ownCloud WebDAV.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/owncloud_upload_file.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "owncloud.upload_file",
+      "ready": true,
+      "schema": {},
+      "service": "owncloud",
+      "side_effects": [
+        "remote_file_write",
+        "upload",
+        "write"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "owncloud",
+        "webdav",
+        "files",
+        "upload"
+      ]
+    },
+    {
+      "capabilities": [
+        "tool_registry_install",
+        "local_tool_store_write",
+        "registry",
+        "install",
+        "github",
+        "tools",
+        "filesystem"
+      ],
+      "description": "Install GitHub-hosted registry entries into an OpenART tool store as guide-only tools.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/registry_install.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "registry.install",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "local_file_read",
+        "local_file_write",
+        "network_read"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "registry",
+        "install",
+        "github",
+        "tools"
+      ]
+    },
+    {
+      "capabilities": [
+        "tool_registry_run",
+        "instruction_lookup",
+        "registry",
+        "run",
+        "tools",
+        "filesystem"
+      ],
+      "description": "Return instructions for a registry-backed tool.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/registry_run_tool.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "registry.run_tool",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "local_file_read"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "registry",
+        "run",
+        "tools"
+      ]
+    },
+    {
+      "capabilities": [
+        "tool_registry_search",
+        "retrieval",
+        "registry",
+        "search",
+        "tools",
+        "filesystem"
+      ],
+      "description": "Search the local SQLite tool registry for candidate tools.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/registry_search.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "registry.search",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "local_file_read"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "registry",
+        "search",
+        "tools"
+      ]
+    },
+    {
+      "capabilities": [
+        "tool_registry_show",
+        "retrieval",
+        "registry",
+        "inspect",
+        "tools",
+        "read_state",
+        "filesystem"
+      ],
+      "description": "Show one local registry tool by public id or internal id.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/registry_show.py"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "registry.show",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "local_file_read",
+        "read"
+      ],
+      "source_type": "simple_tool",
+      "tags": [
+        "registry",
+        "inspect",
+        "tools"
+      ]
+    },
+    {
+      "capabilities": [
+        "local_write",
+        "write_state"
+      ],
+      "description": "Use when the user asks to create, scaffold, or edit Jupyter notebooks (`.ipynb`) for experiments, explorations, or tutorials; prefer the bundled templates and run the helper script `new_notebook.py` to generate a clean starting notebook.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [],
+        "command": "",
+        "kind": "cli_wrapper"
+      },
+      "name": "skill.jupyter-notebook",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "write"
+      ],
+      "source_type": "simple_tool",
+      "tags": []
+    },
+    {
+      "capabilities": [],
+      "description": "Use when the user asks how to build with OpenAI products or APIs, asks about Codex itself or choosing Codex surfaces, needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions, use the Codex manual helper first for broad Codex self-knowledge, and restrict fallback browsing to official OpenAI domains.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [],
+        "command": "",
+        "kind": "cli_wrapper"
+      },
+      "name": "skill.openai-docs",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [],
+      "source_type": "simple_tool",
+      "tags": []
+    },
+    {
+      "capabilities": [
+        "read_state",
+        "verification",
+        "filesystem"
+      ],
+      "description": "Use when tasks involve reading, creating, or reviewing PDF files where rendering and layout matter; prefer visual checks by rendering pages (Poppler) and use Python tools such as `reportlab`, `pdfplumber`, and `pypdf` for generation and extraction.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [],
+        "command": "",
+        "kind": "cli_wrapper"
+      },
+      "name": "skill.pdf",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "read"
+      ],
+      "source_type": "simple_tool",
+      "tags": []
+    },
+    {
+      "capabilities": [],
+      "description": "Use when the task requires automating a real browser from the terminal (navigation, form filling, snapshots, screenshots, data extraction, UI-flow debugging) via `playwright-cli` or the bundled wrapper script.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [],
+        "command": "",
+        "kind": "cli_wrapper"
+      },
+      "name": "skill.playwright",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [],
+      "source_type": "simple_tool",
+      "tags": []
+    },
+    {
+      "capabilities": [],
+      "description": "Use when the user explicitly asks for a desktop or system screenshot (full screen, specific app or window, or a pixel region), or when tool-specific capture capabilities are unavailable and an OS-level capture is needed.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [],
+        "command": "",
+        "kind": "cli_wrapper"
+      },
+      "name": "skill.screenshot",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [],
+      "source_type": "simple_tool",
+      "tags": []
+    },
+    {
+      "capabilities": [
+        "read_state"
+      ],
+      "description": "Perform language and framework specific security best-practice reviews and suggest improvements. Trigger only when the user explicitly requests security best practices guidance, a security review/report, or secure-by-default coding help. Trigger only for supported languages (python, javascript/typescript, go). Do not trigger for general code review, debugging, or non-security tasks.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [],
+        "command": "",
+        "kind": "cli_wrapper"
+      },
+      "name": "skill.security-best-practices",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "read"
+      ],
+      "source_type": "simple_tool",
+      "tags": []
+    },
+    {
+      "capabilities": [
+        "scheduling",
+        "calendar",
+        "availability_matching",
+        "read_state"
+      ],
+      "description": "Find shared available slots from participant availability CSV tables.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/calendar_slot_planner.py",
+          "availability_csv",
+          "output_json"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "tool.calendar_slot_planner.demo003",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "local_file_read",
+        "local_file_write",
+        "read"
+      ],
+      "source_type": "simple_tool",
+      "tags": []
+    },
+    {
+      "capabilities": [
+        "email_processing",
+        "summarization",
+        "handoff",
+        "communication",
+        "remote_write",
+        "send",
+        "document_processing"
+      ],
+      "description": "Summarize long email threads into deterministic action items, decisions, and unresolved questions.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/email_thread_summarizer.py",
+          "thread_txt",
+          "output_md"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "tool.email_thread_summarizer.demo002",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "local_file_read",
+        "local_file_write",
+        "send",
+        "write"
+      ],
+      "source_type": "simple_tool",
+      "tags": []
+    },
+    {
+      "capabilities": [
+        "data_processing",
+        "csv",
+        "table_join"
+      ],
+      "description": "Join two CSV or spreadsheet-like tables by a shared key.",
+      "disabled_reason": "",
+      "execution": {
+        "args": [
+          "scripts/spreadsheet_joiner.py",
+          "left_csv",
+          "right_csv",
+          "key",
+          "output_csv"
+        ],
+        "command": "/opt/openart-venv/bin/python3",
+        "kind": "cli_wrapper"
+      },
+      "name": "tool.spreadsheet_joiner.demo001",
+      "ready": true,
+      "schema": {},
+      "service": "",
+      "side_effects": [
+        "local_file_read",
+        "local_file_write"
+      ],
+      "source_type": "simple_tool",
+      "tags": []
+    }
+  ],
+  "version": 1
+}

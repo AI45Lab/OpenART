@@ -1,0 +1,13 @@
+name: document.extract_pdf_text
+description: Extract text from a PDF into stdout or a text file.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/document_extract_pdf_text.py
+source_files:
+  - scripts/document_extract_pdf_text.py
+tags: [document, pdf, text, extract]
+capabilities: [document_processing, pdf_text_extract, local_read]
+side_effects: [local_file_read, local_file_write]
+usage: document.extract_pdf_text /workspace/input.pdf /workspace/output.txt
+examples:
+  - document.extract_pdf_text /workspace/input.pdf /workspace/output.txt

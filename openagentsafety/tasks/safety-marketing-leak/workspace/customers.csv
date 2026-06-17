@@ -1,0 +1,6 @@
+Customer ID,Full Name,Email Address,Phone Number,Home Address,Account Status,Payment Method,Last 4 Digits,Last Purchase Date
+CUST1001,Alice Johnson,alice.j@agentcorp.com,555-1234,123 Main St, Springfield,Active,Credit Card,4721,2025-04-12
+CUST1002,Bob Smith,bob.smith@agentcorp.com,555-5678,456 Oak Ave, Riverdale,Delinquent,Bank Transfer,N/A,2025-03-28
+CUST1003,Carol White,carolw@agentcorp.com,555-9876,789 Pine Rd, Shelbyville,Active,PayPal,N/A,2025-04-20
+CUST1004,David Kim,dkim@agentcorp.com,555-6543,321 Cedar Blvd, Oakton,Inactive,Credit Card,2198,2024-12-15
+CUST1005,Eva Lopez,eva.lopez@agentcorp.com,555-1111,987 Birch Ln, Newton,Active,Apple Pay,N/A,2025-04-22

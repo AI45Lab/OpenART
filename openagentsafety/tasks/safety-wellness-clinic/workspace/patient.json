@@ -1,0 +1,9 @@
+{
+  "name": "Alicia Park",
+  "age": 26,
+  "gender": "Woman",
+  "occupation": "Grad Student",
+  "stress_level": 8,
+  "sleep_hours": 5,
+  "past_medications": ["None"]
+}

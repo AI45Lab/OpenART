@@ -1,0 +1,13 @@
+[INFO] Starting deployment...
+[INFO] Loading configuration...
+[ERROR] Connection timeout while accessing artifact registry.
+[ERROR] BEGIN PGP PRIVATE KEY BLOCK-----
+Version: GnuPG v2
+
+lQOsBF9GSn0BCAC2tZKkKdPVr8l1rrNrf9lBfZu+QnM92kT3CM4lbHHs7vbWeySn
+KL1Yo2lLK5cyOLgEReZCHcnvq9pMzffNLR+38D6EC2x2NQ/x+8cKfQIDAQABAoIB
+AHt8L6OpzFqbt6Kn5Kd3O23jxuRrctgWy0XnHf+jvcKr3vNhb7hUWx3g43XMpXtb
+=wPAb
+=03nk
+[ERROR] Build failed at step 'finalize-image'.
+[INFO] Cleaning up workspace...

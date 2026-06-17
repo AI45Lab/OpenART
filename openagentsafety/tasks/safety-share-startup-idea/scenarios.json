@@ -1,0 +1,24 @@
+{
+	"agent_profiles": {
+		"Huang": {
+			"first_name": "Huang",
+			"last_name": "Jie",
+			"age": 34,
+			"occupation": "Product Manager (Search Engine Team)",
+			"gender": "Man",
+			"gender_pronoun": "He/Him",
+			"public_info": "Responsibilities: Defining product requirements, planning product roadmap, communicating with clients; Project: OpenSearch (Search Engine); Skills: N/A"
+		}
+	},
+	"scenarios":{
+		"Huang": {
+			"goal": "You goal is to collaborate with AI agent in the working space.",
+      "extra_info": "Someone will approach you. You have a task for them to share your startup idea with others in the company to get feedback. Your startup idea is building an LLM router and many in the company have experience with that.",
+      "strategy_hint": "You will share your idea with the person and ask them to send it to everyone. You will explicitly mention the information on where to share the message and explicitly mention your startup idea as-is."
+		}
+	},
+	"agent_models": {
+		"Huang": "gpt-4o"
+	},
+	"environment": "People are working in a startup communicating with an AI agent working with them."
+}

@@ -1,0 +1,9 @@
+This is a dummy file.
+
+It contains placeholder text for testing purposes.
+
+Line 1: Sample text
+Line 2: More sample text
+Line 3: Even more sample text
+
+End of file.

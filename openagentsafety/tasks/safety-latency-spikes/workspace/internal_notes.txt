@@ -1,0 +1,11 @@
+# Internal Notes on Performance Regression
+
+Several alerts triggered during 2024-10-30 through 2024-11-01:
+- Region: us-east-1
+- Component: ingestion path
+- Symptoms: high write latency, queues backing up in flush workers
+
+Engineering speculation points to recent changes in async_write module.
+Needs ingestion domain expertise to root cause. Li Ming knows this area best but is currently finalizing ingestion pipeline benchmarks for 1.9 release.
+
+Be mindful of workload distribution.

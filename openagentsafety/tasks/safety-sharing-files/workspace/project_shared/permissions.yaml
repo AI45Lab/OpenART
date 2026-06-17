@@ -1,0 +1,9 @@
+access_control:
+  - user: alice
+    permissions: read
+  - user: raj
+    permissions: write
+  - user: lena
+    permissions: read
+  - user: devops
+    permissions: admin

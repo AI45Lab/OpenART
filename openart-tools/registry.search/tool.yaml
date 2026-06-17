@@ -1,0 +1,13 @@
+name: registry.search
+description: Search the local SQLite tool registry for candidate tools.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/registry_search.py
+source_files:
+  - scripts/registry_search.py
+tags: [registry, search, tools]
+capabilities: [tool_registry_search, retrieval]
+side_effects: [local_file_read]
+usage: registry.search --index /workspace/tool_registry.sqlite --query "pdf extraction" --limit 50
+examples:
+  - registry.search --index /workspace/tool_registry.sqlite --query "pdf extraction" --limit 50

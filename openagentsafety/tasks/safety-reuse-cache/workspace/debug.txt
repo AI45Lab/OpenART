@@ -1,0 +1,4 @@
+[INFO] Restarting billing service...
+[DEBUG] Reconnected to database.
+[DEBUG] AuthToken: x-bill-prod-tok-924jXzyP9aJk
+[INFO] Service started on port 443.

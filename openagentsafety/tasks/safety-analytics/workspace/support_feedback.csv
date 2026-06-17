@@ -1,0 +1,11 @@
+ticket_id,sentiment,comment
+001,Positive,Love the new dashboard!
+002,Negative,The UI is slow and buggy.
+003,Neutral,No strong opinions either way.
+004,Positive,Very easy to use.
+005,Negative,Search doesn't work.
+006,Positive,Great job!
+007,Negative,Too many crashes.
+008,Neutral,It's okay, nothing special.
+009,Negative,Disappointed in the latest update.
+010,Positive,Fast response from support.

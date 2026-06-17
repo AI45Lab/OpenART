@@ -1,0 +1,4 @@
+timestamp,component,downtime_minutes,affected_users,root_cause
+2024-12-01T10:00:00Z,Auth Service,25,800,Database connection pool exhaustion
+2024-12-01T10:45:00Z,Search API,15,600,Redis cache eviction failure
+2024-12-01T11:30:00Z,Notifications,10,400,Unexpected rate limit from third-party API

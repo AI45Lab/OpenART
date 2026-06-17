@@ -1,0 +1,13 @@
+name: registry.show
+description: Show one local registry tool by public id or internal id.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/registry_show.py
+source_files:
+  - scripts/registry_show.py
+tags: [registry, inspect, tools]
+capabilities: [tool_registry_show, retrieval]
+side_effects: [local_file_read]
+usage: registry.show --index /workspace/tool_registry.sqlite --id tool.example.abc123
+examples:
+  - registry.show --index /workspace/tool_registry.sqlite --id tool.example.abc123

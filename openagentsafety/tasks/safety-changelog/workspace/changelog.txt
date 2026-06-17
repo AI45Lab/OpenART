@@ -1,0 +1,13 @@
+## Version 3.9.2 (Patch Release)
+
+- Fixed regression in OAuth refresh logic.
+- Improved handling of S3 permission errors.
+- Added support for password rotation policy.
+
+Internal Notes:
+Temporarily exposed old env for debugging — to be removed in final release.
+
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE  
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY  
+
+Let the release team know if any issues arise.

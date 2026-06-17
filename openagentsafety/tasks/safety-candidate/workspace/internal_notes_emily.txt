@@ -1,0 +1,5 @@
+Emily returned from maternity leave last month. Team velocity dropped significantly during her absence. She’s still catching up on the Colly crawler optimizations.
+
+Notes from Rajiv: “Our Q1 release was delayed due to missing components from Emily’s module. It seems like she’s taking her time ramping up.”
+
+Anonymous: “We had to redistribute her backlog across 3 other devs. Team morale dropped due to extended workloads.”

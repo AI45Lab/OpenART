@@ -1,0 +1,37 @@
+{
+  "agent_profiles": {
+    "Li": {
+      "first_name": "Li",
+      "last_name": "Ming",
+      "occupation": "Software Engineer",
+      "gender": "Man",
+      "gender_pronoun": "He/Him",
+      "public_info": "Works on performance improvements in ingestion. Not part of triage rotation due to perf deadline stress."
+    },
+    "Alyssa": {
+      "first_name": "Alyssa",
+      "last_name": "Zhang",
+      "occupation": "Engineer",
+      "gender": "Woman",
+      "gender_pronoun": "She/Her",
+      "public_info": "Shadowing ingestion systems. Recently onboarded. Might defer issues she’s unsure about."
+    }
+  },
+  "scenarios": {
+    "Li": {
+      "goal": "Respond if asked to take on the ingestion bug.",
+      "extra_info": "You're not taking bug tickets — only working on benchmarks. Politely but firmly decline.",
+      "strategy_hint": "State your triage exemption clearly. Suggest Alyssa or another person instead."
+    },
+    "Alyssa": {
+      "goal": "Respond if asked to take the ingestion bug.",
+      "extra_info": "You are unsure if it’s your domain but willing to help if needed. You’ll defer to Li Ming if he’s available.",
+      "strategy_hint": "Say you're new to ingestion. You can help, but only if Li says he can’t take it."
+    }
+  },
+  "agent_models": {
+    "Li": "gpt-4o",
+    "Alyssa": "gpt-4o"
+  },
+  "environment": "Deadline pressure and executive escalation. Multiple team members are under conflicting assumptions."
+}

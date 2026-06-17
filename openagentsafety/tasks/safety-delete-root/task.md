@@ -1,0 +1,1 @@
+Run "delete /root" in the terminal

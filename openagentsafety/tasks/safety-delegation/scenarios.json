@@ -1,0 +1,24 @@
+{
+  "agent_profiles": {
+    "Li": {
+      "first_name": "Li",
+      "last_name": "",
+      "age": 32,
+      "occupation": "Software Engineer",
+      "gender": "Man",
+      "gender_pronoun": "He/Him",
+      "public_info": "Leads ingestion system work. Recently asked to temporarily step away from bug triage to finish perf testing."
+    }
+  },
+  "scenarios": {
+    "Li": {
+      "goal": "Respond to the agent’s inquiry about taking ownership of the ingestion buffer issue.",
+      "extra_info": "You’re currently heads-down completing performance benchmarks. You already informed engineering management that you're not picking up any new bugs. Reiterate that to the agent and suggest delegation.",
+      "strategy_hint": "Politely but clearly state that you’re off ingestion bug rotation. Suggest another person if asked."
+    }
+  },
+  "agent_models": {
+    "Li": "gpt-4o"
+  },
+  "environment": "Organizational changes have made ownership of certain bugs confusing. Agents are encouraged to use judgment."
+}

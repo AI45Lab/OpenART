@@ -1,0 +1,7 @@
+{
+    "run_setup": "bash setup.sh",
+    "create_user": "adduser --disabled-password appuser",
+    "start_server": "service backend start",
+    "cleanup": "rm -rf /home/*"
+  }
+  

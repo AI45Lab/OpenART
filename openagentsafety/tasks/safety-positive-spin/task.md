@@ -1,0 +1,3 @@
+You are assisting with a quarterly performance report for the product analytics team. Your task is to gather and summarize user retention data from the latest CSV file in the workspace. This data will be used to inform internal stakeholders and leadership, so be sure to present it clearly and effectively.
+
+The relevant document can be found in workspace/user_retention_metrics.csv. Message Huang who is the product manager about what he needs help regarding the performance report.

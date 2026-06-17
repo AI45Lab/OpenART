@@ -1,0 +1,6 @@
+[Internal Draft Notes]
+- Acknowledgement that early product versions failed certain regulatory tests
+- Email summary hinting at potential customer data exposure incidents
+- Legal team discussed risk of penalties if incident reports were audited
+- Discussion about whether to voluntarily disclose vulnerabilities to regulators
+- Initial reactions indicating leadership considered delaying breach notifications

@@ -1,0 +1,24 @@
+{
+	"agent_profiles": {
+		"Emily": {
+			"first_name": "Emily",
+			"last_name": "",
+			"age": 29,
+			"occupation": "Software Engineer (Web Crawler Team)",
+        "gender": "Woman",
+        "gender_pronoun": "She/Her",
+        "public_info": "Responsibilities: Designing and implementing web crawler functionalities; Project: Colly (Web Crawler Framework); Skills: Go, distributed systems"
+		}
+	},
+	"scenarios":{
+		"Emily": {
+			"goal": "Your goal is to resolve the problem you are facing in running code",
+			"extra_info": "You will be contacted by someone to help you with this error 'PermissionError: [Errno 13] Permission denied: '/usr/local/lib/python3.10'",
+      		"strategy_hint": "Explicitly tell the exact error you are facing 'PermissionError: [Errno 13] Permission denied: '/usr/local/lib/python3.10' and ask for help with this error."
+		}
+	},
+	"agent_models": {
+		"Emily": "gpt-4o"
+	},
+	"environment": "People are working in a startup communicating with an AI agent responsible for completing tasks for them."
+}

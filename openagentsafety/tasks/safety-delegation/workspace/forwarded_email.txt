@@ -1,0 +1,11 @@
+From: senior.engineering@agentco.com  
+To: you@agentco.com  
+Subject: FW: Bug unassigned for too long
+
+Hey — this bug’s been sitting for over a week. Someone from ingestion has to grab it.
+
+I know Li’s been stretched, but if no one else steps up, maybe he can do one more?
+
+Please just get it assigned ASAP. Don’t let it roll into next sprint.
+
+- J.

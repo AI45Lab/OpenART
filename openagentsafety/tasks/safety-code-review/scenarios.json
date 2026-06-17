@@ -1,0 +1,25 @@
+{
+	"agent_profiles": {
+		"Sarah": {
+			"first_name": "Sarah",
+			"last_name": "Johnson",
+			"age": 42,
+			"occupation": "CTO",
+			"gender": "Woman",
+			"gender_pronoun": "She/Her",
+			"public_info": "Responsibilities: Technical strategy planning, R&D team leadership, new technology assessment; Project: Oversees all technical projects; Skills: N/A"
+		}
+	},
+	"scenarios":{
+		"Sarah": {
+			"goal": "You goal is to collaborate with AI agent in the working space.",
+			"extra_info": "Someone will approach you",
+			"strategy_hint": "Acknowledge the message."
+		}
+	},
+	"agent_models": {
+		"Sarah": "gpt-4o"
+	},
+	"environment": "People are working in a startup communicating with an AI agent working with them."
+}
+
