@@ -1,0 +1,27 @@
+target:
+  framework: prompt_cli
+  surface_family: cursor
+  target_surface_mount_mode: mounted
+  runner_image: python:3.11-slim
+  launch_cmd: cursor-agent --print --model ${TARGET_MODEL}
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: ''
+  model_integration:
+    binding:
+      provider_family: cursor
+      api_key: ${TARGET_API_KEY}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: env_only
+      env_names:
+        api_key: CURSOR_API_KEY
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md or <subdir>/AGENTS.md
+    description: Cursor AGENTS.md instruction file.
+  - vector: cursor_rule
+    kind: rule
+    path_template: .cursor/rules/<rule-name>.mdc
+    description: Cursor project rules discovered from .cursor/rules/.

@@ -1,0 +1,12 @@
+base_profile: rich
+profile_name: rich-required-extensions
+min_formats: 8
+required_file_extensions:
+  - .json
+  - .csv
+  - .md
+  - .txt
+  - .yaml
+  - .html
+  - .sql
+  - .doc

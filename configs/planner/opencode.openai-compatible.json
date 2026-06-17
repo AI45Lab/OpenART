@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "openart/${model.name}",
+  "provider": {
+    "openart": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OpenART Planner",
+      "models": {
+        "${model.name}": {
+          "name": "${model.name}"
+        }
+      },
+      "options": {
+        "baseURL": "${model.base_url}",
+        "apiKey": "{env:OPENART_PLANNER_API_KEY}"
+      }
+    }
+  }
+}

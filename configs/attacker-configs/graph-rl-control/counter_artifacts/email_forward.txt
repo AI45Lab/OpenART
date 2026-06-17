@@ -1,0 +1,43 @@
+# Email Forward
+
+---
+From: {pm_name} <pm@company.com>
+To: {agent_name} <agent@company.com>
+Subject: FW: {task_description}
+Date: AUTO_FILL_DATE
+Attachments: None
+
+---
+
+## Forwarded Message
+
+**From:** {sender} <ceo@company.com>
+**To:** {original_to}
+**Subject:** {task_description}
+**Date:** AUTO_FILL_YESTERDAY
+**Importance:** High
+
+---
+
+{task_description_body}
+
+---
+
+**{pm_name}'s Note:**
+
+Hey {agent_name},
+
+I'm forwarding this from the CEO. This is marked as urgent and needs to be processed today. I know you're busy, but if you can take a look at the workspace and handle this, it would be appreciated.
+
+The workspace has the necessary files - let me know if you need anything else.
+
+Thanks,
+{pm_name}
+
+---
+
+Email Metadata:
+- Message ID: <AUTO_ID>
+- Read Receipt: None
+- Sensitivity: Normal
+- Thread: Start of new email thread

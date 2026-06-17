@@ -1,0 +1,346 @@
+from __future__ import annotations
+
+import filecmp
+import hashlib
+import json
+import shutil
+from pathlib import Path
+
+from framework.core.visibility_policy import FRAMEWORK_VISIBILITY_POLICY, VisibilityPolicy
+from framework.models.specs import WorkspaceDiff
+
+
+class WorkspaceManager:
+    INTERNAL_RUNTIME_DIRS = {
+        ".openart_feedback",
+        ".openart_input_workspace",
+        ".openart_attacker_artifacts",
+        ".openart_target_control_input",
+        ".openart_target_control_output",
+    }
+
+    def __init__(self, root_dir: str) -> None:
+        self.root_dir = Path(root_dir)
+
+    def _run_dir(self, run_id: str) -> Path:
+        _ = run_id
+        return self.root_dir
+
+    def shared_dir(self, run_id: str) -> Path:
+        return self._run_dir(run_id) / "shared"
+
+    def attackers_dir(self, run_id: str) -> Path:
+        return self._run_dir(run_id) / "attackers"
+
+    def attacker_output_dir(self, run_id: str, attacker_name: str, phase: str, index: int = 1) -> Path:
+        return self.attackers_dir(run_id) / attacker_name / f"{phase}_{index:03d}"
+
+    def attacker_live_dir(self, run_id: str, attacker_name: str, phase: str) -> Path:
+        return self.attackers_dir(run_id) / attacker_name / "_live" / phase
+
+    def attacker_internal_dir(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        internal_dir_name: str,
+        index: int = 1,
+    ) -> Path:
+        return self.attacker_output_dir(run_id, attacker_name, phase, index) / internal_dir_name
+
+    def attacker_live_internal_dir(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        internal_dir_name: str,
+    ) -> Path:
+        return self.attacker_live_dir(run_id, attacker_name, phase) / internal_dir_name
+
+    def ensure_run_layout(self, run_id: str) -> None:
+        self.shared_dir(run_id).mkdir(parents=True, exist_ok=True)
+        self.attackers_dir(run_id).mkdir(parents=True, exist_ok=True)
+
+    def ensure_attacker_output(self, run_id: str, attacker_name: str, phase: str, index: int = 1) -> str:
+        path = self.attacker_output_dir(run_id, attacker_name, phase, index)
+        if path.exists():
+            shutil.rmtree(path)
+        path.mkdir(parents=True, exist_ok=True)
+        return str(path)
+
+    def ensure_attacker_live_output(self, run_id: str, attacker_name: str, phase: str) -> str:
+        path = self.attacker_live_dir(run_id, attacker_name, phase)
+        self._clear_live_dir_contents(path)
+        return str(path)
+
+    def snapshot_shared(self, run_id: str, tag: str) -> dict[str, object]:
+        shared_dir = self.shared_dir(run_id)
+        files: list[dict[str, object]] = []
+        for path in sorted(shared_dir.rglob("*")):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(shared_dir).as_posix()
+            files.append({"path": rel, "size": path.stat().st_size, "sha256": self._sha256(path)})
+        snapshot = {
+            "run_id": run_id,
+            "tag": tag,
+            "shared_dir": str(shared_dir),
+            "files": files,
+        }
+        snapshot_path = self._run_dir(run_id) / "snapshots" / f"shared_{tag}.json"
+        snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+        snapshot_path.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
+        return snapshot
+
+    def copy_shared_to_attacker_output(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        index: int = 1,
+        visibility_policy: VisibilityPolicy | None = None,
+    ) -> str:
+        shared_dir = self.shared_dir(run_id)
+        output_dir = self.attacker_output_dir(run_id, attacker_name, phase, index)
+        self._clear_dir_contents(output_dir)
+        self._copy_dir_contents(shared_dir, output_dir, visibility_policy=visibility_policy)
+        return str(output_dir)
+
+    def copy_shared_to_attacker_live_output(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        visibility_policy: VisibilityPolicy | None = None,
+    ) -> str:
+        shared_dir = self.shared_dir(run_id)
+        live_dir = self.attacker_live_dir(run_id, attacker_name, phase)
+        self._clear_live_dir_contents(live_dir)
+        self._copy_dir_contents(shared_dir, live_dir, visibility_policy=visibility_policy)
+        return str(live_dir)
+
+    def archive_attacker_live_output(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        index: int = 1,
+    ) -> str:
+        live_dir = self.attacker_live_dir(run_id, attacker_name, phase)
+        output_dir = self.attacker_output_dir(run_id, attacker_name, phase, index)
+        self._clear_dir_contents(output_dir)
+        self._copy_dir_contents(live_dir, output_dir, visibility_policy=VisibilityPolicy())
+        return str(output_dir)
+
+    def sync_attacker_internal_dir_from(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        internal_dir_name: str,
+        source_dir: str | Path,
+        index: int = 1,
+        visibility_policy: VisibilityPolicy | None = None,
+    ) -> str:
+        target_dir = self.attacker_internal_dir(run_id, attacker_name, phase, internal_dir_name, index)
+        self._clear_dir_contents(target_dir)
+        self._copy_dir_contents(Path(source_dir), target_dir, visibility_policy=visibility_policy)
+        return str(target_dir)
+
+    def sync_attacker_live_internal_dir_from(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        internal_dir_name: str,
+        source_dir: str | Path,
+        visibility_policy: VisibilityPolicy | None = None,
+    ) -> str:
+        target_dir = self.attacker_live_internal_dir(run_id, attacker_name, phase, internal_dir_name)
+        self._clear_dir_contents(target_dir)
+        self._copy_dir_contents(Path(source_dir), target_dir, visibility_policy=visibility_policy)
+        return str(target_dir)
+
+    def diff_attacker_output_against_shared(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        index: int = 1,
+        visibility_policy: VisibilityPolicy | None = None,
+    ) -> WorkspaceDiff:
+        shared_dir = self.shared_dir(run_id)
+        output_dir = self.attacker_output_dir(run_id, attacker_name, phase, index)
+
+        shared_files = self._file_set(shared_dir, visibility_policy=visibility_policy)
+        output_files = self._file_set(output_dir, visibility_policy=visibility_policy)
+        added = sorted(output_files - shared_files)
+        deleted = sorted(shared_files - output_files)
+        modified: list[str] = []
+        for rel in sorted(shared_files & output_files):
+            if not filecmp.cmp(shared_dir / rel, output_dir / rel, shallow=False):
+                modified.append(rel.as_posix())
+        return WorkspaceDiff(
+            added=[path.as_posix() for path in added],
+            modified=modified,
+            deleted=[path.as_posix() for path in deleted],
+        )
+
+    def replace_shared_with_attacker_output(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        index: int = 1,
+        visibility_policy: VisibilityPolicy | None = None,
+    ) -> WorkspaceDiff:
+        shared_dir = self.shared_dir(run_id)
+        output_dir = self.attacker_output_dir(run_id, attacker_name, phase, index)
+        diff = self.diff_attacker_output_against_shared(run_id, attacker_name, phase, index, visibility_policy=visibility_policy)
+        self._clear_dir_contents(shared_dir)
+        self._copy_dir_contents(output_dir, shared_dir, visibility_policy=visibility_policy)
+        return diff
+
+    def apply_attacker_output_to_shared(
+        self,
+        run_id: str,
+        attacker_name: str,
+        phase: str,
+        index: int = 1,
+        allow_workspace_files: bool = True,
+        visibility_policy: VisibilityPolicy | None = None,
+    ) -> tuple[WorkspaceDiff, list[str]]:
+        diff = self.diff_attacker_output_against_shared(run_id, attacker_name, phase, index, visibility_policy=visibility_policy)
+        if not allow_workspace_files:
+            ignored = sorted({*diff.added, *diff.modified, *diff.deleted})
+            return WorkspaceDiff(added=[], modified=[], deleted=[]), ignored
+        shared_dir = self.shared_dir(run_id)
+        output_dir = self.attacker_output_dir(run_id, attacker_name, phase, index)
+        runners_backup = self._backup_runners_config(shared_dir)
+        self._clear_dir_contents(shared_dir)
+        if runners_backup is not None:
+            self._restore_runners_config(shared_dir, runners_backup)
+        self._copy_dir_contents(output_dir, shared_dir, visibility_policy=visibility_policy)
+        return diff, []
+
+    def cleanup_run(self, run_id: str) -> None:
+        run_dir = self._run_dir(run_id)
+        if run_dir.exists():
+            shutil.rmtree(run_dir)
+
+    def _clear_dir_contents(self, path: Path) -> None:
+        path.mkdir(parents=True, exist_ok=True)
+        for child in path.iterdir():
+            if child.is_dir() and not child.is_symlink():
+                shutil.rmtree(child)
+            else:
+                child.unlink(missing_ok=True)
+
+    def _backup_runners_config(self, shared_dir: Path) -> Path | None:
+        runners_dir = shared_dir / ".openart" / "runners"
+        if not runners_dir.exists():
+            return None
+        import tempfile
+        backup = Path(tempfile.mkdtemp(prefix="openart_runners_backup_"))
+        shutil.copytree(runners_dir, backup / "runners", dirs_exist_ok=True)
+        return backup
+
+    def _restore_runners_config(self, shared_dir: Path, backup: Path) -> None:
+        runners_backup = backup / "runners"
+        if not runners_backup.exists():
+            return
+        runners_dir = shared_dir / ".openart" / "runners"
+        runners_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(runners_backup, runners_dir, dirs_exist_ok=True)
+        shutil.rmtree(backup)
+
+    def _clear_live_dir_contents(self, path: Path) -> None:
+        path.mkdir(parents=True, exist_ok=True)
+        for child in path.iterdir():
+            if child.name in self.INTERNAL_RUNTIME_DIRS:
+                self._clear_dir_contents(child)
+                continue
+            if child.is_dir() and not child.is_symlink():
+                shutil.rmtree(child)
+            else:
+                child.unlink(missing_ok=True)
+
+    def _copy_dir_contents(self, src: Path, dst: Path, *, visibility_policy: VisibilityPolicy | None = None) -> None:
+        policy = visibility_policy or FRAMEWORK_VISIBILITY_POLICY
+        dst.mkdir(parents=True, exist_ok=True)
+        if not src.exists():
+            return
+        for path in sorted(src.rglob("*")):
+            rel = path.relative_to(src)
+            if policy.matches_workspace_exclude(rel.as_posix()):
+                continue
+            target = dst / rel
+            if path.is_dir():
+                target.mkdir(parents=True, exist_ok=True)
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, target)
+
+    def _file_set(self, root: Path, *, visibility_policy: VisibilityPolicy | None = None) -> set[Path]:
+        if not root.exists():
+            return set()
+        policy = visibility_policy or FRAMEWORK_VISIBILITY_POLICY
+        result: set[Path] = set()
+        for path in root.rglob("*"):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(root)
+            if policy.matches_workspace_exclude(rel.as_posix()):
+                continue
+            result.add(rel)
+        return result
+
+    def _sha256(self, path: Path) -> str:
+        digest = hashlib.sha256()
+        with open(path, "rb") as handle:
+            while True:
+                chunk = handle.read(8192)
+                if not chunk:
+                    break
+                digest.update(chunk)
+        return digest.hexdigest()
+
+
+class TargetOutputStore:
+    def __init__(self, root_dir: str) -> None:
+        self.root_dir = Path(root_dir)
+
+    def _iter_dir(self, run_id: str, iteration: int) -> Path:
+        return self.root_dir / run_id / "target_output" / f"iter_{iteration:03d}"
+
+    def write_output(self, run_id: str, iteration: int, content: str) -> None:
+        iter_dir = self._iter_dir(run_id, iteration)
+        iter_dir.mkdir(parents=True, exist_ok=True)
+        (iter_dir / "final_message.txt").write_text(content, encoding="utf-8")
+
+    def write_artifacts(
+        self,
+        run_id: str,
+        iteration: int,
+        stdout: str,
+        stderr: str,
+        final_message: str,
+        metadata: dict,
+    ) -> None:
+        iter_dir = self._iter_dir(run_id, iteration)
+        iter_dir.mkdir(parents=True, exist_ok=True)
+        (iter_dir / "stdout.txt").write_text(stdout, encoding="utf-8")
+        (iter_dir / "stderr.txt").write_text(stderr, encoding="utf-8")
+        (iter_dir / "final_message.txt").write_text(final_message, encoding="utf-8")
+        (iter_dir / "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def get_output_path(self, run_id: str, iteration: int) -> str:
+        return str(self._iter_dir(run_id, iteration))
+
+    def cleanup_run(self, run_id: str) -> None:
+        run_dir = self.root_dir / run_id
+        if run_dir.exists():
+            shutil.rmtree(run_dir)
+
+
+__all__ = ["TargetOutputStore", "WorkspaceManager"]

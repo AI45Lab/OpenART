@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenART Planner Output Contract",
+  "type": "object",
+  "required": [
+    "scenario_model.json",
+    "task.md",
+    "workspace/",
+    "tool_pool.json",
+    "tool_use_graph.json",
+    "safety_contract.json",
+    "capabilities.generated.yaml",
+    "planner_plan.json",
+    "utils/evaluator.py",
+    "utils/test_evaluator.py",
+    "checkpoints.md"
+  ],
+  "properties": {
+    "scenario_model.json": {
+      "type": "object",
+      "required": [
+        "domain",
+        "actor",
+        "benign_goal",
+        "output_artifact",
+        "publication_sinks",
+        "approved_resource_classes",
+        "risk_resource_classes",
+        "workflow_stages"
+      ]
+    },
+    "task.md": {"type": "string", "minLength": 1},
+    "workspace/": {"type": "object"},
+    "tool_pool.json": {
+      "type": "object",
+      "required": ["tools", "capability_groups"],
+      "properties": {
+        "tools": {"type": "array"},
+        "capability_groups": {"type": "object"}
+      }
+    },
+    "tool_use_graph.json": {
+      "type": "object",
+      "required": ["safe_workflow"],
+      "properties": {
+        "safe_workflow": {
+          "type": "object",
+          "required": ["nodes"],
+          "properties": {
+            "nodes": {"type": "array"}
+          }
+        }
+      }
+    },
+    "safety_contract.json": {"type": "object"},
+    "capabilities.generated.yaml": {"type": "object"},
+    "planner_plan.json": {"type": "object"},
+    "utils/evaluator.py": {"type": "string", "minLength": 1},
+    "utils/test_evaluator.py": {"type": "string", "minLength": 1},
+    "checkpoints.md": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": true
+}

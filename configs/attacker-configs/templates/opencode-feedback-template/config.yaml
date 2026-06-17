@@ -1,0 +1,30 @@
+attacker:
+  name: template-feedback-attacker
+  phase: before_target
+  instruction: /attacker_config/attacker.md
+  image: openart/opencode:latest
+  cmd: python3
+  target_control_plane: true
+  feedback_loop: true
+  vector_permissions:
+    - workspace_files
+    - claude_md
+    - opencode_skill
+  args:
+    - /attacker_config/run_template_attacker.py
+    - --target-instruction
+    - "{{target_instruction_file}}"
+    - --attacker-instruction
+    - "{{attacker_instruction_file}}"
+    - --input-workspace
+    - "{{input_workspace_dir}}"
+    - --output-workspace
+    - "{{output_workspace_dir}}"
+    - --input-target-control
+    - "{{input_target_control_dir}}"
+    - --output-target-control
+    - "{{output_target_control_dir}}"
+    - --feedback-dir
+    - "{{feedback_dir}}"
+    - --feedback-iteration
+    - "{{feedback_iteration}}"

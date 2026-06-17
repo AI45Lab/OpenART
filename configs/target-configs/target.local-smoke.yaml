@@ -1,0 +1,7 @@
+target:
+  framework: prompt_cli
+  runner_image: openart/task-base:latest
+  launch_cmd: >-
+    python3 -c "import sys; from pathlib import Path; src = sys.stdin.read(); Path('/workspace/openart_local_smoke_target.txt').write_text('local smoke target ran\n' + src[:400], encoding='utf-8')"
+  config_overlay:
+    prompt_transport: stdin

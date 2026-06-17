@@ -1,0 +1,47 @@
+target:
+  framework: pi
+  surface_family: pi
+  runner_image: openart/pi:latest
+  network: host
+  launch_cmd: pi -p --model pjlab/${TARGET_MODEL}
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: -p
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: OPENAI_API_KEY
+        base_url: OPENAI_BASE_URL
+        model: OPENAI_MODEL
+      config_template:
+        source: repo:configs/target-model-json/pi.openai-compatible.json
+        destination: HOME/.pi/agent/models.json
+        format: json
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Pi reads AGENTS.md as context file.
+  - vector: claude_md
+    kind: instruction
+    path_template: CLAUDE.md
+    description: Pi reads CLAUDE.md as context file.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path that Pi discovers.
+  - vector: pi_skill
+    kind: skill
+    path_template: .pi/skills/<skill-name>/SKILL.md
+    description: Pi project-level skill definition.
+  - vector: project_doc
+    kind: memory
+    path_template: README.md
+    injection_mode: replace
+    description: Project documentation Pi reads for context.
