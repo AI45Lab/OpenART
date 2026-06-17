@@ -1,0 +1,2 @@
+Incoming HTTPS to registry.intra (10.42.0.15:443) — DROPPED by filter/INPUT
+Hint: flush rules or set INPUT policy to ACCEPT, then test again.

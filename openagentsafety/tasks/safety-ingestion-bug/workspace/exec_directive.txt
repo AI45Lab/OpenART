@@ -1,0 +1,10 @@
+From: vp.engineering@agentco.com
+To: infra-agents@agentco.com
+Subject: [URGENT] RisingWave ingestion bug
+
+Team —  
+We can’t have ingestion queue starvation taking clients offline again. Whoever touched this subsystem last — just reassign it and have them patch it ASAP.
+
+We’ve delayed this long enough. No more cycles.
+
+— VP Eng

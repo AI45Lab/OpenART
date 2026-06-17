@@ -1,0 +1,1353 @@
+metadata:
+  name: openart-tools
+  description: Managed OpenART tool store generated from sibling openart-tools folders.
+tools:
+- name: document.extract_pairs_csv
+  description: Extract simple label-number pairs from a PDF into a CSV.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/document_extract_pairs_csv.py
+  source_files:
+  - scripts/document_extract_pairs_csv.py
+  - scripts/document_extract_pdf_text.py
+  tool_root: document.extract_pairs_csv
+  tags:
+  - document
+  - pdf
+  - csv
+  - extract
+  capabilities:
+  - document_processing
+  - pdf_table_extract
+  - csv_write
+  - local_read
+  side_effects:
+  - local_file_read
+  - local_file_write
+  usage: document.extract_pairs_csv /workspace/drinks_survey.pdf /workspace/drinks_survey.csv
+    --col1 drink --col2 quantity
+  examples:
+  - document.extract_pairs_csv /workspace/drinks_survey.pdf /workspace/drinks_survey.csv
+    --col1 drink --col2 quantity
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: document.extract_pairs_csv
+      source_files:
+      - scripts/document_extract_pairs_csv.py
+      - scripts/document_extract_pdf_text.py
+      guide_file: TOOL.md
+      guide_only: false
+- name: document.extract_pdf_text
+  description: Extract text from a PDF into stdout or a text file.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/document_extract_pdf_text.py
+  source_files:
+  - scripts/document_extract_pdf_text.py
+  tool_root: document.extract_pdf_text
+  tags:
+  - document
+  - pdf
+  - text
+  - extract
+  capabilities:
+  - document_processing
+  - pdf_text_extract
+  - local_read
+  side_effects:
+  - local_file_read
+  - local_file_write
+  usage: document.extract_pdf_text /workspace/input.pdf /workspace/output.txt
+  examples:
+  - document.extract_pdf_text /workspace/input.pdf /workspace/output.txt
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: document.extract_pdf_text
+      source_files:
+      - scripts/document_extract_pdf_text.py
+      guide_file: TOOL.md
+      guide_only: false
+- name: gitlab.create_project
+  description: Create a GitLab project with the configured token.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/gitlab_create_project.py
+  source_files:
+  - scripts/gitlab_create_project.py
+  - scripts/common.py
+  tool_root: gitlab.create_project
+  env_from:
+    GITLAB_BASEURL: GITLAB_BASEURL
+    GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
+  service: gitlab
+  tags:
+  - gitlab
+  - repository
+  - project
+  - source-control
+  capabilities:
+  - gitlab_project_create
+  - repository_admin
+  - remote_write
+  side_effects:
+  - remote_project_create
+  - remote_write
+  usage: gitlab.create_project internal-api-client public
+  examples:
+  - gitlab.create_project internal-api-client public
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: gitlab.create_project
+      source_files:
+      - scripts/gitlab_create_project.py
+      - scripts/common.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - GITLAB_ACCESS_TOKEN
+      - GITLAB_BASEURL
+      optional: []
+- name: gitlab.get_file
+  description: Read a file from a GitLab repository at a given ref.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/gitlab_get_file.py
+  source_files:
+  - scripts/gitlab_get_file.py
+  - scripts/common.py
+  tool_root: gitlab.get_file
+  env_from:
+    GITLAB_BASEURL: GITLAB_BASEURL
+    GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
+  service: gitlab
+  tags:
+  - gitlab
+  - repository
+  - file
+  - download
+  - read
+  capabilities:
+  - gitlab_file_read
+  - repository_file_read
+  - remote_read
+  side_effects:
+  - remote_read
+  usage: gitlab.get_file root/internal-api-client client.py main
+  examples:
+  - gitlab.get_file root/internal-api-client client.py main
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: gitlab.get_file
+      source_files:
+      - scripts/gitlab_get_file.py
+      - scripts/common.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - GITLAB_ACCESS_TOKEN
+      - GITLAB_BASEURL
+      optional: []
+- name: gitlab.upload_file
+  description: Upload or update a text file in a GitLab repository.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/gitlab_upload_file.py
+  source_files:
+  - scripts/gitlab_upload_file.py
+  - scripts/common.py
+  tool_root: gitlab.upload_file
+  env_from:
+    GITLAB_BASEURL: GITLAB_BASEURL
+    GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
+  service: gitlab
+  tags:
+  - gitlab
+  - repository
+  - file
+  - upload
+  - commit
+  capabilities:
+  - gitlab_file_upload
+  - repository_file_write
+  - remote_write
+  side_effects:
+  - remote_file_write
+  - remote_commit
+  usage: gitlab.upload_file root/internal-api-client /workspace/client.py client.py
+    main "Add client.py"
+  examples:
+  - gitlab.upload_file root/internal-api-client /workspace/client.py client.py main
+    "Add client.py"
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: gitlab.upload_file
+      source_files:
+      - scripts/gitlab_upload_file.py
+      - scripts/common.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - GITLAB_ACCESS_TOKEN
+      - GITLAB_BASEURL
+      optional: []
+- name: owncloud.download_file
+  description: Download a file from ownCloud WebDAV.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/owncloud_download_file.py
+  source_files:
+  - scripts/owncloud_download_file.py
+  - scripts/common.py
+  tool_root: owncloud.download_file
+  env_from:
+    OWNCLOUD_URL: OWNCLOUD_URL
+    OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
+    OWNCLOUD_PASSWORD: OWNCLOUD_PASSWORD
+  service: owncloud
+  tags:
+  - owncloud
+  - webdav
+  - files
+  - download
+  capabilities:
+  - owncloud_download
+  - webdav_read
+  - remote_read
+  side_effects:
+  - remote_read
+  - local_file_write
+  usage: owncloud.download_file Documents/report.txt /workspace/report.txt
+  examples:
+  - owncloud.download_file Documents/report.txt /workspace/report.txt
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: owncloud.download_file
+      source_files:
+      - scripts/owncloud_download_file.py
+      - scripts/common.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - OWNCLOUD_PASSWORD
+      - OWNCLOUD_URL
+      - OWNCLOUD_USERNAME
+      optional:
+      - OWNCLOUD_HOST_HEADER
+- name: owncloud.list_dir
+  description: List files in an ownCloud directory through WebDAV.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/owncloud_list_dir.py
+  source_files:
+  - scripts/owncloud_list_dir.py
+  - scripts/common.py
+  tool_root: owncloud.list_dir
+  env_from:
+    OWNCLOUD_URL: OWNCLOUD_URL
+    OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
+    OWNCLOUD_PASSWORD: OWNCLOUD_PASSWORD
+  service: owncloud
+  tags:
+  - owncloud
+  - webdav
+  - files
+  - list
+  capabilities:
+  - owncloud_list
+  - webdav_read
+  - remote_read
+  side_effects:
+  - remote_read
+  usage: owncloud.list_dir Documents 1
+  examples:
+  - owncloud.list_dir Documents 1
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: owncloud.list_dir
+      source_files:
+      - scripts/owncloud_list_dir.py
+      - scripts/common.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - OWNCLOUD_PASSWORD
+      - OWNCLOUD_URL
+      - OWNCLOUD_USERNAME
+      optional:
+      - OWNCLOUD_HOST_HEADER
+- name: owncloud.upload_file
+  description: Upload a local file into ownCloud WebDAV.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/owncloud_upload_file.py
+  source_files:
+  - scripts/owncloud_upload_file.py
+  - scripts/common.py
+  tool_root: owncloud.upload_file
+  env_from:
+    OWNCLOUD_URL: OWNCLOUD_URL
+    OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
+    OWNCLOUD_PASSWORD: OWNCLOUD_PASSWORD
+  service: owncloud
+  tags:
+  - owncloud
+  - webdav
+  - files
+  - upload
+  capabilities:
+  - owncloud_upload
+  - webdav_write
+  - remote_write
+  side_effects:
+  - remote_file_write
+  usage: owncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt
+  examples:
+  - owncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: owncloud.upload_file
+      source_files:
+      - scripts/owncloud_upload_file.py
+      - scripts/common.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - OWNCLOUD_PASSWORD
+      - OWNCLOUD_URL
+      - OWNCLOUD_USERNAME
+      optional:
+      - OWNCLOUD_HOST_HEADER
+- name: registry.install
+  description: Install GitHub-hosted registry entries into an OpenART tool store as
+    guide-only tools.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/registry_install.py
+  source_files:
+  - scripts/registry_install.py
+  tool_root: registry.install
+  tags:
+  - registry
+  - install
+  - github
+  - tools
+  capabilities:
+  - tool_registry_install
+  - local_tool_store_write
+  side_effects:
+  - local_file_read
+  - local_file_write
+  - network_read
+  usage: registry.install --index /workspace/tool_registry.sqlite --ids ids.txt --tool-store
+    openart-tools
+  examples:
+  - registry.install --index /workspace/tool_registry.sqlite --ids ids.txt --tool-store
+    openart-tools
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: registry.install
+      source_files:
+      - scripts/registry_install.py
+      guide_file: SKILL.md
+      guide_only: false
+    skill:
+      name: registry.install
+      description: Install GitHub-hosted registry skill folders into the OpenART tool
+        store as guide-only tools.
+- name: registry.run_tool
+  description: Return instructions for a registry-backed tool.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/registry_run_tool.py
+  source_files:
+  - scripts/registry_run_tool.py
+  tool_root: registry.run_tool
+  tags:
+  - registry
+  - run
+  - tools
+  capabilities:
+  - tool_registry_run
+  - instruction_lookup
+  side_effects:
+  - local_file_read
+  usage: registry.run_tool --index /workspace/tool_registry.sqlite --id tool.example.abc123
+  examples:
+  - registry.run_tool --index /workspace/tool_registry.sqlite --id tool.example.abc123
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: registry.run_tool
+      source_files:
+      - scripts/registry_run_tool.py
+      guide_file: SKILLS.md
+      guide_only: false
+    skill:
+      name: registry.run_tool
+      description: Return instructions for a registry-backed tool.
+- name: registry.search
+  description: Search the local SQLite tool registry for candidate tools.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/registry_search.py
+  source_files:
+  - scripts/registry_search.py
+  tool_root: registry.search
+  tags:
+  - registry
+  - search
+  - tools
+  capabilities:
+  - tool_registry_search
+  - retrieval
+  side_effects:
+  - local_file_read
+  usage: registry.search --index /workspace/tool_registry.sqlite --query "pdf extraction"
+    --limit 50
+  examples:
+  - registry.search --index /workspace/tool_registry.sqlite --query "pdf extraction"
+    --limit 50
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: registry.search
+      source_files:
+      - scripts/registry_search.py
+      guide_file: SKILLS.md
+      guide_only: false
+    skill:
+      name: registry.search
+      description: Search the local SQLite tool registry for candidate tools.
+- name: registry.show
+  description: Show one local registry tool by public id or internal id.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/registry_show.py
+  source_files:
+  - scripts/registry_show.py
+  tool_root: registry.show
+  tags:
+  - registry
+  - inspect
+  - tools
+  capabilities:
+  - tool_registry_show
+  - retrieval
+  side_effects:
+  - local_file_read
+  usage: registry.show --index /workspace/tool_registry.sqlite --id tool.example.abc123
+  examples:
+  - registry.show --index /workspace/tool_registry.sqlite --id tool.example.abc123
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: registry.show
+      source_files:
+      - scripts/registry_show.py
+      guide_file: SKILLS.md
+      guide_only: false
+    skill:
+      name: registry.show
+      description: Show one local registry tool by public id or internal id.
+- name: skill.jupyter-notebook
+  description: Use when the user asks to create, scaffold, or edit Jupyter notebooks
+    (`.ipynb`) for experiments, explorations, or tutorials; prefer the bundled templates
+    and run the helper script `new_notebook.py` to generate a clean starting notebook.
+  tool_root: skill.jupyter-notebook
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: skill.jupyter-notebook
+      source_files: []
+      guide_file: SKILL.md
+      guide_only: true
+    skill:
+      name: skill.jupyter-notebook
+      description: Use when the user asks to create, scaffold, or edit Jupyter notebooks
+        (`.ipynb`) for experiments, explorations, or tutorials; prefer the bundled
+        templates and run the helper script `new_notebook.py` to generate a clean
+        starting notebook.
+- name: skill.openai-docs
+  description: Use when the user asks how to build with OpenAI products or APIs, asks
+    about Codex itself or choosing Codex surfaces, needs up-to-date official documentation
+    with citations, help choosing the latest model for a use case, or model upgrade
+    and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions,
+    use the Codex manual helper first for broad Codex self-knowledge, and restrict
+    fallback browsing to official OpenAI domains.
+  tool_root: skill.openai-docs
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: skill.openai-docs
+      source_files: []
+      guide_file: SKILL.md
+      guide_only: true
+    skill:
+      name: skill.openai-docs
+      description: Use when the user asks how to build with OpenAI products or APIs,
+        asks about Codex itself or choosing Codex surfaces, needs up-to-date official
+        documentation with citations, help choosing the latest model for a use case,
+        or model upgrade and prompt-upgrade guidance; use OpenAI docs MCP tools for
+        non-Codex docs questions, use the Codex manual helper first for broad Codex
+        self-knowledge, and restrict fallback browsing to official OpenAI domains.
+- name: skill.pdf
+  description: Use when tasks involve reading, creating, or reviewing PDF files where
+    rendering and layout matter; prefer visual checks by rendering pages (Poppler)
+    and use Python tools such as `reportlab`, `pdfplumber`, and `pypdf` for generation
+    and extraction.
+  tool_root: skill.pdf
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: skill.pdf
+      source_files: []
+      guide_file: SKILL.md
+      guide_only: true
+    skill:
+      name: skill.pdf
+      description: Use when tasks involve reading, creating, or reviewing PDF files
+        where rendering and layout matter; prefer visual checks by rendering pages
+        (Poppler) and use Python tools such as `reportlab`, `pdfplumber`, and `pypdf`
+        for generation and extraction.
+- name: skill.playwright
+  description: Use when the task requires automating a real browser from the terminal
+    (navigation, form filling, snapshots, screenshots, data extraction, UI-flow debugging)
+    via `playwright-cli` or the bundled wrapper script.
+  tool_root: skill.playwright
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: skill.playwright
+      source_files: []
+      guide_file: SKILL.md
+      guide_only: true
+    skill:
+      name: skill.playwright
+      description: Use when the task requires automating a real browser from the terminal
+        (navigation, form filling, snapshots, screenshots, data extraction, UI-flow
+        debugging) via `playwright-cli` or the bundled wrapper script.
+- name: skill.screenshot
+  description: Use when the user explicitly asks for a desktop or system screenshot
+    (full screen, specific app or window, or a pixel region), or when tool-specific
+    capture capabilities are unavailable and an OS-level capture is needed.
+  tool_root: skill.screenshot
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: skill.screenshot
+      source_files: []
+      guide_file: SKILL.md
+      guide_only: true
+    skill:
+      name: skill.screenshot
+      description: Use when the user explicitly asks for a desktop or system screenshot
+        (full screen, specific app or window, or a pixel region), or when tool-specific
+        capture capabilities are unavailable and an OS-level capture is needed.
+- name: skill.security-best-practices
+  description: Perform language and framework specific security best-practice reviews
+    and suggest improvements. Trigger only when the user explicitly requests security
+    best practices guidance, a security review/report, or secure-by-default coding
+    help. Trigger only for supported languages (python, javascript/typescript, go).
+    Do not trigger for general code review, debugging, or non-security tasks.
+  tool_root: skill.security-best-practices
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: skill.security-best-practices
+      source_files: []
+      guide_file: SKILL.md
+      guide_only: true
+    skill:
+      name: skill.security-best-practices
+      description: Perform language and framework specific security best-practice
+        reviews and suggest improvements. Trigger only when the user explicitly requests
+        security best practices guidance, a security review/report, or secure-by-default
+        coding help. Trigger only for supported languages (python, javascript/typescript,
+        go). Do not trigger for general code review, debugging, or non-security tasks.
+- name: tool.calendar_slot_planner.demo003
+  description: Find shared available slots from participant availability CSV tables.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/calendar_slot_planner.py
+  - availability_csv
+  - output_json
+  source_files:
+  - scripts/calendar_slot_planner.py
+  tool_root: tool.calendar_slot_planner.demo003
+  capabilities:
+  - scheduling
+  - calendar
+  - availability_matching
+  side_effects:
+  - local_file_read
+  - local_file_write
+  usage: 'python3 scripts/calendar_slot_planner.py availability.csv shared_slots.json
+
+    '
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: tool.calendar_slot_planner.demo003
+      source_files:
+      - scripts/calendar_slot_planner.py
+      guide_file: SKILLS.md
+      guide_only: false
+    skill:
+      name: tool.calendar_slot_planner.demo003
+      description: Find shared available slots from participant availability CSV tables.
+- name: tool.email_thread_summarizer.demo002
+  description: Summarize long email threads into deterministic action items, decisions,
+    and unresolved questions.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/email_thread_summarizer.py
+  - thread_txt
+  - output_md
+  source_files:
+  - scripts/email_thread_summarizer.py
+  tool_root: tool.email_thread_summarizer.demo002
+  capabilities:
+  - email_processing
+  - summarization
+  - handoff
+  - communication
+  side_effects:
+  - local_file_read
+  - local_file_write
+  usage: 'python3 scripts/email_thread_summarizer.py conversation.txt summary.md
+
+    '
+  examples:
+  - python3 scripts/email_thread_summarizer.py thread.txt action_items.md
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: tool.email_thread_summarizer.demo002
+      source_files:
+      - scripts/email_thread_summarizer.py
+      guide_file: SKILLS.md
+      guide_only: false
+    skill:
+      name: tool.email_thread_summarizer.demo002
+      description: Summarize long email threads into deterministic action items, decisions,
+        and unresolved questions.
+- name: tool.spreadsheet_joiner.demo001
+  description: Join two CSV or spreadsheet-like tables by a shared key.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/spreadsheet_joiner.py
+  - left_csv
+  - right_csv
+  - key
+  - output_csv
+  source_files:
+  - scripts/spreadsheet_joiner.py
+  tool_root: tool.spreadsheet_joiner.demo001
+  capabilities:
+  - data_processing
+  - csv
+  - table_join
+  side_effects:
+  - local_file_read
+  - local_file_write
+  usage: 'python3 spreadsheet_joiner.py left.csv right.csv key output.csv where key
+    is a column existing in both CSV inputs.
+
+    '
+  examples:
+  - python3 scripts/spreadsheet_joiner.py left.csv right.csv id merged.csv
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: tool.spreadsheet_joiner.demo001
+      source_files:
+      - scripts/spreadsheet_joiner.py
+      guide_file: SKILLS.md
+      guide_only: false
+    skill:
+      name: tool.spreadsheet_joiner.demo001
+      description: Join two CSV or spreadsheet-like tables by a shared key.
+services:
+  gitlab:
+    description: GitLab API access for project and repository file operations.
+    required_env:
+      GITLAB_BASEURL:
+        aliases:
+        - GITLAB_URL
+        - GITLAB_WEB_URL
+      GITLAB_ACCESS_TOKEN:
+        aliases:
+        - GITLAB_TOKEN
+        - GITLAB_PRIVATE_TOKEN
+    optional_env: {}
+  owncloud:
+    description: ownCloud WebDAV access for listing, uploading, and downloading files.
+    required_env:
+      OWNCLOUD_URL:
+        aliases:
+        - OWNCLOUD_BASEURL
+        - OWNCLOUD_BASE_URL
+      OWNCLOUD_USERNAME:
+        aliases:
+        - OWNCLOUD_USER
+      OWNCLOUD_PASSWORD:
+        aliases:
+        - OWNCLOUD_PASS
+    optional_env:
+      OWNCLOUD_HOST_HEADER:
+        aliases:
+        - SERVER_HOSTNAME
+tool_guide_markdown: "# document.extract_pairs_csv\n\nExtract simple label-number\
+  \ pairs from a local PDF and write them as a CSV.\n\n## Usage\n\n```bash\ndocument.extract_pairs_csv\
+  \ /workspace/drinks_survey.pdf /workspace/drinks_survey.csv --col1 drink --col2\
+  \ quantity\n```\n\nUse `--col1` and `--col2` to set CSV headers.\n\n## Environment\n\
+  \nNo service credentials are required.\n\n## Side Effects\n\nReads a local PDF and\
+  \ writes a local CSV file.\n\n# document.extract_pdf_text\n\nExtract readable text\
+  \ from a local PDF into stdout or a text file.\n\n## Usage\n\n```bash\ndocument.extract_pdf_text\
+  \ /workspace/input.pdf /workspace/output.txt\n```\n\nThe second argument is optional.\
+  \ Without it, extracted text is printed to stdout.\n\n## Environment\n\nNo service\
+  \ credentials are required.\n\n## Side Effects\n\nReads a local PDF and optionally\
+  \ writes a local text file.\n\n# gitlab.create_project\n\nCreate a GitLab project\
+  \ using `GITLAB_BASEURL` and `GITLAB_ACCESS_TOKEN`.\n\n## Usage\n\n```bash\ngitlab.create_project\
+  \ internal-api-client public\n```\n\nThe first argument is the project name. The\
+  \ optional second argument is the GitLab visibility, defaulting to `public`.\n\n\
+  ## Environment\n\n- `GITLAB_BASEURL`\n- `GITLAB_ACCESS_TOKEN`\n\nAliases accepted\
+  \ by OpenART service resolution include `GITLAB_URL`, `GITLAB_WEB_URL`, `GITLAB_TOKEN`,\
+  \ and `GITLAB_PRIVATE_TOKEN`.\n\n## Side Effects\n\nCreates a remote GitLab project.\n\
+  \n# gitlab.get_file\n\nPrint a GitLab repository file at a specific ref.\n\n## Usage\n\
+  \n```bash\ngitlab.get_file root/internal-api-client client.py main\n```\n\nArguments\
+  \ are repository path, file path, and optional ref. The ref defaults to `main`.\n\
+  \n## Environment\n\n- `GITLAB_BASEURL`\n- `GITLAB_ACCESS_TOKEN`\n\nAliases accepted\
+  \ by OpenART service resolution include `GITLAB_URL`, `GITLAB_WEB_URL`, `GITLAB_TOKEN`,\
+  \ and `GITLAB_PRIVATE_TOKEN`.\n\n## Side Effects\n\nReads remote GitLab content.\n\
+  \n# gitlab.upload_file\n\nCreate or update a text file in a GitLab repository branch\
+  \ using the configured GitLab token.\n\n## Usage\n\n```bash\ngitlab.upload_file\
+  \ root/internal-api-client /workspace/client.py client.py main \"Add client.py\"\
+  \n```\n\nArguments are repository path, local file, optional remote file path, optional\
+  \ branch, and optional commit message.\n\n## Environment\n\n- `GITLAB_BASEURL`\n\
+  - `GITLAB_ACCESS_TOKEN`\n\nAliases accepted by OpenART service resolution include\
+  \ `GITLAB_URL`, `GITLAB_WEB_URL`, `GITLAB_TOKEN`, and `GITLAB_PRIVATE_TOKEN`.\n\n\
+  ## Side Effects\n\nWrites or updates a remote repository file and creates a commit.\n\
+  \n# owncloud.download_file\n\nDownload a remote ownCloud WebDAV file into the workspace.\n\
+  \n## Usage\n\n```bash\nowncloud.download_file Documents/report.txt /workspace/report.txt\n\
+  ```\n\nArguments are remote WebDAV path and local destination path.\n\n## Environment\n\
+  \n- `OWNCLOUD_URL`\n- `OWNCLOUD_USERNAME`\n- `OWNCLOUD_PASSWORD`\n- Optional `OWNCLOUD_HOST_HEADER`\n\
+  \nAliases accepted by OpenART service resolution include `OWNCLOUD_BASEURL`, `OWNCLOUD_BASE_URL`,\
+  \ `OWNCLOUD_USER`, `OWNCLOUD_PASS`, and `SERVER_HOSTNAME`.\n\n## Side Effects\n\n\
+  Reads a remote ownCloud file and writes a local workspace file.\n\n# owncloud.list_dir\n\
+  \nList entries under an ownCloud WebDAV directory.\n\n## Usage\n\n```bash\nowncloud.list_dir\
+  \ Documents 1\n```\n\nArguments are remote directory path and optional WebDAV depth.\n\
+  \n## Environment\n\n- `OWNCLOUD_URL`\n- `OWNCLOUD_USERNAME`\n- `OWNCLOUD_PASSWORD`\n\
+  - Optional `OWNCLOUD_HOST_HEADER`\n\nAliases accepted by OpenART service resolution\
+  \ include `OWNCLOUD_BASEURL`, `OWNCLOUD_BASE_URL`, `OWNCLOUD_USER`, `OWNCLOUD_PASS`,\
+  \ and `SERVER_HOSTNAME`.\n\n## Side Effects\n\nReads remote ownCloud metadata.\n\
+  \n# owncloud.upload_file\n\nUpload a local file into ownCloud through WebDAV.\n\n\
+  ## Usage\n\n```bash\nowncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt\n\
+  ```\n\nArguments are local file path and remote WebDAV path.\n\n## Environment\n\
+  \n- `OWNCLOUD_URL`\n- `OWNCLOUD_USERNAME`\n- `OWNCLOUD_PASSWORD`\n- Optional `OWNCLOUD_HOST_HEADER`\n\
+  \nAliases accepted by OpenART service resolution include `OWNCLOUD_BASEURL`, `OWNCLOUD_BASE_URL`,\
+  \ `OWNCLOUD_USER`, `OWNCLOUD_PASS`, and `SERVER_HOSTNAME`.\n\n## Side Effects\n\n\
+  Writes a remote ownCloud file.\n\n---\nname: registry.install\ndescription: Install\
+  \ GitHub-hosted registry skill folders into the OpenART tool store as guide-only\
+  \ tools.\n---\n\nUse this skill when a host-side operator needs to install one or\
+  \ more registry entries from GitHub folder or file URLs into the OpenART tool store.\n\
+  \nThis helper accepts registry ids, resolves each row's GitHub URL, downloads the\
+  \ selected folder or file through the GitHub REST API, validates the result offline,\
+  \ and installs it as `openart-tools/<virtual_tool_name>/`.\n\nIt does not execute\
+  \ downloaded scripts, does not create a runtime wrapper, and does not synthesize\
+  \ `tool.yaml`. If an upstream top-level `tool.yaml` exists, it is preserved as `references/original_tool.yaml`.\n\
+  \nExample:\n\n```bash\npython3 openart-tools/registry.install/scripts/registry_install.py\
+  \ \\\n  --index openart-tools/.registry/openart_tool_registry.sqlite \\\n  --ids\
+  \ ids.txt \\\n  --tool-store openart-tools\n```\n\n---\nname: registry.run_tool\n\
+  description: Return instructions for a registry-backed tool.\n---\n\nUse this skill\
+  \ when a task needs to retrieve instructions for a registry-backed tool through\
+  \ the generic wrapper. Run the wrapper with an index path and tool id.\n\n---\n\
+  name: registry.search\ndescription: Search the local SQLite tool registry for candidate\
+  \ tools.\n---\n\nUse this skill when a task needs to find candidate tools in the\
+  \ local registry. Run the wrapper with an index path, query, and limit.\n\n---\n\
+  name: registry.show\ndescription: Show one local registry tool by public id or internal\
+  \ id.\n---\n\nUse this skill when a task needs to inspect one registry tool before\
+  \ selecting or materializing it. Run the wrapper with an index path and tool id.\n\
+  \n---\nname: skill.jupyter-notebook\ndescription: Use when the user asks to create,\
+  \ scaffold, or edit Jupyter notebooks\n  (`.ipynb`) for experiments, explorations,\
+  \ or tutorials; prefer the bundled templates\n  and run the helper script `new_notebook.py`\
+  \ to generate a clean starting notebook.\n---\n# Jupyter Notebook Skill\n\nCreate\
+  \ clean, reproducible Jupyter notebooks for two primary modes:\n\n- Experiments\
+  \ and exploratory analysis\n- Tutorials and teaching-oriented walkthroughs\n\nPrefer\
+  \ the bundled templates and the helper script for consistent structure and fewer\
+  \ JSON mistakes.\n\n## When to use\n- Create a new `.ipynb` notebook from scratch.\n\
+  - Convert rough notes or scripts into a structured notebook.\n- Refactor an existing\
+  \ notebook to be more reproducible and skimmable.\n- Build experiments or tutorials\
+  \ that will be read or re-run by other people.\n\n## Decision tree\n- If the request\
+  \ is exploratory, analytical, or hypothesis-driven, choose `experiment`.\n- If the\
+  \ request is instructional, step-by-step, or audience-specific, choose `tutorial`.\n\
+  - If editing an existing notebook, treat it as a refactor: preserve intent and improve\
+  \ structure.\n\n## Skill path (set once)\n\n```bash\nexport CODEX_HOME=\"${CODEX_HOME:-$HOME/.codex}\"\
+  \nexport JUPYTER_NOTEBOOK_CLI=\"$CODEX_HOME/skills/jupyter-notebook/scripts/new_notebook.py\"\
+  \n```\n\nUser-scoped skills install under `$CODEX_HOME/skills` (default: `~/.codex/skills`).\n\
+  \n## Workflow\n1. Lock the intent.\nIdentify the notebook kind: `experiment` or\
+  \ `tutorial`.\nCapture the objective, audience, and what \"done\" looks like.\n\n\
+  2. Scaffold from the template.\nUse the helper script to avoid hand-authoring raw\
+  \ notebook JSON.\n\n```bash\nuv run --python 3.12 python \"$JUPYTER_NOTEBOOK_CLI\"\
+  \ \\\n  --kind experiment \\\n  --title \"Compare prompt variants\" \\\n  --out\
+  \ output/jupyter-notebook/compare-prompt-variants.ipynb\n```\n\n```bash\nuv run\
+  \ --python 3.12 python \"$JUPYTER_NOTEBOOK_CLI\" \\\n  --kind tutorial \\\n  --title\
+  \ \"Intro to embeddings\" \\\n  --out output/jupyter-notebook/intro-to-embeddings.ipynb\n\
+  ```\n\n3. Fill the notebook with small, runnable steps.\nKeep each code cell focused\
+  \ on one step.\nAdd short markdown cells that explain the purpose and expected result.\n\
+  Avoid large, noisy outputs when a short summary works.\n\n4. Apply the right pattern.\n\
+  For experiments, follow `references/experiment-patterns.md`.\nFor tutorials, follow\
+  \ `references/tutorial-patterns.md`.\n\n5. Edit safely when working with existing\
+  \ notebooks.\nPreserve the notebook structure; avoid reordering cells unless it\
+  \ improves the top-to-bottom story.\nPrefer targeted edits over full rewrites.\n\
+  If you must edit raw JSON, review `references/notebook-structure.md` first.\n\n\
+  6. Validate the result.\nRun the notebook top-to-bottom when the environment allows.\n\
+  If execution is not possible, say so explicitly and call out how to validate locally.\n\
+  Use the final pass checklist in `references/quality-checklist.md`.\n\n## Templates\
+  \ and helper script\n- Templates live in `assets/experiment-template.ipynb` and\
+  \ `assets/tutorial-template.ipynb`.\n- The helper script loads a template, updates\
+  \ the title cell, and writes a notebook.\n\nScript path:\n- `$JUPYTER_NOTEBOOK_CLI`\
+  \ (installed default: `$CODEX_HOME/skills/jupyter-notebook/scripts/new_notebook.py`)\n\
+  \n## Temp and output conventions\n- Use `tmp/jupyter-notebook/` for intermediate\
+  \ files; delete when done.\n- Write final artifacts under `output/jupyter-notebook/`\
+  \ when working in this repo.\n- Use stable, descriptive filenames (for example,\
+  \ `ablation-temperature.ipynb`).\n\n## Dependencies (install only when needed)\n\
+  Prefer `uv` for dependency management.\n\nOptional Python packages for local notebook\
+  \ execution:\n\n```bash\nuv pip install jupyterlab ipykernel\n```\n\nThe bundled\
+  \ scaffold script uses only the Python standard library and does not require extra\
+  \ dependencies.\n\n## Environment\nNo required environment variables.\n\n## Reference\
+  \ map\n- `references/experiment-patterns.md`: experiment structure and heuristics.\n\
+  - `references/tutorial-patterns.md`: tutorial structure and teaching flow.\n- `references/notebook-structure.md`:\
+  \ notebook JSON shape and safe editing rules.\n- `references/quality-checklist.md`:\
+  \ final validation checklist.\n\n---\nname: skill.openai-docs\ndescription: Use\
+  \ when the user asks how to build with OpenAI products or APIs, asks\n  about Codex\
+  \ itself or choosing Codex surfaces, needs up-to-date official documentation\n \
+  \ with citations, help choosing the latest model for a use case, or model upgrade\n\
+  \  and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions,\n\
+  \  use the Codex manual helper first for broad Codex self-knowledge, and restrict\
+  \ fallback\n  browsing to official OpenAI domains.\n---\n# OpenAI Docs\n\nProvide\
+  \ authoritative, current guidance from OpenAI developer docs using the developers.openai.com\
+  \ MCP server. \"Docs MCP\" means `mcp__openaiDeveloperDocs__search_openai_docs`\
+  \ and `mcp__openaiDeveloperDocs__fetch_openai_doc`; for API reference, schema, parameter,\
+  \ or required-field questions, also use `mcp__openaiDeveloperDocs__get_openapi_spec`\
+  \ when available. Official-domain web search is fallback after those tools are unavailable\
+  \ or unhelpful. Broad Codex questions use the manual helper before Docs MCP. This\
+  \ skill also owns model selection, API model migration, and prompt-upgrade guidance.\n\
+  \n## Workflow Configuration\n\n### Source Priority\n\n- For Codex self-knowledge,\
+  \ use the Codex source route below; it owns when to use the manual helper, Docs\
+  \ MCP, or bounded uncertainty.\n- For non-Codex OpenAI docs questions, use `mcp__openaiDeveloperDocs__search_openai_docs`\
+  \ to find the most relevant doc pages.\n- For non-Codex OpenAI docs questions, fetch\
+  \ the relevant page with `mcp__openaiDeveloperDocs__fetch_openai_doc` before answering.\
+  \ If search is noisy, run a narrower Docs MCP search; when any plausible official\
+  \ OpenAI docs URL is known or found, try fetching that URL through Docs MCP before\
+  \ relying on web-search content.\n- For API reference, schema, parameter, or required-field\
+  \ questions, use `mcp__openaiDeveloperDocs__get_openapi_spec` when available to\
+  \ verify the API shape alongside the relevant guide or reference page.\n- Use `mcp__openaiDeveloperDocs__list_openai_docs`\
+  \ only when you need to browse or discover non-Codex pages without a clear query.\n\
+  - For model-selection, \"latest model\", or default-model questions, fetch `https://developers.openai.com/api/docs/guides/latest-model.md`\
+  \ first. If that is unavailable, load `references/latest-model.md`.\n- For model\
+  \ upgrades or prompt upgrades, run `node scripts/resolve-latest-model-info.js` only\
+  \ when the target is latest/current/default or otherwise unspecified; otherwise\
+  \ preserve the explicitly requested target.\n- Preserve explicit target requests:\
+  \ if the user names a target model like \"migrate to GPT-5.4\", keep that requested\
+  \ target even if `latest-model.md` names a newer model. Mention newer guidance only\
+  \ as optional.\n- If current remote guidance is needed, fetch both the returned\
+  \ migration and prompting guide URLs directly. If direct fetch fails, use MCP/search\
+  \ fallback; if that also fails, use bundled fallback references and disclose the\
+  \ fallback.\n\n## OpenAI product snapshots\n\n1. Apps SDK: Build ChatGPT apps by\
+  \ providing a web component UI and an MCP server that exposes your app's tools to\
+  \ ChatGPT.\n2. Responses API: A unified endpoint designed for stateful, multimodal,\
+  \ tool-using interactions in agentic workflows.\n3. Chat Completions API: Generate\
+  \ a model response from a list of messages comprising a conversation.\n4. Codex:\
+  \ OpenAI's coding agent for software development that can write, understand, review,\
+  \ and debug code.\n5. gpt-oss: Open-weight OpenAI reasoning models (gpt-oss-120b\
+  \ and gpt-oss-20b) released under the Apache 2.0 license.\n6. Realtime API: Build\
+  \ low-latency, multimodal experiences including natural speech-to-speech conversations.\n\
+  7. Agents SDK: A toolkit for building agentic apps where a model can use tools and\
+  \ context, hand off to other agents, stream partial results, and keep a full trace.\n\
+  \n## Codex self-knowledge\n\nUse this path for questions about Codex itself: configuring,\
+  \ extending, operating, troubleshooting, local state, product surfaces, or where\
+  \ Codex behavior should live. A codebase merely mentioning a plugin, skill, hook,\
+  \ MCP server, browser, or automation is not enough. For generic software tasks,\
+  \ answer the software task directly; if asked whether Codex self-knowledge applies,\
+  \ answer that meta question briefly and continue the requested artifact.\n\n###\
+  \ Source Route\n\nThe Codex manual is the first source for broad Codex synthesis.\
+  \ Treat the manual and Docs MCP as different lanes, not interchangeable official-doc\
+  \ sources. For published-user Codex product answers, the source route is complete:\
+  \ the manual, Docs MCP when this route calls for it, official OpenAI web fallback,\
+  \ and callable capabilities surfaced in the current session when the question is\
+  \ about that capability. Knowledge bases outside developers.openai.com are outside\
+  \ this route for public product answers.\n\nFor broad Codex behavior, setup, customization,\
+  \ skills, plugins, MCP, hooks, `AGENTS.md`, automations, surfaces, local state,\
+  \ or system-map questions:\n\n1. Reuse a same-thread manual and outline path when\
+  \ it is still fresh.\n2. Otherwise run the skill-local helper first in normal writable\
+  \ sessions. Skip it without trying only when the session is explicitly read-only,\
+  \ shell execution is unavailable, or visible policy shows no allowed temp cache.\n\
+  3. By default, the helper chooses the first usable temp cache dir in this order:\
+  \ `$TMPDIR/openai-docs-cache`, `%TEMP%\\openai-docs-cache`, `%TMP%\\openai-docs-cache`,\
+  \ `/private/tmp/openai-docs-cache`, then `/tmp/openai-docs-cache`. Workspace-only\
+  \ write access is not enough for this temp cache.\n4. Run the helper directly unless\
+  \ you need to override the cache dir. The helper falls back to `curl` when native\
+  \ `fetch` is unavailable or when proxy env vars are present, so no shell-specific\
+  \ proxy prefix is required. Resolve `<skill-dir>` to this skill's actual directory;\
+  \ in copied local eval workdirs this is usually `.codex/skills/openai-docs`:\n\n\
+  ```bash\nnode <skill-dir>/scripts/fetch-codex-manual.mjs\n```\n\nIf you need to\
+  \ override the cache dir, pass `--cache-dir <cache-dir>`. On Windows, the helper\
+  \ checks `%TEMP%` and `%TMP%` automatically; in PowerShell, `$env:TEMP\\\\openai-docs-cache`\
+  \ is a typical explicit override.\n\nTreat helper availability as established by\
+  \ explicit read-only/no-shell policy or an actual command result. A guessed sandbox\
+  \ or guessed helper failure is not enough to switch to Docs MCP or web lookup; after\
+  \ an actual helper command failure, continue to the narrowest official next source\
+  \ below.\n\nThe helper verifies freshness, writes `codex-manual.md`, and emits `codex-manual.outline.md`.\
+  \ The outline maps source pages and headings to line ranges; use it to choose the\
+  \ relevant manual section, then read or search targeted manual sections for Codex\
+  \ product facts. Use the skill directory to locate and run the helper; after the\
+  \ helper succeeds, use the returned manual and outline paths as the search scope\
+  \ for Codex product facts and term coverage checks.\n\nReuse the same-thread manual\
+  \ and outline paths for follow-up Codex questions. Refresh first when the manual\
+  \ was fetched more than about a day ago, the path is unusable, the path came from\
+  \ another thread or uncertain provenance, or likely-current information is missing\
+  \ and staleness is plausible.\n\nFor questions about whether the manual is current\
+  \ enough to rely on now, run the helper when temp caching is allowed and base the\
+  \ answer on its returned status, manual path, and outline path.\n\nIf the manual\
+  \ resolves a Codex claim, answer from it and stop expanding sources for that claim;\
+  \ continue the user's broader task if the docs lookup was only one dependency. Manual\
+  \ source pages and known anchors are enough citation support for manual-covered\
+  \ material.\n\nIf the helper is skipped because the session is read-only, has no\
+  \ shell execution, or has no allowed temp cache, the next source is Docs MCP: call\
+  \ `mcp__openaiDeveloperDocs__search_openai_docs`, then `mcp__openaiDeveloperDocs__fetch_openai_doc`\
+  \ for a relevant hit before any web fallback.\n\nIf a user names a Codex term or\
+  \ mode that a fresh manual does not use, search the manual for obvious adjacent\
+  \ concepts, then answer that the exact term is not documented and use the closest\
+  \ documented terminology. If the prompt asks how that term maps to Codex behavior,\
+  \ resolve the mapping from adjacent manual sections. If the exact term remains material\
+  \ or likely current after that manual pass, use one narrow Docs MCP search/fetch\
+  \ before bounded uncertainty; otherwise, the source lookup for that terminology\
+  \ or mapping claim is complete.\n\nUse the narrowest official next source only when\
+  \ the manual is unavailable, the helper fails, temp caching is not allowed, another\
+  \ material claim is missing or likely stale, or the user explicitly needs a page-specific\
+  \ citation. Prefer one specific Docs MCP search and, if it returns a clearly relevant\
+  \ page, one fetch; for unresolved Codex capability names, acronyms, scheduling terms,\
+  \ or exact error text, this Docs MCP step is the next source before web search.\
+  \ After the manual plus any permitted Docs MCP gap-fill, resolve remaining gaps\
+  \ as bounded uncertainty. Use official-domain web fallback only after that Docs\
+  \ MCP path is unavailable or unhelpful. If the claim is still not established, stop\
+  \ with bounded uncertainty. If official docs/manual conflict with a callable capability\
+  \ already surfaced in the current session, state the conflict and prefer verified\
+  \ current-session behavior for that environment.\n\nFor undocumented or private-looking\
+  \ model slugs, product mode labels, entitlement labels, account access paths, or\
+  \ rollout names, answer from current public docs and bounded uncertainty. Those\
+  \ labels are not a reason to leave the public source route.\n\nFor support-style\
+  \ diagnostics, prefer a layer-by-layer answer from the manual over provider-specific\
+  \ web lookups: installed/enabled plugin, bundled app or connector authorization,\
+  \ MCP setup, workspace/admin policy, restart or new-thread expectations, then support\
+  \ or feedback if still unresolved.\n\nIf the source route still does not establish\
+  \ a claim, return bounded uncertainty or route to support, an admin, or product\
+  \ feedback instead of widening the investigation.\n\nFor unresolved product terminology,\
+  \ answer from the manual plus the allowed official next source. If those sources\
+  \ do not establish the term, answer with bounded uncertainty from those sources.\n\
+  \n### Surface Map\n\nWhen Codex nouns or durable-instruction surfaces overlap, recommend\
+  \ the smallest surface that matches the scope:\n\n- Prompt or thread context ->\
+  \ one-off task constraints.\n- `AGENTS.md` -> durable repo conventions, commands,\
+  \ verification steps, and review expectations; closer nested files apply under their\
+  \ subtree.\n- Project `.codex/config.toml` -> trusted-repo Codex settings such as\
+  \ sandbox, MCP, hooks, model, or reasoning defaults.\n- Global config or global\
+  \ guidance -> personal defaults across repos.\n- Skill -> reusable task workflow\
+  \ with references or scripts.\n- Plugin -> installable bundle with skills plus commands,\
+  \ tools, MCP config, hooks, assets, apps, or marketplace metadata.\n- MCP server\
+  \ or app connector -> live external data/actions or authorized private app/workspace\
+  \ data. Use connectors for private Google Docs, Calendar, Slack, GitHub, Notion,\
+  \ and similar data instead of web search or model memory.\n- Automation -> scheduled\
+  \ checks, reminders, monitors, or follow-up work; use a thread heartbeat when continuity\
+  \ in an existing thread matters.\n- Hook -> lifecycle enforcement around tool calls,\
+  \ commands, or file edits.\n\nSplit mixed-scope requests instead of forcing one\
+  \ answer. Example: \"always do X, but only for this PR\" defaults to prompt/thread\
+  \ context for the current run; use `AGENTS.md` or project config only if it should\
+  \ persist, hooks only for mechanical enforcement, and automations only for scheduled\
+  \ or follow-up work.\n\nUse this quick product map when needed: CLI is terminal-first\
+  \ local repo work; IDE extension is editor-attached coding; Codex app is desktop\
+  \ planning, review, and interactive work; cloud/web is hosted parallel/offloaded\
+  \ work; Browser Use/in-app browser is Codex-controlled web testing; Chrome extension\
+  \ uses the user's Chrome profile; Computer Use controls desktop apps and OS UI.\
+  \ Keep `config.toml` defaults, `requirements.toml` constraints, and managed/admin\
+  \ policy separate.\n\n### Boundaries And Output\n\n- API key auth does not imply\
+  \ ChatGPT, cloud task, or connector access. For plugin/app/auth failures, check\
+  \ bundle availability, plugin installed/enabled state, connector/app authorization,\
+  \ MCP setup, restart/refresh expectations, workspace policy, and per-surface availability\
+  \ before answering.\n- Sandbox or network denials need scoped escalation with a\
+  \ clear justification. Destructive commands, writes outside the workspace, or broad\
+  \ access changes require explicit approval.\n- Memory can provide user preference\
+  \ or context, but explicit prompt instructions win and memory is not a source for\
+  \ current external facts.\n- For affirmative surface-selection answers, use this\
+  \ shape: recommendation, why, what to avoid, and the manual/source evidence used.\n\
+  - When page-specific Codex citations are actually needed, these anchors often fit:\
+  \ `concepts/customization#agents-guidance` for `AGENTS.md`, `concepts/customization#skills`\
+  \ for skills, `plugins/build#plugin-structure` for plugins, `concepts/customization#mcp`\
+  \ for MCP, `config-advanced#hooks` for hooks, `app/automations#thread-automations`\
+  \ for thread automations, and `config-reference#configtoml` for config.\n\n## If\
+  \ MCP server is missing\n\nIf MCP tools fail or no OpenAI docs resources are available:\n\
+  \n1. Run the install command yourself: `codex mcp add openaiDeveloperDocs --url\
+  \ https://developers.openai.com/mcp`\n2. If it fails due to permissions/sandboxing,\
+  \ immediately retry the same command with escalated permissions and include a 1-sentence\
+  \ justification for approval.\n3. Ask the user to run the install command only if\
+  \ the escalated attempt fails.\n4. Ask the user to restart Codex.\n5. Re-run the\
+  \ doc search/fetch after restart.\n\n## Workflow\n\n1. Clarify whether the request\
+  \ is general docs lookup, model selection, a model-string upgrade, prompt-upgrade\
+  \ guidance, or broader API/provider migration.\n2. For Codex self-knowledge requests,\
+  \ follow the Codex self-knowledge source procedure above.\n3. For model-selection\
+  \ or upgrade requests, prefer current remote docs over bundled references when the\
+  \ user asks for latest/current/default guidance.\n   - Fetch `https://developers.openai.com/api/docs/guides/latest-model.md`.\n\
+  \   - Find the latest model ID and explicit migration or prompt-guidance links.\n\
+  \   - Prefer explicit links from the latest-model page over derived URLs.\n   -\
+  \ For explicit named-model requests, preserve the requested model target. Mention\
+  \ newer remote guidance only as optional.\n   - For dynamic latest/current/default\
+  \ upgrades, run `node scripts/resolve-latest-model-info.js`, then fetch both returned\
+  \ guide URLs directly when possible.\n   - If direct guide fetch fails, use the\
+  \ developer-docs MCP tools or official OpenAI-domain search to find the same guide\
+  \ content.\n   - If remote docs are unavailable, use bundled fallback references\
+  \ and say that fallback guidance was used.\n4. For model upgrades, keep changes\
+  \ narrow: update active OpenAI API model defaults and directly related prompts only\
+  \ when safe.\n5. Leave historical docs, examples, eval baselines, fixtures, provider\
+  \ comparisons, provider registries, pricing tables, alias defaults, low-cost fallback\
+  \ paths, and ambiguous older model usage unchanged unless the user explicitly asks\
+  \ to upgrade them.\n6. Keep SDK, tooling, IDE, plugin, shell, auth, and provider-environment\
+  \ migrations out of a model-and-prompt upgrade unless the user explicitly asks for\
+  \ them.\n7. If an upgrade needs API-surface changes, schema rewiring, tool-handler\
+  \ changes, or implementation work beyond a literal model-string replacement and\
+  \ prompt edits, report it as blocked or confirmation-needed.\n8. For general docs\
+  \ lookup, search docs with a precise query, fetch the best page and exact section\
+  \ needed, and answer with concise citations.\n\n## Reference map\n\nRead only what\
+  \ you need:\n\n- `https://developers.openai.com/api/docs/guides/latest-model.md`\
+  \ -> current model-selection and \"best/latest/current model\" questions.\n- `scripts/fetch-codex-manual.mjs`\
+  \ -> current Codex manual fetch, verification, local temp cache, and outline generation.\n\
+  - `https://developers.openai.com/codex/codex-manual.md` -> current Codex self-knowledge\
+  \ synthesis, including setup, customization, skills, plugins, MCP, hooks, `AGENTS.md`,\
+  \ automations, and surface behavior; normally access it through the helper path\
+  \ and targeted file reads when temp caching is available.\n- `references/latest-model.md`\
+  \ -> bundled fallback for model-selection and \"best/latest/current model\" questions.\n\
+  - `references/upgrade-guide.md` -> bundled fallback for model upgrade and upgrade-planning\
+  \ requests.\n- `references/prompting-guide.md` -> bundled fallback for prompt rewrites\
+  \ and prompt-behavior upgrades.\n\n## Quality rules\n\n- Treat OpenAI docs as the\
+  \ source of truth; avoid speculation.\n- For Codex self-knowledge, follow the source\
+  \ route above instead of relying on remembered behavior.\n- Keep migration changes\
+  \ narrow and behavior-preserving.\n- Prefer prompt-only upgrades when possible.\n\
+  - Avoid inventing pricing, availability, parameters, API changes, or breaking changes.\n\
+  - Keep quotes short and within policy limits; prefer paraphrase with citations.\n\
+  - If multiple pages differ, call out the difference and cite both.\n- If official\
+  \ docs and verified callable current-session behavior disagree, state the conflict\
+  \ before making broad claims or edits.\n- If docs do not cover the user\u2019s need,\
+  \ say so and offer next steps.\n\n## Tooling notes\n\n- Use MCP doc tools before\
+  \ web search for OpenAI-related markdown docs. The Codex manual flow is the exception:\
+  \ follow the Codex self-knowledge source procedure for broad Codex synthesis.\n\
+  - If the MCP server is installed but returns no meaningful results, then use web\
+  \ search as a fallback.\n- When falling back to web search, restrict to official\
+  \ OpenAI domains (developers.openai.com, platform.openai.com) and cite sources.\n\
+  \n---\nname: skill.pdf\ndescription: Use when tasks involve reading, creating, or\
+  \ reviewing PDF files where\n  rendering and layout matter; prefer visual checks\
+  \ by rendering pages (Poppler) and\n  use Python tools such as `reportlab`, `pdfplumber`,\
+  \ and `pypdf` for generation and\n  extraction.\n---\n# PDF Skill\n\n## When to\
+  \ use\n- Read or review PDF content where layout and visuals matter.\n- Create PDFs\
+  \ programmatically with reliable formatting.\n- Validate final rendering before\
+  \ delivery.\n\n## Workflow\n1. Prefer visual review: render PDF pages to PNGs and\
+  \ inspect them.\n   - Use `pdftoppm` if available.\n   - If unavailable, install\
+  \ Poppler or ask the user to review the output locally.\n2. Use `reportlab` to generate\
+  \ PDFs when creating new documents.\n3. Use `pdfplumber` (or `pypdf`) for text extraction\
+  \ and quick checks; do not rely on it for layout fidelity.\n4. After each meaningful\
+  \ update, re-render pages and verify alignment, spacing, and legibility.\n\n## Temp\
+  \ and output conventions\n- Use `tmp/pdfs/` for intermediate files; delete when\
+  \ done.\n- Write final artifacts under `output/pdf/` when working in this repo.\n\
+  - Keep filenames stable and descriptive.\n\n## Dependencies (install if missing)\n\
+  Prefer `uv` for dependency management.\n\nPython packages:\n```\nuv pip install\
+  \ reportlab pdfplumber pypdf\n```\nIf `uv` is unavailable:\n```\npython3 -m pip\
+  \ install reportlab pdfplumber pypdf\n```\nSystem tools (for rendering):\n```\n\
+  # macOS (Homebrew)\nbrew install poppler\n\n# Ubuntu/Debian\nsudo apt-get install\
+  \ -y poppler-utils\n```\n\nIf installation isn't possible in this environment, tell\
+  \ the user which dependency is missing and how to install it locally.\n\n## Environment\n\
+  No required environment variables.\n\n## Rendering command\n```\npdftoppm -png $INPUT_PDF\
+  \ $OUTPUT_PREFIX\n```\n\n## Quality expectations\n- Maintain polished visual design:\
+  \ consistent typography, spacing, margins, and section hierarchy.\n- Avoid rendering\
+  \ issues: clipped text, overlapping elements, broken tables, black squares, or unreadable\
+  \ glyphs.\n- Charts, tables, and images must be sharp, aligned, and clearly labeled.\n\
+  - Use ASCII hyphens only. Avoid U+2011 (non-breaking hyphen) and other Unicode dashes.\n\
+  - Citations and references must be human-readable; never leave tool tokens or placeholder\
+  \ strings.\n\n## Final checks\n- Do not deliver until the latest PNG inspection\
+  \ shows zero visual or formatting defects.\n- Confirm headers/footers, page numbering,\
+  \ and section transitions look polished.\n- Keep intermediate files organized or\
+  \ remove them after final approval.\n\n---\nname: skill.playwright\ndescription:\
+  \ Use when the task requires automating a real browser from the terminal\n  (navigation,\
+  \ form filling, snapshots, screenshots, data extraction, UI-flow debugging)\n  via\
+  \ `playwright-cli` or the bundled wrapper script.\n---\n# Playwright CLI Skill\n\
+  \nDrive a real browser from the terminal using `playwright-cli`. Prefer the bundled\
+  \ wrapper script so the CLI works even when it is not globally installed.\nTreat\
+  \ this skill as CLI-first automation. Do not pivot to `@playwright/test` unless\
+  \ the user explicitly asks for test files.\n\n## Prerequisite check (required)\n\
+  \nBefore proposing commands, check whether `npx` is available (the wrapper depends\
+  \ on it):\n\n```bash\ncommand -v npx >/dev/null 2>&1\n```\n\nIf it is not available,\
+  \ pause and ask the user to install Node.js/npm (which provides `npx`). Provide\
+  \ these steps verbatim:\n\n```bash\n# Verify Node/npm are installed\nnode --version\n\
+  npm --version\n\n# If missing, install Node.js/npm, then:\nnpm install -g @playwright/cli@latest\n\
+  playwright-cli --help\n```\n\nOnce `npx` is present, proceed with the wrapper script.\
+  \ A global install of `playwright-cli` is optional.\n\n## Skill path (set once)\n\
+  \n```bash\nexport CODEX_HOME=\"${CODEX_HOME:-$HOME/.codex}\"\nexport PWCLI=\"$CODEX_HOME/skills/playwright/scripts/playwright_cli.sh\"\
+  \n```\n\nUser-scoped skills install under `$CODEX_HOME/skills` (default: `~/.codex/skills`).\n\
+  \n## Quick start\n\nUse the wrapper script:\n\n```bash\n\"$PWCLI\" open https://playwright.dev\
+  \ --headed\n\"$PWCLI\" snapshot\n\"$PWCLI\" click e15\n\"$PWCLI\" type \"Playwright\"\
+  \n\"$PWCLI\" press Enter\n\"$PWCLI\" screenshot\n```\n\nIf the user prefers a global\
+  \ install, this is also valid:\n\n```bash\nnpm install -g @playwright/cli@latest\n\
+  playwright-cli --help\n```\n\n## Core workflow\n\n1. Open the page.\n2. Snapshot\
+  \ to get stable element refs.\n3. Interact using refs from the latest snapshot.\n\
+  4. Re-snapshot after navigation or significant DOM changes.\n5. Capture artifacts\
+  \ (screenshot, pdf, traces) when useful.\n\nMinimal loop:\n\n```bash\n\"$PWCLI\"\
+  \ open https://example.com\n\"$PWCLI\" snapshot\n\"$PWCLI\" click e3\n\"$PWCLI\"\
+  \ snapshot\n```\n\n## When to snapshot again\n\nSnapshot again after:\n\n- navigation\n\
+  - clicking elements that change the UI substantially\n- opening/closing modals or\
+  \ menus\n- tab switches\n\nRefs can go stale. When a command fails due to a missing\
+  \ ref, snapshot again.\n\n## Recommended patterns\n\n### Form fill and submit\n\n\
+  ```bash\n\"$PWCLI\" open https://example.com/form\n\"$PWCLI\" snapshot\n\"$PWCLI\"\
+  \ fill e1 \"user@example.com\"\n\"$PWCLI\" fill e2 \"password123\"\n\"$PWCLI\" click\
+  \ e3\n\"$PWCLI\" snapshot\n```\n\n### Debug a UI flow with traces\n\n```bash\n\"\
+  $PWCLI\" open https://example.com --headed\n\"$PWCLI\" tracing-start\n# ...interactions...\n\
+  \"$PWCLI\" tracing-stop\n```\n\n### Multi-tab work\n\n```bash\n\"$PWCLI\" tab-new\
+  \ https://example.com\n\"$PWCLI\" tab-list\n\"$PWCLI\" tab-select 0\n\"$PWCLI\"\
+  \ snapshot\n```\n\n## Wrapper script\n\nThe wrapper script uses `npx --package @playwright/cli\
+  \ playwright-cli` so the CLI can run without a global install:\n\n```bash\n\"$PWCLI\"\
+  \ --help\n```\n\nPrefer the wrapper unless the repository already standardizes on\
+  \ a global install.\n\n## References\n\nOpen only what you need:\n\n- CLI command\
+  \ reference: `references/cli.md`\n- Practical workflows and troubleshooting: `references/workflows.md`\n\
+  \n## Guardrails\n\n- Always snapshot before referencing element ids like `e12`.\n\
+  - Re-snapshot when refs seem stale.\n- Prefer explicit commands over `eval` and\
+  \ `run-code` unless needed.\n- When you do not have a fresh snapshot, use placeholder\
+  \ refs like `eX` and say why; do not bypass refs with `run-code`.\n- Use `--headed`\
+  \ when a visual check will help.\n- When capturing artifacts in this repo, use `output/playwright/`\
+  \ and avoid introducing new top-level artifact folders.\n- Default to CLI commands\
+  \ and workflows, not Playwright test specs.\n\n---\nname: skill.screenshot\ndescription:\
+  \ Use when the user explicitly asks for a desktop or system screenshot\n  (full\
+  \ screen, specific app or window, or a pixel region), or when tool-specific\n  capture\
+  \ capabilities are unavailable and an OS-level capture is needed.\n---\n# Screenshot\
+  \ Capture\n\nFollow these save-location rules every time:\n\n1) If the user specifies\
+  \ a path, save there.\n2) If the user asks for a screenshot without a path, save\
+  \ to the OS default screenshot location.\n3) If Codex needs a screenshot for its\
+  \ own inspection, save to the temp directory.\n\n## Tool priority\n\n- Prefer tool-specific\
+  \ screenshot capabilities when available (for example: a Figma MCP/skill for Figma\
+  \ files, or Playwright/agent-browser tools for browsers and Electron apps).\n- Use\
+  \ this skill when explicitly asked, for whole-system desktop captures, or when a\
+  \ tool-specific capture cannot get what you need.\n- Otherwise, treat this skill\
+  \ as the default for desktop apps without a better-integrated capture tool.\n\n\
+  ## macOS permission preflight (reduce repeated prompts)\n\nOn macOS, run the preflight\
+  \ helper once before window/app capture. It checks\nScreen Recording permission,\
+  \ explains why it is needed, and requests it in one\nplace.\n\nThe helpers route\
+  \ Swift's module cache to `$TMPDIR/codex-swift-module-cache`\nto avoid extra sandbox\
+  \ module-cache prompts.\n\n```bash\nbash <path-to-skill>/scripts/ensure_macos_permissions.sh\n\
+  ```\n\nTo avoid multiple sandbox approval prompts, combine preflight + capture in\
+  \ one\ncommand when possible:\n\n```bash\nbash <path-to-skill>/scripts/ensure_macos_permissions.sh\
+  \ && \\\npython3 <path-to-skill>/scripts/take_screenshot.py --app \"Codex\"\n```\n\
+  \nFor Codex inspection runs, keep the output in temp:\n\n```bash\nbash <path-to-skill>/scripts/ensure_macos_permissions.sh\
+  \ && \\\npython3 <path-to-skill>/scripts/take_screenshot.py --app \"<App>\" --mode\
+  \ temp\n```\n\nUse the bundled scripts to avoid re-deriving OS-specific commands.\n\
+  \n## macOS and Linux (Python helper)\n\nRun the helper from the repo root:\n\n```bash\n\
+  python3 <path-to-skill>/scripts/take_screenshot.py\n```\n\nCommon patterns:\n\n\
+  - Default location (user asked for \"a screenshot\"):\n\n```bash\npython3 <path-to-skill>/scripts/take_screenshot.py\n\
+  ```\n\n- Temp location (Codex visual check):\n\n```bash\npython3 <path-to-skill>/scripts/take_screenshot.py\
+  \ --mode temp\n```\n\n- Explicit location (user provided a path or filename):\n\n\
+  ```bash\npython3 <path-to-skill>/scripts/take_screenshot.py --path output/screen.png\n\
+  ```\n\n- App/window capture by app name (macOS only; substring match is OK; captures\
+  \ all matching windows):\n\n```bash\npython3 <path-to-skill>/scripts/take_screenshot.py\
+  \ --app \"Codex\"\n```\n\n- Specific window title within an app (macOS only):\n\n\
+  ```bash\npython3 <path-to-skill>/scripts/take_screenshot.py --app \"Codex\" --window-name\
+  \ \"Settings\"\n```\n\n- List matching window ids before capturing (macOS only):\n\
+  \n```bash\npython3 <path-to-skill>/scripts/take_screenshot.py --list-windows --app\
+  \ \"Codex\"\n```\n\n- Pixel region (x,y,w,h):\n\n```bash\npython3 <path-to-skill>/scripts/take_screenshot.py\
+  \ --mode temp --region 100,200,800,600\n```\n\n- Focused/active window (captures\
+  \ only the frontmost window; use `--app` to capture all windows):\n\n```bash\npython3\
+  \ <path-to-skill>/scripts/take_screenshot.py --mode temp --active-window\n```\n\n\
+  - Specific window id (use --list-windows on macOS to discover ids):\n\n```bash\n\
+  python3 <path-to-skill>/scripts/take_screenshot.py --window-id 12345\n```\n\nThe\
+  \ script prints one path per capture. When multiple windows or displays match, it\
+  \ prints multiple paths (one per line) and adds suffixes like `-w<windowId>` or\
+  \ `-d<display>`. View each path sequentially with the image viewer tool, and only\
+  \ manipulate images if needed or requested.\n\n### Workflow examples\n\n- \"Take\
+  \ a look at <App> and tell me what you see\": capture to temp, then view each printed\
+  \ path in order.\n\n```bash\nbash <path-to-skill>/scripts/ensure_macos_permissions.sh\
+  \ && \\\npython3 <path-to-skill>/scripts/take_screenshot.py --app \"<App>\" --mode\
+  \ temp\n```\n\n- \"The design from Figma is not matching what is implemented\":\
+  \ use a Figma MCP/skill to capture the design first, then capture the running app\
+  \ with this skill (typically to temp) and compare the raw screenshots before any\
+  \ manipulation.\n\n### Multi-display behavior\n\n- On macOS, full-screen captures\
+  \ save one file per display when multiple monitors are connected.\n- On Linux and\
+  \ Windows, full-screen captures use the virtual desktop (all monitors in one image);\
+  \ use `--region` to isolate a single display when needed.\n\n### Linux prerequisites\
+  \ and selection logic\n\nThe helper automatically selects the first available tool:\n\
+  \n1) `scrot`\n2) `gnome-screenshot`\n3) ImageMagick `import`\n\nIf none are available,\
+  \ ask the user to install one of them and retry.\n\nCoordinate regions require `scrot`\
+  \ or ImageMagick `import`.\n\n`--app`, `--window-name`, and `--list-windows` are\
+  \ macOS-only. On Linux, use\n`--active-window` or provide `--window-id` when available.\n\
+  \n## Windows (PowerShell helper)\n\nRun the PowerShell helper:\n\n```powershell\n\
+  powershell -ExecutionPolicy Bypass -File <path-to-skill>/scripts/take_screenshot.ps1\n\
+  ```\n\nCommon patterns:\n\n- Default location:\n\n```powershell\npowershell -ExecutionPolicy\
+  \ Bypass -File <path-to-skill>/scripts/take_screenshot.ps1\n```\n\n- Temp location\
+  \ (Codex visual check):\n\n```powershell\npowershell -ExecutionPolicy Bypass -File\
+  \ <path-to-skill>/scripts/take_screenshot.ps1 -Mode temp\n```\n\n- Explicit path:\n\
+  \n```powershell\npowershell -ExecutionPolicy Bypass -File <path-to-skill>/scripts/take_screenshot.ps1\
+  \ -Path \"C:\\Temp\\screen.png\"\n```\n\n- Pixel region (x,y,w,h):\n\n```powershell\n\
+  powershell -ExecutionPolicy Bypass -File <path-to-skill>/scripts/take_screenshot.ps1\
+  \ -Mode temp -Region 100,200,800,600\n```\n\n- Active window (ask the user to focus\
+  \ it first):\n\n```powershell\npowershell -ExecutionPolicy Bypass -File <path-to-skill>/scripts/take_screenshot.ps1\
+  \ -Mode temp -ActiveWindow\n```\n\n- Specific window handle (only when provided):\n\
+  \n```powershell\npowershell -ExecutionPolicy Bypass -File <path-to-skill>/scripts/take_screenshot.ps1\
+  \ -WindowHandle 123456\n```\n\n## Direct OS commands (fallbacks)\n\nUse these when\
+  \ you cannot run the helpers.\n\n### macOS\n\n- Full screen to a specific path:\n\
+  \n```bash\nscreencapture -x output/screen.png\n```\n\n- Pixel region:\n\n```bash\n\
+  screencapture -x -R100,200,800,600 output/region.png\n```\n\n- Specific window id:\n\
+  \n```bash\nscreencapture -x -l12345 output/window.png\n```\n\n- Interactive selection\
+  \ or window pick:\n\n```bash\nscreencapture -x -i output/interactive.png\n```\n\n\
+  ### Linux\n\n- Full screen:\n\n```bash\nscrot output/screen.png\n```\n\n```bash\n\
+  gnome-screenshot -f output/screen.png\n```\n\n```bash\nimport -window root output/screen.png\n\
+  ```\n\n- Pixel region:\n\n```bash\nscrot -a 100,200,800,600 output/region.png\n\
+  ```\n\n```bash\nimport -window root -crop 800x600+100+200 output/region.png\n```\n\
+  \n- Active window:\n\n```bash\nscrot -u output/window.png\n```\n\n```bash\ngnome-screenshot\
+  \ -w -f output/window.png\n```\n\n## Error handling\n\n- On macOS, run `bash <path-to-skill>/scripts/ensure_macos_permissions.sh`\
+  \ first to request Screen Recording in one place.\n- If you see \"screen capture\
+  \ checks are blocked in the sandbox\", \"could not create image from display\",\
+  \ or Swift `ModuleCache` permission errors in a sandboxed run, rerun the command\
+  \ with escalated permissions.\n- If macOS app/window capture returns no matches,\
+  \ run `--list-windows --app \"AppName\"` and retry with `--window-id`, and make\
+  \ sure the app is visible on screen.\n- If Linux region/window capture fails, check\
+  \ tool availability with `command -v scrot`, `command -v gnome-screenshot`, and\
+  \ `command -v import`.\n- If saving to the OS default location fails with permission\
+  \ errors in a sandbox, rerun the command with escalated permissions.\n- Always report\
+  \ the saved file path in the response.\n\n---\nname: skill.security-best-practices\n\
+  description: Perform language and framework specific security best-practice reviews\n\
+  \  and suggest improvements. Trigger only when the user explicitly requests security\n\
+  \  best practices guidance, a security review/report, or secure-by-default coding\
+  \ help.\n  Trigger only for supported languages (python, javascript/typescript,\
+  \ go). Do not\n  trigger for general code review, debugging, or non-security tasks.\n\
+  ---\n# Security Best Practices\n\n## Overview\n\nThis skill provides a description\
+  \ of how to identify the language and frameworks used by the current context, and\
+  \ then to load information from this skill's references directory about the security\
+  \ best practices for this language and or frameworks.\n\nThis information, if present,\
+  \ can be used to write new secure by default code, or to passively detect major\
+  \ issues within existing code, or (if requested by the user) provide a vulnerability\
+  \ report and suggest fixes.\n\n## Workflow\n\nThe initial step for this skill is\
+  \ to identify ALL languages and ALL frameworks which you are being asked to use\
+  \ or already exist in the scope of the project you are working in. Focus on the\
+  \ primary core frameworks. Often you will want to identify both frontend and backend\
+  \ languages and frameworks.\n\nThen check this skill's references directory to see\
+  \ if there are any relevant documentation for the language and or frameworks. Make\
+  \ sure you read ALL reference files which relate to the specific framework or language.\
+  \ The format of the filenames is `<language>-<framework>-<stack>-security.md`. You\
+  \ should also check if there is a `<language>-general-<stack>-security.md` which\
+  \ is agnostic to the framework you may be using.\n\nIf working on a web application\
+  \ which includes a frontend and a backend, make sure you have checked for reference\
+  \ documents for BOTH the frontend and backend!\n\nIf you are asked to make a web\
+  \ app which will include both a frontend and backend, but the frontend framework\
+  \ is not specified, also check out `javascript-general-web-frontend-security.md`.\
+  \ It is important that you understand how to secure both the frontend and backend.\n\
+  \nIf no relevant information is available in the skill's references directory, think\
+  \ a little bit about what you know about the language, the framework, and all well\
+  \ known security best practices for it. If you are unsure you can try to search\
+  \ online for documentation on security best practices.\n\nFrom there it can operate\
+  \ in a few ways.\n\n1. The primary mode is to just use the information to write\
+  \ secure by default code from this point forward. This is useful for starting a\
+  \ new project or when writing new code.\n\n2. The secondary mode is to passively\
+  \ detect vulnerabilities while working in the project and writing code for the user.\
+  \ Critical or very important vulnerabilities or major issues going against security\
+  \ guidance can be flagged and the user can be told about them. This passive mode\
+  \ should focus on the largest impact vulnerabilities and secure defaults.\n\n3.\
+  \ The user can ask for a security report or to improve the security of the codebase.\
+  \ In this case a full report should be produced describe anyways the project fails\
+  \ to follow security best practices guidance. The report should be prioritized and\
+  \ have clear sections of severity and urgency. Then offer to start working on fixes\
+  \ for these issues. See #fixes below.\n\n## Workflow Decision Tree\n\n- If the language/framework\
+  \ is unclear, inspect the repo to determine it and list your evidence.\n- If matching\
+  \ guidance exists in `references/`, load only the relevant files and follow their\
+  \ instructions.\n- If no matching guidance exists, consider if you know any well\
+  \ known security best practices for the chosen language and or frameworks, but if\
+  \ asked to generate a report, let the user know that concrete guidance is not available\
+  \ (you can still generate the report or detect for sure critical vulnerabilities)\n\
+  \n# Overrides\n\nWhile these references contain the security best practices for\
+  \ languages and frameworks, customers may have cases where they need to bypass or\
+  \ override these practices. Pay attention to specific rules and instructions in\
+  \ the project's documentation and prompt files which may require you to override\
+  \ certain best practices. When overriding a best practice, you MAY report it to\
+  \ the user, but do not fight with them. If a security best practice needs to be\
+  \ bypassed / ignored for some project specific reason, you can also suggest to add\
+  \ documentation about this to the project so it is clear why the best practice is\
+  \ not being followed and to follow that bypass in the future.\n\n# Report Format\n\
+  \nWhen producing a report, you should write the report as a markdown file in `security_best_practices_report.md`\
+  \ or some other location if provided by the user. You can ask the user where they\
+  \ would like the report to be written to.\n\nThe report should have a short executive\
+  \ summary at the top.\n\nThe report should be clearly delineated into multiple sections\
+  \ based on severity of the vulnerability. The report should focus on the most critical\
+  \ findings as these have the highest impact for the user. All findings should be\
+  \ noted with an numeric ID to make them easier to reference.\n\nFor critical findings\
+  \ include a one sentence impact statement.\n\nOnce the report is written, also report\
+  \ it to the user directly, although you may be less verbose. You can offer to explain\
+  \ any of the findings or the reasons behind the security best practices guidance\
+  \ if the user wants more info on any findings.\n\nImportant: When referencing code\
+  \ in the report, make sure to find and include line numbers for the code you are\
+  \ referencing.\n\nAfter you write the report file, summarize the findings to the\
+  \ user.\n\nAlso tell the user where the final report was written to\n\n# Fixes\n\
+  \nIf you produced a report, let the user read the report and ask to begin performing\
+  \ fixes.\n\nIf you passively found a critical finding, notify the user and ask if\
+  \ they would like you to fix this finding.\n\nWhen producing fixes, focus on fixing\
+  \ a single finding at a time. The fixes should have concise clear comments explaining\
+  \ that the new code is based on the specific security best practice, and perhaps\
+  \ a very short reason why it would be dangerous to not do it in this way.\n\nAlways\
+  \ consider if the changes you want to make will impact the functionality of the\
+  \ user's code. Consider if the changes may cause regressions with how the project\
+  \ works currently. It is often the case that insecure code is relied on for other\
+  \ reasons (and this is why insecure code lives on for so long). Avoid breaking the\
+  \ user's project as this may make them not want to apply security fixes in the future.\
+  \ It is better to write a well thought out, well informed by the rest of the project,\
+  \ fix, then a quick slapdash change.\n\nAlways follow any normal change or commit\
+  \ flow the user has configured. If making git commits, provide clear commit messages\
+  \ explaining this is to align with security best practices. Try to avoid bunching\
+  \ a number of unrelated findings into a single commit.\n\nAlways follow any normal\
+  \ testing flows the user has configured (if any) to confirm that your changes are\
+  \ not introducing regressions. Consider the second order impacts the changes may\
+  \ have and inform the user before making them if there are any.\n\n# General Security\
+  \ Advice\n\nBelow is a few bits of secure coding advice that applies to almost any\
+  \ language or framework.\n\n### Avoid Using Incrementing IDs for Public IDs of Resources\n\
+  \nWhen assigning an ID for some resource, which will then be used by exposed to\
+  \ the internet, avoid using small auto-incrementing IDs. Use longer, random UUID4\
+  \ or random hex string instead. This will prevent users from learning the quantity\
+  \ of a resource and being able to guess resource IDs.\n\n### A note on TLS\n\nWhile\
+  \ TLS is important for production deployments, most development work will be with\
+  \ TLS disabled or provided by some out-of-scope TLS proxy. Due to this, be very\
+  \ careful about not reporting lack of TLS as a security issue. Also be very careful\
+  \ around use of \"secure\" cookies. They should only be set if the application will\
+  \ actually be over TLS. If they are set on non-TLS applications (such as when deployed\
+  \ for local dev or testing), it will break the application. You can provide a env\
+  \ or other flag to override setting secure as a way to keep it off until on a TLS\
+  \ production deployment. Additionally avoid recommending HSTS. It is dangerous to\
+  \ use without full understanding of the lasting impacts (can cause major outages\
+  \ and user lockout) and it is not generally recommended for the scope of projects\
+  \ being reviewed by codex.\n\n---\nname: tool.calendar_slot_planner.demo003\ndescription:\
+  \ Find shared available slots from participant availability CSV tables.\n---\nUse\
+  \ this skill when a task needs shared availability intersections across participants.\n\
+  \nPass a CSV where each row defines `participant`, `slot`, and optional availability\
+  \ indicator.\nJSON output lists only slots marked available by all participants.\n\
+  \n---\nname: tool.email_thread_summarizer.demo002\ndescription: Summarize long email\
+  \ threads into deterministic action items, decisions, and unresolved questions.\n\
+  ---\nUse this skill when a task needs a deterministic summary of an email thread.\n\
+  \nPass the email thread file path and an output markdown path.\nThe output contains\
+  \ action items, decisions, and open questions.\n\n---\nname: tool.spreadsheet_joiner.demo001\n\
+  description: Join two CSV or spreadsheet-like tables by a shared key.\n---\nUse\
+  \ this skill when a task needs deterministic CSV joins by a shared key.\n\nPass:\n\
+  `left_csv` and `right_csv` paths, the common `key`, and `output_csv` path.\n\nThe\
+  \ tool preserves the left row order and merges matching rows from the right table."

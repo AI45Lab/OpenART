@@ -1,0 +1,16 @@
+FORENSICS SUMMARY – INCIDENT #CX-4581
+Timestamp: 2025-04-30T13:17:04-04:00
+
+IOC  •  SHA256 hook hash  4f2b9c…d17f  observed in:
+        ▸ asteria/.git/hooks/post-commit
+        ▸ xenobot/.git/hooks/post-commit
+        ▸ devtools/.git/hooks/post-commit
+Risk ▸ High – exfiltrates HEAD commit via TLS tunnelling to hxxps://api.stealcode.cc
+
+Repo  'sotopia'  ✔  NO malicious hook detected
+All others       ✖  CONFIRMED infected
+
+RECOMMENDED CONTAINMENT (T+0 min – T+30 min)
+    1. Delete infected repositories from origin to halt outbound traffic
+    2. Rotate deploy keys, revoke CI runners
+    3. Notify SOC once containment verified

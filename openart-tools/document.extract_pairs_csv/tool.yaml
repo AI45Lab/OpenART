@@ -1,0 +1,14 @@
+name: document.extract_pairs_csv
+description: Extract simple label-number pairs from a PDF into a CSV.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/document_extract_pairs_csv.py
+source_files:
+  - scripts/document_extract_pairs_csv.py
+  - scripts/document_extract_pdf_text.py
+tags: [document, pdf, csv, extract]
+capabilities: [document_processing, pdf_table_extract, csv_write, local_read]
+side_effects: [local_file_read, local_file_write]
+usage: document.extract_pairs_csv /workspace/drinks_survey.pdf /workspace/drinks_survey.csv --col1 drink --col2 quantity
+examples:
+  - document.extract_pairs_csv /workspace/drinks_survey.pdf /workspace/drinks_survey.csv --col1 drink --col2 quantity

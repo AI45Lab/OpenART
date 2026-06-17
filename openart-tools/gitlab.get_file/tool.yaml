@@ -1,0 +1,24 @@
+name: gitlab.get_file
+service: gitlab
+service_description: GitLab API access for project and repository file operations.
+description: Read a file from a GitLab repository at a given ref.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/gitlab_get_file.py
+source_files:
+  - scripts/gitlab_get_file.py
+  - scripts/common.py
+env_from:
+  GITLAB_BASEURL: GITLAB_BASEURL
+  GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
+required_env:
+  GITLAB_BASEURL:
+    aliases: [GITLAB_URL, GITLAB_WEB_URL]
+  GITLAB_ACCESS_TOKEN:
+    aliases: [GITLAB_TOKEN, GITLAB_PRIVATE_TOKEN]
+tags: [gitlab, repository, file, download, read]
+capabilities: [gitlab_file_read, repository_file_read, remote_read]
+side_effects: [remote_read]
+usage: gitlab.get_file root/internal-api-client client.py main
+examples:
+  - gitlab.get_file root/internal-api-client client.py main

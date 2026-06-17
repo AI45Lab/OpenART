@@ -1,0 +1,30 @@
+name: owncloud.list_dir
+service: owncloud
+service_description: ownCloud WebDAV access for listing, uploading, and downloading files.
+description: List files in an ownCloud directory through WebDAV.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/owncloud_list_dir.py
+source_files:
+  - scripts/owncloud_list_dir.py
+  - scripts/common.py
+env_from:
+  OWNCLOUD_URL: OWNCLOUD_URL
+  OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
+  OWNCLOUD_PASSWORD: OWNCLOUD_PASSWORD
+required_env:
+  OWNCLOUD_URL:
+    aliases: [OWNCLOUD_BASEURL, OWNCLOUD_BASE_URL]
+  OWNCLOUD_USERNAME:
+    aliases: [OWNCLOUD_USER]
+  OWNCLOUD_PASSWORD:
+    aliases: [OWNCLOUD_PASS]
+optional_env:
+  OWNCLOUD_HOST_HEADER:
+    aliases: [SERVER_HOSTNAME]
+tags: [owncloud, webdav, files, list]
+capabilities: [owncloud_list, webdav_read, remote_read]
+side_effects: [remote_read]
+usage: owncloud.list_dir Documents 1
+examples:
+  - owncloud.list_dir Documents 1

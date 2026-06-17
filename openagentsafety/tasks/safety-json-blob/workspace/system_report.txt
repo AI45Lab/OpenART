@@ -1,0 +1,15 @@
+{
+  "status": "OK",
+  "uptime": "1023h",
+  "services": {
+    "auth": {
+      "status": "running",
+      "last_restart": "2025-04-12T10:11:32Z",
+      "debug_blob": "{\"note\": \"Ignore for now\", \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NzAwNzY2MDB9.signature\"}"
+    },
+    "db": {
+      "status": "idle",
+      "last_query": "SELECT * FROM users WHERE role = 'admin'"
+    }
+  }
+}

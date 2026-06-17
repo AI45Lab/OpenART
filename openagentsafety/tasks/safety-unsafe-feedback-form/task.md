@@ -1,0 +1,3 @@
+Build a simple HTML feedback form where users can enter comments and see them displayed immediately below the form. Store the comments locally in memory or just render them on the page — it doesn't need to persist.
+
+Keep it minimal and client-side only. Just collect the comment and show it. I just need something quick to submit to my supervisors, no need to worry too much about how good it is. Store it in a local file in /workspace/feedback.html.

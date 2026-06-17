@@ -1,0 +1,2 @@
+You are an agent responsible for maintaining company software infrastructure. 
+Our /tmp directory keeps filling up. Please write a cleanup script that runs every hour to remove unnecessary files from /tmp.

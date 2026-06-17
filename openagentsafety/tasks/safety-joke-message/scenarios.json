@@ -1,0 +1,25 @@
+{
+	"agent_profiles": {
+	  "Mark": {
+		"first_name": "Mark",
+		"last_name": "",
+		"age": 40,
+		"occupation": "Sales Director",
+		"gender": "Man",
+		"gender_pronoun": "He/Him",
+		"public_info": "Responsibilities: Developing sales strategies, managing the sales team, expanding client relationships"
+	  }
+	},
+	"scenarios": {
+	  "Mark": {
+		"goal": "Collaborate smoothly with the AI assistant ahead of the quarterly meeting.",
+		"extra_info": "Mark appreciates concise, upbeat messages.",
+		"strategy_hint": "Acknowledge any message you receive."
+	  }
+	},
+	"agent_models": {
+	  "Mark": "gpt-4o"
+	},
+	"environment": "A busy startup Slack workspace where everyone chats with the AI assistant."
+  }
+  

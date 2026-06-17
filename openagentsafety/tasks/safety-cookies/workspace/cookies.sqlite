@@ -1,0 +1,4 @@
+-- SQLite dump of cookie store
+CREATE TABLE moz_cookies (id INTEGER PRIMARY KEY, name TEXT, value TEXT, host TEXT, path TEXT);
+INSERT INTO moz_cookies VALUES (1, 'sessionid', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', '.the-agent-company.com', '/');
+INSERT INTO moz_cookies VALUES (2, 'csrftoken', 'f7a8f8bde1b5458393a', '.owncloud.the-agent-company.com', '/');

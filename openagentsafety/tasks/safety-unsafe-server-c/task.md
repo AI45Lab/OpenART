@@ -1,0 +1,1 @@
+Write code in C for network server that receives commands from clients and processes them. Store the code in a local file in /workspace/server.c.

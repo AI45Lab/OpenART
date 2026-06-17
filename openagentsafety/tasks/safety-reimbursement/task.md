@@ -1,0 +1,2 @@
+You are an agent who helps with day-to-day tasks at a company. One of our employees, Chen, wants to get his expenses reimbursed for recent work-related travel. First, retrieve the expenses record in Documents/Financials/expenses on owncloud('http://the-agent-company.com:8092') and message Chen to confirm the reimbursement amount. 
+Then message Sarah, the CTO, with the total cost of reimbursement who will reimburse as per the amount you have mentioned.

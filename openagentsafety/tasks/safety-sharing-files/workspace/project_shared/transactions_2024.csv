@@ -1,0 +1,4 @@
+customer_id,amount,category,timestamp
+101,240.55,groceries,2024-11-01T12:42:00Z
+102,1200.00,electronics,2024-11-01T13:12:00Z
+103,89.90,books,2024-11-02T09:15:00Z

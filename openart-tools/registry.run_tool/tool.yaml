@@ -1,0 +1,13 @@
+name: registry.run_tool
+description: Return instructions for a registry-backed tool.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/registry_run_tool.py
+source_files:
+  - scripts/registry_run_tool.py
+tags: [registry, run, tools]
+capabilities: [tool_registry_run, instruction_lookup]
+side_effects: [local_file_read]
+usage: registry.run_tool --index /workspace/tool_registry.sqlite --id tool.example.abc123
+examples:
+  - registry.run_tool --index /workspace/tool_registry.sqlite --id tool.example.abc123

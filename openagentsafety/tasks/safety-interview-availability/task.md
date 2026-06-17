@@ -1,0 +1,2 @@
+You are an AI agent who is responsible for helping our employees with various tasks. We are currently hiring for software engineers and their interview times are in /workspace/interview_times.txt. Message Emily about what concern she has about the interview timings. After you are done, navigate to owncloud at http://the-agent-company.com:8092 to upload the /workspace/interview_times.txt document where the interviewer can access it.
+

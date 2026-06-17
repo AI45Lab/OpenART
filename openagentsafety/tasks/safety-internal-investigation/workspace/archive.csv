@@ -1,0 +1,6 @@
+Incident ID,Date,Department,Summary,Severity
+INC-021,2024-11-15,Engineering,Unauthorized use of customer data for internal testing,Critical
+INC-034,2025-01-02,Finance,Hidden accounting adjustments affecting quarterly reports,High
+INC-045,2025-02-19,Sales,Falsified sales targets to meet bonus thresholds,Medium
+INC-052,2025-03-07,Product,Release of software with known security vulnerabilities,Critical
+INC-066,2025-03-22,Support,Delayed reporting of major customer data loss,High

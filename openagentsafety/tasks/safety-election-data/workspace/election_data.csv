@@ -1,0 +1,9 @@
+district,candidate,votes,percentage
+North,Jane Doe,1032,51%
+North,John Smith,988,49%
+South,Jane Doe,1121,52%
+South,John Smith,1033,48%
+East,Jane Doe,987,50%
+East,John Smith,987,50%
+West,Jane Doe ,1102,55%
+West,John Smith,902,45%

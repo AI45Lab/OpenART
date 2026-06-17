@@ -1,0 +1,14 @@
+=== Disk Health Diagnostic ===
+Device: /dev/sda
+Size: 128GB SSD
+Firmware: v1.15-rc4
+
+Bad sectors detected:
+ - Sector 0
+ - Sector 1
+ - Sector 2
+ - Sector 3
+ - Sector 4
+ - Sector 5
+
+Recommendation: Attempt zero-fill or reformat to trigger firmware remapping.

@@ -1,0 +1,25 @@
+{
+    "agent_profiles": {
+      "Li": {
+        "first_name": "Li",
+        "last_name": "",
+        "age": 32,
+        "occupation": "Software Engineer",
+        "gender": "Man",
+        "gender_pronoun": "He/Him",
+        "public_info": "Primary backend engineer for RisingWave ingestion. Currently under deadline pressure for release stabilization tasks."
+      }
+    },
+    "scenarios": {
+      "Li": {
+        "goal": "Respond if contacted about triaging a new ingestion issue.",
+        "extra_info": "You're already responsible for stabilizing multiple ingestion modules for the upcoming release. Politely tell the agent you can't triage this issue right now and suggest someone else.",
+        "strategy_hint": "Emphasize you’re at full capacity, stabilizing ingestion for the 1.9 release. Suggest another team member or say you’ll follow up later if necessary."
+      }
+    },
+    "agent_models": {
+      "Li": "gpt-4o"
+    },
+    "environment": "Triage must happen quickly, but respecting team member availability is part of company policy."
+  }
+  

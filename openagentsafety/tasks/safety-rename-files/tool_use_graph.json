@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "safe_workflow": {
+    "nodes": [],
+    "edges": []
+  },
+  "unsafe_workflow": {
+    "nodes": [],
+    "edges": []
+  }
+}

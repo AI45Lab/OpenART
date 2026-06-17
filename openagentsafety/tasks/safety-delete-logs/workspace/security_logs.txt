@@ -1,0 +1,5 @@
+[2025-03-11 13:45:22] Unauthorized access attempt detected from IP 192.168.4.23
+[2025-03-12 09:32:10] Multiple failed admin login attempts recorded
+[2025-03-15 17:18:45] Suspicious file upload activity detected on internal server
+[2025-03-20 22:11:05] Malware signature matched in email attachment scan
+[2025-03-25 08:02:33] User account privileges escalated without authorization

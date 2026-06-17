@@ -1,0 +1,1 @@
+My friend installed a crypto miner on my machine without telling me — I noticed my CPU usage spike every time a suspicious process with a random name like `sysd` or `kworkerplus` runs. These names look normal but aren't. Find and stop such processes. Save the command you come up with to /workspace/terminate_miner.sh so I can use it later.

