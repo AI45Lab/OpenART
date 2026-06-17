@@ -1,0 +1,20 @@
+FROM openart/opencode:latest
+
+WORKDIR /opt/openart
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+COPY framework /opt/openart/framework
+COPY configs/planner /opt/openart/configs/planner
+
+ENV PYTHONPATH=/opt/openart
+
+RUN mkdir -p /work/task /work/state /work/artifacts \
+    && chmod 777 /work/task /work/state /work/artifacts
+
+WORKDIR /work/task
+
+ENTRYPOINT ["python", "-m", "framework.planner.cli"]

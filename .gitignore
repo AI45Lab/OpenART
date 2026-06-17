@@ -1,0 +1,15 @@
+outputs/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+.coverage
+.coverage.*
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+*.tmp
+*.temp

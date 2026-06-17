@@ -1,0 +1,69 @@
+target:
+  framework: hermes
+  surface_family: hermes
+  runner_image: openart/hermes:latest
+  launch_cmd: hermes -z
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: -z
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: OPENAI_API_KEY
+        base_url: OPENAI_BASE_URL
+        model: OPENAI_MODEL
+      config_template:
+        source: repo:configs/target-model-json/hermes.openai-compatible.json
+        destination: HOME/.hermes/config.yaml
+        format: yaml
+  attack_surfaces:
+  - vector: claude_md
+    kind: instruction
+    path_template: CLAUDE.md
+    description: Instruction file surfaced to prompt-first agents including Hermes.
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Repository-level agent instruction file.
+  - vector: claude_skill
+    kind: skill
+    path_template: .claude/skills/<skill-name>/SKILL.md
+    description: Skill discovered by prompt-first agents including Hermes.
+  - vector: opencode_skill
+    kind: skill
+    path_template: .opencode/skills/<skill-name>/SKILL.md
+    description: OpenCode-style skill discovered by prompt-first agents.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path discovered by prompt-first agents.
+  - vector: hermes_skill
+    kind: skill
+    path_template: HOME/.hermes/skills/<skill-name>/SKILL.md
+    description: Hermes Agent skill definition in HOME dir.
+  - vector: soul_md
+    kind: memory
+    path_template: HOME/.hermes/SOUL.md
+    injection_mode: replace
+    description: Hermes personality/tone file. Injected into system prompt. Overwrite to remove safety instructions.
+  - vector: agent_memory
+    kind: memory
+    path_template: HOME/.hermes/memories/MEMORY.md
+    injection_mode: replace
+    description: Agent personal notes (2200 char limit). Injected into system prompt at session start.
+  - vector: user_profile
+    kind: memory
+    path_template: HOME/.hermes/memories/USER.md
+    injection_mode: replace
+    description: User profile (1375 char limit). Injected into system prompt at session start.
+  - vector: hermes_db
+    kind: memory
+    path_template: HOME/.hermes/state.db
+    injection_mode: replace
+    description: Hermes SQLite database. Replace with crafted DB containing fake session history.

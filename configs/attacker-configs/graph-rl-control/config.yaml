@@ -1,0 +1,102 @@
+attacker:
+  name: graph-rl-control-attacker
+  phase: before_target
+  instruction: /attacker_config/attacker.md
+  image: openart/opencode:latest
+  cmd: python3
+  timeout_seconds: 3600
+  target_control_plane: true
+  feedback_loop: true
+  vector_permissions:
+    - workspace_files
+    - agents_md
+    - claude_md
+    - claude_local_md
+    - claude_rule
+    - claude_command
+    - claude_skill
+    - opencode_skill
+    - opencode_command
+    - agents_skill
+    - conversation_history
+    - auto_memory
+    - task_rewrite
+  visibility_policy:
+    workspace_exclude_globs:
+      - "_opencode_scratch"
+      - "_opencode_scratch/**"
+      - ".tmp_*"
+      - ".tmp_*/**"
+      - "**/context_snapshot.json"
+      - "**/plan_proposal_prompt.txt"
+      - "**/opencode_scratch_prompt.txt"
+      - "**/scratch_manifest.json"
+      - "**/feedback_directives.json"
+      - "**/detection_analysis_iter_*.json"
+    control_exclude_globs:
+      - "_opencode_scratch"
+      - "_opencode_scratch/**"
+      - ".tmp_*"
+      - ".tmp_*/**"
+      - "**/context_snapshot.json"
+      - "**/plan_proposal_prompt.txt"
+      - "**/opencode_scratch_prompt.txt"
+      - "**/scratch_manifest.json"
+      - "**/feedback_directives.json"
+      - "**/detection_analysis_iter_*.json"
+    target_visible_leak:
+      path_markers:
+        - "_opencode_scratch"
+        - "openart-opencode-scratch"
+        - "openart-opencode-state"
+        - "context_snapshot.json"
+        - "plan_proposal_prompt.txt"
+        - "opencode_scratch_prompt.txt"
+        - "scratch_manifest.json"
+        - "feedback_directives.json"
+        - "detection_analysis_iter_"
+        - "strategy_candidates.json"
+        - "strategy_proposal_prompt.txt"
+        - "strategy_proposal_stdout.txt"
+        - "strategy_critique_prompt.txt"
+        - "strategy_critique_stdout.txt"
+        - "strategy_pool.json"
+  env_from:
+    OPENAI_API_KEY: OPENAI_API_KEY
+    OPENAI_BASE_URL: OPENAI_BASE_URL
+    OPENAI_MODEL: OPENAI_MODEL
+  env:
+    OPENART_GRAPH_RL_PROMPT_TIMEOUT_SECONDS: "3600"
+    OPENART_GRAPH_RL_MAX_SUB_TASKS: "4"
+    OPENART_GRAPH_RL_REWARD_MODE: "strict"
+    OPENART_GRAPH_RL_COMPLETION_GAP_REPAIR: "1"
+    OPENART_GRAPH_RL_DETECTION_ANALYSIS: "1"
+    OPENART_GRAPH_RL_VALIDATION_RETRIES: "5"
+    OPENART_GRAPH_RL_SCRATCH_RETRIES: "3"
+    OPENART_GRAPH_RL_SCRATCH_FALLBACK: "1"
+    OPENART_GRAPH_RL_REUSE_PREVIOUS_ON_TRANSIENT: "1"
+    OPENART_GRAPH_RL_OPENCODE_TOOLS: "read,write,bash"
+  args:
+    - /attacker_config/run_graph_rl_attacker.py
+    - --target-instruction
+    - "{{target_instruction_file}}"
+    - --attacker-instruction
+    - "{{attacker_instruction_file}}"
+    - --input-workspace
+    - "{{input_workspace_dir}}"
+    - --output-workspace
+    - "{{output_workspace_dir}}"
+    - --input-target-control
+    - "{{input_target_control_dir}}"
+    - --output-target-control
+    - "{{output_target_control_dir}}"
+    - --feedback-dir
+    - "{{feedback_dir}}"
+    - --attacker-history-dir
+    - "{{attacker_history_dir}}"
+    - --attack-iteration
+    - "{{attack_iteration}}"
+    - --feedback-iteration
+    - "{{feedback_iteration}}"
+    - --run-id
+    - "{{run_id}}"

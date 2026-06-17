@@ -1,0 +1,93 @@
+FROM python:3.11-slim-bookworm
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with OpenCode installed"
+LABEL version="1.0.0"
+
+ARG PIP_INDEX_URL=https://pypi.org/simple
+ARG PIP_EXTRA_INDEX_URL=
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV VIRTUAL_ENV=/opt/openart-venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+ENV PIP_INDEX_URL=${PIP_INDEX_URL}
+ENV PIP_EXTRA_INDEX_URL=${PIP_EXTRA_INDEX_URL}
+ENV PIP_DEFAULT_TIMEOUT=120
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    curl \
+    file \
+    ghostscript \
+    git \
+    git-lfs \
+    imagemagick \
+    jq \
+    libgl1 \
+    libglib2.0-0 \
+    npm \
+    nodejs \
+    openssh-client \
+    poppler-utils \
+    procps \
+    qpdf \
+    ripgrep \
+    sqlite3 \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-osd \
+    unzip \
+    zip \
+    xz-utils \
+    zbar-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python -m venv --copies ${VIRTUAL_ENV} \
+    && ${VIRTUAL_ENV}/bin/pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && ${VIRTUAL_ENV}/bin/pip install --no-cache-dir \
+        requests \
+        httpx \
+        pandas \
+        numpy \
+        pyyaml \
+        pdfminer.six \
+        pypdf \
+        PyPDF2 \
+        pdfplumber \
+        pillow \
+        pytesseract \
+        opencv-python-headless \
+        pyzbar \
+        beautifulsoup4 \
+        lxml \
+        python-docx \
+        python-pptx \
+        openpyxl \
+        odfpy \
+        pymupdf \
+        pikepdf \
+        duckdb \
+        pyarrow \
+        boto3 \
+        flask \
+        pytest \
+    && ln -sf ${VIRTUAL_ENV}/bin/python3 /usr/local/bin/python3 \
+    && ln -sf ${VIRTUAL_ENV}/bin/python3 /usr/local/bin/python \
+    && ln -sf ${VIRTUAL_ENV}/bin/pip /usr/local/bin/pip \
+    && ln -sf ${VIRTUAL_ENV}/bin/pip /usr/local/bin/pip3 \
+    && printf 'export VIRTUAL_ENV=%s\nexport PATH="%s/bin:$PATH"\n' "${VIRTUAL_ENV}" "${VIRTUAL_ENV}" > /etc/profile.d/openart-python.sh
+
+RUN npm install -g opencode-ai \
+    && command -v opencode \
+    && opencode --version
+
+
+RUN mkdir -p /workspace && chmod 777 /workspace
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

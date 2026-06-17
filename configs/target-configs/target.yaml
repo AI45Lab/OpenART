@@ -1,0 +1,68 @@
+target:
+  framework: prompt_cli
+  surface_family: opencode
+  runner_image: openart/opencode:latest
+  launch_cmd: opencode run
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: ""
+    output_event_name: opencode_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: OPENAI_API_KEY
+        base_url: OPENAI_BASE_URL
+        model: OPENAI_MODEL
+      env:
+        OPENCODE_DISABLE_AUTOUPDATE: "1"
+      config_template:
+        source: repo:configs/target-model-json/opencode.openai-compatible.json
+        destination: XDG_CONFIG_HOME/opencode/opencode.json
+        format: json
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Generic repository-level agent instruction file.
+  - vector: claude_md
+    kind: instruction
+    path_template: CLAUDE.md
+    description: Claude-compatible instruction file also visible to OpenCode.
+  - vector: opencode_skill
+    kind: skill
+    path_template: .opencode/skills/<skill-name>/SKILL.md
+    description: Native OpenCode skill definition discovered from the workspace.
+  - vector: opencode_command
+    kind: command
+    path_template: .opencode/commands/<command-name>.md
+    description: Native OpenCode slash-command content discovered from the workspace.
+  - vector: claude_skill
+    kind: skill
+    path_template: .claude/skills/<skill-name>/SKILL.md
+    description: Claude-compatible skill path that OpenCode also discovers.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path that OpenCode discovers.
+  - vector: conversation_history
+    kind: memory
+    path_template: .opencode/sessions/<session-id>.jsonl
+    injection_mode: append
+    description: OpenCode session transcripts. APPEND mode — inject fake turns where
+      the agent already agreed.
+  - vector: auto_memory
+    kind: memory
+    path_template: .opencode/memory/<memory-name>.md
+    injection_mode: append
+    description: OpenCode auto-generated memory. APPEND mode — inject fake learnings
+      from past sessions.
+  skills:
+  - coding
+  - browser
+  - enterprise-ops

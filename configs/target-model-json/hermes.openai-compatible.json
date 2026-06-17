@@ -1,0 +1,12 @@
+{
+  "model": {
+    "default": "${model.name}",
+    "provider": "custom",
+    "base_url": "${model.base_url}"
+  },
+  "skills": {
+    "external_dirs": [
+      "/workspace/.hermes/skills"
+    ]
+  }
+}

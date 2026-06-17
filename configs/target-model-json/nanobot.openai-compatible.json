@@ -1,0 +1,20 @@
+{
+  "agents": {
+    "defaults": {
+      "model": "${model.name}",
+      "provider": "custom"
+    }
+  },
+  "providers": {
+    "custom": {
+      "apiKey": "${model.api_key}",
+      "apiBase": "${model.base_url}",
+      "extraBody": {
+        "temperature": 1
+      }
+    }
+  },
+  "tools": {
+    "ssrfWhitelist": ["100.64.0.0/10", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "0.0.0.0/8"]
+  }
+}

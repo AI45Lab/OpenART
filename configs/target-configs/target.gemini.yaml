@@ -1,0 +1,36 @@
+target:
+  framework: prompt_cli
+  surface_family: gemini
+  target_surface_mount_mode: mounted
+  runner_image: openart/gemini:latest
+  launch_cmd: gemini --model ${TARGET_MODEL}
+  model_integration:
+    binding:
+      provider_family: gemini
+      api_key: ${TARGET_API_KEY}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: env_only
+      env_names:
+        api_key: GEMINI_API_KEY
+        model: GEMINI_MODEL
+  attack_surfaces:
+  - vector: gemini_md
+    kind: instruction
+    path_template: GEMINI.md or <subdir>/GEMINI.md
+    description: Gemini CLI context file discovered from the workspace hierarchy.
+  - vector: gemini_skill
+    kind: skill
+    path_template: .gemini/skills/<skill-name>/SKILL.md
+    description: Gemini CLI skill definition discovered from the workspace.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard alias supported by Gemini CLI.
+  - vector: gemini_command
+    kind: command
+    path_template: .gemini/commands/<command-name>.toml
+    description: Gemini CLI custom command definition discovered from the workspace.
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: -p

@@ -1,0 +1,21 @@
+{
+  "providers": {
+    "pjlab": {
+      "name": "PJLab",
+      "api": "openai-completions",
+      "apiKey": "${env_name.api_key}",
+      "baseUrl": "${model.base_url}",
+      "models": [
+        {
+          "id": "${model.name}",
+          "name": "Model",
+          "reasoning": false,
+          "input": ["text"],
+          "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+          "contextWindow": 128000,
+          "maxTokens": 8192
+        }
+      ]
+    }
+  }
+}
