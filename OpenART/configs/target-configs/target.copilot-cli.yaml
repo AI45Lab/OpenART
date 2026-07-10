@@ -1,0 +1,58 @@
+target:
+  framework: prompt_cli
+  surface_family: copilot_cli
+  runner_image: openart/copilot-cli:latest
+  launch_cmd: copilot -s --no-ask-user --allow-all --model ${TARGET_MODEL}
+  config_overlay:
+    prompt_transport: file_ref_argv
+    prompt_flag: -p
+    output_event_name: copilot_cli_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: env_only
+      env_names:
+        api_key: COPILOT_PROVIDER_API_KEY
+        model: COPILOT_MODEL
+      env:
+        COPILOT_PROVIDER_TYPE: openai
+        COPILOT_PROVIDER_BASE_URL: ${model.base_url}
+        COPILOT_OFFLINE: "true"
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Primary generic repository-level instruction file read by Copilot CLI.
+  - vector: copilot_instructions
+    kind: instruction
+    path_template: .github/copilot-instructions.md
+    description: Repository-wide GitHub Copilot custom instructions.
+  - vector: copilot_path_instructions
+    kind: instruction
+    path_template: .github/instructions/<instruction-name>.instructions.md
+    description: Path-specific GitHub Copilot custom instructions.
+  - vector: copilot_user_instructions
+    kind: instruction
+    path_template: HOME/.copilot/copilot-instructions.md
+    description: User-level Copilot CLI local instructions materialized into the runner HOME overlay.
+  - vector: copilot_project_skill
+    kind: skill
+    path_template: .github/skills/<skill-name>/SKILL.md
+    description: Project-level GitHub Copilot Agent Skill.
+  - vector: copilot_user_skill
+    kind: skill
+    path_template: HOME/.copilot/skills/<skill-name>/SKILL.md
+    description: User-level GitHub Copilot Agent Skill materialized into the runner HOME overlay.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path also supported by Copilot CLI.
+  - vector: copilot_mcp
+    kind: configuration
+    path_template: HOME/.copilot/mcp-config.json
+    injection_mode: replace
+    description: Copilot CLI user MCP configuration. Keep disabled unless testing MCP/tool supply-chain behavior.

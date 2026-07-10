@@ -160,6 +160,47 @@ def test_responses_tools_drop_web_search_builtin_tools() -> None:
     assert converted[0]["function"]["name"] == "lookup"
 
 
+def test_responses_tools_drop_empty_namespace_tools() -> None:
+    converted = router.responses_tools_to_chat_tools(
+        [
+            {"type": "namespace", "namespace": "local_shell"},
+            {
+                "type": "function",
+                "name": "lookup",
+                "description": "Look up a value.",
+                "parameters": {"type": "object", "properties": {}},
+            },
+        ]
+    )
+
+    assert len(converted) == 1
+    assert converted[0]["function"]["name"] == "lookup"
+
+
+def test_responses_tools_flatten_namespace_function_tools() -> None:
+    converted = router.responses_tools_to_chat_tools(
+        [
+            {
+                "type": "namespace",
+                "namespace": "shell.tools",
+                "tools": [
+                    {
+                        "type": "function",
+                        "name": "exec",
+                        "description": "Run a command.",
+                        "parameters": {"type": "object", "properties": {"cmd": {"type": "string"}}},
+                    },
+                    {"type": "file_search", "name": "ignored"},
+                ],
+            }
+        ]
+    )
+
+    assert len(converted) == 1
+    assert converted[0]["function"]["name"] == "shell_tools__exec"
+    assert converted[0]["function"]["parameters"]["properties"]["cmd"]["type"] == "string"
+
+
 def test_responses_request_drops_web_search_tool_choice() -> None:
     conversion = router.responses_request_to_chat(
         {
@@ -167,6 +208,20 @@ def test_responses_request_drops_web_search_tool_choice() -> None:
             "input": "Return OK.",
             "tools": [{"type": "web_search"}],
             "tool_choice": {"type": "web_search"},
+        }
+    )
+
+    assert "tools" not in conversion.payload
+    assert "tool_choice" not in conversion.payload
+
+
+def test_responses_request_drops_namespace_tool_choice() -> None:
+    conversion = router.responses_request_to_chat(
+        {
+            "model": "glm-5.1",
+            "input": "Return OK.",
+            "tools": [{"type": "namespace", "namespace": "local_shell"}],
+            "tool_choice": {"type": "namespace", "namespace": "local_shell"},
         }
     )
 
@@ -309,6 +364,65 @@ def test_reasoning_content_is_cached_and_echoed_for_tool_followup() -> None:
     assert "Tool result for shell" in messages[0]["content"]
 
 
+def test_chat_reasoning_content_is_cached_and_restored_for_tool_followup() -> None:
+    reasoning_by_call_id: dict[str, str] = {}
+    router.cache_chat_response_reasoning(
+        {
+            "choices": [
+                {
+                    "message": {
+                        "role": "assistant",
+                        "content": None,
+                        "reasoning_content": "Need to inspect before editing.",
+                        "tool_calls": [
+                            {
+                                "id": "call_abc",
+                                "type": "function",
+                                "function": {"name": "shell", "arguments": "{\"cmd\":\"pwd\"}"},
+                            }
+                        ],
+                    },
+                    "finish_reason": "tool_calls",
+                }
+            ]
+        },
+        reasoning_by_call_id,
+    )
+
+    restored = router.restore_chat_reasoning_content(
+        {
+            "model": "deepseek-v4-pro",
+            "messages": [
+                {"role": "user", "content": "Do the task."},
+                {
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": [
+                        {
+                            "id": "call_abc",
+                            "type": "function",
+                            "function": {"name": "shell", "arguments": "{\"cmd\":\"pwd\"}"},
+                        }
+                    ],
+                },
+                {"role": "tool", "tool_call_id": "call_abc", "content": "/workspace\n"},
+            ],
+        },
+        reasoning_by_call_id,
+    )
+
+    assert reasoning_by_call_id == {"call_abc": "Need to inspect before editing."}
+    assert restored["messages"][1]["reasoning_content"] == "Need to inspect before editing."
+
+
+def test_chat_reasoning_restore_leaves_plain_chat_request_unchanged() -> None:
+    payload = {"model": "deepseek-v4-pro", "messages": [{"role": "user", "content": "Return OK."}]}
+
+    restored = router.restore_chat_reasoning_content(payload, {"call_abc": "hidden"})
+
+    assert restored == payload
+
+
 class _FakeChatBackend(BaseHTTPRequestHandler):
     requests_seen: list[dict[str, Any]] = []
 
@@ -328,6 +442,65 @@ class _FakeChatBackend(BaseHTTPRequestHandler):
             }
         ).encode("utf-8")
         self.send_response(200)
+        self.send_header("content-type", "application/json")
+        self.send_header("content-length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+
+class _ReasoningChatBackend(BaseHTTPRequestHandler):
+    requests_seen: list[dict[str, Any]] = []
+
+    def log_message(self, format: str, *args: Any) -> None:
+        return
+
+    def do_POST(self) -> None:
+        length = int(self.headers.get("content-length") or "0")
+        payload = json.loads(self.rfile.read(length).decode("utf-8"))
+        self.__class__.requests_seen.append({"path": self.path, "payload": payload})
+        request_index = len(self.__class__.requests_seen)
+        if request_index == 1:
+            body_payload = {
+                "id": "chatcmpl_reasoning",
+                "object": "chat.completion",
+                "model": payload["model"],
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {
+                            "role": "assistant",
+                            "content": None,
+                            "reasoning_content": "Need to inspect. ",
+                            "tool_calls": [
+                                {
+                                    "id": "call_abc",
+                                    "type": "function",
+                                    "function": {"name": "shell", "arguments": "{\"cmd\":\"pwd\"}"},
+                                }
+                            ],
+                        },
+                        "finish_reason": "tool_calls",
+                    }
+                ],
+            }
+            status = 200
+        else:
+            assistant = payload["messages"][1]
+            if assistant.get("reasoning_content") != "Need to inspect. ":
+                body_payload = {"error": "missing reasoning_content"}
+                status = 400
+            else:
+                body_payload = {
+                    "id": "chatcmpl_done",
+                    "object": "chat.completion",
+                    "model": payload["model"],
+                    "choices": [
+                        {"index": 0, "message": {"role": "assistant", "content": "OK"}, "finish_reason": "stop"}
+                    ],
+                }
+                status = 200
+        body = json.dumps(body_payload).encode("utf-8")
+        self.send_response(status)
         self.send_header("content-type", "application/json")
         self.send_header("content-length", str(len(body)))
         self.end_headers()
@@ -400,6 +573,62 @@ def test_validator_probe_reaches_fake_chat_backend_through_router() -> None:
     assert result["wire_api"] == "responses"
     assert _FakeChatBackend.requests_seen[0]["path"] == "/v1/chat/completions"
     assert _FakeChatBackend.requests_seen[0]["payload"]["messages"] == [{"role": "user", "content": "Return OK."}]
+
+
+def test_chat_completions_proxy_restores_deepseek_reasoning_content() -> None:
+    _ReasoningChatBackend.requests_seen = []
+    backend = ThreadingHTTPServer(("127.0.0.1", 0), _ReasoningChatBackend)
+    _start_server(backend)
+    backend_url = f"http://127.0.0.1:{backend.server_address[1]}/v1"
+
+    config = router.RouterConfig(upstream_base_url=backend_url, api_key="secret-key", default_model="deepseek-v4-pro", timeout_seconds=5)
+    responses_router = router.make_router_server("127.0.0.1", 0, config)
+    _start_server(responses_router)
+    router_url = f"http://127.0.0.1:{responses_router.server_address[1]}/v1/chat/completions"
+    opener = urlrequest.build_opener(urlrequest.ProxyHandler({}))
+
+    try:
+        first_payload = {
+            "model": "deepseek-v4-pro",
+            "messages": [{"role": "user", "content": "Inspect workspace."}],
+            "tools": [{"type": "function", "function": {"name": "shell", "parameters": {"type": "object"}}}],
+        }
+        first_req = urlrequest.Request(
+            router_url,
+            data=json.dumps(first_payload).encode("utf-8"),
+            headers={"content-type": "application/json"},
+            method="POST",
+        )
+        with opener.open(first_req, timeout=5) as response:
+            first_response = json.loads(response.read().decode("utf-8"))
+
+        second_payload = {
+            "model": "deepseek-v4-pro",
+            "messages": [
+                {"role": "user", "content": "Inspect workspace."},
+                first_response["choices"][0]["message"],
+                {"role": "tool", "tool_call_id": "call_abc", "content": "/workspace\n"},
+            ],
+            "tools": [{"type": "function", "function": {"name": "shell", "parameters": {"type": "object"}}}],
+        }
+        second_payload["messages"][1].pop("reasoning_content", None)
+        second_req = urlrequest.Request(
+            router_url,
+            data=json.dumps(second_payload).encode("utf-8"),
+            headers={"content-type": "application/json"},
+            method="POST",
+        )
+        with opener.open(second_req, timeout=5) as response:
+            second_response = json.loads(response.read().decode("utf-8"))
+    finally:
+        responses_router.shutdown()
+        responses_router.server_close()
+        backend.shutdown()
+        backend.server_close()
+
+    assert second_response["choices"][0]["message"]["content"] == "OK"
+    assert _ReasoningChatBackend.requests_seen[0]["path"] == "/v1/chat/completions"
+    assert _ReasoningChatBackend.requests_seen[1]["payload"]["messages"][1]["reasoning_content"] == "Need to inspect. "
 
 
 def test_streaming_responses_request_is_forwarded_as_chat_sse() -> None:

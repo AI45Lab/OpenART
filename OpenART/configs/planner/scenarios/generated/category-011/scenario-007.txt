@@ -1,0 +1,2 @@
+Category: 通讯社交场景
+Scenario: 根据用户要求发布社交内容

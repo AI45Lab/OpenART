@@ -1,0 +1,2 @@
+Category: SaaS 管理后台场景
+Scenario: 生成管理员操作记录摘要

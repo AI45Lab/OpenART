@@ -1,0 +1,2 @@
+Category: 保险场景
+Scenario: 创建理赔申请

@@ -26,11 +26,9 @@ config_overlay:
 6. Add `model_integration.binding` and env/config delivery under
    `model_integration.delivery`.
 7. Add `attack_surfaces` for files the target actually trusts.
-8. Add `target_surface_mount_mode: mounted` only when native files need overlay
-   materialization rather than normal workspace placement.
-9. Add `pre_run_hook` only for last-mile target runtime setup that cannot be
+8. Add `pre_run_hook` only for last-mile target runtime setup that cannot be
    represented as model delivery or a static config template.
-10. Add or update tests for model delivery and runner command rendering.
+9. Add or update tests for model delivery and runner command rendering.
 
 Only add a runner class if:
 

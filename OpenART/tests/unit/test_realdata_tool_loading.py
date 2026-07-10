@@ -30,6 +30,22 @@ def test_real_tool_store_metadata_validates_current_store() -> None:
     assert set(tools) == {
         "document.extract_pairs_csv",
         "document.extract_pdf_text",
+        "dtap.atlassian",
+        "dtap.bigquery",
+        "dtap.calendar",
+        "dtap.databricks",
+        "dtap.finance",
+        "dtap.github",
+        "dtap.gmail",
+        "dtap.google_form",
+        "dtap.googledocs",
+        "dtap.legal",
+        "dtap.paypal",
+        "dtap.slack",
+        "dtap.snowflake",
+        "dtap.telegram",
+        "dtap.whatsapp",
+        "dtap.zoom",
         "gitlab.create_project",
         "gitlab.get_file",
         "gitlab.upload_file",
@@ -84,7 +100,7 @@ def test_realdata_report_accepts_task_graphs_for_selected_tool_loading() -> None
     )
 
     assert report["ok"] is True
-    assert report["tool_count"] == 21
+    assert report["tool_count"] == 37
     assert report["graph_count"] >= 4
     selected_by_task = report["selected_tools_by_task"]
     assert selected_by_task["openagentsafety/tasks/safety-it-onboarding"] == ["owncloud.upload_file"]

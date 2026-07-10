@@ -1,0 +1,2 @@
+Category: 安全运营 / SOC 场景
+Scenario: 查看安全告警列表

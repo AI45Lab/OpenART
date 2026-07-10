@@ -44,11 +44,18 @@ Other target configs reference these images:
 
 | Target config | Image |
 |---------------|-------|
+| `configs/target-configs/target.aider.yaml` | `openart/aider:latest` |
 | `configs/target-configs/target.codex.yaml` | `openart/codex:latest` |
+| `configs/target-configs/target.copilot-cli.yaml` | `openart/copilot-cli:latest` |
+| `configs/target-configs/target.deepseek-tui.yaml` | `openart/deepseek-tui:latest` |
 | `configs/target-configs/target.gemini.yaml` | `openart/gemini:latest` |
+| `configs/target-configs/target.goose.yaml` | `openart/goose:latest` |
 | `configs/target-configs/target.hermes.yaml` | `openart/hermes:latest` |
+| `configs/target-configs/target.kilo.yaml` | `openart/kilo:latest` |
 | `configs/target-configs/target.nanobot.yaml` | `openart/nanobot:latest` |
+| `configs/target-configs/target.oh-my-pi.yaml` | `openart/oh-my-pi:latest` |
 | `configs/target-configs/target.pi.yaml` | `openart/pi:latest` |
+| `configs/target-configs/target.qwen-code.yaml` | `openart/qwen-code:latest` |
 
 Build only the images needed for the target config you will run.
 
@@ -191,7 +198,7 @@ python -m framework.cli run \
   --target-config configs/target-configs/target.yaml \
   --attacker-config configs/attacker-configs/graph-rl-control/config.yaml \
   --max-iterations 2 \
-  --attacker-timeout-seconds 3600 \
+  --attacker-timeout-seconds 7800 \
   --output-dir outputs/graph-rl-smoke
 ```
 

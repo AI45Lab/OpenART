@@ -209,12 +209,20 @@ def _wait_for_router_health(proc: subprocess.Popen, health_url: str, log_path: P
     raise RuntimeError(f"responses router did not become healthy: {last_error}\nLog preview:\n{preview}")
 
 
+def _target_responses_router_upstream_base_url(value: str) -> str:
+    text = str(value or "").strip().rstrip("/")
+    if not text:
+        return ""
+    return text if text.endswith("/v1") else f"{text}/v1"
+
+
 def _start_target_responses_router(repo_root: Path, batch_dir: Path, mode: str) -> dict[str, Any]:
     if mode != "responses-to-chat":
         raise ValueError(f"unsupported target responses router mode: {mode}")
-    upstream_base_url = str(os.environ.get("TARGET_BASE_URL", "") or "").strip()
-    if not upstream_base_url:
+    raw_upstream_base_url = str(os.environ.get("TARGET_BASE_URL", "") or "").strip()
+    if not raw_upstream_base_url:
         raise RuntimeError("TARGET_BASE_URL is required to launch --target-responses-router responses-to-chat")
+    upstream_base_url = _target_responses_router_upstream_base_url(raw_upstream_base_url)
 
     port = _reserve_local_port()
     router_origin = f"http://127.0.0.1:{port}"
@@ -275,7 +283,9 @@ def _start_target_responses_router(repo_root: Path, batch_dir: Path, mode: str) 
         "router_origin": router_origin,
         "router_base_url": router_base_url,
         "health_url": f"{router_origin}/healthz",
+        "raw_upstream_base_url": _redact_url(raw_upstream_base_url),
         "upstream_base_url": _redact_url(upstream_base_url),
+        "upstream_base_url_normalized": raw_upstream_base_url.rstrip("/") != upstream_base_url.rstrip("/"),
         "target_base_url_rewrite": {
             "from": _redact_url(upstream_base_url),
             "to": router_base_url,
@@ -405,7 +415,7 @@ def append_jsonl(path: Path, payload: dict[str, Any]) -> None:
 
 def run_target_validation(repo_root: Path, args: argparse.Namespace, batch_dir: Path) -> dict[str, Any]:
     target_config = (
-        Path(args.target_config).resolve()
+        (repo_root / args.target_config).resolve()
         if args.target_config
         else (repo_root / "configs" / "target-configs" / "target.yaml").resolve()
     )
@@ -615,6 +625,23 @@ def main() -> int:
                 "tool_store": str((repo_root / args.tool_store).resolve()) if args.tool_store else "",
                 "attacker_config": str((repo_root / args.attacker_config).resolve()) if args.attacker_config else "",
                 "target_config": str((repo_root / args.target_config).resolve()) if args.target_config else "",
+                "attacker_model": str(os.environ.get("OPENAI_MODEL", "") or ""),
+                "target_model": str(os.environ.get("TARGET_MODEL", "") or ""),
+                "judge_model": str(os.environ.get("JUDGE_MODEL", "") or ""),
+                "model_bindings": {
+                    "attacker": {
+                        "base_url": _redact_url(str(os.environ.get("OPENAI_BASE_URL", "") or "")),
+                        "model": str(os.environ.get("OPENAI_MODEL", "") or ""),
+                    },
+                    "target": {
+                        "base_url": _redact_url(str(os.environ.get("TARGET_BASE_URL", "") or "")),
+                        "model": str(os.environ.get("TARGET_MODEL", "") or ""),
+                    },
+                    "judge": {
+                        "base_url": _redact_url(str(os.environ.get("JUDGE_BASE_URL", "") or "")),
+                        "model": str(os.environ.get("JUDGE_MODEL", "") or ""),
+                    },
+                },
                 "runner_framework": str(args.runner_framework or ""),
                 "runner_model": str(args.runner_model or ""),
                 "eval_strategy": args.eval_strategy,

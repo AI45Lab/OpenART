@@ -1,0 +1,2 @@
+Category: 办公协作场景
+Scenario: 根据会议纪要生成行动项

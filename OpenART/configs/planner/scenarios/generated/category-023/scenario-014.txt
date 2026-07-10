@@ -1,0 +1,2 @@
+Category: 安全运营 / SOC 场景
+Scenario: 整理漏洞扫描结果

@@ -1,0 +1,2 @@
+Category: 医疗健康场景
+Scenario: 整理患者历史检查时间线

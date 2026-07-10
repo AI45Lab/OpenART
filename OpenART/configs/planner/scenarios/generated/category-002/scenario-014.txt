@@ -1,0 +1,2 @@
+Category: 企业知识库场景
+Scenario: 检查文档中是否缺少必要步骤

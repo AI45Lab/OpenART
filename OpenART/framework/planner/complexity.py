@@ -12,12 +12,17 @@ _SPEC_FIELDS = {
     "scenario_count",
     "min_workflow_stages",
     "min_safe_workflow_nodes",
+    "target_safe_workflow_nodes",
+    "max_safe_workflow_nodes",
     "min_dependency_depth",
     "min_parallel_branches",
+    "min_external_tool_call_nodes",
     "min_approved_files",
     "min_risk_files",
     "min_formats",
     "required_file_extensions",
+    "required_binary_file_extensions",
+    "min_binary_formats",
     "min_risk_types",
     "require_mixed_risk_layout",
 }
@@ -29,12 +34,17 @@ class PlannerComplexitySpec:
     scenario_count: int = 1
     min_workflow_stages: int = 4
     min_safe_workflow_nodes: int = 6
+    target_safe_workflow_nodes: int | None = None
+    max_safe_workflow_nodes: int | None = None
     min_dependency_depth: int = 2
     min_parallel_branches: int = 0
+    min_external_tool_call_nodes: int | None = None
     min_approved_files: int = 6
     min_risk_files: int = 2
     min_formats: int = 3
     required_file_extensions: tuple[str, ...] = ()
+    required_binary_file_extensions: tuple[str, ...] = ()
+    min_binary_formats: int | None = None
     min_risk_types: int = 1
     require_mixed_risk_layout: bool = False
 
@@ -44,12 +54,17 @@ class PlannerComplexitySpec:
             "scenario_count": self.scenario_count,
             "min_workflow_stages": self.min_workflow_stages,
             "min_safe_workflow_nodes": self.min_safe_workflow_nodes,
+            "target_safe_workflow_nodes": self.target_safe_workflow_nodes,
+            "max_safe_workflow_nodes": self.max_safe_workflow_nodes,
             "min_dependency_depth": self.min_dependency_depth,
             "min_parallel_branches": self.min_parallel_branches,
+            "min_external_tool_call_nodes": self.min_external_tool_call_nodes,
             "min_approved_files": self.min_approved_files,
             "min_risk_files": self.min_risk_files,
             "min_formats": self.min_formats,
             "required_file_extensions": list(self.required_file_extensions),
+            "required_binary_file_extensions": list(self.required_binary_file_extensions),
+            "min_binary_formats": self.min_binary_formats,
             "min_risk_types": self.min_risk_types,
             "require_mixed_risk_layout": self.require_mixed_risk_layout,
         }
@@ -227,12 +242,25 @@ def _validate_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
             continue
         if key == "require_mixed_risk_layout":
             result[key] = _bool_value(key, value)
-        elif key == "required_file_extensions":
+        elif key in {"required_file_extensions", "required_binary_file_extensions"}:
             result[key] = _extension_list(key, value)
         elif key == "min_parallel_branches":
             result[key] = _nonnegative_int(key, value)
         else:
             result[key] = _positive_int(key, value)
+
+    min_safe_nodes = result.get("min_safe_workflow_nodes", payload.get("min_safe_workflow_nodes"))
+    target_safe_nodes = result.get("target_safe_workflow_nodes", payload.get("target_safe_workflow_nodes"))
+    max_safe_nodes = result.get("max_safe_workflow_nodes", payload.get("max_safe_workflow_nodes"))
+    min_external_nodes = result.get("min_external_tool_call_nodes", payload.get("min_external_tool_call_nodes"))
+    if min_safe_nodes is not None and target_safe_nodes is not None and int(target_safe_nodes) < int(min_safe_nodes):
+        raise ValueError("target_safe_workflow_nodes must be at least min_safe_workflow_nodes")
+    if min_safe_nodes is not None and max_safe_nodes is not None and int(max_safe_nodes) < int(min_safe_nodes):
+        raise ValueError("max_safe_workflow_nodes must be at least min_safe_workflow_nodes")
+    if target_safe_nodes is not None and max_safe_nodes is not None and int(target_safe_nodes) > int(max_safe_nodes):
+        raise ValueError("target_safe_workflow_nodes must be no greater than max_safe_workflow_nodes")
+    if min_external_nodes is not None and max_safe_nodes is not None and int(min_external_nodes) > int(max_safe_nodes):
+        raise ValueError("min_external_tool_call_nodes must be no greater than max_safe_workflow_nodes")
     return result
 
 
@@ -256,5 +284,18 @@ def load_complexity_spec(
     spec_payload = base.as_dict()
     spec_payload.update(overrides)
     spec_payload["required_file_extensions"] = tuple(spec_payload.get("required_file_extensions", ()))
+    spec_payload["required_binary_file_extensions"] = tuple(spec_payload.get("required_binary_file_extensions", ()))
     spec_payload["profile_name"] = str(payload.get("profile_name") or payload.get("name") or profile_name or base.profile_name)
+    min_safe_nodes = int(spec_payload["min_safe_workflow_nodes"])
+    target_safe_nodes = spec_payload.get("target_safe_workflow_nodes")
+    max_safe_nodes = spec_payload.get("max_safe_workflow_nodes")
+    min_external_nodes = spec_payload.get("min_external_tool_call_nodes")
+    if target_safe_nodes is not None and int(target_safe_nodes) < min_safe_nodes:
+        raise ValueError("target_safe_workflow_nodes must be at least min_safe_workflow_nodes")
+    if max_safe_nodes is not None and int(max_safe_nodes) < min_safe_nodes:
+        raise ValueError("max_safe_workflow_nodes must be at least min_safe_workflow_nodes")
+    if target_safe_nodes is not None and max_safe_nodes is not None and int(target_safe_nodes) > int(max_safe_nodes):
+        raise ValueError("target_safe_workflow_nodes must be no greater than max_safe_workflow_nodes")
+    if min_external_nodes is not None and max_safe_nodes is not None and int(min_external_nodes) > int(max_safe_nodes):
+        raise ValueError("min_external_tool_call_nodes must be no greater than max_safe_workflow_nodes")
     return PlannerComplexitySpec(**spec_payload)

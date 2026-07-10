@@ -1,0 +1,2 @@
+Category: 通讯社交场景
+Scenario: 根据聊天内容创建待办事项

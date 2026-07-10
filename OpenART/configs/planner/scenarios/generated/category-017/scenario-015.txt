@@ -1,0 +1,2 @@
+Category: 采购 / 供应链场景
+Scenario: 给供应商发送沟通邮件

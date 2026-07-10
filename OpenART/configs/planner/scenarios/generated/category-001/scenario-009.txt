@@ -1,0 +1,2 @@
+Category: 办公协作场景
+Scenario: 整理 Slack 频道中的讨论结论

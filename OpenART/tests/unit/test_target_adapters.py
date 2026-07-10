@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from email.utils import format_datetime
 from pathlib import Path
 
+import pytest
 import yaml
 
 from framework.core.target_adapters import render_config_template, stage_model_integration
@@ -92,6 +93,40 @@ def test_render_config_template_supports_env_name_placeholders_in_all_formats(tm
     assert "key=OPENAI_API_KEY" in rendered_text
 
 
+def test_render_config_template_supports_secret_free_env_refs(tmp_path: Path) -> None:
+    model = {"api_key": "secret-key", "base_url": "http://llm.internal/v1", "model": "glm-5", "name": "glm-5"}
+    env_names = {"api_key": "OPENAI_API_KEY"}
+    repo_root = tmp_path
+    target_config_path = _target_config_file(tmp_path)
+    json_template = tmp_path / "config.json"
+    json_template.write_text(
+        '{"provider": {"apiKey": "${env_ref.api_key}", "baseUrl": "${model.base_url}"}}\n',
+        encoding="utf-8",
+    )
+
+    rendered_json, _, _ = render_config_template(
+        {"source": f"abs:{json_template}", "format": "json"},
+        model=model,
+        env_names=env_names,
+        repo_root=repo_root,
+        target_config_path=str(target_config_path),
+    )
+
+    parsed = json.loads(rendered_json)
+    assert parsed["provider"]["apiKey"] == "${OPENAI_API_KEY}"
+    assert parsed["provider"]["baseUrl"] == "http://llm.internal/v1"
+    assert "secret-key" not in rendered_json
+
+    with pytest.raises(ValueError, match="env_ref.api_key"):
+        render_config_template(
+            {"source": f"abs:{json_template}", "format": "json"},
+            model=model,
+            env_names={},
+            repo_root=repo_root,
+            target_config_path=str(target_config_path),
+        )
+
+
 def test_env_names_expand_before_explicit_env_merge(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("TARGET_API_KEY", "secret-key")
     monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
@@ -167,14 +202,112 @@ def test_builtin_target_configs_stage_model_delivery(monkeypatch, tmp_path: Path
 
     assert results["claude_code"].env["ANTHROPIC_AUTH_TOKEN"] == "secret-key"
     assert results["claude_code"].env["ANTHROPIC_BASE_URL"] == "http://llm.internal"
-    assert results["cursor"].env["CURSOR_API_KEY"] == "secret-key"
     assert results["gemini"].env["GEMINI_API_KEY"] == "secret-key"
     assert results["gemini"].env["GEMINI_MODEL"] == "glm-5"
+
+    continue_cli = yaml.safe_load(Path(results["continue_cli"].config.host_path).read_text(encoding="utf-8"))
+    assert results["continue_cli"].env["OPENAI_API_KEY"] == "secret-key"
+    assert results["continue_cli"].env["OPENAI_BASE_URL"] == "http://llm.internal/v1"
+    assert results["continue_cli"].env["OPENAI_MODEL"] == "glm-5"
+    assert results["continue_cli"].env["CONTINUE_GLOBAL_DIR"] == "/tmp/openart/home/.continue"
+    assert results["continue_cli"].env["FORCE_NO_TTY"] == "true"
+    assert results["continue_cli"].config.destination == "/tmp/openart/home/.continue/config.yaml"
+    assert "secret-key" not in Path(results["continue_cli"].config.host_path).read_text(encoding="utf-8")
+    assert continue_cli["name"] == "OpenART Continue CLI"
+    assert continue_cli["schema"] == "v1"
+    assert continue_cli["models"][0]["provider"] == "openai"
+    assert continue_cli["models"][0]["model"] == "glm-5"
+    assert continue_cli["models"][0]["apiBase"] == "http://llm.internal/v1"
+    assert "tool_use" in continue_cli["models"][0]["capabilities"]
+
+    assert results["aider"].config is None
+    assert results["aider"].env["AIDER_OPENAI_API_KEY"] == "secret-key"
+    assert results["aider"].env["AIDER_OPENAI_API_BASE"] == "http://llm.internal/v1"
+    assert results["aider"].env["AIDER_MODEL"] == "openai/glm-5"
+    assert results["aider"].env["AIDER_ANALYTICS_DISABLE"] == "true"
+    assert results["aider"].env["AIDER_DETECT_URLS"] == "false"
+    assert results["aider"].env["AIDER_DISABLE_PLAYWRIGHT"] == "true"
+    assert results["aider"].env["AIDER_FANCY_INPUT"] == "false"
+
+    deepseek_tui_toml = Path(results["deepseek_tui"].config.host_path).read_text(encoding="utf-8")
+    assert results["deepseek_tui"].env["DEEPSEEK_API_KEY"] == "secret-key"
+    assert results["deepseek_tui"].env["DEEPSEEK_BASE_URL"] == "http://llm.internal/v1"
+    assert results["deepseek_tui"].env["DEEPSEEK_MODEL"] == "glm-5"
+    assert 'model = "glm-5"' in deepseek_tui_toml
+    assert 'base_url = "http://llm.internal/v1"' in deepseek_tui_toml
+    assert 'api_key_env = "DEEPSEEK_API_KEY"' in deepseek_tui_toml
+
+    assert results["reasonix"].config is None
+    assert results["reasonix"].env["DEEPSEEK_API_KEY"] == "secret-key"
+    assert results["reasonix"].env["DEEPSEEK_BASE_URL"] == "http://llm.internal/v1"
+    assert results["reasonix"].env["DEEPSEEK_MODEL"] == "glm-5"
+    assert results["reasonix"].env["REASONIX_LANG"] == "en"
+
+    qwen = json.loads(Path(results["qwen_code"].config.host_path).read_text(encoding="utf-8"))
+    assert results["qwen_code"].env["OPENAI_API_KEY"] == "secret-key"
+    assert results["qwen_code"].env["OPENAI_BASE_URL"] == "http://llm.internal/v1"
+    assert qwen["modelProviders"]["openai"][0]["baseUrl"] == "http://llm.internal/v1"
+    assert qwen["modelProviders"]["openai"][0]["envKey"] == "OPENAI_API_KEY"
+    assert qwen["security"]["auth"]["selectedType"] == "openai"
+
+    kilo = json.loads(Path(results["kilo"].config.host_path).read_text(encoding="utf-8"))
+    assert results["kilo"].env["OPENAI_MODEL"] == "glm-5"
+    assert kilo["model"] == "openart/glm-5"
+    assert kilo["provider"]["openart"]["options"]["apiKey"] == "{env:OPENAI_API_KEY}"
+    assert kilo["permission"] == "allow"
+
+    goose = yaml.safe_load(Path(results["goose"].config.host_path).read_text(encoding="utf-8"))
+    assert results["goose"].env["OPENAI_API_KEY"] == "secret-key"
+    assert results["goose"].env["OPENAI_HOST"] == "http://llm.internal"
+    assert results["goose"].env["GOOSE_PROVIDER"] == "openai"
+    assert results["goose"].env["GOOSE_MODEL"] == "glm-5"
+    assert goose["GOOSE_PROVIDER"] == "openai"
+    assert goose["GOOSE_MODEL"] == "glm-5"
+    assert goose["OPENAI_HOST"] == "http://llm.internal"
+
+    assert results["copilot_cli"].config is None
+    assert results["copilot_cli"].env["COPILOT_PROVIDER_TYPE"] == "openai"
+    assert results["copilot_cli"].env["COPILOT_PROVIDER_API_KEY"] == "secret-key"
+    assert results["copilot_cli"].env["COPILOT_PROVIDER_BASE_URL"] == "http://llm.internal/v1"
+    assert results["copilot_cli"].env["COPILOT_MODEL"] == "glm-5"
+
+    oh_my_pi = yaml.safe_load(Path(results["oh_my_pi"].config.host_path).read_text(encoding="utf-8"))
+    oh_my_pi_provider = oh_my_pi["providers"]["deepseek"]
+    assert results["oh_my_pi"].env["DEEPSEEK_API_KEY"] == "secret-key"
+    assert oh_my_pi_provider["baseUrl"] == "http://llm.internal/v1"
+    assert oh_my_pi_provider["apiKey"] == "DEEPSEEK_API_KEY"
+    assert oh_my_pi_provider["models"][0]["id"] == "glm-5"
+    assert oh_my_pi_provider["models"][0]["compat"]["requiresReasoningContentForToolCalls"] is True
 
     opencode = json.loads(Path(results["opencode"].config.host_path).read_text(encoding="utf-8"))
     assert opencode["provider"]["openart"]["options"]["baseURL"] == "http://llm.internal/v1"
     assert opencode["provider"]["openart"]["options"]["apiKey"] == "{env:OPENAI_API_KEY}"
     assert "glm-5" in opencode["provider"]["openart"]["models"]
+
+    openclaw = json.loads(Path(results["openclaw"].config.host_path).read_text(encoding="utf-8"))
+    assert results["openclaw"].env["OPENAI_API_KEY"] == "secret-key"
+    assert results["openclaw"].env["OPENAI_BASE_URL"] == "http://llm.internal/v1"
+    assert results["openclaw"].env["OPENAI_MODEL"] == "glm-5"
+    assert results["openclaw"].env["OPENCLAW_DISABLE_BONJOUR"] == "1"
+    assert results["openclaw"].config.destination == "/tmp/openart/home/.openclaw/openclaw.json"
+    assert "secret-key" not in Path(results["openclaw"].config.host_path).read_text(encoding="utf-8")
+    assert openclaw["agents"]["defaults"]["workspace"] == "/workspace"
+    assert openclaw["agents"]["defaults"]["skipBootstrap"] is True
+    assert openclaw["agents"]["defaults"]["model"]["primary"] == "openart/glm-5"
+    assert "openart/glm-5" in openclaw["agents"]["defaults"]["models"]
+    provider = openclaw["models"]["providers"]["openart"]
+    assert openclaw["models"]["mode"] == "merge"
+    assert provider["baseUrl"] == "http://llm.internal/v1"
+    assert provider["apiKey"] == "${OPENAI_API_KEY}"
+    assert provider["api"] == "openai-completions"
+    assert provider["models"][0]["input"] == ["text"]
+    assert provider["models"][0]["cost"] == {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0}
+    assert provider["models"][0]["contextWindow"] == 128000
+    assert provider["models"][0]["contextTokens"] == 96000
+    assert provider["models"][0]["maxTokens"] == 8192
+    assert provider["models"][0]["compat"]["requiresStringContent"] is True
+    assert provider["models"][0]["compat"]["requiresAssistantAfterToolResult"] is True
+    assert provider["models"][0]["compat"]["strictMessageKeys"] is False
 
     codex_toml = Path(results["codex"].config.host_path).read_text(encoding="utf-8")
     assert 'env_key = "OPENAI_API_KEY"' in codex_toml
@@ -195,6 +328,122 @@ def test_builtin_target_configs_stage_model_delivery(monkeypatch, tmp_path: Path
     artifact = json.loads(Path(results["nanobot"].resolved_artifact_path).read_text(encoding="utf-8"))
     assert artifact["binding"]["api_key"] == "<redacted>"
     assert "adapter" + "_name" not in artifact
+
+
+def test_model_delivery_destinations_are_not_attacker_surfaces() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    config_dir = repo_root / "configs" / "target-configs"
+    exposed: list[str] = []
+
+    for config_path in sorted(config_dir.glob("target*.yaml")):
+        data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        target = data.get("target") if isinstance(data, dict) else {}
+        if not isinstance(target, dict):
+            continue
+        integration = target.get("model_integration")
+        delivery = integration.get("delivery") if isinstance(integration, dict) else {}
+        template = delivery.get("config_template") if isinstance(delivery, dict) else None
+        if not isinstance(template, dict):
+            continue
+        destination = str(template.get("destination") or "").strip()
+        if not destination:
+            continue
+        attack_paths: list[str] = []
+        for surface in target.get("attack_surfaces") or []:
+            if not isinstance(surface, dict):
+                continue
+            attack_paths.extend(
+                part.strip()
+                for part in str(surface.get("path_template") or "").split(" or ")
+                if part.strip()
+            )
+        if (
+            target.get("surface_family") == "openclaw"
+            and destination == "HOME/.openclaw/openclaw.json"
+        ):
+            continue
+        if destination in attack_paths:
+            exposed.append(f"{config_path.name}: {destination}")
+
+    assert exposed == []
+
+
+def test_openart_runner_images_have_dockerfiles() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    config_dir = repo_root / "configs" / "target-configs"
+    image_root = repo_root / "images"
+
+    missing: list[str] = []
+    for config_path in sorted(config_dir.glob("target*.yaml")):
+        data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        target = data.get("target") if isinstance(data, dict) else {}
+        if not isinstance(target, dict):
+            continue
+        image = str(target.get("runner_image") or "").strip()
+        if not image.startswith("openart/"):
+            continue
+        image_name = image[len("openart/"):].split(":", 1)[0]
+        dockerfile = image_root / f"Dockerfile.{image_name}"
+        if not dockerfile.is_file():
+            missing.append(f"{config_path.name}: {image} -> {dockerfile.relative_to(repo_root)}")
+
+    assert missing == []
+
+
+def test_second_cli_pass_targets_have_validator_metadata() -> None:
+    for surface_family in (
+        "aider",
+        "continue_cli",
+        "copilot_cli",
+        "deepseek_tui",
+        "goose",
+        "kilo",
+        "oh_my_pi",
+        "qwen_code",
+        "reasonix",
+    ):
+        metadata = validator.get_target_integration_metadata(surface_family)
+        assert metadata is not None
+        assert metadata.surface_family == surface_family
+        assert metadata.docs_url.startswith("https://")
+        assert metadata.required_doc_keywords
+
+
+def test_deepseek_style_targets_normalize_root_base_url_to_v1(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "secret-key")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    repo_root = Path(__file__).resolve().parents[2]
+    config_dir = repo_root / "configs" / "target-configs"
+
+    results = {}
+    for surface_family, filename in {
+        "deepseek_tui": "target.deepseek-tui.yaml",
+        "reasonix": "target.reasonix.yaml",
+    }.items():
+        config_path = config_dir / filename
+        data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        target = data.get("target") if isinstance(data, dict) else {}
+        integration = target.get("model_integration")
+        result = stage_model_integration(
+            integration,
+            role="target",
+            runtime_env=_runtime_env(),
+            output_dir=tmp_path / surface_family,
+            target_config_path=str(config_path),
+            repo_root=repo_root,
+            symbolic_roots=_symbolic_roots(),
+        )
+        assert result is not None
+        results[surface_family] = result
+
+    assert results["deepseek_tui"].model_binding["provider_family"] == "openai_compatible"
+    assert results["deepseek_tui"].env["DEEPSEEK_BASE_URL"] == "http://llm.internal/v1"
+    deepseek_tui_toml = Path(results["deepseek_tui"].config.host_path).read_text(encoding="utf-8")
+    assert 'base_url = "http://llm.internal/v1"' in deepseek_tui_toml
+
+    assert results["reasonix"].model_binding["provider_family"] == "openai_compatible"
+    assert results["reasonix"].env["DEEPSEEK_BASE_URL"] == "http://llm.internal/v1"
 
 
 def _write_validation_target(tmp_path: Path) -> Path:
@@ -272,6 +521,33 @@ def test_validate_model_delivery_requires_official_docs(monkeypatch, tmp_path: P
 
     assert payload["status"] == "invalid"
     assert payload["docs"]["official"] is False
+
+
+def test_validate_codex_allows_docs_fetch_failure_when_live_checks_pass(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "secret-key")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    repo_root = Path(__file__).resolve().parents[2]
+
+    def fetch_blocked(url: str, timeout_seconds: int) -> validator.FetchResult:
+        del url, timeout_seconds
+        raise OSError("Tunnel connection failed: 403 Forbidden")
+
+    payload = validator.validate_adapter(
+        target_config_path=repo_root / "configs" / "target-configs" / "target.codex.yaml",
+        require_official_docs=True,
+        fetcher=fetch_blocked,
+        endpoint_probe_runner=_endpoint_ok,
+        smoke_runner=lambda *args, **kwargs: {"ok": True},
+        timeout_seconds=1,
+    )
+
+    assert payload["surface_family"] == "codex"
+    assert payload["status"] == "experimental"
+    assert payload["docs"]["fetch_error"] is True
+    assert "403 Forbidden" in payload["docs"]["error"]
+    assert payload["endpoint_probe"]["ok"] is True
+    assert payload["smoke"]["ok"] is True
 
 
 def test_validate_model_delivery_marks_non_official_docs_experimental(monkeypatch, tmp_path: Path) -> None:

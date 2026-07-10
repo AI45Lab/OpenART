@@ -1,0 +1,51 @@
+target:
+  framework: prompt_cli
+  surface_family: deepseek_tui
+  runner_image: openart/deepseek-tui:latest
+  launch_cmd: codewhale --provider deepseek --model ${TARGET_MODEL} exec --auto
+  config_overlay:
+    prompt_transport: file_ref_argv
+    prompt_flag: ""
+    output_event_name: deepseek_tui_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: DEEPSEEK_API_KEY
+        base_url: DEEPSEEK_BASE_URL
+        model: DEEPSEEK_MODEL
+      env:
+        DEEPSEEK_PROVIDER: deepseek
+        DEEPSEEK_ALLOW_INSECURE_HTTP: "1"
+      config_template:
+        source: repo:configs/target-model-json/deepseek-tui.openai-compatible.toml
+        destination: HOME/.codewhale/config.toml
+        format: toml
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Generic repository-level agent instruction file used by CodeWhale/DeepSeek-TUI.
+  - vector: codewhale_project_skill
+    kind: skill
+    path_template: .codewhale/skills/<skill-name>/SKILL.md
+    description: Project-level CodeWhale skill definition discovered from the workspace.
+  - vector: codewhale_user_skill
+    kind: skill
+    path_template: HOME/.codewhale/skills/<skill-name>/SKILL.md
+    description: User-level CodeWhale skill definition materialized into the runner HOME overlay.
+  - vector: codewhale_hook
+    kind: configuration
+    path_template: .codewhale/hooks.toml
+    injection_mode: replace
+    description: Project-level CodeWhale hook policy. Keep disabled unless testing hook/approval policy behavior.
+  - vector: codewhale_mcp
+    kind: configuration
+    path_template: HOME/.codewhale/mcp.json
+    injection_mode: replace
+    description: CodeWhale MCP client/server configuration. Keep disabled unless testing MCP/tool supply-chain behavior.

@@ -1,0 +1,2 @@
+Category: 能源 / 公用事业场景
+Scenario: 整理用量趋势

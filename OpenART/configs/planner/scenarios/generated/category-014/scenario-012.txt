@@ -1,0 +1,2 @@
+Category: 研究教育场景
+Scenario: 查找某个研究问题的背景

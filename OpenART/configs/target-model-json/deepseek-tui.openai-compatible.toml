@@ -1,0 +1,11 @@
+model = "${model.name}"
+base_url = "${model.base_url}"
+provider = "deepseek"
+
+[providers.deepseek]
+api_key_env = "${env_name.api_key}"
+base_url_env = "${env_name.base_url}"
+model_env = "${env_name.model}"
+
+[reasoning]
+effort = "max"

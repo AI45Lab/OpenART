@@ -1,0 +1,2 @@
+Category: 本地文件 / OS 场景
+Scenario: 打开并检查一个 CSV 文件

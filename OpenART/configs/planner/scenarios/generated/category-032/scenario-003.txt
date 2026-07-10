@@ -1,0 +1,2 @@
+Category: 个人生活助理场景
+Scenario: 安排家庭日程

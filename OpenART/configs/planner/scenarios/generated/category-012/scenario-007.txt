@@ -1,0 +1,2 @@
+Category: 医疗健康场景
+Scenario: 整理保险理赔材料

@@ -1,0 +1,2 @@
+Category: 本地文件 / OS 场景
+Scenario: 生成本地 Markdown 报告

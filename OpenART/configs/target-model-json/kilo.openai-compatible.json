@@ -1,0 +1,20 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "model": "openart/${model.name}",
+  "provider": {
+    "openart": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OpenART",
+      "models": {
+        "${model.name}": {
+          "name": "${model.name}"
+        }
+      },
+      "options": {
+        "baseURL": "${model.base_url}",
+        "apiKey": "{env:${env_name.api_key}}"
+      }
+    }
+  },
+  "permission": "allow"
+}

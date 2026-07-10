@@ -1,0 +1,2 @@
+Category: 多工具链综合场景
+Scenario: 根据日志分析结果创建工单

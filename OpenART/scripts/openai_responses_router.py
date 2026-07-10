@@ -46,6 +46,46 @@ def _is_droppable_builtin_tool(tool_type: str) -> bool:
     return tool_type in _DROPPABLE_BUILTIN_TOOL_TYPES or tool_type.startswith("web_search_preview")
 
 
+def _chat_function_tool(function: dict[str, Any], *, name_prefix: str = "") -> dict[str, Any]:
+    raw_name = str(function.get("name") or "").strip()
+    name = f"{name_prefix}{raw_name}" if raw_name else ""
+    return {
+        "type": "function",
+        "function": {
+            "name": name,
+            "description": str(function.get("description") or ""),
+            "parameters": function.get("parameters") or {"type": "object", "properties": {}},
+        },
+    }
+
+
+def _namespace_tools_to_chat_tools(tool: dict[str, Any]) -> list[dict[str, Any]]:
+    namespace = str(tool.get("namespace") or tool.get("name") or "").strip()
+    prefix = ""
+    if namespace:
+        safe_namespace = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in namespace)
+        prefix = f"{safe_namespace}__"
+
+    nested_tools = tool.get("tools")
+    if not isinstance(nested_tools, list):
+        nested_tools = tool.get("functions")
+    if not isinstance(nested_tools, list):
+        return []
+
+    converted: list[dict[str, Any]] = []
+    for nested in nested_tools:
+        if not isinstance(nested, dict):
+            continue
+        nested_type = str(nested.get("type") or "function").strip()
+        if nested_type != "function":
+            continue
+        function = nested.get("function") if isinstance(nested.get("function"), dict) else nested
+        if not str(function.get("name") or "").strip():
+            continue
+        converted.append(_chat_function_tool(function, name_prefix=prefix))
+    return converted
+
+
 def _to_chat_message_role(role: Any) -> str:
     normalized = str(role or "user").strip() or "user"
     if normalized == "developer":
@@ -138,17 +178,13 @@ def responses_tools_to_chat_tools(tools: Any) -> list[dict[str, Any]]:
         tool_type = str(tool.get("type") or "").strip()
         if _is_droppable_builtin_tool(tool_type):
             continue
+        if tool_type == "namespace":
+            converted.extend(_namespace_tools_to_chat_tools(tool))
+            continue
         if tool_type != "function":
             raise RouterRequestError(400, f"unsupported Responses tool type: {tool_type}")
         function = tool.get("function") if isinstance(tool.get("function"), dict) else tool
-        converted.append({
-            "type": "function",
-            "function": {
-                "name": str(function.get("name") or ""),
-                "description": str(function.get("description") or ""),
-                "parameters": function.get("parameters") or {"type": "object", "properties": {}},
-            },
-        })
+        converted.append(_chat_function_tool(function))
     return converted
 
 
@@ -156,6 +192,8 @@ def _convert_tool_choice(tool_choice: Any) -> Any:
     if not isinstance(tool_choice, dict):
         return tool_choice
     if _is_droppable_builtin_tool(str(tool_choice.get("type") or "").strip()):
+        return None
+    if tool_choice.get("type") == "namespace":
         return None
     if tool_choice.get("type") == "function" and tool_choice.get("name"):
         return {"type": "function", "function": {"name": str(tool_choice["name"])}}
@@ -377,6 +415,121 @@ def _chat_response_to_response(payload: dict[str, Any], request_model: str) -> d
     }
 
 
+def _tool_call_id(tool_call: Any) -> str:
+    if not isinstance(tool_call, dict):
+        return ""
+    return str(tool_call.get("id") or tool_call.get("call_id") or "").strip()
+
+
+def _cache_chat_reasoning_for_tool_calls(
+    *,
+    reasoning_text: str,
+    tool_calls: Any,
+    reasoning_by_call_id: dict[str, str] | None,
+) -> None:
+    if not reasoning_text or reasoning_by_call_id is None or not isinstance(tool_calls, list):
+        return
+    for call in tool_calls:
+        call_id = _tool_call_id(call)
+        if call_id:
+            reasoning_by_call_id[call_id] = reasoning_text
+
+
+def restore_chat_reasoning_content(
+    payload: dict[str, Any],
+    reasoning_by_call_id: dict[str, str] | None,
+) -> dict[str, Any]:
+    if not reasoning_by_call_id:
+        return dict(payload)
+    messages = payload.get("messages")
+    if not isinstance(messages, list):
+        return dict(payload)
+
+    copied = dict(payload)
+    copied_messages: list[Any] = []
+    for message in messages:
+        if not isinstance(message, dict):
+            copied_messages.append(message)
+            continue
+        if message.get("role") != "assistant" or message.get("reasoning_content"):
+            copied_messages.append(dict(message))
+            continue
+        tool_calls = message.get("tool_calls")
+        if not isinstance(tool_calls, list):
+            copied_messages.append(dict(message))
+            continue
+        reasoning_parts: list[str] = []
+        seen: set[str] = set()
+        for call in tool_calls:
+            call_id = _tool_call_id(call)
+            reasoning = reasoning_by_call_id.get(call_id, "") if call_id else ""
+            if reasoning and reasoning not in seen:
+                seen.add(reasoning)
+                reasoning_parts.append(reasoning)
+        restored = dict(message)
+        if reasoning_parts:
+            restored["reasoning_content"] = "".join(reasoning_parts)
+        copied_messages.append(restored)
+    copied["messages"] = copied_messages
+    return copied
+
+
+def cache_chat_response_reasoning(
+    payload: dict[str, Any],
+    reasoning_by_call_id: dict[str, str] | None,
+) -> None:
+    if reasoning_by_call_id is None:
+        return
+    choices = payload.get("choices") if isinstance(payload, dict) else None
+    if not isinstance(choices, list):
+        return
+    for choice in choices:
+        if not isinstance(choice, dict):
+            continue
+        message = choice.get("message")
+        if not isinstance(message, dict):
+            continue
+        reasoning_text = str(message.get("reasoning_content") or "")
+        _cache_chat_reasoning_for_tool_calls(
+            reasoning_text=reasoning_text,
+            tool_calls=message.get("tool_calls"),
+            reasoning_by_call_id=reasoning_by_call_id,
+        )
+
+
+def cache_chat_stream_reasoning(
+    chunk: dict[str, Any],
+    stream_state: dict[str, Any],
+    reasoning_by_call_id: dict[str, str] | None,
+) -> None:
+    if reasoning_by_call_id is None:
+        return
+    choices = chunk.get("choices") if isinstance(chunk, dict) else None
+    if not isinstance(choices, list) or not choices:
+        return
+    choice = choices[0]
+    if not isinstance(choice, dict):
+        return
+    delta = choice.get("delta")
+    if not isinstance(delta, dict):
+        delta = {}
+    if delta.get("reasoning_content"):
+        stream_state.setdefault("reasoning_parts", []).append(str(delta["reasoning_content"]))
+    call_ids = stream_state.setdefault("tool_call_ids", {})
+    for call in delta.get("tool_calls") or []:
+        if not isinstance(call, dict):
+            continue
+        index = int(call.get("index") or 0)
+        call_id = _tool_call_id(call)
+        if call_id:
+            call_ids[index] = call_id
+    if choice.get("finish_reason") == "tool_calls":
+        reasoning_text = "".join(stream_state.get("reasoning_parts") or [])
+        for call_id in call_ids.values():
+            if reasoning_text and call_id:
+                reasoning_by_call_id[str(call_id)] = reasoning_text
+
+
 def _post_json(url: str, payload: dict[str, Any], config: RouterConfig) -> tuple[int, dict[str, Any]]:
     with _open_json_request(url, payload, config) as response:
         text = response.read(2_000_000).decode(response.headers.get_content_charset() or "utf-8", errors="replace")
@@ -459,34 +612,15 @@ def make_router_server(host: str, port: int, config: RouterConfig) -> ThreadingH
             try:
                 length = int(self.headers.get("content-length") or "0")
                 raw = self.rfile.read(length).decode("utf-8")
-                responses_payload = json.loads(raw) if raw.strip() else {}
-                conversion = responses_request_to_chat(responses_payload, reasoning_by_call_id)
-                chat_payload = dict(conversion.payload)
-                if not chat_payload.get("model") and config.default_model:
-                    chat_payload["model"] = config.default_model
-                if self.path not in {"/v1/responses", "/responses"}:
-                    self._send_json(404, {"error": "not found"})
+                payload = json.loads(raw) if raw.strip() else {}
+                path = parse.urlparse(self.path).path
+                if path in {"/v1/responses", "/responses"}:
+                    self._handle_responses_request(payload)
                     return
-                upstream_url = _join_url(config.upstream_base_url, "/chat/completions")
-                request_model = str(chat_payload.get("model") or "")
-                if chat_payload.get("stream"):
-                    with _open_json_request(upstream_url, chat_payload, config) as chat_response:
-                        self.send_response(int(getattr(chat_response, "status", 200) or 200))
-                        self.send_header("content-type", "text/event-stream; charset=utf-8")
-                        self.send_header("cache-control", "no-cache")
-                        self.end_headers()
-                        events = chat_stream_to_response_events(
-                            _iter_sse_json(chat_response),
-                            response_id="resp_openart_router",
-                            model=request_model,
-                            created_at=int(time.time()),
-                            reasoning_by_call_id=reasoning_by_call_id,
-                        )
-                        for event_name, event_payload in events:
-                            self._send_sse_event(event_name, event_payload)
+                if path in {"/v1/chat/completions", "/chat/completions"}:
+                    self._handle_chat_completions_request(payload)
                     return
-                status, chat_response = _post_json(upstream_url, chat_payload, config)
-                self._send_json(status, _chat_response_to_response(chat_response, request_model))
+                self._send_json(404, {"error": "not found"})
             except RouterRequestError as exc:
                 self._send_json(exc.status_code, {"error": exc.message})
             except error.HTTPError as exc:
@@ -495,11 +629,62 @@ def make_router_server(host: str, port: int, config: RouterConfig) -> ThreadingH
             except Exception as exc:
                 self._send_json(500, {"error": str(exc)})
 
+        def _handle_responses_request(self, responses_payload: dict[str, Any]) -> None:
+            conversion = responses_request_to_chat(responses_payload, reasoning_by_call_id)
+            chat_payload = dict(conversion.payload)
+            if not chat_payload.get("model") and config.default_model:
+                chat_payload["model"] = config.default_model
+            upstream_url = _join_url(config.upstream_base_url, "/chat/completions")
+            request_model = str(chat_payload.get("model") or "")
+            if chat_payload.get("stream"):
+                with _open_json_request(upstream_url, chat_payload, config) as chat_response:
+                    self.send_response(int(getattr(chat_response, "status", 200) or 200))
+                    self.send_header("content-type", "text/event-stream; charset=utf-8")
+                    self.send_header("cache-control", "no-cache")
+                    self.end_headers()
+                    events = chat_stream_to_response_events(
+                        _iter_sse_json(chat_response),
+                        response_id="resp_openart_router",
+                        model=request_model,
+                        created_at=int(time.time()),
+                        reasoning_by_call_id=reasoning_by_call_id,
+                    )
+                    for event_name, event_payload in events:
+                        self._send_sse_event(event_name, event_payload)
+                return
+            status, chat_response = _post_json(upstream_url, chat_payload, config)
+            cache_chat_response_reasoning(chat_response, reasoning_by_call_id)
+            self._send_json(status, _chat_response_to_response(chat_response, request_model))
+
+        def _handle_chat_completions_request(self, chat_payload: dict[str, Any]) -> None:
+            chat_payload = restore_chat_reasoning_content(chat_payload, reasoning_by_call_id)
+            if not chat_payload.get("model") and config.default_model:
+                chat_payload["model"] = config.default_model
+            upstream_url = _join_url(config.upstream_base_url, "/chat/completions")
+            if chat_payload.get("stream"):
+                with _open_json_request(upstream_url, chat_payload, config) as chat_response:
+                    self.send_response(int(getattr(chat_response, "status", 200) or 200))
+                    self.send_header("content-type", "text/event-stream; charset=utf-8")
+                    self.send_header("cache-control", "no-cache")
+                    self.end_headers()
+                    stream_state: dict[str, Any] = {}
+                    for chunk in _iter_sse_json(chat_response):
+                        cache_chat_stream_reasoning(chunk, stream_state, reasoning_by_call_id)
+                        body = f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n".encode("utf-8")
+                        self.wfile.write(body)
+                        self.wfile.flush()
+                    self.wfile.write(b"data: [DONE]\n\n")
+                    self.wfile.flush()
+                return
+            status, chat_response = _post_json(upstream_url, chat_payload, config)
+            cache_chat_response_reasoning(chat_response, reasoning_by_call_id)
+            self._send_json(status, chat_response)
+
     return ThreadingHTTPServer((host, port), Handler)
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Route OpenAI Responses API requests to a chat-completions backend.")
+    parser = argparse.ArgumentParser(description="Route OpenAI Responses and chat-completions requests to a chat backend.")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--upstream-base-url", default="")

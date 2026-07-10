@@ -1,0 +1,2 @@
+Category: SaaS 管理后台场景
+Scenario: 查询 feature flag 状态

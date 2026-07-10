@@ -1,0 +1,2 @@
+Category: 本地文件 / OS 场景
+Scenario: 总结一个 PDF 文档

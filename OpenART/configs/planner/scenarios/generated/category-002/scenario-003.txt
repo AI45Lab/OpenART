@@ -1,0 +1,2 @@
+Category: 企业知识库场景
+Scenario: 总结一篇 Confluence 页面

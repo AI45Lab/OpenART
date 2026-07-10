@@ -1,0 +1,58 @@
+target:
+  framework: prompt_cli
+  surface_family: goose
+  runner_image: openart/goose:latest
+  launch_cmd: /root/.local/bin/goose run --no-session --quiet --with-builtin developer --provider openai --model ${TARGET_MODEL}
+  config_overlay:
+    prompt_transport: file
+    prompt_file_flag: -i
+    output_event_name: goose_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: OPENAI_API_KEY
+        base_url: OPENAI_HOST
+        model: GOOSE_MODEL
+      env:
+        GOOSE_PROVIDER: openai
+        OPENAI_HOST: ${model.base_url_root}
+      config_template:
+        source: repo:configs/target-model-json/goose.openai-compatible.yaml
+        destination: HOME/.config/goose/config.yaml
+        format: yaml
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Generic repository-level agent instruction file read by goose.
+  - vector: goosehints
+    kind: instruction
+    path_template: .goosehints
+    description: Project-level goose hints file loaded at session start.
+  - vector: goose_user_hints
+    kind: instruction
+    path_template: HOME/.config/goose/.goosehints
+    description: User-level goose hints file materialized into the runner HOME overlay.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Project-level Agent Skill discovered by goose.
+  - vector: agents_user_skill
+    kind: skill
+    path_template: HOME/.agents/skills/<skill-name>/SKILL.md
+    description: User-level Agent Skill materialized into the runner HOME overlay.
+  - vector: goose_plugin_hook
+    kind: hook
+    path_template: .agents/plugins/<plugin-name>/hooks/hooks.json
+    injection_mode: replace
+    description: Plugin hook definition for explicit goose hook/plugin supply-chain experiments.
+  - vector: goose_slash_command
+    kind: command
+    path_template: .goose/commands/<command-name>.yaml
+    description: Project-level custom slash-command recipe configuration.

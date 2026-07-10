@@ -46,6 +46,13 @@ Build the base task image and the target runner image you plan to use:
 docker build -t openart/task-base:latest -f images/Dockerfile.task-base .
 docker build -t openart/opencode:latest -f images/Dockerfile.opencode .
 docker build -t openart/claude-code:latest -f images/Dockerfile.claude-code .
+docker build -t openart/qwen-code:latest -f images/Dockerfile.qwen-code .
+docker build -t openart/kilo:latest -f images/Dockerfile.kilo .
+docker build -t openart/copilot-cli:latest -f images/Dockerfile.copilot-cli .
+docker build -t openart/oh-my-pi:latest -f images/Dockerfile.oh-my-pi .
+docker build -t openart/deepseek-tui:latest -f images/Dockerfile.deepseek-tui .
+docker build -t openart/aider:latest -f images/Dockerfile.aider .
+docker build -t openart/goose:latest -f images/Dockerfile.goose .
 ```
 
 ## Run
@@ -115,6 +122,16 @@ python -m framework.planner.cli \
   --task-id recruiting-interview-agenda \
   --output-dir outputs/recruiting-interview-agenda \
   --overwrite
+```
+
+High tool-call planning uses a complexity config for total safe workflow
+nodes and `--tool-count` for distinct enabled external tools:
+
+```bash
+python scripts/planner.py run \
+  --complexity-config configs/planner/complexity/high_tool_calls_60_100.yaml \
+  --tool-count 25 \
+  --output-dir outputs/opencode-planner-high-calls
 ```
 
 Generated bundles contain `scenario_model.json`, `task.md`, `workspace/`,

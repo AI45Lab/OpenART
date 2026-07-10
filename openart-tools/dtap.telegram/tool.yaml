@@ -1,0 +1,27 @@
+name: dtap.telegram
+service: telegram
+service_description: DTAP Telegram service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP Telegram service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_TELEGRAM_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_TELEGRAM_HEALTH_URL: {}
+  DTAP_TELEGRAM_PG_URL: {}
+  DTAP_TELEGRAM_PG_ADDR: {}
+  DTAP_TELEGRAM_PG_PORT: {}
+  DTAP_TELEGRAM_API_URL: {}
+  DTAP_TELEGRAM_API_ADDR: {}
+  DTAP_TELEGRAM_API_PORT: {}
+tags: [dtap, telegram, http, service]
+capabilities: [dtap_request, telegram_remote_read, telegram_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.telegram --health
+examples:
+  - dtap.telegram --health
+  - dtap.telegram --path /

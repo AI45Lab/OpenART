@@ -1,0 +1,27 @@
+name: dtap.databricks
+service: databricks
+service_description: DTAP Databricks service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP Databricks service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_DATABRICKS_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_DATABRICKS_HEALTH_URL: {}
+  DTAP_DATABRICKS_PG_URL: {}
+  DTAP_DATABRICKS_PG_ADDR: {}
+  DTAP_DATABRICKS_PG_PORT: {}
+  DTAP_DATABRICKS_ADMIN_URL: {}
+  DTAP_DATABRICKS_ADMIN_ADDR: {}
+  DTAP_DATABRICKS_ADMIN_PORT: {}
+tags: [dtap, databricks, http, service]
+capabilities: [dtap_request, databricks_remote_read, databricks_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.databricks --health
+examples:
+  - dtap.databricks --health
+  - dtap.databricks --path /

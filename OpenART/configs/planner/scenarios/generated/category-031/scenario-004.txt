@@ -1,0 +1,2 @@
+Category: 非营利 / 公益组织场景
+Scenario: 安排志愿者活动时间

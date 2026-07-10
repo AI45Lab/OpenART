@@ -1,0 +1,2 @@
+Category: 企业知识库场景
+Scenario: 整理新员工 onboarding 材料

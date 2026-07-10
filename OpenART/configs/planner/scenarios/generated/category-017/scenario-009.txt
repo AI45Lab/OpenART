@@ -1,0 +1,2 @@
+Category: 采购 / 供应链场景
+Scenario: 更新供应商联系人

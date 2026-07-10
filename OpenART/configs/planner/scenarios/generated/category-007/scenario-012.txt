@@ -1,0 +1,2 @@
+Category: 数据库 / BI 场景
+Scenario: 查询某个地区的销售排行

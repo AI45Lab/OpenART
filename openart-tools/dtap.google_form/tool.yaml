@@ -1,0 +1,27 @@
+name: dtap.google_form
+service: google-form
+service_description: DTAP Google Form service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP Google Form service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_GOOGLE_FORM_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_GOOGLE_FORM_HEALTH_URL: {}
+  DTAP_GOOGLE_FORM_API_URL: {}
+  DTAP_GOOGLE_FORM_API_ADDR: {}
+  DTAP_GOOGLE_FORM_API_PORT: {}
+  DTAP_GOOGLE_FORM_UI_URL: {}
+  DTAP_GOOGLE_FORM_UI_ADDR: {}
+  DTAP_GOOGLE_FORM_UI_PORT: {}
+tags: [dtap, google-form, google_form, http, service]
+capabilities: [dtap_request, google_form_remote_read, google_form_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.google_form --health
+examples:
+  - dtap.google_form --health
+  - dtap.google_form --path /

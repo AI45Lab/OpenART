@@ -73,10 +73,42 @@ def test_load_env_backfills_target_and_judge_settings(monkeypatch, tmp_path: Pat
     assert commands.os.environ["TARGET_MODEL"] == "demo-model"
     assert commands.os.environ["JUDGE_API_KEY"] == "openai-secret"
     assert commands.os.environ["JUDGE_BASE_URL"] == "http://llm.internal/v1"
-    assert commands.os.environ["JUDGE_MODEL"] == "demo-model"
+    assert commands.os.environ["JUDGE_MODEL"] == "deepseek-v4-pro"
     assert commands.os.environ["ATTACK_API_KEY"] == "openai-secret"
     assert commands.os.environ["ATTACK_BASE_URL"] == "http://llm.internal/v1"
     assert commands.os.environ["ATTACK_MODEL"] == "demo-model"
+
+
+def test_load_env_preserves_explicit_judge_model(monkeypatch, tmp_path: Path) -> None:
+    env_path = tmp_path / ".env"
+    env_path.write_text(
+        'OPENAI_KEY="openai-secret"\n'
+        'OPENAI_BASE_URL="http://llm.internal/v1"\n'
+        'OPENAI_MODEL="demo-model"\n'
+        'JUDGE_MODEL="custom-judge"\n',
+        encoding="utf-8",
+    )
+
+    for key in (
+        "OPENAI_KEY",
+        "OPENAI_API_KEY",
+        "OPENAI_BASE_URL",
+        "OPENAI_MODEL",
+        "TARGET_API_KEY",
+        "TARGET_BASE_URL",
+        "TARGET_MODEL",
+        "JUDGE_API_KEY",
+        "JUDGE_BASE_URL",
+        "JUDGE_MODEL",
+    ):
+        monkeypatch.delenv(key, raising=False)
+
+    monkeypatch.setattr(commands, "_env_file_candidates", lambda: [env_path])
+    monkeypatch.setattr(commands, "_ENV_BOOTSTRAPPED", False)
+
+    commands.load_env()
+
+    assert commands.os.environ["JUDGE_MODEL"] == "custom-judge"
 
 
 @pytest.mark.parametrize(
@@ -653,3 +685,10 @@ def test_batch_runner_writes_metrics_to_plan_and_summary(tmp_path: Path, monkeyp
         assert payload["batch_metrics"] == metrics
         for key, value in metrics.items():
             assert payload[key] == value
+
+
+def test_target_responses_router_upstream_base_url_normalizes_openai_root() -> None:
+    assert batch_runner._target_responses_router_upstream_base_url("http://llm.internal") == "http://llm.internal/v1"
+    assert batch_runner._target_responses_router_upstream_base_url("http://llm.internal/") == "http://llm.internal/v1"
+    assert batch_runner._target_responses_router_upstream_base_url("http://llm.internal/v1") == "http://llm.internal/v1"
+    assert batch_runner._target_responses_router_upstream_base_url("") == ""

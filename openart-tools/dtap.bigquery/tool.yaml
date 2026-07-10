@@ -1,0 +1,26 @@
+name: dtap.bigquery
+service: bigquery
+service_description: DTAP BigQuery service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP BigQuery service and run TCP health checks.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_BIGQUERY_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_BIGQUERY_API_URL: {}
+  DTAP_BIGQUERY_API_ADDR: {}
+  DTAP_BIGQUERY_API_PORT: {}
+  DTAP_BIGQUERY_GRPC_URL: {}
+  DTAP_BIGQUERY_GRPC_ADDR: {}
+  DTAP_BIGQUERY_GRPC_PORT: {}
+tags: [dtap, bigquery, http, tcp, service]
+capabilities: [dtap_request, bigquery_remote_read, bigquery_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.bigquery --health
+examples:
+  - dtap.bigquery --health
+  - dtap.bigquery --path /

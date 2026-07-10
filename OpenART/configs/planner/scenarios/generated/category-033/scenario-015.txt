@@ -1,0 +1,2 @@
+Category: 智能家居 / IoT 场景
+Scenario: 查看家庭成员设备权限

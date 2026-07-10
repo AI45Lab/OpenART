@@ -1,0 +1,58 @@
+target:
+  framework: prompt_cli
+  surface_family: reasonix
+  runner_image: openart/reasonix:latest
+  launch_cmd: reasonix run --no-config --no-proxy --model ${TARGET_MODEL}
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: ""
+    output_event_name: reasonix_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: env_only
+      env_names:
+        api_key: DEEPSEEK_API_KEY
+        base_url: DEEPSEEK_BASE_URL
+        model: DEEPSEEK_MODEL
+      env:
+        DEEPSEEK_MODEL: ${model.name}
+        REASONIX_LANG: en
+  attack_surfaces:
+  - vector: reasonix_md
+    kind: memory
+    path_template: REASONIX.md
+    injection_mode: append
+    description: Committable Reasonix project memory pinned into future sessions.
+  - vector: reasonix_project_skill
+    kind: skill
+    path_template: .reasonix/skills/<skill-name>.md or .reasonix/skills/<skill-name>/SKILL.md
+    description: Project-level Reasonix skill loaded from the workspace.
+  - vector: reasonix_global_skill
+    kind: skill
+    path_template: HOME/.reasonix/skills/<skill-name>.md or HOME/.reasonix/skills/<skill-name>/SKILL.md
+    description: Global Reasonix skill materialized into the runner HOME overlay.
+  - vector: reasonix_global_memory
+    kind: memory
+    path_template: HOME/.reasonix/memory/global/<memory-name>.md
+    injection_mode: append
+    description: Global Reasonix memory materialized into the runner HOME overlay.
+  - vector: reasonix_global_reasonix_md
+    kind: memory
+    path_template: HOME/.reasonix/REASONIX.md
+    injection_mode: append
+    description: Global Reasonix markdown memory pinned into sessions.
+  - vector: reasonix_project_settings
+    kind: configuration
+    path_template: .reasonix/settings.json
+    injection_mode: replace
+    description: Project-level Reasonix hook settings. Keep disabled unless testing hook policy behavior.
+  - vector: reasonix_global_settings
+    kind: configuration
+    path_template: HOME/.reasonix/settings.json
+    injection_mode: replace
+    description: Global Reasonix hook settings materialized into the runner HOME overlay.

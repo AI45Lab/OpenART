@@ -114,9 +114,7 @@ def load_env() -> None:
     )
     judge_model = (
         os.environ.get("JUDGE_MODEL")
-        or os.environ.get("OPENAI_MODEL")
-        or os.environ.get("DEFAULT_MODEL")
-        or ""
+        or "deepseek-v4-pro"
     )
     attack_api_key = (
         os.environ.get("ATTACK_API_KEY")

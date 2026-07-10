@@ -1,0 +1,2 @@
+Category: CRM / 客服场景
+Scenario: 查询某个客户的基本资料

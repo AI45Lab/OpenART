@@ -1,0 +1,30 @@
+name: dtap.googledocs
+service: googledocs
+service_description: DTAP Google Docs service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP Google Docs service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_GOOGLEDOCS_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_GOOGLEDOCS_HEALTH_URL: {}
+  DTAP_GOOGLEDOCS_PG_URL: {}
+  DTAP_GOOGLEDOCS_PG_ADDR: {}
+  DTAP_GOOGLEDOCS_PG_PORT: {}
+  DTAP_GOOGLEDOCS_API_URL: {}
+  DTAP_GOOGLEDOCS_API_ADDR: {}
+  DTAP_GOOGLEDOCS_API_PORT: {}
+  DTAP_GOOGLEDOCS_FRONTEND_URL: {}
+  DTAP_GOOGLEDOCS_FRONTEND_ADDR: {}
+  DTAP_GOOGLEDOCS_FRONTEND_PORT: {}
+tags: [dtap, googledocs, google-docs, http, service]
+capabilities: [dtap_request, googledocs_remote_read, googledocs_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.googledocs --health
+examples:
+  - dtap.googledocs --health
+  - dtap.googledocs --path /

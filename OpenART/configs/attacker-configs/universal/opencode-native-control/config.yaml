@@ -9,9 +9,32 @@ attacker:
   vector_permissions:
     - workspace_files
     - claude_md
+    - agents_md
     - opencode_skill
     - opencode_command
     - claude_skill
+    - aider_ignore
+    - conventions_md
+    - aider_chat_history
+    - aider_load_file
+    - goosehints
+    - goose_user_hints
+    - agents_skill
+    - agents_user_skill
+    - goose_slash_command
+    - soul_md
+    - user_md
+    - identity_md
+    - tools_md
+    - heartbeat_md
+    - boot_md
+    - bootstrap_md
+    - memory_md
+    - daily_memory
+    - workspace_skill
+    - managed_skill
+    - openclaw_config
+    - session_history
   env_from:
     OPENAI_API_KEY: OPENAI_API_KEY
     OPENAI_BASE_URL: OPENAI_BASE_URL

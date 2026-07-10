@@ -1,0 +1,67 @@
+target:
+  framework: prompt_cli
+  surface_family: continue_cli
+  runner_image: openart/continue-cli:latest
+  launch_cmd: cn -p --silent --config /tmp/openart/runners/target/home/.continue/config.yaml
+  config_overlay:
+    prompt_transport: argv
+    prompt_flag: ""
+    output_event_name: continue_cli_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: OPENAI_API_KEY
+        base_url: OPENAI_BASE_URL
+        model: OPENAI_MODEL
+      env:
+        CONTINUE_GLOBAL_DIR: ${env.HOME}/.continue
+        CONTINUE_CLI_DISABLE_COMMIT_SIGNATURE: "1"
+        CONTINUE_CLI_ENABLE_TELEMETRY: "0"
+        CONTINUE_METRICS_ENABLED: "0"
+        FORCE_NO_TTY: "true"
+        OPENART_MODEL_CONFIG_EXPAND_ENV_REFS: "1"
+      config_template:
+        source: repo:configs/target-model-json/continue-cli.openai-compatible.yaml
+        destination: HOME/.continue/config.yaml
+        format: yaml
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Continue CLI agent instruction file discovered from the workspace root.
+  - vector: agent_md
+    kind: instruction
+    path_template: AGENT.md
+    description: Alternate Continue CLI agent instruction file discovered from the workspace root.
+  - vector: claude_md
+    kind: instruction
+    path_template: CLAUDE.md
+    description: Claude-compatible instruction file that Continue CLI also reads.
+  - vector: codex_md
+    kind: instruction
+    path_template: CODEX.md
+    description: Codex-compatible instruction file that Continue CLI also reads.
+  - vector: continue_rule
+    kind: rule
+    path_template: .continue/rules/<rule-name>.md
+    description: Project-level Continue markdown rule discovered from .continue/rules/.
+  - vector: continue_user_rule
+    kind: rule
+    path_template: HOME/.continue/rules/<rule-name>.md
+    description: User-level Continue markdown rule materialized into the runner HOME overlay.
+  - vector: continue_permissions
+    kind: configuration
+    path_template: HOME/.continue/permissions.yaml
+    injection_mode: replace
+    description: Continue CLI tool permission policy. Keep disabled unless testing tool-approval behavior.
+  - vector: continue_session
+    kind: memory
+    path_template: HOME/.continue/sessions/<session-id>.json
+    injection_mode: append
+    description: Continue CLI saved session transcript. APPEND mode seeds plausible prior session state.

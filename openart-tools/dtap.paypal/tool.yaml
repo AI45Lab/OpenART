@@ -1,0 +1,30 @@
+name: dtap.paypal
+service: paypal
+service_description: DTAP PayPal service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP PayPal service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_PAYPAL_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_PAYPAL_HEALTH_URL: {}
+  DTAP_PAYPAL_PG_URL: {}
+  DTAP_PAYPAL_PG_ADDR: {}
+  DTAP_PAYPAL_PG_PORT: {}
+  DTAP_PAYPAL_API_URL: {}
+  DTAP_PAYPAL_API_ADDR: {}
+  DTAP_PAYPAL_API_PORT: {}
+  DTAP_PAYPAL_UI_URL: {}
+  DTAP_PAYPAL_UI_ADDR: {}
+  DTAP_PAYPAL_UI_PORT: {}
+tags: [dtap, paypal, http, service]
+capabilities: [dtap_request, paypal_remote_read, paypal_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.paypal --health
+examples:
+  - dtap.paypal --health
+  - dtap.paypal --path /

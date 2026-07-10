@@ -64,6 +64,8 @@ class DownloadState:
 @dataclass(slots=True)
 class ValidationReport:
     warnings: list[str] = field(default_factory=list)
+    materialization_mode: str = "github_guide_only"
+    source_files: list[str] = field(default_factory=list)
 
 
 def _short(value: Any, *, limit: int = 500) -> str:
@@ -80,6 +82,21 @@ def _loads(value: Any, fallback: Any) -> Any:
         return json.loads(value)
     except (TypeError, json.JSONDecodeError):
         return fallback
+
+
+def _string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    raw_items = value if isinstance(value, list) else [value]
+    result: list[str] = []
+    seen: set[str] = set()
+    for item in raw_items:
+        text = str(item or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        result.append(text)
+    return result
 
 
 def _parse_ids(values: Iterable[str]) -> list[str]:
@@ -132,13 +149,18 @@ def _resolve_row(conn: sqlite3.Connection, identifier: str) -> sqlite3.Row | Non
 
 
 def _row_payload(row: sqlite3.Row) -> dict[str, Any]:
-    return {
+    columns = set(row.keys())
+    payload = {
         "tool_id": row["tool_id"],
         "virtual_tool_name": row["virtual_tool_name"],
         "description": row["description"],
         "source_url": row["source_url"],
         "raw": _loads(row["raw"], {}),
     }
+    for optional in ("tags", "capabilities"):
+        if optional in columns:
+            payload[optional] = _loads(row[optional], [])
+    return payload
 
 
 def _source_url(record: Mapping[str, Any]) -> str:
@@ -309,7 +331,20 @@ def download_github_selection(
     max_total_bytes: int = DEFAULT_MAX_TOTAL_BYTES,
 ) -> None:
     state = DownloadState(max_files=max_files, max_total_bytes=max_total_bytes)
-    _download_item(selection, selection.path, destination, state, selected_is_file=selection.kind == "blob")
+    try:
+        _download_item(selection, selection.path, destination, state, selected_is_file=selection.kind == "blob")
+    except ValueError as exc:
+        if selection.kind != "blob" or "resolved to a directory" not in str(exc):
+            raise
+        retry = GitHubSelection(
+            owner=selection.owner,
+            repo=selection.repo,
+            kind="tree",
+            ref=selection.ref,
+            path=selection.path,
+        )
+        state = DownloadState(max_files=max_files, max_total_bytes=max_total_bytes)
+        _download_item(retry, retry.path, destination, state, selected_is_file=False)
     if state.file_count == 0:
         raise ValueError("downloaded folder is empty")
 
@@ -404,6 +439,183 @@ def relocate_top_level_tool_yaml(tool_dir: Path) -> None:
     source.rename(target)
 
 
+def _runner_script() -> str:
+    return r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import os
+from pathlib import Path
+import stat
+import subprocess
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / "scripts"
+RUNNER_NAME = Path(__file__).name
+
+
+def _available_scripts() -> list[Path]:
+    if not SCRIPTS.is_dir():
+        return []
+    result: list[Path] = []
+    for path in sorted(SCRIPTS.rglob("*")):
+        if not path.is_file() or path.name == RUNNER_NAME:
+            continue
+        result.append(path)
+    return result
+
+
+def _resolve_script(name: str) -> Path:
+    text = str(name or "").strip()
+    if not text:
+        raise SystemExit("script name is required")
+    rel = Path(text)
+    if rel.is_absolute() or ".." in rel.parts:
+        raise SystemExit(f"unsafe script path: {text}")
+    candidate = (ROOT / rel) if rel.parts and rel.parts[0] == "scripts" else (SCRIPTS / rel)
+    candidate = candidate.resolve()
+    scripts_root = SCRIPTS.resolve()
+    try:
+        candidate.relative_to(scripts_root)
+    except ValueError as exc:
+        raise SystemExit(f"script path escapes scripts/: {text}") from exc
+    if candidate.name == RUNNER_NAME or not candidate.is_file():
+        raise SystemExit(f"script not found: {text}")
+    return candidate
+
+
+def _print_list() -> int:
+    for path in _available_scripts():
+        print(path.relative_to(ROOT).as_posix())
+    return 0
+
+
+def _inspect(name: str) -> int:
+    path = _resolve_script(name)
+    print(path.relative_to(ROOT).as_posix())
+    print(f"size_bytes={path.stat().st_size}")
+    mode = path.stat().st_mode
+    print(f"executable={bool(mode & stat.S_IXUSR)}")
+    return 0
+
+
+def _run(name: str, args: list[str]) -> int:
+    path = _resolve_script(name)
+    suffix = path.suffix.lower()
+    if suffix == ".py":
+        command = [sys.executable, str(path), *args]
+    elif suffix in {".sh", ".bash"}:
+        command = ["/bin/bash", str(path), *args]
+    elif os.access(path, os.X_OK):
+        command = [str(path), *args]
+    else:
+        raise SystemExit(f"script is not directly runnable; use a .py/.sh script or mark executable: {path.relative_to(ROOT).as_posix()}")
+    completed = subprocess.run(command, cwd=str(ROOT))
+    return int(completed.returncode)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Inspect or run upstream scripts bundled with this OpenART registry skill.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers.add_parser("list", help="List bundled upstream scripts.")
+    inspect_parser = subparsers.add_parser("inspect", help="Print metadata for one bundled script.")
+    inspect_parser.add_argument("script")
+    run_parser = subparsers.add_parser("run", help="Run one bundled script by safe relative name.")
+    run_parser.add_argument("script")
+    run_parser.add_argument("script_args", nargs=argparse.REMAINDER)
+    args = parser.parse_args(argv)
+    if args.command == "list":
+        return _print_list()
+    if args.command == "inspect":
+        return _inspect(args.script)
+    if args.command == "run":
+        return _run(args.script, args.script_args)
+    raise SystemExit(f"unknown command: {args.command}")
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+'''
+
+
+def _script_files(tool_dir: Path) -> list[str]:
+    scripts_dir = tool_dir / "scripts"
+    if not scripts_dir.is_dir():
+        return []
+    result: list[str] = []
+    for path in sorted(scripts_dir.rglob("*")):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(tool_dir).as_posix()
+        if rel == "scripts/openart_skill_runner.py":
+            continue
+        result.append(_safe_rel_path(rel, field="script source file"))
+    return result
+
+
+def _write_openart_runner_tool_yaml(
+    tool_dir: Path,
+    *,
+    tool_name: str,
+    registry_description: str,
+    record: Mapping[str, Any] | None = None,
+) -> list[str]:
+    scripts_dir = tool_dir / "scripts"
+    scripts_dir.mkdir(parents=True, exist_ok=True)
+    wrapper_rel = "scripts/openart_skill_runner.py"
+    wrapper_path = tool_dir / wrapper_rel
+    if wrapper_path.exists():
+        references = tool_dir / "references"
+        references.mkdir(parents=True, exist_ok=True)
+        target = references / "original_openart_skill_runner.py"
+        if target.exists():
+            raise ValueError("references/original_openart_skill_runner.py already exists")
+        wrapper_path.rename(target)
+    wrapper_path.write_text(_runner_script(), encoding="utf-8")
+    wrapper_path.chmod(0o755)
+
+    source_files = [wrapper_rel, *_script_files(tool_dir)]
+    description = _short(registry_description, limit=500) or f"GitHub-backed OpenART skill {tool_name}."
+    payload: dict[str, Any] = {
+        "name": tool_name,
+        "description": description,
+        "command": "/opt/openart-venv/bin/python3",
+        "args": [wrapper_rel],
+        "source_files": source_files,
+        "side_effects": ["local_process_execution"],
+        "usage": f"{tool_name} list | inspect <script> | run <script> -- <args>",
+        "examples": [
+            f"{tool_name} list",
+            f"{tool_name} inspect scripts/example.py",
+            f"{tool_name} run scripts/example.py -- --help",
+        ],
+    }
+    if record is not None:
+        tags = _string_list(record.get("tags"))
+        capabilities = _string_list(record.get("capabilities"))
+        if tags:
+            payload["tags"] = tags
+        if capabilities:
+            payload["capabilities"] = capabilities
+    (tool_dir / "tool.yaml").write_text(
+        yaml.safe_dump(payload, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+    )
+    return source_files
+
+
+def _prune_guide_only_tool_dir(tool_dir: Path) -> None:
+    for child in list(tool_dir.iterdir()):
+        if child.name in {"SKILL.md", "references"}:
+            continue
+        if child.is_dir():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
+
+
 def _validate_downloaded_paths(tool_dir: Path) -> None:
     files = [path for path in tool_dir.rglob("*") if path.is_file()]
     if not files:
@@ -448,10 +660,13 @@ def validate_installed_tool(tool_store_root: Path, tool_name: str) -> Validation
         report.warnings.append("description is longer than 15 non-empty lines")
     if not (tool_dir / "references").is_dir():
         report.warnings.append("missing references/ directory")
-    if not (tool_dir / "scripts").is_dir():
-        report.warnings.append("missing scripts/ directory")
 
     manifest = load_tool_store_manifest(tool_store_root, selected_names={tool_name})
+    manifest_tools = [
+        item
+        for item in manifest.get("tools", [])
+        if isinstance(item, Mapping) and str(item.get("name") or "").strip() == tool_name
+    ]
     names = {
         str(item.get("name") or "").strip()
         for item in manifest.get("tools", [])
@@ -459,13 +674,41 @@ def validate_installed_tool(tool_store_root: Path, tool_name: str) -> Validation
     }
     if tool_name not in names:
         raise ValueError("load_tool_store_manifest did not include installed tool")
+    if manifest_tools:
+        tool = manifest_tools[0]
+        config = tool.get("config") if isinstance(tool.get("config"), Mapping) else {}
+        store_config = config.get("tool_store") if isinstance(config.get("tool_store"), Mapping) else {}
+        guide_only = bool(store_config.get("guide_only"))
+        report.materialization_mode = "github_guide_only" if guide_only else "github_script_tool"
+        report.source_files = _string_list(store_config.get("source_files"))
+        if not guide_only:
+            if "scripts/openart_skill_runner.py" not in report.source_files:
+                raise ValueError("script-backed GitHub skill is missing generated OpenART runner in source_files")
+            args = _string_list(tool.get("args"))
+            if args[:1] != ["scripts/openart_skill_runner.py"]:
+                raise ValueError("script-backed GitHub skill command must invoke scripts/openart_skill_runner.py")
     return report
 
 
-def prepare_downloaded_tool(tool_dir: Path, *, tool_name: str, registry_description: str) -> ValidationReport:
+def prepare_downloaded_tool(
+    tool_dir: Path,
+    *,
+    tool_name: str,
+    registry_description: str,
+    record: Mapping[str, Any] | None = None,
+) -> ValidationReport:
     _validate_downloaded_paths(tool_dir)
     relocate_top_level_tool_yaml(tool_dir)
     normalize_skill_markdown(tool_dir, tool_name=tool_name, registry_description=registry_description)
+    if (tool_dir / "scripts").is_dir():
+        _write_openart_runner_tool_yaml(
+            tool_dir,
+            tool_name=tool_name,
+            registry_description=registry_description,
+            record=record,
+        )
+    else:
+        _prune_guide_only_tool_dir(tool_dir)
     _validate_downloaded_paths(tool_dir)
     return validate_installed_tool(tool_dir.parent, tool_name)
 
@@ -538,6 +781,7 @@ def _install_one(
             temp_tool,
             tool_name=tool_name,
             registry_description=str(record.get("description") or ""),
+            record=record,
         )
 
         backup_path = None
@@ -554,6 +798,8 @@ def _install_one(
             "status": "created",
             "path": str(existing),
             "warnings": list(report.warnings),
+            "materialization_mode": report.materialization_mode,
+            "source_files": list(report.source_files),
         }
         if backup_path is not None:
             result["backup"] = str(backup_path)
@@ -564,6 +810,66 @@ def _install_one(
         return {"id": identifier, "tool_name": tool_name, "status": "failed", "reason": _short(exc)}
     finally:
         shutil.rmtree(temp_parent, ignore_errors=True)
+
+
+def _group_install_results(tool_store_root: Path, results: list[dict[str, Any]]) -> dict[str, Any]:
+    grouped: dict[str, list[dict[str, Any]]] = {"created": [], "reused": [], "unsupported": [], "failed": []}
+    for item in results:
+        status = str(item.get("status") or "")
+        if status in grouped:
+            grouped[status].append(item)
+        else:
+            grouped["failed"].append({**item, "status": "failed", "reason": f"unknown install status: {status}"})
+    return {
+        "tool_store": str(tool_store_root),
+        "created": grouped["created"],
+        "reused": grouped["reused"],
+        "unsupported": grouped["unsupported"],
+        "failed": grouped["failed"],
+        "results": results,
+    }
+
+
+def install_registry_record(
+    record: Mapping[str, Any],
+    tool_store_root: Path,
+    *,
+    max_files: int = DEFAULT_MAX_FILES,
+    max_total_bytes: int = DEFAULT_MAX_TOTAL_BYTES,
+    overwrite: bool = False,
+    replace_invalid: bool = False,
+) -> dict[str, Any]:
+    return _install_one(
+        record,
+        tool_store_root=tool_store_root,
+        max_files=max_files,
+        max_total_bytes=max_total_bytes,
+        overwrite=overwrite,
+        replace_invalid=replace_invalid,
+    )
+
+
+def install_registry_records(
+    records: Iterable[Mapping[str, Any]],
+    tool_store_root: Path,
+    *,
+    max_files: int = DEFAULT_MAX_FILES,
+    max_total_bytes: int = DEFAULT_MAX_TOTAL_BYTES,
+    overwrite: bool = False,
+    replace_invalid: bool = False,
+) -> dict[str, Any]:
+    results = [
+        install_registry_record(
+            record,
+            tool_store_root,
+            max_files=max_files,
+            max_total_bytes=max_total_bytes,
+            overwrite=overwrite,
+            replace_invalid=replace_invalid,
+        )
+        for record in records
+    ]
+    return _group_install_results(tool_store_root, results)
 
 
 def install_registry_tools(
@@ -598,21 +904,7 @@ def install_registry_tools(
                 )
             )
 
-    grouped: dict[str, list[dict[str, Any]]] = {"created": [], "reused": [], "unsupported": [], "failed": []}
-    for item in results:
-        status = str(item.get("status") or "")
-        if status in grouped:
-            grouped[status].append(item)
-        else:
-            grouped["failed"].append({**item, "status": "failed", "reason": f"unknown install status: {status}"})
-    return {
-        "tool_store": str(tool_store_root),
-        "created": grouped["created"],
-        "reused": grouped["reused"],
-        "unsupported": grouped["unsupported"],
-        "failed": grouped["failed"],
-        "results": results,
-    }
+    return _group_install_results(tool_store_root, results)
 
 
 def main(argv: list[str] | None = None) -> int:

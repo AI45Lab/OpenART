@@ -62,6 +62,32 @@ MIN_PUBLIC_WORKSPACE_FILES = 6
 MIN_PRIVATE_WORKSPACE_FILES = 2
 MIN_SERVICE_STYLE_ARTIFACTS = 1
 
+BINARY_STYLE_FILE_EXTENSIONS = {
+    ".avif",
+    ".bin",
+    ".bmp",
+    ".db",
+    ".doc",
+    ".docx",
+    ".gif",
+    ".jpeg",
+    ".jpg",
+    ".odp",
+    ".ods",
+    ".odt",
+    ".parquet",
+    ".pdf",
+    ".png",
+    ".ppt",
+    ".pptx",
+    ".sqlite",
+    ".sqlite3",
+    ".webp",
+    ".xls",
+    ".xlsx",
+    ".zip",
+}
+
 PRIVATE_WORKSPACE_PATH_TERMS = (
     "private",
     "confidential",
@@ -1007,10 +1033,12 @@ def _validate_tool_count_and_disabled(
     tool_pool: Mapping[str, Any],
     graph: Mapping[str, Any],
     tool_count: int | None,
+    complexity_spec: PlannerComplexitySpec | None,
     errors: list[str],
 ) -> dict[str, Any]:
     items = _pool_items_by_name(tool_pool)
-    safe_tool_names = _node_tool_names(_workflow_nodes(graph, "safe_workflow"))
+    safe_nodes = _workflow_nodes(graph, "safe_workflow")
+    safe_tool_names = _node_tool_names(safe_nodes)
     unsafe_tool_names = _node_tool_names(_workflow_nodes(graph, "unsafe_workflow"))
     all_tool_names = safe_tool_names + unsafe_tool_names
     disabled_used: list[str] = []
@@ -1029,16 +1057,34 @@ def _validate_tool_count_and_disabled(
         errors.append(f"tool_use_graph uses disabled or unavailable tools: {sorted(set(disabled_used))}")
 
     counted = sorted({name for name in safe_tool_names if name in items and _is_external_enabled(items[name])})
+    external_call_nodes = [
+        str(node.get("id", "") or "").strip() or f"safe_workflow[{index}]"
+        for index, node in enumerate(safe_nodes)
+        if (name := str(node.get("tool", "") or "").strip()) in items and _is_external_enabled(items[name])
+    ]
     if tool_count is not None and len(counted) != tool_count:
         errors.append(
             "tool_use_graph.safe_workflow uses "
             f"{len(counted)} distinct enabled external tools; expected exactly {tool_count}: {counted}"
+        )
+    if (
+        complexity_spec is not None
+        and complexity_spec.min_external_tool_call_nodes is not None
+        and len(external_call_nodes) < complexity_spec.min_external_tool_call_nodes
+    ):
+        errors.append(
+            "tool_use_graph.safe_workflow has "
+            f"{len(external_call_nodes)} enabled external tool-call nodes; "
+            f"{complexity_spec.profile_name} requires at least "
+            f"{complexity_spec.min_external_tool_call_nodes}"
         )
 
     return {
         "safe_tool_names": safe_tool_names,
         "unsafe_tool_names": unsafe_tool_names,
         "counted_external_safe_tools": counted,
+        "external_safe_tool_call_node_count": len(external_call_nodes),
+        "external_safe_tool_call_nodes": external_call_nodes[:50],
         "requested_tool_count": tool_count,
     }
 
@@ -1188,6 +1234,12 @@ def _validate_graph_complexity(
                 f"{len(safe_nodes)}; {complexity_spec.profile_name} requires at least "
                 f"{complexity_spec.min_safe_workflow_nodes}"
             )
+        if complexity_spec.max_safe_workflow_nodes is not None and len(safe_nodes) > complexity_spec.max_safe_workflow_nodes:
+            errors.append(
+                "safe_workflow node count is "
+                f"{len(safe_nodes)}; {complexity_spec.profile_name} allows at most "
+                f"{complexity_spec.max_safe_workflow_nodes}"
+            )
         if depth < complexity_spec.min_dependency_depth:
             errors.append(
                 "safe_workflow dependency depth is "
@@ -1212,6 +1264,8 @@ def _validate_graph_complexity(
         "safe_workflow_stage_count": len(stages),
         "safe_workflow_stages": stages,
         "safe_workflow_node_count": len(safe_nodes),
+        "target_safe_workflow_node_count": complexity_spec.target_safe_workflow_nodes if complexity_spec else None,
+        "max_safe_workflow_node_count": complexity_spec.max_safe_workflow_nodes if complexity_spec else None,
         "safe_workflow_dependency_depth": depth,
         "safe_workflow_parallel_branch_count": branch_count,
         "safe_workflow_publish_nodes": publish_nodes,
@@ -1406,6 +1460,8 @@ def _validate_workspace_complexity(
     }
     risk_classes = _list_of_mappings((scenario_model or {}).get("risk_resource_classes")) if scenario_model else []
     risk_type_count = len(risk_classes) if risk_classes else len(risk_roots)
+    configured_binary_extensions = set(complexity_spec.required_binary_file_extensions) if complexity_spec else set()
+    binary_extensions = sorted(all_extensions & (BINARY_STYLE_FILE_EXTENSIONS | configured_binary_extensions))
 
     if complexity_spec is not None:
         if len(public_files) < complexity_spec.min_approved_files:
@@ -1431,6 +1487,19 @@ def _validate_workspace_complexity(
         ]
         if missing_required_extensions:
             errors.append(f"workspace required file extensions are missing: {missing_required_extensions}")
+        missing_required_binary_extensions = [
+            extension for extension in complexity_spec.required_binary_file_extensions if extension not in all_extensions
+        ]
+        if missing_required_binary_extensions:
+            errors.append(
+                f"workspace required binary file extensions are missing: {missing_required_binary_extensions}"
+            )
+        if complexity_spec.min_binary_formats is not None and len(binary_extensions) < complexity_spec.min_binary_formats:
+            errors.append(
+                "workspace binary/non-text file format count is "
+                f"{len(binary_extensions)}; {complexity_spec.profile_name} requires at least "
+                f"{complexity_spec.min_binary_formats}"
+            )
         if risk_type_count < complexity_spec.min_risk_types:
             errors.append(
                 "workspace risk type count is "
@@ -1455,6 +1524,9 @@ def _validate_workspace_complexity(
         "public_extensions": public_extensions,
         "all_extensions": sorted(all_extensions),
         "required_file_extensions": list(complexity_spec.required_file_extensions) if complexity_spec else [],
+        "binary_extensions": binary_extensions,
+        "required_binary_file_extensions": list(complexity_spec.required_binary_file_extensions) if complexity_spec else [],
+        "min_binary_formats": complexity_spec.min_binary_formats if complexity_spec else None,
         "service_artifact_count": len(service_artifacts),
         "service_artifacts": service_artifacts[:20],
         "private_files": private_files[:20],
@@ -1779,7 +1851,7 @@ def validate_generated_bundle(
         metadata["scenario_model"] = scenario_result.metadata
         errors.extend(f"scenario_model: {error}" for error in scenario_result.errors)
     if graph:
-        metadata.update(_validate_tool_count_and_disabled(tool_pool, graph, tool_count, errors))
+        metadata.update(_validate_tool_count_and_disabled(tool_pool, graph, tool_count, complexity_spec, errors))
         metadata["graph_complexity"] = _validate_graph_complexity(graph, complexity_spec, errors)
     if (bundle_root / "workspace").is_dir():
         metadata["workspace_complexity"] = _validate_workspace_complexity(

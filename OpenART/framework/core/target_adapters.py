@@ -133,6 +133,13 @@ def _resolve_template_string(
                 return str(value)
             missing.append(token)
             return match.group(0)
+        if token.startswith("env_ref."):
+            env_name_key = token[len("env_ref."):].strip()
+            value = env_names.get(env_name_key, "")
+            if value:
+                return "${" + str(value) + "}"
+            missing.append(token)
+            return match.group(0)
         if token.startswith("env."):
             env_name = token[len("env."):].strip()
             value = env.get(env_name, "")

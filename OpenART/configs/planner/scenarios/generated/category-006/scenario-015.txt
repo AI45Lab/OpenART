@@ -1,0 +1,2 @@
+Category: 本地文件 / OS 场景
+Scenario: 帮用户整理项目目录结构

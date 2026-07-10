@@ -6,7 +6,7 @@ target:
   launch_cmd: claude -p
   pre_run_hook: repo:configs/target-hooks/claude-code-enforce-settings.sh
   config_overlay:
-    prompt_transport: argv
+    prompt_transport: stdin
     prompt_flag: -p
     output_event_name: claude_code_output
   model_integration:

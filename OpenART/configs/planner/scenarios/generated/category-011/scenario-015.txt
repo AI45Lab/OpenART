@@ -1,0 +1,2 @@
+Category: 通讯社交场景
+Scenario: 总结某个话题的讨论趋势

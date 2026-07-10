@@ -1,0 +1,2 @@
+Category: 企业知识库场景
+Scenario: 查找某个产品功能的内部说明

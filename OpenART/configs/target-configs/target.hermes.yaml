@@ -4,7 +4,7 @@ target:
   runner_image: openart/hermes:latest
   launch_cmd: hermes -z
   config_overlay:
-    prompt_transport: argv
+    prompt_transport: file_ref_argv
     prompt_flag: -z
   model_integration:
     binding:

@@ -1,0 +1,2 @@
+Category: 本地文件 / OS 场景
+Scenario: 解压用户提供的压缩包

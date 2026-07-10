@@ -75,7 +75,7 @@ def write_json_artifact(
     ensure_ascii: bool = False,
     indent: int = 2,
 ) -> str:
-    content = json.dumps(payload, ensure_ascii=ensure_ascii, indent=indent) + "\n"
+    content = json.dumps(payload, ensure_ascii=ensure_ascii, indent=indent, default=str) + "\n"
     return write_text_artifact(path, content)
 
 

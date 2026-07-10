@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 from framework.attackers.models import AttackerSpec
-from framework.components.evaluators import DeterministicEvaluator
+from framework.components.evaluators import DeterministicEvaluator, LLMJudgeEvaluator
+from framework.core.orchestrator import Orchestrator
 from framework.core.factory import DEFAULT_COMMAND_TEMPLATES, DEFAULT_RUNNER_IMAGES, MIN_TARGET_TIMEOUT_SECONDS, OrchestratorFactory
+from framework.core.workspace import WorkspaceManager
 from framework.models.task import TaskBundleSpec
 
 
@@ -85,6 +88,96 @@ def test_factory_runtime_env_uses_managed_tool_env_and_proxy(monkeypatch, tmp_pa
 
     assert runtime_env["OWNCLOUD_URL"] == "http://owncloud.example:8092"
     assert runtime_env["NO_PROXY"] == "example.internal"
+
+
+def test_factory_defaults_judge_model_to_deepseek_v4_pro(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("OPENAI_MODEL", "glm-5.2")
+    monkeypatch.setenv("DEFAULT_MODEL", "glm-5.2")
+    monkeypatch.setenv("JUDGE_API_KEY", "judge-secret")
+    monkeypatch.setenv("JUDGE_BASE_URL", "http://judge.local/v1")
+    monkeypatch.delenv("JUDGE_MODEL", raising=False)
+
+    bundle = _make_bundle(tmp_path)
+    judge_rubric = Path(bundle.root_dir) / "checkpoints.md"
+    judge_rubric.write_text("judge rubric\n", encoding="utf-8")
+    bundle.judge_rubric = "checkpoints.md"
+
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        eval_strategy="llm",
+    )
+
+    evaluator = factory._create_evaluator(factory._create_task_container())
+
+    assert isinstance(evaluator, LLMJudgeEvaluator)
+    assert evaluator.judge_model == "deepseek-v4-pro"
+
+
+def test_factory_applies_default_docker_network_to_all_containers(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("OPENART_DOCKER_NETWORK", "host")
+    bundle = _make_bundle(
+        tmp_path,
+        attacker=AttackerSpec(
+            name="setup-attacker",
+            instruction="attacker.md",
+            image="python:3.11-slim",
+            cmd="python3",
+            args=["{{attacker_instruction_file}}"],
+        ),
+    )
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={"framework": "prompt_cli"},
+    )
+    factory._workspace_manager.ensure_run_layout("run-1")
+    factory._workspace_path = str(factory._workspace_manager.shared_dir("run-1"))
+
+    task_container = factory._create_task_container()
+    runner = factory._create_runner("target")
+    attacker, _context = factory._create_attacker()
+
+    assert task_container.spec.network == "host"
+    assert runner.container.spec.network == "host"
+    assert attacker is not None
+    assert attacker.container.spec.network == "host"
+
+
+def test_factory_container_network_overrides_default_by_role(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("OPENART_DOCKER_NETWORK", "host")
+    monkeypatch.setenv("OPENART_TASK_DOCKER_NETWORK", "task-net")
+    monkeypatch.setenv("OPENART_RUNNER_DOCKER_NETWORK", "runner-net")
+    monkeypatch.setenv("OPENART_ATTACKER_DOCKER_NETWORK", "attacker-net")
+    bundle = _make_bundle(
+        tmp_path,
+        attacker=AttackerSpec(
+            name="setup-attacker",
+            instruction="attacker.md",
+            image="python:3.11-slim",
+            cmd="python3",
+            args=["{{attacker_instruction_file}}"],
+        ),
+    )
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={"framework": "prompt_cli", "network": "target-config-net"},
+    )
+    factory._workspace_manager.ensure_run_layout("run-1")
+    factory._workspace_path = str(factory._workspace_manager.shared_dir("run-1"))
+
+    task_container = factory._create_task_container()
+    runner = factory._create_runner("target")
+    attacker, _context = factory._create_attacker()
+
+    assert task_container.spec.network == "task-net"
+    assert runner.container.spec.network == "target-config-net"
+    assert attacker is not None
+    assert attacker.container.spec.network == "attacker-net"
 
 
 def test_factory_runner_framework_override_uses_matching_defaults(tmp_path: Path) -> None:
@@ -167,6 +260,39 @@ def test_factory_creates_attacker_with_separate_workspace(monkeypatch, tmp_path:
     assert attacker.runtime_env["OPENART_ATTACKER_HISTORY_DIR"] == "/workspace/.openart_feedback/attacker_outputs/setup-attacker"
     assert attacker.runtime_env["OPENART_ATTACKER_GUIDANCE_FILE"] == "/workspace/.openart_feedback/attacker_feedback_guidance.json"
     assert attacker.runtime_env["OPENART_TARGET_CONTROL_MANIFEST_FILE"] == "/workspace/.openart_feedback/control/target/base/.openart-target-control-manifest.json"
+
+
+def test_task_rewrite_is_staged_under_run_dir_for_dind_mounts(tmp_path: Path) -> None:
+    run_dir = tmp_path / "out" / "run-1"
+    run_dir.mkdir(parents=True)
+    workspace_manager = WorkspaceManager(str(run_dir / "workspace"))
+    workspace_manager.ensure_run_layout("run-1")
+    rewrite = workspace_manager.shared_dir("run-1") / ".openart_task_rewrite.md"
+    rewrite.write_text("rewritten task\n", encoding="utf-8")
+    target_container = SimpleNamespace(spec=SimpleNamespace(mounts=[]))
+    target_runner = SimpleNamespace(container=target_container, timing=None)
+
+    orchestrator = Orchestrator(
+        target_runner=target_runner,
+        attacker=None,
+        attacker_context=None,
+        evaluator=SimpleNamespace(),
+        task_container=SimpleNamespace(),
+        workspace_manager=workspace_manager,
+        control_manager=SimpleNamespace(),
+        max_iterations=1,
+        adaptive_iterations=False,
+        trace_sink=SimpleNamespace(),
+        trace_file=str(run_dir / "trace.jsonl"),
+    )
+
+    orchestrator._stage_task_rewrite("run-1")
+
+    staged = run_dir / "task_rewrites" / "run-1_task.md"
+    assert staged.read_text(encoding="utf-8") == "rewritten task\n"
+    assert not rewrite.exists()
+    assert target_container.spec.mounts[-1].host_path == str(staged)
+    assert target_container.spec.mounts[-1].container_path == "/task/task.md"
 
 
 def test_factory_increases_target_timeout_floor(tmp_path: Path) -> None:
@@ -268,21 +394,28 @@ def test_factory_rejects_legacy_control_plane_mount_mode_key(tmp_path: Path) -> 
     except ValueError as exc:
         assert "legacy target surface config keys" in str(exc)
         assert "control_plane_mount_mode" in str(exc)
-        assert "target_surface_mount_mode" in str(exc)
+        assert "target_surface_mount_mode" not in str(exc)
+        assert "workspace materialization" in str(exc)
     else:
         raise AssertionError("expected ValueError for legacy target.control_plane_mount_mode")
 
 
-def test_factory_accepts_target_surface_mount_mode(tmp_path: Path) -> None:
+def test_factory_rejects_target_surface_mount_mode(tmp_path: Path) -> None:
     bundle = _make_bundle(tmp_path)
-    factory = OrchestratorFactory(
-        bundle=bundle,
-        output_dir=str(tmp_path / "out"),
-        run_id="run-1",
-        target_config={"framework": "prompt_cli", "target_surface_mount_mode": "mounted"},
-    )
 
-    assert factory._target_control_plane_mount_mode == "mounted"
+    try:
+        OrchestratorFactory(
+            bundle=bundle,
+            output_dir=str(tmp_path / "out"),
+            run_id="run-1",
+            target_config={"framework": "prompt_cli", "target_surface_mount_mode": "mounted"},
+        )
+    except ValueError as exc:
+        assert "target_surface_mount_mode" in str(exc)
+        assert "Mounted target-control delivery was removed" in str(exc)
+        assert "always materialized to the workspace" in str(exc)
+    else:
+        raise AssertionError("expected ValueError for obsolete target.target_surface_mount_mode")
 
 
 def test_factory_rejects_legacy_target_model_fields(tmp_path: Path) -> None:
@@ -454,6 +587,157 @@ def test_factory_applies_model_integration_env_and_config_template(monkeypatch, 
     staged = json.loads(staged_text)
     assert staged["model"] == "openart/glm-5"
     assert staged["provider"]["openart"]["options"]["baseURL"] == "http://llm.internal/v1"
+
+
+def test_factory_stages_openclaw_native_config_to_runner_home(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "dummy")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "prompt_cli",
+            "surface_family": "openclaw",
+            "runner_image": "openart/openclaw:latest",
+            "launch_cmd": (
+                "openclaw --no-color agent --local --json --model openart/${TARGET_MODEL} "
+                "--session-key agent:main:openart-target --thinking medium --timeout 600 --message"
+            ),
+            "config_overlay": {
+                "prompt_transport": "argv",
+                "prompt_flag": "",
+            },
+            "model_integration": {
+                "binding": {
+                    "provider_family": "openai_compatible",
+                    "api_key": "${TARGET_API_KEY}",
+                    "base_url": "${TARGET_BASE_URL}",
+                    "model": "${TARGET_MODEL}",
+                },
+                "delivery": {
+                    "type": "hybrid",
+                    "env_names": {
+                        "api_key": "OPENAI_API_KEY",
+                        "base_url": "OPENAI_BASE_URL",
+                        "model": "OPENAI_MODEL",
+                    },
+                    "config_template": {
+                        "source": "repo:configs/target-model-json/openclaw.openai-compatible.json",
+                        "destination": "HOME/.openclaw/openclaw.json",
+                        "format": "json",
+                    },
+                },
+            },
+        },
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    runner = factory._create_runner("target")
+
+    assert "openclaw-openart-runner" not in runner.command.template
+    assert "openclaw --no-color agent" in runner.command.template
+    assert "--model openart/glm-5" in runner.command.template
+    assert runner.runtime_env["OPENART_MODEL_CONFIG_JSON_DESTINATION"] == (
+        "/tmp/openart/runners/target/home/.openclaw/openclaw.json"
+    )
+    assert "OPENART_PRE_RUN_HOOK" not in runner.runtime_env
+    mounts = {mount.container_path: mount.host_path for mount in runner.container.spec.mounts}
+    staged_path = mounts["/workspace/.openart_model_integration_target.json"]
+    staged_text = Path(staged_path).read_text(encoding="utf-8")
+    staged = json.loads(staged_text)
+    assert "dummy" not in staged_text
+    assert staged["models"]["providers"]["openart"]["apiKey"] == "${OPENAI_API_KEY}"
+
+
+def test_factory_seeds_matching_model_config_surface(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "prompt_cli",
+            "surface_family": "custom",
+            "model_integration": {
+                "binding": {
+                    "provider_family": "openai_compatible",
+                    "api_key": "dummy",
+                    "base_url": "http://llm.internal/v1",
+                    "model": "glm-5",
+                },
+                "delivery": {
+                    "type": "hybrid",
+                    "config_template": {
+                        "destination": "HOME/.custom/config.json",
+                    },
+                },
+            },
+            "attack_surfaces": [
+                {
+                    "vector": "custom_config",
+                    "kind": "configuration",
+                    "path_template": "HOME/.custom/config.json",
+                    "description": "Native config file.",
+                }
+            ],
+        },
+    )
+    factory._workspace_manager.ensure_run_layout("run-1")
+    staged_dir = tmp_path / "out" / "model_integration" / "target"
+    staged_dir.mkdir(parents=True)
+    (staged_dir / "config.json").write_text('{"ok": true}\n', encoding="utf-8")
+
+    factory._stage_model_configs_to_shared_workspace()
+
+    seeded = tmp_path / "out" / "workspace" / "shared" / "HOME" / ".custom" / "config.json"
+    assert seeded.read_text(encoding="utf-8") == '{"ok": true}\n'
+
+
+def test_factory_does_not_seed_model_descriptor_into_unmatched_config_surface(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "prompt_cli",
+            "surface_family": "openclaw",
+            "model_integration": {
+                "binding": {
+                    "provider_family": "openai_compatible",
+                    "api_key": "dummy",
+                    "base_url": "http://llm.internal/v1",
+                    "model": "glm-5",
+                },
+                "delivery": {
+                    "type": "hybrid",
+                    "config_template": {
+                        "destination": "RUNNER_STATE_DIR/unmatched-openclaw-config.json",
+                    },
+                },
+            },
+            "attack_surfaces": [
+                {
+                    "vector": "openclaw_config",
+                    "kind": "configuration",
+                    "path_template": "HOME/.openclaw/openclaw.json",
+                    "description": "OpenClaw config overlay.",
+                }
+            ],
+        },
+    )
+    factory._workspace_manager.ensure_run_layout("run-1")
+    staged_dir = tmp_path / "out" / "model_integration" / "target"
+    staged_dir.mkdir(parents=True)
+    (staged_dir / "openclaw.openai-compatible.json").write_text('{"provider": "descriptor"}\n', encoding="utf-8")
+
+    factory._stage_model_configs_to_shared_workspace()
+
+    unexpected = tmp_path / "out" / "workspace" / "shared" / "HOME" / ".openclaw" / "openclaw.json"
+    assert not unexpected.exists()
 
 
 def test_factory_build_smoke_wires_runtime_graph_without_starting_containers(tmp_path: Path) -> None:

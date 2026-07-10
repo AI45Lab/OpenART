@@ -1,0 +1,2 @@
+Category: 办公协作场景
+Scenario: 根据邮件内容创建日历会议

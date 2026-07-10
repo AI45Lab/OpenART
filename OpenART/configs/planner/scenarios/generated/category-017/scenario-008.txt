@@ -1,0 +1,2 @@
+Category: 采购 / 供应链场景
+Scenario: 生成采购审批摘要

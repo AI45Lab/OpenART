@@ -10,6 +10,7 @@ This module merges all runner types:
 from __future__ import annotations
 
 import json
+import re
 import shlex
 import stat
 import time
@@ -34,6 +35,28 @@ _TOOL_GUIDE_FILENAMES = ("SKILL.md", "skill.md", "skills.md", "SKILLS.md", "TOOL
 _TOOL_FOLDER_SKIP_DIRS = {".git", "__pycache__"}
 _TOOL_FOLDER_SKIP_FILES = {".DS_Store"}
 _TOOL_FOLDER_SKIP_SUFFIXES = {".pyc", ".pyo"}
+_SENSITIVE_ENV_KEY_MARKERS = ("api_key", "apikey", "auth_token", "access_token", "token", "secret", "password")
+_ENV_REF_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+
+
+def _is_sensitive_env_key(key: str) -> bool:
+    normalized = str(key or "").lower()
+    return any(marker in normalized for marker in _SENSITIVE_ENV_KEY_MARKERS)
+
+
+def _redact_tool_env(env: dict[str, str]) -> dict[str, str]:
+    return {
+        key: ("<redacted>" if _is_sensitive_env_key(key) and value else value)
+        for key, value in env.items()
+    }
+
+
+def _env_flag_enabled(value: str | None) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _runner_json_dumps(payload: Any) -> str:
+    return json.dumps(payload, ensure_ascii=True, indent=2, default=str)
 
 
 class RunnerBase(ABC):
@@ -259,17 +282,21 @@ class RunnerBase(ABC):
     def _prompt_cli_prelude(self, task_instruction_file: str) -> str:
         quoted_task_path = shlex.quote(task_instruction_file)
         skill_paths_text = ", ".join(self._active_skill_probe_paths())
+        extra_runtime_note = str(self.extra_config.get("runtime_note_append") or "").strip()
         runtime_note = (
             "OpenART runtime note:\n"
             "- Your working directory is /workspace.\n"
             "- Before carrying out the task, quickly inspect the workspace and any obvious local context files so you understand the current state.\n"
             f"- Before acting, inspect relevant SKILL.md files under {skill_paths_text}, plus any files under /workspace/.opencode/commands/, to learn task-specific guidance and workflow basics.\n"
             "- Use the available local tools when they match the task.\n"
+            "- When a local tool needs to create an output file, write it under /workspace (or a child directory) rather than /tmp or other external paths, because external directories may be blocked by the target permissions.\n"
             "- If the task involves PDFs, scanned documents, tables, or extracting structured values from documents, prefer document.extract_pdf_text or document.extract_pairs_csv before ad-hoc OCR/probing.\n"
             "- If the workspace already contains notes, approvals, checklists, configs, or policy files relevant to the task, read them before making changes.\n"
             "- If OPENART_TOOL_STORE_DIR is set, inspect selected managed tool folders under that directory. Start with SKILL.md, skills.md, TOOL.md, or tools.md before using local scripts.\n"
             "- Prefer managed PATH wrappers when available. Run scripts manually from copied guide-only tool folders only after reading the tool guide."
         )
+        if extra_runtime_note:
+            runtime_note += "\n" + extra_runtime_note
         if "codex" in (self.command.template or "").split():
             runtime_note += (
                 "\n- The active model endpoint is text-only. Never use built-in image viewing or image attachment features. "
@@ -308,7 +335,47 @@ class RunnerBase(ABC):
         if not args:
             raise ValueError("runner command template must include an executable")
         quoted_args = " ".join(shlex.quote(arg) for arg in args)
-        return f"{self._prompt_cli_prelude(task_instruction_file)}printf '%s' \"$prompt\" | exec {quoted_args}"
+        pre_hook = str(self.runtime_env.get("OPENART_PRE_RUN_HOOK", "") or "").strip()
+        command = self._prompt_cli_prelude(task_instruction_file)
+        if pre_hook:
+            command += f"{pre_hook}; "
+        return f"{command}printf '%s' \"$prompt\" | exec {quoted_args}"
+
+    def _prompt_file_write_shell(self) -> str:
+        prompt_file = shlex.quote(self._prompt_file_path())
+        return (
+            f"prompt_file={prompt_file}; "
+            'mkdir -p "$(dirname "$prompt_file")"; '
+            "umask 077; "
+            'printf \'%s\' "$prompt" > "$prompt_file"; '
+        )
+
+    def _render_prompt_cli_file_command(self, task_instruction_file: str, args: list[str]) -> str:
+        if not args:
+            raise ValueError("runner command template must include an executable")
+        quoted_args = " ".join(shlex.quote(arg) for arg in args)
+        pre_hook = str(self.runtime_env.get("OPENART_PRE_RUN_HOOK", "") or "").strip()
+        command = f"{self._prompt_cli_prelude(task_instruction_file)}{self._prompt_file_write_shell()}"
+        if pre_hook:
+            command += f"{pre_hook}; "
+        return f'{command}exec {quoted_args} "$prompt_file"'
+
+    def _render_prompt_cli_file_ref_argv_command(self, task_instruction_file: str, args: list[str]) -> str:
+        if not args:
+            raise ValueError("runner command template must include an executable")
+        quoted_args = " ".join(shlex.quote(arg) for arg in args)
+        prompt_file_path = self._prompt_file_path()
+        prompt_ref = self._prompt_ref_template().replace("{prompt_file}", prompt_file_path)
+        quoted_prompt_ref = shlex.quote(prompt_ref)
+        pre_hook = str(self.runtime_env.get("OPENART_PRE_RUN_HOOK", "") or "").strip()
+        command = (
+            f"{self._prompt_cli_prelude(task_instruction_file)}"
+            f"{self._prompt_file_write_shell()}"
+            f"prompt_ref=$(printf '%s' {quoted_prompt_ref}); "
+        )
+        if pre_hook:
+            command += f"{pre_hook}; "
+        return f'{command}exec {quoted_args} "$prompt_ref"'
 
     def _install_framework_config(self) -> None:
         if self.runtime_env.get("OPENART_MODEL_CONFIG_DESTINATION") or self.runtime_env.get("OPENART_MODEL_CONFIG_JSON_DESTINATION"):
@@ -334,7 +401,36 @@ class RunnerBase(ABC):
         model_name = str(self.model or self.runtime_env.get("OPENAI_MODEL", "") or "").strip()
         if "gpt-5.5" in model_name and "@ai-sdk/openai-compatible" in content:
             content = content.replace("@ai-sdk/openai-compatible", "@ai-sdk/openai")
+        if _env_flag_enabled(self.runtime_env.get("OPENART_MODEL_CONFIG_EXPAND_ENV_REFS")):
+            content = self._expand_model_config_env_refs(content)
         self.container.write_text_file(destination_path, content, env=self.runtime_env)
+
+    def _expand_model_config_env_refs(self, content: str) -> str:
+        missing: list[str] = []
+
+        def replace(match: re.Match[str]) -> str:
+            env_name = match.group(1)
+            value = self.runtime_env.get(env_name)
+            if value is None:
+                missing.append(env_name)
+                return match.group(0)
+            return str(value)
+
+        rendered = _ENV_REF_PATTERN.sub(replace, content)
+        if missing:
+            raise ValueError(
+                "model config env expansion missing runtime env var(s): "
+                + ", ".join(sorted(set(missing)))
+            )
+        return rendered
+
+    def _redact_runtime_secrets(self, content: str) -> str:
+        redacted = content
+        for key, value in self.runtime_env.items():
+            if not value or not _is_sensitive_env_key(str(key)):
+                continue
+            redacted = redacted.replace(str(value), "<redacted>")
+        return redacted
 
     def _install_tools(self) -> None:
         self.validate_tools()
@@ -348,7 +444,7 @@ class RunnerBase(ABC):
                 "description": tool.description,
                 "command": self._resolve_tool_command(tool),
                 "args": self._resolve_tool_args(tool),
-                "env": tool.env,
+                "env": _redact_tool_env(tool.env),
                 "env_from": tool.env_from,
                 "usage": tool.usage,
                 "service": tool.service,
@@ -364,7 +460,7 @@ class RunnerBase(ABC):
                 item["source_files"] = source_files
             payload.append(item)
         path = f"{self._state_dir()}/tools.json"
-        self.container.write_text_file(path, json.dumps(payload, ensure_ascii=True, indent=2), env=self.runtime_env)
+        self.container.write_text_file(path, _runner_json_dumps(payload), env=self.runtime_env)
         self.runtime_env["OPENART_TOOLS_FILE"] = path
         self._install_tool_wrappers()
         self._install_tool_guide()
@@ -470,7 +566,7 @@ class RunnerBase(ABC):
             folders_payload[tool.name] = metadata
 
         folders_path = self._tool_folders_file_path()
-        self.container.write_text_file(folders_path, json.dumps(folders_payload, ensure_ascii=True, indent=2), env=self.runtime_env)
+        self.container.write_text_file(folders_path, _runner_json_dumps(folders_payload), env=self.runtime_env)
         self.runtime_env["OPENART_TOOL_STORE_DIR"] = container_root
         self.runtime_env["OPENART_TOOL_FOLDERS_FILE"] = folders_path
 
@@ -551,7 +647,10 @@ class RunnerBase(ABC):
         quoted_command = " ".join(shlex.quote(part) for part in command_parts if str(part).strip())
         lines = ["#!/usr/bin/env bash", "set -euo pipefail"]
         for key, value in tool.env.items():
-            lines.append(f"export {key}={shlex.quote(value)}")
+            if _is_sensitive_env_key(key):
+                lines.append(f'if [ -n "${{{key}+x}}" ]; then export {key}="${{{key}}}"; fi')
+            else:
+                lines.append(f"export {key}={shlex.quote(value)}")
         for key, source in tool.env_from.items():
             lines.append(f'if [ -n "${{{source}+x}}" ]; then export {key}="${{{source}}}"; fi')
         lines.append(f"exec {quoted_command} \"$@\"")
@@ -655,7 +754,7 @@ class RunnerBase(ABC):
             for skill in self.skills
         ]
         path = f"{self._state_dir()}/skills.json"
-        self.container.write_text_file(path, json.dumps(payload, ensure_ascii=True, indent=2), env=self.runtime_env)
+        self.container.write_text_file(path, _runner_json_dumps(payload), env=self.runtime_env)
         self.runtime_env["OPENART_SKILLS_FILE"] = path
 
 
@@ -820,7 +919,7 @@ class RunnerBase(ABC):
                 content = self.container.read_text_file(container_path, env=self.runtime_env)
                 item["present"] = True
                 artifact_name = f"prepared/{label}{suffix}"
-                self._write_runner_artifact(artifact_name, content)
+                self._write_runner_artifact(artifact_name, self._redact_runtime_secrets(content))
                 if label == "framework_config":
                     item["mentions_tools"] = '"tools"' in content or "tools" in content
                     item["mentions_skills"] = '"skills"' in content or "skills" in content
@@ -908,13 +1007,19 @@ class RunnerRegistry:
 class PromptCLIRunner(RunnerBase):
     """Generic prompt-first CLI runner.
 
-    Supports two prompt transport modes:
+    Supports prompt transport modes:
     - stdin (default): pipe the composed prompt to the command
     - argv: pass the composed prompt as a CLI argument
+    - file: write the composed prompt to a file and pass that file path
+    - file_ref_argv: write the composed prompt to a file and pass a small
+      argv instruction that points the target at that file
     """
 
     _PROMPT_TRANSPORT_KEY = "prompt_transport"
     _PROMPT_FLAG_KEY = "prompt_flag"
+    _PROMPT_FILE_FLAG_KEY = "prompt_file_flag"
+    _PROMPT_FILE_PATH_KEY = "prompt_file_path"
+    _PROMPT_REF_TEMPLATE_KEY = "prompt_ref_template"
     _OUTPUT_EVENT_NAME_KEY = "output_event_name"
 
     def framework_name(self) -> str:
@@ -924,7 +1029,7 @@ class PromptCLIRunner(RunnerBase):
         value = str(self.extra_config.get(self._PROMPT_TRANSPORT_KEY, "") or "").strip().lower()
         if not value:
             return "stdin"
-        if value not in {"stdin", "argv"}:
+        if value not in {"stdin", "argv", "file", "file_ref_argv"}:
             raise ValueError(f"invalid prompt transport: {value}")
         return value
 
@@ -932,6 +1037,24 @@ class PromptCLIRunner(RunnerBase):
         if self._PROMPT_FLAG_KEY not in self.extra_config:
             return "-p"
         return str(self.extra_config.get(self._PROMPT_FLAG_KEY) or "").strip()
+
+    def _prompt_file_flag(self) -> str:
+        return str(self.extra_config.get(self._PROMPT_FILE_FLAG_KEY) or "").strip()
+
+    def _prompt_file_path(self) -> str:
+        configured = str(self.extra_config.get(self._PROMPT_FILE_PATH_KEY) or "").strip()
+        if configured:
+            return configured
+        return f"{self._state_dir()}/prompt.md"
+
+    def _prompt_ref_template(self) -> str:
+        configured = str(self.extra_config.get(self._PROMPT_REF_TEMPLATE_KEY) or "").strip()
+        if configured:
+            return configured
+        return (
+            "Read the complete OpenART task prompt from {prompt_file} and follow it exactly. "
+            "Treat that file as the full user task; do not skip or summarize it before acting."
+        )
 
     def _output_event_name(self) -> str:
         return str(self.extra_config.get(self._OUTPUT_EVENT_NAME_KEY) or "prompt_cli_output").strip() or "prompt_cli_output"
@@ -948,7 +1071,7 @@ class PromptCLIRunner(RunnerBase):
         return config
 
     def write_framework_config(self, config: dict[str, Any]) -> None:
-        content = json.dumps(config, indent=2)
+        content = _runner_json_dumps(config)
         path = self.framework_config_path() or f"{self._state_dir()}/prompt_cli_config.json"
         self.container.write_text_file(path, content, env=self.runtime_env)
         self._maybe_write_codex_config()
@@ -985,12 +1108,27 @@ class PromptCLIRunner(RunnerBase):
 
     def render_command(self, task_instruction_file: str) -> str:
         args = self._template_args_without_task_placeholder(["prompt-cli"])
-        if self._prompt_transport() == "argv":
+        prompt_transport = self._prompt_transport()
+        if prompt_transport == "argv":
             prompt_flag = self._prompt_flag()
             argv_args = list(args)
             if prompt_flag and prompt_flag not in argv_args:
                 argv_args.append(prompt_flag)
             return self._render_prompt_cli_command(task_instruction_file, argv_args)
+        if prompt_transport == "file":
+            prompt_file_flag = self._prompt_file_flag()
+            if not prompt_file_flag:
+                raise ValueError("prompt_file_flag is required when prompt_transport=file")
+            file_args = list(args)
+            if prompt_file_flag not in file_args:
+                file_args.append(prompt_file_flag)
+            return self._render_prompt_cli_file_command(task_instruction_file, file_args)
+        if prompt_transport == "file_ref_argv":
+            prompt_flag = self._prompt_flag()
+            argv_args = list(args)
+            if prompt_flag and prompt_flag not in argv_args:
+                argv_args.append(prompt_flag)
+            return self._render_prompt_cli_file_ref_argv_command(task_instruction_file, argv_args)
         return self._render_prompt_cli_stdin_command(task_instruction_file, args)
 
     def parse_output(

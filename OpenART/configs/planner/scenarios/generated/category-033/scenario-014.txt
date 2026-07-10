@@ -1,0 +1,2 @@
+Category: 智能家居 / IoT 场景
+Scenario: 设置房间自动化规则

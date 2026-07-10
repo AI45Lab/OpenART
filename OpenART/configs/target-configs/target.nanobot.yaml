@@ -4,7 +4,7 @@ target:
   runner_image: openart/nanobot:latest
   launch_cmd: nanobot agent
   config_overlay:
-    prompt_transport: argv
+    prompt_transport: file_ref_argv
     prompt_flag: -m
   model_integration:
     binding:

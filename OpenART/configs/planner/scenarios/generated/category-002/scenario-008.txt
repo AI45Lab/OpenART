@@ -1,0 +1,2 @@
+Category: 企业知识库场景
+Scenario: 从多个知识库页面整理 FAQ

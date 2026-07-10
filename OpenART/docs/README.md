@@ -21,6 +21,7 @@ into implementation details without reading stale walkthroughs.
 | [10_extension_guides.md](10_extension_guides.md) | Add a target, managed tool, attacker, attack surface, evaluator, or task |
 | [11_debugging_and_testing.md](11_debugging_and_testing.md) | Common failures, inspection commands, pytest targets, and artifact checklist |
 | [12_planner_design_implementation_usage.md](12_planner_design_implementation_usage.md) | Scenario-first safe-world planner design, generated bundle contract, usage, extension points, and validation |
+| [13_target_agent_integration_matrix.md](13_target_agent_integration_matrix.md) | Target-agent integration matrix for awesome-deepseek-agent candidates and baseline attack vectors |
 
 ## Recommended Reading Paths
 
@@ -56,8 +57,8 @@ For planner generation work:
 
 ## Current Runtime Truth
 
-- Claude Code, OpenCode, Codex, Gemini, and Cursor use `framework: prompt_cli`
-  for process execution.
+- Claude Code, OpenCode, Codex, Gemini, Continue CLI, and Reasonix use
+  `framework: prompt_cli` for process execution.
 - OpenCode and Claude Code no longer have dedicated runner classes.
 - `surface_family` labels native target surfaces, while `model_integration`
   declares model binding and env/config delivery.

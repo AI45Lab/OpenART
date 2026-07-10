@@ -1,0 +1,23 @@
+name: OpenART Continue CLI
+version: 1.0.0
+schema: v1
+models:
+- name: ${model.name}
+  provider: openai
+  model: ${model.name}
+  apiKey: ${env_ref.api_key}
+  apiBase: ${model.base_url}
+  roles:
+  - chat
+  - edit
+  - apply
+  capabilities:
+  - tool_use
+  defaultCompletionOptions:
+    contextLength: 128000
+    maxTokens: 8192
+rules: []
+prompts: []
+context:
+- provider: file
+- provider: code

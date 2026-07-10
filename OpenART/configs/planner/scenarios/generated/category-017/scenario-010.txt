@@ -1,0 +1,2 @@
+Category: 采购 / 供应链场景
+Scenario: 检查发票和采购单是否匹配

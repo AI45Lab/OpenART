@@ -1,0 +1,2 @@
+Category: 制造 / 工业场景
+Scenario: 整理现场巡检记录

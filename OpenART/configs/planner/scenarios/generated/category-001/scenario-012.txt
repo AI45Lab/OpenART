@@ -1,0 +1,2 @@
+Category: 办公协作场景
+Scenario: 根据表单提交结果生成摘要

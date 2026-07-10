@@ -82,7 +82,8 @@ RUN python -m venv --copies ${VIRTUAL_ENV} \
     && ln -sf ${VIRTUAL_ENV}/bin/pip /usr/local/bin/pip3 \
     && printf 'export VIRTUAL_ENV=%s\nexport PATH="%s/bin:$PATH"\n' "${VIRTUAL_ENV}" "${VIRTUAL_ENV}" > /etc/profile.d/openart-python.sh
 
-RUN npm install -g @openai/codex \
+ARG CODEX_CLI_VERSION=0.141.0
+RUN npm install -g "@openai/codex@${CODEX_CLI_VERSION}" \
     && command -v codex \
     && codex --version
 

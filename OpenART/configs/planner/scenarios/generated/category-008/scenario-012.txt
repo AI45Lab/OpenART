@@ -1,0 +1,2 @@
+Category: 金融支付场景
+Scenario: 根据交易记录分类消费

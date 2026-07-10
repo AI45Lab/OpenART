@@ -26,6 +26,8 @@ The planner is meant to:
   materialized before prompting;
 - enforce a requested exact count of distinct enabled external tools in the
   safe workflow;
+- enforce complexity-configured safe workflow node ranges and external
+  tool-call node floors;
 - validate and repair generated output before treating a bundle as usable.
 
 ## Implementation Map
@@ -40,8 +42,58 @@ The planner is meant to:
 | Bundle and scenario validation | `framework/planner/validation.py` |
 | Planner prompt contracts | `configs/planner/*.md`, `configs/planner/output_contract.schema.json` |
 | Scenario seeds | `configs/planner/scenarios/*.txt` |
-| Batch runner | `scripts/run_opencode_planner.py` |
+| Scenario corpus generation | `framework/planner/scenarios.py` |
+| Batch runner | `framework/planner/batch_runner.py` |
+| Task collection | `framework/planner/collector.py` |
+| Human-facing utility entrypoint | `scripts/planner.py` |
 | Regression tests | `tests/unit/test_opencode_planner.py`, `tests/unit/test_safe_world_planner.py`, `tests/unit/test_opencode_planner_runner.py`, `tests/unit/test_planner_registry_materialization.py` |
+
+## Scenario Corpus Generation
+
+The checked-in seed inventory starts with `../agent_scenarios.md`, a 525
+scenario corpus with 35 categories and 15 scenarios per category. The expansion
+source `../agent_scenarios_expansion_double_525.md` adds another non-duplicate
+525 scenarios with the same category structure.
+
+Generate the expansion-only and combined 1050 scenario file trees:
+
+```bash
+cd OpenART
+
+python scripts/planner.py scenarios \
+  --source ../agent_scenarios_expansion_double_525.md \
+  --output-dir configs/planner/scenarios/generated_expansion_double_525
+
+python scripts/planner.py scenarios \
+  --source ../agent_scenarios.md \
+  --append-source ../agent_scenarios_expansion_double_525.md \
+  --output-dir configs/planner/scenarios/generated_combined_double_1050
+```
+
+Generate the large deterministic diversity fabric:
+
+```bash
+cd OpenART
+
+python scripts/planner.py scenarios \
+  --diverse-count 100000 \
+  --output-dir configs/planner/scenarios/generated_100k
+```
+
+`configs/planner/scenarios/generated_100k/` is intentionally treated as a
+generated artifact and is not checked into git. Its `manifest.json` records the
+balanced per-category counts, excluded source files, and the coverage profile.
+The current `domain-tool-surface-fabric-v3` profile keeps the original 35
+checked-in categories, appends 465 generated domain categories from 155 domain
+sectors and 3 workflow modes, and adds explicit tool-surface phrases to each
+seed so registry search/materialization has stronger cues when a large tool
+store is available. The 100k target balances exactly across 500 configured
+categories, 200 scenarios per category. It deliberately expands domain and
+tool-surface coverage only; it does not add action-intent, synthetic
+complexity, or style axes to the scenario corpus.
+
+The same implementation can be called as a module when scripting from
+`OpenART/`, for example `python -m framework.planner.scenarios --help`.
 
 ## Architecture
 
@@ -175,7 +227,7 @@ Generate a small batch of real scenarios:
 ```bash
 cd OpenART
 
-python scripts/run_opencode_planner.py \
+python scripts/planner.py run \
   --count 3 \
   --workers 1 \
   --tool-store ../openart-tools \
@@ -183,6 +235,35 @@ python scripts/run_opencode_planner.py \
   --planner-max-repairs 2 \
   --complexity-profile stress \
   --output-dir outputs/opencode-planner-real-scenarios
+```
+
+Generate high-call tasks with 60-100 safe workflow nodes, aiming near 90,
+using 25 distinct enabled external tools:
+
+```bash
+cd OpenART
+
+python scripts/planner.py run \
+  --complexity-config configs/planner/complexity/high_tool_calls_60_100.yaml \
+  --tool-count 25 \
+  --output-dir outputs/opencode-planner-high-calls
+```
+
+Here, the tool-call count target comes from
+`tool_use_graph.safe_workflow.nodes` through the complexity config.
+`--tool-count` still means distinct enabled external tools used by the safe
+workflow, not total calls.
+
+Collect valid generated tasks from one or more batch summaries:
+
+```bash
+cd OpenART
+
+python scripts/planner.py collect \
+  outputs/opencode-planner-real-scenarios/summary.json \
+  --output-dir ../outputs/planner-task-collections/real-scenarios \
+  --mode symlink \
+  --overwrite
 ```
 
 Run a generated task with deterministic evaluation:
@@ -208,10 +289,34 @@ Built-in profiles live in `framework/planner/complexity.py`:
 
 Use `--complexity-config` with a YAML or JSON mapping to overlay a built-in
 profile. Supported override fields include `min_workflow_stages`,
-`min_safe_workflow_nodes`, `min_dependency_depth`, `min_parallel_branches`,
-`min_approved_files`, `min_risk_files`, `min_formats`,
-`required_file_extensions`, `min_risk_types`, and
-`require_mixed_risk_layout`.
+`min_safe_workflow_nodes`, `target_safe_workflow_nodes`,
+`max_safe_workflow_nodes`, `min_dependency_depth`, `min_parallel_branches`,
+`min_external_tool_call_nodes`, `min_approved_files`, `min_risk_files`,
+`min_formats`, `required_file_extensions`,
+`required_binary_file_extensions`, `min_binary_formats`, `min_risk_types`,
+and `require_mixed_risk_layout`.
+
+`min_safe_workflow_nodes`, `target_safe_workflow_nodes`, and
+`max_safe_workflow_nodes` apply to `tool_use_graph.safe_workflow.nodes`.
+`min_external_tool_call_nodes` counts safe workflow nodes that call enabled
+external tools. It is separate from `--tool-count`, which counts distinct
+enabled external tools and is usually much smaller.
+
+The high-call preset lives at
+`configs/planner/complexity/high_tool_calls_60_100.yaml`. It overlays `stress`,
+requires 60-100 safe workflow nodes with a target of 90, at least 40 external
+tool-call nodes, 14 total workspace formats, and 5 binary/non-text formats.
+It also requires text/semi-structured suffixes such as `.md`, `.json`, `.csv`,
+`.yaml`, `.html`, `.xml`, `.log`, and `.sql`, plus non-text suffixes such as
+`.pdf`, `.docx`, `.xlsx`, `.pptx`, `.png`, and `.sqlite`.
+
+Binary and non-text files increase workspace realism and give external tools
+useful targets. Keep `safety_contract` markers, evaluator-required safe facts,
+and other scoring-critical strings in text-readable files or companion
+metadata unless the generated evaluator explicitly supports parsing a binary
+type. Placeholder binary-style artifacts with the correct suffix are acceptable
+when creating a minimal valid document is not practical, provided companion
+metadata carries any evaluator-critical facts.
 
 ## Extension Points
 
@@ -254,6 +359,7 @@ Planner regression tests:
 ```bash
 python3 -m pytest OpenART/tests/unit/test_opencode_planner.py
 python3 -m pytest OpenART/tests/unit/test_safe_world_planner.py
+python3 -m pytest OpenART/tests/unit/test_generate_planner_scenario_files.py
 python3 -m pytest OpenART/tests/unit/test_opencode_planner_runner.py
 python3 -m pytest OpenART/tests/unit/test_planner_registry_materialization.py
 ```
@@ -272,6 +378,9 @@ python3 -m pytest OpenART/tests/unit/test_planner_registry_materialization.py
 - Tool count: compare requested `--tool-count` with distinct enabled external
   tools in `tool_use_graph.safe_workflow.nodes`; built-in workspace tools do
   not count.
+- High-call complexity: compare total safe calls with
+  `tool_use_graph.safe_workflow.nodes`, and compare external call floors with
+  the number of safe nodes that call enabled external tools.
 - Generated inputs: inspect `tool_pool.json` and
   `capabilities.generated.yaml` in the task output directory, not stale source
   manifests.

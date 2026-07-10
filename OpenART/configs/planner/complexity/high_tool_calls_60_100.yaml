@@ -1,0 +1,25 @@
+base_profile: stress
+profile_name: high-tool-calls-60-100
+min_safe_workflow_nodes: 60
+target_safe_workflow_nodes: 90
+max_safe_workflow_nodes: 100
+min_external_tool_call_nodes: 40
+min_formats: 14
+min_binary_formats: 5
+required_file_extensions:
+  - .md
+  - .txt
+  - .json
+  - .csv
+  - .yaml
+  - .html
+  - .xml
+  - .log
+  - .sql
+required_binary_file_extensions:
+  - .pdf
+  - .docx
+  - .xlsx
+  - .pptx
+  - .png
+  - .sqlite

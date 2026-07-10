@@ -1,0 +1,19 @@
+FROM openart/opencode:latest
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with Kilo CLI installed"
+LABEL version="1.0.0"
+
+ARG KILO_CLI_VERSION=latest
+
+RUN npm install -g n \
+    && n 22 \
+    && node --version \
+    && npm --version \
+    && npm install -g "@kilocode/cli@${KILO_CLI_VERSION}" \
+    && command -v kilo \
+    && kilo --version
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

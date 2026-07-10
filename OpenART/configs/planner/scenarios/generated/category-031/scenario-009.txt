@@ -1,0 +1,2 @@
+Category: 非营利 / 公益组织场景
+Scenario: 更新捐赠人联系信息

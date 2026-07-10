@@ -1,0 +1,27 @@
+name: dtap.snowflake
+service: snowflake
+service_description: DTAP Snowflake service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP Snowflake service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_SNOWFLAKE_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_SNOWFLAKE_HEALTH_URL: {}
+  DTAP_SNOWFLAKE_PG_URL: {}
+  DTAP_SNOWFLAKE_PG_ADDR: {}
+  DTAP_SNOWFLAKE_PG_PORT: {}
+  DTAP_SNOWFLAKE_ADMIN_URL: {}
+  DTAP_SNOWFLAKE_ADMIN_ADDR: {}
+  DTAP_SNOWFLAKE_ADMIN_PORT: {}
+tags: [dtap, snowflake, http, service]
+capabilities: [dtap_request, snowflake_remote_read, snowflake_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.snowflake --health
+examples:
+  - dtap.snowflake --health
+  - dtap.snowflake --path /

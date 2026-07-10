@@ -1,0 +1,2 @@
+Category: 企业知识库场景
+Scenario: 检索某个系统的故障处理文档

@@ -1,0 +1,2 @@
+Category: 保险场景
+Scenario: 检查发票和理赔材料

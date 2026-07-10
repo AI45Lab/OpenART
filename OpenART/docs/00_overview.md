@@ -108,7 +108,7 @@ still having framework-specific model delivery and native-surface behavior.
 The current default target strategy is:
 
 - Use `framework: prompt_cli` for prompt-first CLIs such as OpenCode, Claude
-  Code, Codex, Gemini, and Cursor.
+  Code, Codex, Gemini, Continue CLI, and Reasonix.
 - Use `target.surface_family` to label target-native surfaces.
 - Use `model_integration.binding` and `model_integration.delivery` to declare
   model config delivery.

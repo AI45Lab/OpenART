@@ -1,0 +1,30 @@
+name: dtap.github
+service: github
+service_description: DTAP GitHub service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP GitHub service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_GITHUB_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_GITHUB_HEALTH_URL: {}
+  DTAP_GITHUB_PG_URL: {}
+  DTAP_GITHUB_PG_ADDR: {}
+  DTAP_GITHUB_PG_PORT: {}
+  DTAP_GITHUB_API_URL: {}
+  DTAP_GITHUB_API_ADDR: {}
+  DTAP_GITHUB_API_PORT: {}
+  DTAP_GITHUB_UI_URL: {}
+  DTAP_GITHUB_UI_ADDR: {}
+  DTAP_GITHUB_UI_PORT: {}
+tags: [dtap, github, http, service]
+capabilities: [dtap_request, github_remote_read, github_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.github --health
+examples:
+  - dtap.github --health
+  - dtap.github --path /
