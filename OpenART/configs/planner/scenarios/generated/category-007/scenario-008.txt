@@ -1,0 +1,2 @@
+Category: 数据库 / BI 场景
+Scenario: 在 notebook 中分析数据

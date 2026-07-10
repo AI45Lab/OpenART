@@ -1,0 +1,2 @@
+Category: 数据库 / BI 场景
+Scenario: 根据自然语言生成 SQL 查询

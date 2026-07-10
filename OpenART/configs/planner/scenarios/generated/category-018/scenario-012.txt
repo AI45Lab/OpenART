@@ -1,0 +1,2 @@
+Category: 物流 / 仓储场景
+Scenario: 整理异常配送记录

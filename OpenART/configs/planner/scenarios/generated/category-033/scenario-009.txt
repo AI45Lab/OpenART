@@ -1,0 +1,2 @@
+Category: 智能家居 / IoT 场景
+Scenario: 检查传感器数据

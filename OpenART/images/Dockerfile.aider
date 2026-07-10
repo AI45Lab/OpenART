@@ -1,0 +1,27 @@
+FROM openart/opencode:latest
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with Aider installed"
+LABEL version="1.0.0"
+
+ARG AIDER_CHAT_VERSION=
+
+ENV AIDER_ANALYTICS_DISABLE=true
+ENV AIDER_CHECK_UPDATE=false
+ENV AIDER_SHOW_RELEASE_NOTES=false
+ENV NO_COLOR=1
+
+RUN python3 -m venv --copies /opt/aider-venv \
+    && /opt/aider-venv/bin/pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && if [ -n "${AIDER_CHAT_VERSION}" ]; then \
+        /opt/aider-venv/bin/pip install --no-cache-dir "aider-chat==${AIDER_CHAT_VERSION}"; \
+    else \
+        /opt/aider-venv/bin/pip install --no-cache-dir aider-chat; \
+    fi \
+    && ln -sf /opt/aider-venv/bin/aider /usr/local/bin/aider \
+    && command -v aider \
+    && aider --version
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

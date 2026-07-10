@@ -1,0 +1,27 @@
+name: dtap.slack
+service: slack
+service_description: DTAP Slack service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP Slack service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_SLACK_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_SLACK_HEALTH_URL: {}
+  DTAP_SLACK_API_URL: {}
+  DTAP_SLACK_API_ADDR: {}
+  DTAP_SLACK_API_PORT: {}
+  DTAP_SLACK_UI_URL: {}
+  DTAP_SLACK_UI_ADDR: {}
+  DTAP_SLACK_UI_PORT: {}
+tags: [dtap, slack, http, service]
+capabilities: [dtap_request, slack_remote_read, slack_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.slack --health
+examples:
+  - dtap.slack --health
+  - dtap.slack --path /

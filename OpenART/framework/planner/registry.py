@@ -18,6 +18,7 @@ from framework.core.tool_store import (
     tool_store_to_manifest,
 )
 
+from . import registry_install as github_registry_install
 from .safe_world import build_tool_pool, group_tools_by_capability
 
 
@@ -82,6 +83,9 @@ class RegistryToolFeedback:
     tool_name: str
     status: str
     reason: str = ""
+    materialization_mode: str = ""
+    source_url: str = ""
+    warnings: list[str] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, Any]:
         payload = {
@@ -91,6 +95,12 @@ class RegistryToolFeedback:
         }
         if self.reason:
             payload["reason"] = self.reason
+        if self.materialization_mode:
+            payload["materialization_mode"] = self.materialization_mode
+        if self.source_url:
+            payload["source_url"] = self.source_url
+        if self.warnings:
+            payload["warnings"] = list(self.warnings)
         return payload
 
 
@@ -203,8 +213,12 @@ def _public_openart_tool(record: Mapping[str, Any]) -> Mapping[str, Any] | None:
     return payload if isinstance(payload, Mapping) else None
 
 
+def _materializable_guide_only_tool(record: Mapping[str, Any]) -> bool:
+    return str(record.get("ready_mode") or "").strip() == "instruction_lookup"
+
+
 def _materializable_openart_tool(record: Mapping[str, Any]) -> bool:
-    return _public_openart_tool(record) is not None
+    return _public_openart_tool(record) is not None or _materializable_guide_only_tool(record)
 
 
 def _extract_files_payload(row: Mapping[str, Any]) -> list[dict[str, Any]]:
@@ -251,13 +265,64 @@ def _coerce_tool_yaml(tool_yaml: Any, tool_name: str) -> dict[str, Any]:
     return payload
 
 
-def _coerce_openart_tool_payload(raw_payload: Mapping[str, Any], tool_name: str) -> tuple[dict[str, Any], str, dict[str, str]]:
-    guide_file = _is_safe_relative_path(raw_payload.get("guide_file"), field_name="openart_tool.guide_file")
+def _guide_description(record: Mapping[str, Any]) -> str:
+    description = _short_reason(record.get("description", ""), limit=500)
+    if description:
+        return description
+    display_name = str(record.get("display_name") or record.get("name") or "registry tool").strip()
+    return f"Registry-backed instruction lookup tool for {display_name}."
+
+
+def _guide_markdown_from_record(record: Mapping[str, Any], tool_name: str) -> str:
+    display_name = str(record.get("display_name") or record.get("name") or tool_name).strip()
+    description = _guide_description(record)
+    tags = _string_list(record.get("tags"))
+    capabilities = _string_list(record.get("capabilities"))
+    frontmatter = yaml.safe_dump(
+        {"name": tool_name, "description": description},
+        sort_keys=False,
+        allow_unicode=True,
+    ).strip()
+    body_lines = [
+        f"Use this skill when a task needs the registry-backed capability `{display_name}`.",
+        "",
+        "This is a guide-only tool materialized from the local OpenART registry. Inspect the registry metadata and apply the described workflow directly in the task context.",
+        "",
+        f"- Registry name: {display_name}",
+        f"- Category: {str(record.get('category') or '').strip() or 'uncategorized'}",
+    ]
+    if tags:
+        body_lines.append("- Tags: " + ", ".join(tags))
+    if capabilities:
+        body_lines.append("- Capabilities: " + ", ".join(capabilities))
+    if description:
+        body_lines.extend(["", "## Description", description])
+    return "---\n" + frontmatter + "\n---\n" + "\n".join(body_lines).strip() + "\n"
+
+
+def _coerce_openart_tool_payload(
+    raw_payload: Mapping[str, Any],
+    tool_name: str,
+    *,
+    record: Mapping[str, Any] | None = None,
+) -> tuple[dict[str, Any] | None, str, str, dict[str, str]]:
+    guide_file = _is_safe_relative_path(raw_payload.get("guide_file") or "SKILL.md", field_name="openart_tool.guide_file")
     guide_markdown = str(raw_payload.get("guide_markdown", "")).strip()
     if not guide_markdown:
-        raise ValueError("openart_tool.guide_markdown must be non-empty")
+        if record is None:
+            raise ValueError("openart_tool.guide_markdown must be non-empty")
+        guide_markdown = _guide_markdown_from_record(record, tool_name).strip()
     if guide_file not in _ALLOWED_GUIDE_FILENAMES:
         raise ValueError(f"openart_tool.guide_file must be one of: {', '.join(sorted(_ALLOWED_GUIDE_FILENAMES))}")
+
+    if raw_payload.get("tool_yaml") is None:
+        files_raw = raw_payload.get("files")
+        declared_files = (
+            _normalize_file_payload(_extract_files_payload(raw_payload), tool_name=tool_name, reason_prefix="openart_tool.files")
+            if isinstance(files_raw, list) and files_raw
+            else {}
+        )
+        return None, guide_file, guide_markdown, declared_files
 
     tool_yaml = _coerce_tool_yaml(raw_payload.get("tool_yaml"), tool_name)
     declared_files = _normalize_file_payload(_extract_files_payload(raw_payload), tool_name=tool_name, reason_prefix="openart_tool.files")
@@ -265,7 +330,7 @@ def _coerce_openart_tool_payload(raw_payload: Mapping[str, Any], tool_name: str)
     missing = [item for item in source_files if item not in declared_files]
     if missing:
         raise ValueError("openart_tool.files is missing declared source files: " + ", ".join(missing))
-    return tool_yaml, guide_file, declared_files
+    return tool_yaml, guide_file, guide_markdown, declared_files
 
 
 def _tool_payload_to_path(prefix: Path, rel_path: str) -> Path:
@@ -276,22 +341,26 @@ def _validate_payload_tool_directory(
     tool_root: Path,
     tool_name: str,
     *,
-    tool_yaml: Mapping[str, Any],
+    tool_yaml: Mapping[str, Any] | None,
     guide_file: str,
     guide_markdown: str,
     files: Mapping[str, str],
 ) -> None:
     (tool_root / guide_file).write_text(guide_markdown.strip() + "\n", encoding="utf-8")
-    (tool_root / "tool.yaml").write_text(
-        yaml.safe_dump(dict(tool_yaml), sort_keys=False, allow_unicode=True),
-        encoding="utf-8",
-    )
+    if tool_yaml is not None:
+        (tool_root / "tool.yaml").write_text(
+            yaml.safe_dump(dict(tool_yaml), sort_keys=False, allow_unicode=True),
+            encoding="utf-8",
+        )
     for path_text, content in files.items():
         target = _tool_payload_to_path(tool_root, path_text)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content.strip() + "\n", encoding="utf-8")
 
-    _validate_materialized_tool(tool_root.parent, tool_name)
+    valid, reason = _validate_materialized_tool(tool_root.parent, tool_name)
+    if not valid:
+        raise ValueError(f"materialized tool failed validation: {reason}")
+
 
 def _connect_registry(index_path: Path, *, read_only: bool = True) -> sqlite3.Connection:
     if read_only:
@@ -343,12 +412,15 @@ def _require_registry_schema(conn: sqlite3.Connection) -> None:
 
 
 def _db_row_to_record(row: Mapping[str, Any]) -> dict[str, Any]:
+    columns = set(row.keys()) if hasattr(row, "keys") else set(row)
     return {
         "tool_id": row["tool_id"],
         "name": row["name"],
         "display_name": row["display_name"],
         "virtual_tool_name": row["virtual_tool_name"],
         "description": row["description"],
+        "source_url": row["source_url"] if "source_url" in columns else "",
+        "source": row["source"] if "source" in columns else "",
         "author": row["author"],
         "category": row["category"],
         "stars": int(row["stars"]),
@@ -385,7 +457,10 @@ def _public_record(row: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _fts_query(query: str, *, operator: str = "AND") -> str:
-    tokens = [token.strip("./+-_").lower() for token in _WORD_RE.findall(str(query or ""))]
+    tokens: list[str] = []
+    for token in _WORD_RE.findall(str(query or "")):
+        for part in re.split(r"[+-]+", token):
+            tokens.append(part.strip("./_").lower())
     clean = [token for token in tokens if token]
     joiner = f" {operator} "
     return joiner.join(f"{token}*" for token in clean)
@@ -493,14 +568,22 @@ def _resolve_tool_row(conn: sqlite3.Connection, identifier: str) -> sqlite3.Row 
 def _write_materialized_tool(root: Path, record: Mapping[str, Any], *, allow_replace: bool = False) -> str:
     name = str(record["virtual_tool_name"])
     openart_tool = _public_openart_tool(record)
-    if openart_tool is None:
+    if openart_tool is None and not _materializable_guide_only_tool(record):
         raise ValueError(_OPENART_TOOL_FILE_REQUIREMENTS_MISSING)
 
     root.mkdir(parents=True, exist_ok=True)
-    tool_yaml, guide_file, files = _coerce_openart_tool_payload(openart_tool, tool_name=name)
+    tool_yaml: dict[str, Any] | None
+    if openart_tool is None:
+        tool_yaml = None
+        guide_file = "SKILL.md"
+        guide_markdown = _guide_markdown_from_record(record, name)
+        files = {}
+    else:
+        tool_yaml, guide_file, guide_markdown, files = _coerce_openart_tool_payload(openart_tool, tool_name=name, record=record)
     mapping = dict(record)
     description = _short_reason(mapping.get("description", ""), limit=500) or f"Registry-backed tool {mapping['display_name']}."
-    tool_yaml.setdefault("description", description)
+    if tool_yaml is not None:
+        tool_yaml.setdefault("description", description)
 
     temp_root = root / f".{name}.tmp.{int(time.time())}"
     if temp_root.exists():
@@ -515,10 +598,9 @@ def _write_materialized_tool(root: Path, record: Mapping[str, Any], *, allow_rep
             name,
             tool_yaml=tool_yaml,
             guide_file=guide_file,
-            guide_markdown=openart_tool.get("guide_markdown", "").strip(),
+            guide_markdown=guide_markdown,
             files=files,
         )
-        _validate_materialized_tool(temp_root, name)
         final_path = root / name
         if final_path.exists() and not final_path.is_dir():
             raise ValueError(f"tool path is not a directory: {final_path}")
@@ -693,6 +775,32 @@ def _available_external_tool_names(tool_pool: Mapping[str, Any]) -> list[str]:
     return sorted(set(names))
 
 
+def _manifest_tool_names(manifest: Mapping[str, Any]) -> set[str]:
+    names: set[str] = set()
+    for item in manifest.get("tools", []) if isinstance(manifest.get("tools"), list) else []:
+        if not isinstance(item, Mapping):
+            continue
+        name = str(item.get("name", "") or "").strip()
+        if name and name not in REGISTRY_HELPER_NAMES:
+            names.add(name)
+    return names
+
+
+def _record_source_url(record: Mapping[str, Any]) -> str:
+    return github_registry_install.source_url(record)
+
+
+def _record_has_github_source(record: Mapping[str, Any]) -> bool:
+    source_url = _record_source_url(record)
+    if not source_url:
+        return False
+    try:
+        github_registry_install.parse_github_url(source_url)
+    except Exception:
+        return False
+    return True
+
+
 def infer_registry_queries(
     scenario: str,
     *,
@@ -734,7 +842,7 @@ def infer_registry_queries(
 def _selected_candidate_limit(tool_count: int | None) -> int:
     if tool_count is None:
         return 3
-    return max(0, min(int(tool_count), 8))
+    return max(0, int(tool_count))
 
 
 def _candidate_tool_name(candidate: Mapping[str, Any]) -> str:
@@ -742,9 +850,6 @@ def _candidate_tool_name(candidate: Mapping[str, Any]) -> str:
 
 
 def _validate_materialized_tool(tool_store_root: Path, tool_name: str) -> tuple[bool, str]:
-    tool_yaml = tool_store_root / tool_name / "tool.yaml"
-    if not tool_yaml.is_file():
-        return False, "tool.yaml is missing"
     try:
         manifest = load_tool_store_manifest(tool_store_root, selected_names={tool_name})
     except Exception as exc:
@@ -798,6 +903,11 @@ def run_registry_materialization_phase(
 
     base_manifest = _filter_runtime_manifest(base_runtime_manifest or {})
     _initial_store_manifest, initial_invalid = load_valid_tool_store_manifest(root, exclude_names=REGISTRY_HELPER_NAMES)
+    already_available_names = (
+        _manifest_tool_names(_initial_store_manifest)
+        | _manifest_tool_names(base_manifest)
+        | set(_available_external_tool_names(base_tool_pool or {}))
+    )
     feedback.excluded_tool_names = sorted(initial_invalid)
 
     index_path = default_registry_path(root)
@@ -843,18 +953,32 @@ def run_registry_materialization_phase(
                         )
                         continue
                     record = _db_row_to_record(row)
-                    if not _materializable_openart_tool(record):
+                    source_url = _record_source_url(record)
+                    feedback.selected_ids.append(public_id)
+                    if tool_name in already_available_names:
+                        feedback.reused_tools.append(
+                            RegistryToolFeedback(
+                                id=public_id,
+                                tool_name=tool_name,
+                                status="already_available",
+                                materialization_mode="already_available",
+                                source_url=source_url,
+                                reason="selected tool name is already present in the valid tool pool",
+                            )
+                        )
+                        continue
+
+                    if not source_url and not _materializable_openart_tool(record):
                         feedback.failed_tools.append(
                             RegistryToolFeedback(
                                 id=public_id,
                                 tool_name=tool_name,
-                                status="unsupported",
+                                status="failed",
                                 reason=_OPENART_TOOL_FILE_REQUIREMENTS_MISSING,
                             )
                         )
                         continue
 
-                    feedback.selected_ids.append(public_id)
                     tool_dir = root / tool_name
                     replacement_reason = ""
                     if tool_dir.exists():
@@ -864,7 +988,9 @@ def run_registry_materialization_phase(
                                 RegistryToolFeedback(
                                     id=public_id,
                                     tool_name=tool_name,
-                                    status="already_materialized",
+                                    status="already_available",
+                                    materialization_mode="already_available",
+                                    source_url=source_url,
                                 )
                             )
                             continue
@@ -883,27 +1009,91 @@ def run_registry_materialization_phase(
                                     tool_name=tool_name,
                                     status="failed",
                                     reason=_short_reason(f"failed to backup invalid folder before rematerialization: {exc}"),
+                                    source_url=source_url,
                                 )
                             )
                             continue
 
-                    try:
-                        _write_materialized_tool(root, record, allow_replace=True)
-                    except Exception as exc:
+                    materialization_mode = ""
+                    warnings: list[str] = []
+                    if source_url:
+                        install_result = github_registry_install.install_registry_record(
+                            record,
+                            root,
+                            replace_invalid=False,
+                            overwrite=False,
+                        )
+                        install_status = str(install_result.get("status") or "")
+                        if install_status == "reused":
+                            feedback.reused_tools.append(
+                                RegistryToolFeedback(
+                                    id=public_id,
+                                    tool_name=tool_name,
+                                    status="already_available",
+                                    materialization_mode="already_available",
+                                    source_url=source_url,
+                                    warnings=_string_list(install_result.get("warnings")),
+                                )
+                            )
+                            continue
+                        if install_status != "created":
+                            feedback.failed_tools.append(
+                                RegistryToolFeedback(
+                                    id=public_id,
+                                    tool_name=tool_name,
+                                    status="failed",
+                                    reason=_short_reason(install_result.get("reason") or f"GitHub install returned status {install_status!r}"),
+                                    source_url=source_url,
+                                    warnings=_string_list(install_result.get("warnings")),
+                                )
+                            )
+                            continue
+                        materialization_mode = str(install_result.get("materialization_mode") or "").strip()
+                        warnings = _string_list(install_result.get("warnings"))
+                    else:
+                        try:
+                            _write_materialized_tool(root, record, allow_replace=True)
+                        except Exception as exc:
+                            feedback.failed_tools.append(
+                                RegistryToolFeedback(
+                                    id=public_id,
+                                    tool_name=tool_name,
+                                    status="failed",
+                                    reason=_short_reason(exc),
+                                )
+                            )
+                            continue
+                        materialization_mode = (
+                            "embedded_openart_tool"
+                            if _public_openart_tool(record) is not None
+                            else "registry_guide_only"
+                        )
+
+                    valid, reason = _validate_materialized_tool(root, tool_name)
+                    if not valid:
                         feedback.failed_tools.append(
                             RegistryToolFeedback(
                                 id=public_id,
                                 tool_name=tool_name,
                                 status="failed",
-                                reason=_short_reason(exc),
+                                reason=_short_reason(f"materialized tool failed validation: {reason}"),
+                                materialization_mode=materialization_mode,
+                                source_url=source_url,
+                                warnings=warnings,
                             )
                         )
                         continue
-
-                    _, reason = _validate_materialized_tool(root, tool_name)
                     status = "materialized" if not replacement_reason else "rematerialized"
                     feedback.materialized_tools.append(
-                        RegistryToolFeedback(id=public_id, tool_name=tool_name, status=status, reason=replacement_reason or reason)
+                        RegistryToolFeedback(
+                            id=public_id,
+                            tool_name=tool_name,
+                            status=status,
+                            reason=replacement_reason or reason,
+                            materialization_mode=materialization_mode,
+                            source_url=source_url,
+                            warnings=warnings,
+                        )
                     )
 
     final_store_manifest, final_invalid = load_valid_tool_store_manifest(root, exclude_names=REGISTRY_HELPER_NAMES)
@@ -969,7 +1159,7 @@ def format_registry_materialization_feedback(feedback: Mapping[str, Any] | Regis
         [
             "## Registry SQLite Search and Materialization Feedback",
             summary,
-            "Before this prompt, the host-side planner searched the local SQLite registry for scenario-relevant ready rows, materialized selected embedded OpenART tool files into the tool store, reloaded the valid tool folders, and rebuilt the refreshed `tool_pool.json`. Do not add registry lookup, install, or materialization workflow steps to the generated task. Use only tools present in the final refreshed `tool_pool.json`.",
+            "Before this prompt, the host-side planner searched the local SQLite registry for scenario-relevant ready rows, reused any exact already-available tool names, materialized selected GitHub-hosted skill folders or embedded OpenART tool files into the tool store, reloaded only valid tool folders, and rebuilt the refreshed `tool_pool.json`. Do not add registry lookup, install, or materialization workflow steps to the generated task. Use only tools present in the final refreshed `tool_pool.json`.",
             "```json\n" + json.dumps(payload, indent=2, sort_keys=True) + "\n```",
         ]
     )

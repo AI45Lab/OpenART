@@ -760,14 +760,24 @@ def test_orchestrator_leak_guard_ignores_framework_dot_openart_runtime(tmp_path:
     assert evaluator.calls == 1
 
 
-def test_orchestrator_can_mount_control_plane_without_materializing_workspace(tmp_path: Path) -> None:
+def test_orchestrator_materializes_control_plane_to_workspace_without_target_bind_mounts(tmp_path: Path) -> None:
     shared_root = tmp_path / "shared"
     shared_root.mkdir(parents=True, exist_ok=True)
     control_file = tmp_path / "control" / "target" / "final" / "CLAUDE.md"
     control_file.parent.mkdir(parents=True, exist_ok=True)
     control_file.write_text("Use the migration workflow.\n", encoding="utf-8")
 
-    control_manager = _FakeControlManager(enabled=True)
+    class _MaterializingControlManager(_FakeControlManager):
+        def materialize_final_to_workspace(self, workspace_dir: str):
+            diff = super().materialize_final_to_workspace(workspace_dir)
+            root = Path(workspace_dir)
+            for host_path, relative_path in self.final_entries:
+                dest = root / relative_path
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_text(Path(host_path).read_text(encoding="utf-8"), encoding="utf-8")
+            return diff
+
+    control_manager = _MaterializingControlManager(enabled=True)
     control_manager.final_entries = [(control_file, "CLAUDE.md")]
     workspace_manager = _FakeWorkspaceManager(shared_root=shared_root)
     target_runner = _FakeRunner(exit_code=0)
@@ -784,7 +794,6 @@ def test_orchestrator_can_mount_control_plane_without_materializing_workspace(tm
         adaptive_iterations=False,
         trace_sink=_FakeTraceSink(),
         trace_file=str(tmp_path / "trace.jsonl"),
-        target_control_plane_mount_mode="mounted",
     )
 
     result = orchestrator.run(
@@ -794,10 +803,10 @@ def test_orchestrator_can_mount_control_plane_without_materializing_workspace(tm
     )
 
     assert result.decision == "pass"
-    assert "materialize" not in [call[0] for call in control_manager.calls]
-    assert (shared_root / "CLAUDE.md").exists() is False
+    assert ("materialize", str(shared_root)) in control_manager.calls
+    assert (shared_root / "CLAUDE.md").read_text(encoding="utf-8") == "Use the migration workflow.\n"
     mounts = {(mount.container_path, mount.host_path, mount.read_only) for mount in target_runner.container.spec.mounts}
-    assert ("/workspace/CLAUDE.md", str(control_file), True) in mounts
+    assert ("/workspace/CLAUDE.md", str(control_file), True) not in mounts
 
 
 def test_orchestrator_skips_workspace_replacement_when_workspace_vector_disabled(tmp_path: Path) -> None:

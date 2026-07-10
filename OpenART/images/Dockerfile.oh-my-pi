@@ -1,0 +1,26 @@
+FROM openart/opencode:latest
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with Oh My Pi installed"
+LABEL version="1.0.0"
+
+ARG OMP_VERSION=latest
+
+ENV BUN_INSTALL=/opt/bun
+ENV PATH="${BUN_INSTALL}/bin:${PATH}"
+
+RUN npm install -g n \
+    && n 22 \
+    && node --version \
+    && npm --version \
+    && curl -fsSL https://bun.sh/install | bash \
+    && bun --version \
+    && bun install -g "@oh-my-pi/pi-coding-agent@${OMP_VERSION}" \
+    && ln -sf /opt/bun/bin/bun /usr/local/bin/bun \
+    && ln -sf /opt/bun/bin/omp /usr/local/bin/omp \
+    && command -v omp \
+    && omp --version
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

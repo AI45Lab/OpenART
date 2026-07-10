@@ -1,0 +1,21 @@
+{
+  "modelProviders": {
+    "openai": [
+      {
+        "id": "${model.name}",
+        "name": "${model.name}",
+        "baseUrl": "${model.base_url}",
+        "description": "OpenART target model",
+        "envKey": "${env_name.api_key}"
+      }
+    ]
+  },
+  "security": {
+    "auth": {
+      "selectedType": "openai"
+    }
+  },
+  "model": {
+    "name": "${model.name}"
+  }
+}

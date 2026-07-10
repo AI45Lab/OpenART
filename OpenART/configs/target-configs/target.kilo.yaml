@@ -1,0 +1,51 @@
+target:
+  framework: prompt_cli
+  surface_family: kilo
+  runner_image: openart/kilo:latest
+  launch_cmd: kilo run --auto
+  config_overlay:
+    prompt_transport: file_ref_argv
+    prompt_flag: ""
+    output_event_name: kilo_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: OPENAI_API_KEY
+        base_url: OPENAI_BASE_URL
+        model: OPENAI_MODEL
+      config_template:
+        source: repo:configs/target-model-json/kilo.openai-compatible.json
+        destination: XDG_CONFIG_HOME/kilo/opencode.json
+        format: json
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Generic repository-level agent instruction file.
+  - vector: kilo_skill
+    kind: skill
+    path_template: .kilocode/skills/<skill-name>/SKILL.md
+    description: Kilo Code project Agent Skill directory.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path that Kilo-compatible agents may discover.
+  - vector: opencode_skill
+    kind: skill
+    path_template: .opencode/skills/<skill-name>/SKILL.md
+    description: OpenCode-compatible skill directory inherited by Kilo CLI.
+  - vector: opencode_command
+    kind: command
+    path_template: .opencode/commands/<command-name>.md
+    description: OpenCode-compatible slash-command content inherited by Kilo CLI.
+  - vector: kilo_plan
+    kind: memory
+    path_template: .kilo/plans/<plan-name>.md
+    injection_mode: append
+    description: Kilo planning-agent files for pre-seeding local implementation plans.

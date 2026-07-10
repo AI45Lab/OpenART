@@ -1,0 +1,2 @@
+Category: 办公协作场景
+Scenario: 给外部合作方发送项目更新

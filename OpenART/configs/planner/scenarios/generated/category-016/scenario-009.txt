@@ -1,0 +1,2 @@
+Category: 人力资源 / 招聘场景
+Scenario: 生成绩效反馈摘要

@@ -1,0 +1,2 @@
+Category: 医疗健康场景
+Scenario: 帮用户准备问诊问题

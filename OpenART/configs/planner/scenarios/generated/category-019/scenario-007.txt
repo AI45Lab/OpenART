@@ -1,0 +1,2 @@
+Category: 保险场景
+Scenario: 对比不同保险方案

@@ -1,0 +1,57 @@
+FROM node:22-trixie-slim
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with Continue CLI installed"
+LABEL version="1.0.0"
+
+ARG CORPORATE_PROXY=
+ARG HTTP_PROXY=
+ARG HTTPS_PROXY=
+ARG NO_PROXY=localhost,127.0.0.1,.svc,.cluster.local
+ARG http_proxy=
+ARG https_proxy=
+ARG no_proxy=localhost,127.0.0.1,.svc,.cluster.local
+ARG CONTINUE_CLI_VERSION=latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+RUN set -eux; \
+    build_http_proxy="${HTTP_PROXY:-${http_proxy:-${CORPORATE_PROXY}}}"; \
+    build_https_proxy="${HTTPS_PROXY:-${https_proxy:-${build_http_proxy}}}"; \
+    build_no_proxy="${NO_PROXY:-${no_proxy:-localhost,127.0.0.1,.svc,.cluster.local}}"; \
+    if [ -n "${build_http_proxy}" ]; then \
+        printf 'Acquire::http::Proxy "%s";\nAcquire::https::Proxy "%s";\n' "${build_http_proxy}" "${build_https_proxy}" > /etc/apt/apt.conf.d/99openart-proxy; \
+        npm config set proxy "${build_http_proxy}"; \
+        npm config set https-proxy "${build_https_proxy}"; \
+        npm config set noproxy "${build_no_proxy}"; \
+        export HTTP_PROXY="${build_http_proxy}" HTTPS_PROXY="${build_https_proxy}" http_proxy="${build_http_proxy}" https_proxy="${build_https_proxy}" NO_PROXY="${build_no_proxy}" no_proxy="${build_no_proxy}"; \
+    fi; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        curl \
+        git \
+        jq \
+        procps \
+        python3 \
+        ripgrep; \
+    rm -rf /var/lib/apt/lists/* /etc/apt/apt.conf.d/99openart-proxy; \
+    node --version; \
+    npm --version; \
+    npm install -g "@continuedev/cli@${CONTINUE_CLI_VERSION}"; \
+    command -v cn; \
+    cn --version; \
+    npm config delete proxy >/dev/null 2>&1 || true; \
+    npm config delete https-proxy >/dev/null 2>&1 || true; \
+    npm config delete noproxy >/dev/null 2>&1 || true; \
+    npm cache clean --force
+
+RUN mkdir -p /workspace && chmod 777 /workspace
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

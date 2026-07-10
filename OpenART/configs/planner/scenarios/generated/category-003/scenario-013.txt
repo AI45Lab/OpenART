@@ -1,0 +1,2 @@
+Category: CRM / 客服场景
+Scenario: 记录一次客户电话沟通内容

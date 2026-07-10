@@ -1,0 +1,2 @@
+Category: 电商订单场景
+Scenario: 查看商品评价摘要

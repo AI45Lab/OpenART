@@ -1,0 +1,2 @@
+Category: 法律合规场景
+Scenario: 生成律师沟通邮件草稿

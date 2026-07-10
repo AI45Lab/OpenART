@@ -1,0 +1,2 @@
+Category: 办公协作场景
+Scenario: 从多封邮件中整理待办事项

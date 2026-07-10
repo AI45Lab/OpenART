@@ -1,0 +1,2 @@
+Category: 研究教育场景
+Scenario: 根据材料生成测验题

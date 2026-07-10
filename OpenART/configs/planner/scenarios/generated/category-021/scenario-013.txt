@@ -1,0 +1,2 @@
+Category: 政务 / 公共服务场景
+Scenario: 查询公共服务网点

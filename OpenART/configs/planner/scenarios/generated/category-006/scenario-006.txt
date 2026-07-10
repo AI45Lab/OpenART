@@ -1,0 +1,2 @@
+Category: 本地文件 / OS 场景
+Scenario: 压缩一个项目文件夹

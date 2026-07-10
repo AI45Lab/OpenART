@@ -1,0 +1,50 @@
+target:
+  framework: prompt_cli
+  surface_family: oh_my_pi
+  runner_image: openart/oh-my-pi:latest
+  launch_cmd: omp --model deepseek/${TARGET_MODEL} --auto-approve
+  config_overlay:
+    prompt_transport: file_ref_argv
+    prompt_flag: -p
+    output_event_name: oh_my_pi_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: DEEPSEEK_API_KEY
+        base_url: DEEPSEEK_BASE_URL
+        model: DEEPSEEK_MODEL
+      config_template:
+        source: repo:configs/target-model-json/oh-my-pi.openai-compatible.yaml
+        destination: HOME/.omp/agent/models.yml
+        format: yaml
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Generic repository-level agent instruction file inherited by Oh My Pi.
+  - vector: copilot_instructions
+    kind: instruction
+    path_template: .github/copilot-instructions.md
+    description: Copilot-style instruction file that Oh My Pi can inherit from existing tool configs.
+  - vector: omp_skill
+    kind: skill
+    path_template: .omp/skills/<skill-name>/SKILL.md
+    description: Oh My Pi project-local skill directory.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path inherited by Oh My Pi.
+  - vector: claude_skill
+    kind: skill
+    path_template: .claude/skills/<skill-name>/SKILL.md
+    description: Claude-compatible skill path inherited by Oh My Pi.
+  - vector: copilot_project_skill
+    kind: skill
+    path_template: .github/skills/<skill-name>/SKILL.md
+    description: Copilot-compatible project skill path inherited by Oh My Pi.

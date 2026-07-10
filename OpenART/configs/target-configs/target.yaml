@@ -4,7 +4,7 @@ target:
   runner_image: openart/opencode:latest
   launch_cmd: opencode run
   config_overlay:
-    prompt_transport: argv
+    prompt_transport: stdin
     prompt_flag: ""
     output_event_name: opencode_output
   model_integration:

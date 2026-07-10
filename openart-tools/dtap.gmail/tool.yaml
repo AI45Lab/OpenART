@@ -1,0 +1,36 @@
+name: dtap.gmail
+service: gmail
+service_description: DTAP Gmail service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP Gmail service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_GMAIL_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_GMAIL_HEALTH_URL: {}
+  DTAP_GMAIL_SMTP_URL: {}
+  DTAP_GMAIL_SMTP_ADDR: {}
+  DTAP_GMAIL_SMTP_PORT: {}
+  DTAP_GMAIL_AUTH_URL: {}
+  DTAP_GMAIL_AUTH_ADDR: {}
+  DTAP_GMAIL_AUTH_PORT: {}
+  DTAP_GMAIL_PROXY_URL: {}
+  DTAP_GMAIL_PROXY_ADDR: {}
+  DTAP_GMAIL_PROXY_PORT: {}
+  DTAP_GMAIL_UI_URL: {}
+  DTAP_GMAIL_UI_ADDR: {}
+  DTAP_GMAIL_UI_PORT: {}
+  DTAP_GMAIL_FRONTEND_URL: {}
+  DTAP_GMAIL_FRONTEND_ADDR: {}
+  DTAP_GMAIL_FRONTEND_PORT: {}
+tags: [dtap, gmail, http, service]
+capabilities: [dtap_request, gmail_remote_read, gmail_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.gmail --health
+examples:
+  - dtap.gmail --health
+  - dtap.gmail --path /

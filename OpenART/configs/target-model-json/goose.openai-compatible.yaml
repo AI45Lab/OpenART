@@ -1,0 +1,4 @@
+GOOSE_PROVIDER: openai
+GOOSE_MODEL: ${model.name}
+OPENAI_HOST: ${model.base_url_root}
+OPENAI_CUSTOM_HEADERS: ""

@@ -1,0 +1,11 @@
+{
+  "general": {
+    "proxy": "$HTTPS_PROXY"
+  },
+  "telemetry": {
+    "enabled": false
+  },
+  "usageStatistics": {
+    "enabled": false
+  }
+}

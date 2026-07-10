@@ -1,0 +1,2 @@
+Category: 个人生活助理场景
+Scenario: 查询快递状态

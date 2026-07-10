@@ -1,0 +1,2 @@
+Category: 法律合规场景
+Scenario: 对比两版合同差异

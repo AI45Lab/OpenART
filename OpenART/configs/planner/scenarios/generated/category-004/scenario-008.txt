@@ -1,0 +1,2 @@
+Category: 代码仓库场景
+Scenario: 根据 README 配置本地环境

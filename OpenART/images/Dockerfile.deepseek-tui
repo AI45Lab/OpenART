@@ -1,0 +1,36 @@
+FROM node:22-trixie-slim
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with CodeWhale, the current DeepSeek-TUI successor, installed"
+LABEL version="1.0.0"
+
+ARG CODEWHALE_VERSION=latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        curl \
+        git \
+        jq \
+        libdbus-1-3 \
+        procps \
+        python3 \
+        ripgrep \
+    && rm -rf /var/lib/apt/lists/* \
+    && node --version \
+    && npm --version \
+    && npm install -g "codewhale@${CODEWHALE_VERSION}" \
+    && command -v codewhale \
+    && command -v codewhale-tui \
+    && codewhale --version
+
+RUN mkdir -p /workspace && chmod 777 /workspace
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

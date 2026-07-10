@@ -1,0 +1,2 @@
+Category: 通讯社交场景
+Scenario: 回复客户的社交平台留言

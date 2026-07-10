@@ -1,0 +1,24 @@
+name: dtap.finance
+service: finance
+service_description: DTAP finance service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP finance service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_FINANCE_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_FINANCE_HEALTH_URL: {}
+  DTAP_FINANCE_WEB_URL: {}
+  DTAP_FINANCE_WEB_ADDR: {}
+  DTAP_FINANCE_WEB_PORT: {}
+tags: [dtap, finance, http, service]
+capabilities: [dtap_request, finance_remote_read, finance_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.finance --health
+examples:
+  - dtap.finance --health
+  - dtap.finance --path /api/health

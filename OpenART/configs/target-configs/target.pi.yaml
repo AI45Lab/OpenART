@@ -5,7 +5,7 @@ target:
   network: host
   launch_cmd: pi -p --model pjlab/${TARGET_MODEL}
   config_overlay:
-    prompt_transport: argv
+    prompt_transport: file_ref_argv
     prompt_flag: -p
   model_integration:
     binding:

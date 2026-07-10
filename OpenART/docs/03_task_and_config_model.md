@@ -85,7 +85,6 @@ Important fields:
 |-------|---------|
 | `framework` | Runner process family. Use `prompt_cli` for most CLI targets |
 | `surface_family` | Native target surface label, such as `opencode` or `claude_code` |
-| `target_surface_mount_mode` | `workspace` default or `mounted` overlay mode |
 | `runner_image` | Docker image for target runner |
 | `network` | Optional Docker network mode |
 | `launch_cmd` | Target CLI command before prompt injection |
@@ -105,7 +104,8 @@ Important fields:
 | `target-configs/target.claude-code.yaml` | `prompt_cli` | `claude_code` | env only |
 | `target-configs/target.codex.yaml` | `prompt_cli` | `codex` | hybrid env + TOML template |
 | `target-configs/target.gemini.yaml` | `prompt_cli` | `gemini` | env only |
-| `target-configs/target.cursor.yaml` | `prompt_cli` | `cursor` | env only |
+| `target-configs/target.continue-cli.yaml` | `prompt_cli` | `continue_cli` | hybrid env + YAML template |
+| `target-configs/target.reasonix.yaml` | `prompt_cli` | `reasonix` | env only |
 | `target-configs/target.hermes.yaml` | `hermes` | `hermes` | hybrid env + YAML template |
 | `target-configs/target.nanobot.yaml` | `nanobot` | `nanobot` | JSON template |
 | `target-configs/target.pi.yaml` | `pi` | `pi` | hybrid env + JSON template |

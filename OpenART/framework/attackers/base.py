@@ -22,6 +22,19 @@ _TOOL_GUIDE_FILENAMES = ("SKILL.md", "skill.md", "skills.md", "SKILLS.md", "TOOL
 _TOOL_FOLDER_SKIP_DIRS = {".git", "__pycache__"}
 _TOOL_FOLDER_SKIP_FILES = {".DS_Store"}
 _TOOL_FOLDER_SKIP_SUFFIXES = {".pyc", ".pyo"}
+_SENSITIVE_ENV_KEY_MARKERS = ("api_key", "apikey", "auth_token", "access_token", "token", "secret", "password")
+
+
+def _is_sensitive_env_key(key: str) -> bool:
+    normalized = str(key or "").lower()
+    return any(marker in normalized for marker in _SENSITIVE_ENV_KEY_MARKERS)
+
+
+def _redact_tool_env(env: dict[str, str]) -> dict[str, str]:
+    return {
+        key: ("<redacted>" if _is_sensitive_env_key(key) and value else value)
+        for key, value in env.items()
+    }
 
 
 class AttackerBase(ABC):
@@ -295,7 +308,10 @@ class AttackerBase(ABC):
         quoted_command = " ".join(shlex.quote(part) for part in command_parts if str(part).strip())
         lines = ["#!/usr/bin/env bash", "set -euo pipefail"]
         for key, value in tool.env.items():
-            lines.append(f"export {key}={shlex.quote(value)}")
+            if _is_sensitive_env_key(key):
+                lines.append(f'if [ -n "${{{key}+x}}" ]; then export {key}="${{{key}}}"; fi')
+            else:
+                lines.append(f"export {key}={shlex.quote(value)}")
         for key, source in tool.env_from.items():
             lines.append(f'if [ -n "${{{source}+x}}" ]; then export {key}="${{{source}}}"; fi')
         lines.append(f"exec {quoted_command} \"$@\"")
@@ -313,7 +329,7 @@ class AttackerBase(ABC):
                 "description": tool.description,
                 "command": self._resolve_tool_command(tool),
                 "args": self._resolve_tool_args(tool),
-                "env": tool.env,
+                "env": _redact_tool_env(tool.env),
                 "env_from": tool.env_from,
                 "usage": tool.usage,
                 "service": tool.service,
@@ -329,7 +345,7 @@ class AttackerBase(ABC):
                 item["source_files"] = source_files
             payload.append(item)
         path = f"{self._state_dir()}/tools.json"
-        self.container.write_text_file(path, json.dumps(payload, ensure_ascii=True, indent=2), env=self.runtime_env)
+        self.container.write_text_file(path, json.dumps(payload, ensure_ascii=True, indent=2, default=str), env=self.runtime_env)
         self.runtime_env["OPENART_TOOLS_FILE"] = path
 
         wrapper_tools = [tool for tool in self.tools if tool.enabled and tool.command]

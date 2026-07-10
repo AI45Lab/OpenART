@@ -1,7 +1,6 @@
 target:
   framework: prompt_cli
   surface_family: codex
-  target_surface_mount_mode: mounted
   runner_image: openart/codex:latest
   network: host
   launch_cmd: codex exec --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox

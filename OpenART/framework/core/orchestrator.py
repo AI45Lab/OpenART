@@ -211,7 +211,6 @@ class Orchestrator:
         adaptive_iterations: bool,
         trace_sink: TraceSinkBase,
         trace_file: str,
-        target_control_plane_mount_mode: str = "workspace",
     ) -> None:
         self.target_runner = target_runner
         self.attacker = attacker
@@ -220,7 +219,6 @@ class Orchestrator:
         self.task_container = task_container
         self.workspace_manager = workspace_manager
         self.control_manager = control_manager
-        self.target_control_plane_mount_mode = str(target_control_plane_mount_mode or "workspace").strip().lower()
         self.max_iterations = max(1, int(max_iterations or 1))
         self.adaptive_iterations = bool(adaptive_iterations)
         self.trace_sink = trace_sink
@@ -232,7 +230,6 @@ class Orchestrator:
         self._target_prepared = False
         self._attacker_prepared = False
         self._control_prepared = False
-        self._target_control_mount_signature: tuple[tuple[str, str], ...] = tuple()
         self._task_rewrite_staging_path: Path | None = None
         self._last_target_visible_leak_warnings: list[dict[str, Any]] = []
         self._last_target_visible_lint_findings: list[dict[str, Any]] = []
@@ -275,12 +272,10 @@ class Orchestrator:
                 return self._runner_failure_result(run_id, "attack", attacker_result.exit_code)
             with self.timing.phase("control_materialize_before_target_ms"):
                 self._materialize_control_after_attacker(run_id, "before_target", attacker_result, attack_iteration=1)
-            self._refresh_target_control_mounts(run_id)
             self._stage_task_rewrite(run_id)
         else:
             with self.timing.phase("control_materialize_before_target_ms"):
                 self._materialize_base_control(run_id)
-            self._refresh_target_control_mounts(run_id)
             self._stage_task_rewrite(run_id)
 
         self._prepare_target_runner()
@@ -343,7 +338,6 @@ class Orchestrator:
                         attacker_result,
                         attack_iteration=iteration + 1,
                     )
-                self._refresh_target_control_mounts(run_id)
                 self._stage_task_rewrite(run_id)
 
         if self._should_run_attacker("after_target", attack_instruction_file):
@@ -437,7 +431,10 @@ class Orchestrator:
         if not rewrite_in_shared.is_file() and self._task_rewrite_staging_path is None:
             return
 
-        staging_dir = Path("/tmp/openart_task_rewrites")
+        # This path is bind-mounted into target containers by the Docker daemon.
+        # Keep it under the run output directory so it exists in both the runner
+        # container and the daemon host filesystem during Docker-in-Docker runs.
+        staging_dir = self._run_dir() / "task_rewrites"
         staging_dir.mkdir(parents=True, exist_ok=True)
         staging_path = staging_dir / f"{run_id}_task.md"
 
@@ -660,19 +657,17 @@ class Orchestrator:
         with self._timing_event("control.use_base_as_final", role="framework", category="control", phase="control_materialize"):
             self.control_manager.use_base_as_final()
         diff = self._empty_workspace_diff()
-        if not self._target_control_uses_mounted_overlay():
-            with self._timing_event("control.materialize_final_to_workspace", role="framework", category="control", phase="control_materialize") as event:
-                diff = self.control_manager.materialize_final_to_workspace(str(self.workspace_manager.shared_dir(run_id)))
-                if event is not None:
-                    event.metadata["added"] = len(diff.added)
-                    event.metadata["modified"] = len(diff.modified)
-                    event.metadata["deleted"] = len(diff.deleted)
+        with self._timing_event("control.materialize_final_to_workspace", role="framework", category="control", phase="control_materialize") as event:
+            diff = self.control_manager.materialize_final_to_workspace(str(self.workspace_manager.shared_dir(run_id)))
+            if event is not None:
+                event.metadata["added"] = len(diff.added)
+                event.metadata["modified"] = len(diff.modified)
+                event.metadata["deleted"] = len(diff.deleted)
         with self._timing_event("control.write_materialization_artifact", role="framework", category="artifact", phase="control_materialize"):
             write_json_artifact(
                 self._run_dir() / "control" / "target" / "materialization.json",
                 {
                     "source": "base",
-                    "mount_mode": self.target_control_plane_mount_mode,
                     "diff": {
                         "added": diff.added,
                         "modified": diff.modified,
@@ -723,13 +718,12 @@ class Orchestrator:
                 event.metadata["deleted"] = len(control_diff.deleted)
                 event.metadata["ignored"] = len(ignored)
         materialized_diff = self._empty_workspace_diff()
-        if not self._target_control_uses_mounted_overlay():
-            with self._timing_event("control.materialize_final_to_workspace", role="framework", category="control", phase=phase, attack_iteration=attack_iteration) as event:
-                materialized_diff = self.control_manager.materialize_final_to_workspace(str(self.workspace_manager.shared_dir(run_id)))
-                if event is not None:
-                    event.metadata["added"] = len(materialized_diff.added)
-                    event.metadata["modified"] = len(materialized_diff.modified)
-                    event.metadata["deleted"] = len(materialized_diff.deleted)
+        with self._timing_event("control.materialize_final_to_workspace", role="framework", category="control", phase=phase, attack_iteration=attack_iteration) as event:
+            materialized_diff = self.control_manager.materialize_final_to_workspace(str(self.workspace_manager.shared_dir(run_id)))
+            if event is not None:
+                event.metadata["added"] = len(materialized_diff.added)
+                event.metadata["modified"] = len(materialized_diff.modified)
+                event.metadata["deleted"] = len(materialized_diff.deleted)
         attacker_result.metadata["allowed_control_vectors"] = list(allowed_control_vectors)
         attacker_result.metadata["target_control_diff"] = {
             "added": control_diff.added,
@@ -763,7 +757,6 @@ class Orchestrator:
                     "source": "attacker",
                     "phase": phase,
                     "attacker_name": attacker_result.attacker_name,
-                    "mount_mode": self.target_control_plane_mount_mode,
                     "diff": {
                         "added": materialized_diff.added,
                         "modified": materialized_diff.modified,
@@ -858,34 +851,8 @@ class Orchestrator:
         if attack_iteration > 1:
             write_json_artifact(root / "iterations" / f"iter_{attack_iteration:03d}" / "result.json", payload, ensure_ascii=False)
 
-    def _target_control_uses_mounted_overlay(self) -> bool:
-        return self.target_control_plane_mount_mode == "mounted"
-
     def _empty_workspace_diff(self) -> WorkspaceDiff:
         return WorkspaceDiff(added=[], modified=[], deleted=[])
-
-    def _refresh_target_control_mounts(self, run_id: str) -> None:
-        if not self.control_manager.enabled() or not self._target_control_uses_mounted_overlay():
-            return
-
-        shared_root = self.workspace_manager.shared_dir(run_id)
-        mounts = self.target_runner.container.spec.mounts
-        if self._target_control_mount_signature:
-            mounted_paths = {container_path for _host_path, container_path in self._target_control_mount_signature}
-            mounts[:] = [mount for mount in mounts if mount.container_path not in mounted_paths]
-
-        signature: list[tuple[str, str]] = []
-        for host_path, relative_path in self.control_manager.final_allowed_file_entries():
-            container_path = f"/workspace/{relative_path}"
-            (shared_root / Path(relative_path).parent).mkdir(parents=True, exist_ok=True)
-            mounts.append(MountSpec(host_path=str(host_path), container_path=container_path, read_only=True))
-            signature.append((str(host_path), container_path))
-
-        new_signature = tuple(sorted(signature))
-        if self._target_prepared and new_signature != self._target_control_mount_signature:
-            self.target_runner.remove(force=True)
-            self._target_prepared = False
-        self._target_control_mount_signature = new_signature
 
     def _scan_target_visible_file(self, root: Path, path: Path, *, source: str) -> list[dict[str, str]]:
         findings: list[dict[str, str]] = []
@@ -907,16 +874,6 @@ class Orchestrator:
             for path in sorted(shared_root.rglob("*")):
                 if path.is_file():
                     findings.extend(self._scan_target_visible_file(shared_root, path, source="workspace"))
-
-        if self.control_manager.enabled() and self._target_control_uses_mounted_overlay():
-            control_root = self.control_manager.final_dir()
-            for host_path, relative_path in self.control_manager.final_allowed_file_entries():
-                path = Path(host_path)
-                path_marker = self._visibility_policy.path_leak_marker(relative_path)
-                if path_marker:
-                    findings.append({"source": "target_control", "path": relative_path, "field": "path", "marker": path_marker})
-                if path.is_file():
-                    findings.extend(self._scan_target_visible_file(control_root, path, source="target_control"))
         return findings
 
     def _capture_target_visible_state(self, run_id: str, iteration: int) -> dict[str, Any]:
@@ -933,7 +890,6 @@ class Orchestrator:
 
         control_files: list[dict[str, Any]] = []
         if self.control_manager.enabled():
-            control_root = self.control_manager.final_dir()
             for host_path, relative_path in self.control_manager.final_allowed_file_entries():
                 path = Path(host_path)
                 if not path.is_file():
@@ -1314,7 +1270,6 @@ class Orchestrator:
         payload = {
             "task_container_workspace_host_path": task_workspace,
             "target_runner_workspace_host_path": target_workspace,
-            "target_control_plane_mount_mode": self.target_control_plane_mount_mode,
             "attacker_input_workspace_host_path": attacker_input,
             "attacker_output_workspace_host_path": attacker_output,
             "attacker_live_output_workspace_host_path": attacker_live_output,

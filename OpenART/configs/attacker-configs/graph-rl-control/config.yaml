@@ -4,7 +4,7 @@ attacker:
   instruction: /attacker_config/attacker.md
   image: openart/opencode:latest
   cmd: python3
-  timeout_seconds: 3600
+  timeout_seconds: 14400
   target_control_plane: true
   feedback_loop: true
   vector_permissions:
@@ -18,9 +18,33 @@ attacker:
     - opencode_skill
     - opencode_command
     - agents_skill
+    - aider_ignore
+    - conventions_md
+    - aider_chat_history
+    - aider_load_file
+    - goosehints
+    - goose_user_hints
+    - agents_user_skill
+    - goose_slash_command
+    - soul_md
+    - user_md
+    - identity_md
+    - tools_md
+    - heartbeat_md
+    - boot_md
+    - bootstrap_md
+    - memory_md
+    - daily_memory
+    - workspace_skill
+    - managed_skill
+    - openclaw_config
+    - session_history
     - conversation_history
     - auto_memory
     - task_rewrite
+    - gemini_md
+    - gemini_skill
+    - gemini_command
   visibility_policy:
     workspace_exclude_globs:
       - "_opencode_scratch"
@@ -66,15 +90,21 @@ attacker:
     OPENAI_BASE_URL: OPENAI_BASE_URL
     OPENAI_MODEL: OPENAI_MODEL
   env:
-    OPENART_GRAPH_RL_PROMPT_TIMEOUT_SECONDS: "3600"
+    OPENART_GRAPH_RL_PROMPT_TIMEOUT_SECONDS: "14400"
+    OPENART_GRAPH_RL_PLAN_PROPOSAL_TIMEOUT_SECONDS: "14400"
+    OPENART_GRAPH_RL_PLAN_PROPOSAL_MAX_RETRIES: "20"
     OPENART_GRAPH_RL_MAX_SUB_TASKS: "4"
     OPENART_GRAPH_RL_REWARD_MODE: "strict"
     OPENART_GRAPH_RL_COMPLETION_GAP_REPAIR: "1"
     OPENART_GRAPH_RL_DETECTION_ANALYSIS: "1"
-    OPENART_GRAPH_RL_VALIDATION_RETRIES: "5"
-    OPENART_GRAPH_RL_SCRATCH_RETRIES: "3"
+    OPENART_GRAPH_RL_VALIDATION_RETRIES: "30"
+    OPENART_GRAPH_RL_SCRATCH_RETRIES: "10"
+    OPENART_GRAPH_RL_MAX_RETRIES: "10"
     OPENART_GRAPH_RL_SCRATCH_FALLBACK: "1"
+    OPENART_GRAPH_RL_SEED_GRAPH_FALLBACK: "1"
+    OPENART_GRAPH_RL_SEED_GRAPH_PREEMPTIVE: "1"
     OPENART_GRAPH_RL_REUSE_PREVIOUS_ON_TRANSIENT: "1"
+    OPENART_GRAPH_RL_MAX_TOKENS: "4096"
     OPENART_GRAPH_RL_OPENCODE_TOOLS: "read,write,bash"
   args:
     - /attacker_config/run_graph_rl_attacker.py

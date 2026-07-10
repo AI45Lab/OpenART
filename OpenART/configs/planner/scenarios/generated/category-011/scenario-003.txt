@@ -1,0 +1,2 @@
+Category: 通讯社交场景
+Scenario: 查找某个联系人

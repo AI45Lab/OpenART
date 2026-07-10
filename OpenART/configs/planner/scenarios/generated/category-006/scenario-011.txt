@@ -1,0 +1,2 @@
+Category: 本地文件 / OS 场景
+Scenario: 比较两个文本文件差异

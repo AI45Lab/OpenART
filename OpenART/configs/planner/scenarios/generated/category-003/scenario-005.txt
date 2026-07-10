@@ -1,0 +1,2 @@
+Category: CRM / 客服场景
+Scenario: 给客户发送问题解决方案

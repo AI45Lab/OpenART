@@ -1,0 +1,2 @@
+Category: 多工具链综合场景
+Scenario: 从 Google Docs 中提取任务并创建 Jira issue

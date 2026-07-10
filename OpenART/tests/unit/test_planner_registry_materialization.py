@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import base64
 import sqlite3
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
+from framework.core.tool_store import load_tool_store_manifest
 from framework.planner import opencode_backend
 from framework.planner import registry as planner_registry
 from framework.planner.cli import build_parser
@@ -23,6 +25,8 @@ def _add_registry_tool(
     description: str = "Extract text from PDF reports.",
     capabilities: list[str] | None = None,
     include_openart_tool: bool = True,
+    source_url: str = "",
+    raw_extra: dict[str, object] | None = None,
 ) -> str:
     index = _registry_path(tool_store)
     index.parent.mkdir(parents=True, exist_ok=True)
@@ -30,11 +34,11 @@ def _add_registry_tool(
     conn = sqlite3.connect(index)
     conn.executescript(
         """
-        CREATE TABLE meta (
+        CREATE TABLE IF NOT EXISTS meta (
             key TEXT PRIMARY KEY,
             value TEXT NOT NULL
         );
-        CREATE TABLE tools (
+        CREATE TABLE IF NOT EXISTS tools (
             tool_id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             display_name TEXT NOT NULL,
@@ -55,7 +59,7 @@ def _add_registry_tool(
             updated_at TEXT NOT NULL DEFAULT '',
             user_notes TEXT NOT NULL DEFAULT ''
         );
-        CREATE VIRTUAL TABLE tools_fts USING fts5(
+        CREATE VIRTUAL TABLE IF NOT EXISTS tools_fts USING fts5(
             tool_id UNINDEXED,
             virtual_tool_name UNINDEXED,
             display_name,
@@ -70,7 +74,7 @@ def _add_registry_tool(
     )
     caps = capabilities or ["document_processing", "pdf"]
     tags = ["pdf", "report"]
-    openart_payload: dict[str, object] = {}
+    openart_payload: dict[str, object] = dict(raw_extra or {})
     if include_openart_tool:
         tool_yaml = {
             "name": f"tool.{name.lower().replace(' ', '_')}.fixture123",
@@ -108,7 +112,7 @@ def _add_registry_tool(
         "virtual_tool_name": public_id,
         "description": description,
         "source": "fixture",
-        "source_url": "",
+        "source_url": source_url,
         "author": "",
         "category": "document",
         "stars": 3,
@@ -160,6 +164,65 @@ def _add_registry_tool(
     return public_id
 
 
+def _b64(text: str) -> str:
+    return base64.b64encode(text.encode("utf-8")).decode("ascii")
+
+
+def _mock_github_skill_api(_selection, api_path: str):
+    responses = {
+        "skills/demo": [
+            {"type": "file", "path": "skills/demo/SKILL.md"},
+            {"type": "file", "path": "skills/demo/tool.yaml"},
+            {"type": "dir", "path": "skills/demo/scripts"},
+        ],
+        "skills/demo/SKILL.md": {
+            "type": "file",
+            "path": "skills/demo/SKILL.md",
+            "encoding": "base64",
+            "content": _b64("---\nname: upstream-demo\n---\n# Demo\nUse upstream notes.\n"),
+        },
+        "skills/demo/tool.yaml": {
+            "type": "file",
+            "path": "skills/demo/tool.yaml",
+            "encoding": "base64",
+            "content": _b64("name: upstream-demo\ncommand: python3\n"),
+        },
+        "skills/demo/scripts": [
+            {"type": "file", "path": "skills/demo/scripts/run.py"},
+        ],
+        "skills/demo/scripts/run.py": {
+            "type": "file",
+            "path": "skills/demo/scripts/run.py",
+            "encoding": "base64",
+            "content": _b64("print('planner github script')\n"),
+        },
+    }
+    return responses[api_path]
+
+
+def _write_valid_guide(tool_store: Path, tool_name: str) -> None:
+    tool_dir = tool_store / tool_name
+    tool_dir.mkdir(parents=True, exist_ok=True)
+    tool_dir.joinpath("SKILL.md").write_text(
+        "---\n"
+        f"name: {tool_name}\n"
+        "description: Existing guide.\n"
+        "---\n"
+        f"Use this skill when `{tool_name}` is already available for registry-backed planning.\n",
+        encoding="utf-8",
+    )
+
+
+def test_selected_candidate_limit_matches_requested_tool_count() -> None:
+    assert planner_registry._selected_candidate_limit(None) == 3
+    assert planner_registry._selected_candidate_limit(0) == 0
+    assert planner_registry._selected_candidate_limit(12) == 12
+
+
+def test_fts_query_splits_hyphenated_skill_names() -> None:
+    assert planner_registry._fts_query("metaapp-builder") == "metaapp* AND builder*"
+
+
 def test_registry_phase_materializes_missing_ready_tool_and_writes_feedback(tmp_path: Path) -> None:
     tool_store = tmp_path / "openart-tools"
     public_id = _add_registry_tool(tool_store)
@@ -197,10 +260,37 @@ def test_registry_phase_materializes_missing_ready_tool_and_writes_feedback(tmp_
     )
     assert "Registry SQLite Search and Materialization Feedback" in prompt
     assert "searched the local SQLite registry" in prompt
-    assert "materialized selected embedded OpenART tool files" in prompt
+    assert "materialized selected GitHub-hosted skill folders or embedded OpenART tool files" in prompt
     assert public_id in prompt
     assert "registry.search" not in prompt
     assert "tool_registry.sqlite" not in prompt
+
+
+def test_registry_phase_materializes_more_than_eight_requested_tools(tmp_path: Path) -> None:
+    tool_store = tmp_path / "openart-tools"
+    public_ids = [
+        _add_registry_tool(
+            tool_store,
+            name=f"PDF Report Extractor {index:02d}",
+            description="Extract text from PDF reports for planner registry coverage.",
+            capabilities=["document_processing", "pdf", "report"],
+        )
+        for index in range(12)
+    ]
+
+    result = planner_registry.run_registry_materialization_phase(
+        scenario="Prepare a PDF report extraction workflow with registry tools",
+        tool_store_root=tool_store,
+        tool_count=12,
+        artifact_dir=tmp_path / "artifacts",
+    )
+
+    tool_names = {item["name"] for item in result.tool_pool["tools"]}
+    assert len(result.feedback.selected_ids) == 12
+    assert set(result.feedback.selected_ids) == set(public_ids)
+    assert len(result.feedback.materialized_tools) + len(result.feedback.reused_tools) == 12
+    assert set(public_ids).issubset(tool_names)
+    assert set(public_ids).issubset(set(result.feedback.final_available_tool_names))
 
 
 def test_registry_phase_reuses_valid_materialized_tool_without_overwrite(tmp_path: Path) -> None:
@@ -218,9 +308,159 @@ def test_registry_phase_reuses_valid_materialized_tool_without_overwrite(tmp_pat
         artifact_dir=tmp_path / "artifacts",
     )
 
-    assert [item.status for item in result.feedback.reused_tools] == ["already_materialized"]
+    assert [item.status for item in result.feedback.reused_tools] == ["already_available"]
+    assert [item.materialization_mode for item in result.feedback.reused_tools] == ["already_available"]
     assert result.feedback.materialized_tools == []
     assert "# sentinel: keep existing folder" in tool_yaml.read_text(encoding="utf-8")
+
+
+def test_registry_phase_materializes_github_script_skill_as_real_tool(monkeypatch, tmp_path: Path) -> None:
+    tool_store = tmp_path / "openart-tools"
+    public_id = _add_registry_tool(
+        tool_store,
+        name="Demo Script Skill",
+        description="Run a downloaded script skill.",
+        include_openart_tool=False,
+        source_url="https://github.com/acme/tools/tree/main/skills/demo",
+        capabilities=["demo_script"],
+    )
+    monkeypatch.setattr(planner_registry.github_registry_install, "_github_api_json", _mock_github_skill_api)
+
+    result = planner_registry.run_registry_materialization_phase(
+        scenario=f"Use {public_id} to run demo script work",
+        tool_store_root=tool_store,
+        tool_count=1,
+        artifact_dir=tmp_path / "artifacts",
+    )
+
+    assert result.feedback.selected_ids == [public_id]
+    assert result.feedback.failed_tools == []
+    assert result.feedback.materialized_tools[0].materialization_mode == "github_script_tool"
+    assert result.feedback.materialized_tools[0].source_url == "https://github.com/acme/tools/tree/main/skills/demo"
+
+    manifest = load_tool_store_manifest(tool_store, selected_names={public_id})
+    tool = manifest["tools"][0]
+    assert tool["name"] == public_id
+    assert tool["config"]["tool_store"]["guide_only"] is False
+    assert tool["config"]["tool_store"]["source_files"] == ["scripts/openart_skill_runner.py", "scripts/run.py"]
+    assert (tool_store / public_id / "references" / "original_tool.yaml").is_file()
+    assert public_id in {item["name"] for item in result.tool_pool["tools"]}
+
+
+def test_registry_phase_reuses_base_tool_pool_without_github_api(monkeypatch, tmp_path: Path) -> None:
+    tool_store = tmp_path / "openart-tools"
+    public_id = _add_registry_tool(
+        tool_store,
+        name="Base Pool Skill",
+        include_openart_tool=False,
+        source_url="https://github.com/acme/tools/tree/main/skills/demo",
+    )
+
+    def fail_api(_selection, _api_path: str):
+        raise AssertionError("GitHub API should not be called for already available base-pool tools")
+
+    monkeypatch.setattr(planner_registry.github_registry_install, "_github_api_json", fail_api)
+    base_tool_pool = {
+        "tools": [
+            {
+                "name": public_id,
+                "description": "Already loaded tool.",
+                "capabilities": ["existing"],
+            }
+        ],
+        "capability_groups": {"existing": [public_id]},
+    }
+
+    result = planner_registry.run_registry_materialization_phase(
+        scenario=f"Use {public_id}",
+        tool_store_root=tool_store,
+        base_tool_pool=base_tool_pool,
+        tool_count=1,
+    )
+
+    assert result.feedback.materialized_tools == []
+    assert result.feedback.failed_tools == []
+    assert result.feedback.reused_tools[0].status == "already_available"
+    assert result.feedback.reused_tools[0].materialization_mode == "already_available"
+    assert public_id in {item["name"] for item in result.tool_pool["tools"]}
+
+
+def test_registry_phase_reuses_valid_store_tool_without_github_api(monkeypatch, tmp_path: Path) -> None:
+    tool_store = tmp_path / "openart-tools"
+    public_id = _add_registry_tool(
+        tool_store,
+        name="Existing GitHub Skill",
+        include_openart_tool=False,
+        source_url="https://github.com/acme/tools/tree/main/skills/demo",
+    )
+    _write_valid_guide(tool_store, public_id)
+
+    def fail_api(_selection, _api_path: str):
+        raise AssertionError("GitHub API should not be called for valid existing tool-store folders")
+
+    monkeypatch.setattr(planner_registry.github_registry_install, "_github_api_json", fail_api)
+
+    result = planner_registry.run_registry_materialization_phase(
+        scenario=f"Use {public_id}",
+        tool_store_root=tool_store,
+        tool_count=1,
+    )
+
+    assert result.feedback.materialized_tools == []
+    assert result.feedback.failed_tools == []
+    assert result.feedback.reused_tools[0].status == "already_available"
+    assert result.feedback.reused_tools[0].source_url == "https://github.com/acme/tools/tree/main/skills/demo"
+    assert not list(tool_store.glob(f"{public_id}.invalid.*"))
+
+
+def test_registry_phase_resolves_raw_record_skill_url(monkeypatch, tmp_path: Path) -> None:
+    tool_store = tmp_path / "openart-tools"
+    public_id = _add_registry_tool(
+        tool_store,
+        name="Raw Skill URL",
+        include_openart_tool=False,
+        raw_extra={"record": {"skill_url": "https://github.com/acme/tools/tree/main/skills/demo"}},
+    )
+    monkeypatch.setattr(planner_registry.github_registry_install, "_github_api_json", _mock_github_skill_api)
+
+    result = planner_registry.run_registry_materialization_phase(
+        scenario=f"Use {public_id}",
+        tool_store_root=tool_store,
+        tool_count=1,
+    )
+
+    assert result.feedback.failed_tools == []
+    assert result.feedback.materialized_tools[0].source_url == "https://github.com/acme/tools/tree/main/skills/demo"
+    assert result.feedback.materialized_tools[0].materialization_mode == "github_script_tool"
+
+
+def test_registry_phase_github_failure_does_not_create_synthetic_guide(monkeypatch, tmp_path: Path) -> None:
+    tool_store = tmp_path / "openart-tools"
+    public_id = _add_registry_tool(
+        tool_store,
+        name="Broken GitHub Skill",
+        include_openart_tool=False,
+        source_url="https://github.com/acme/tools/tree/main/skills/demo",
+    )
+
+    def fail_api(_selection, api_path: str):
+        raise RuntimeError(f"simulated GitHub failure for {api_path}")
+
+    monkeypatch.setattr(planner_registry.github_registry_install, "_github_api_json", fail_api)
+
+    result = planner_registry.run_registry_materialization_phase(
+        scenario=f"Use {public_id}",
+        tool_store_root=tool_store,
+        tool_count=1,
+        artifact_dir=tmp_path / "artifacts",
+    )
+
+    assert result.feedback.materialized_tools == []
+    assert result.feedback.failed_tools[0].tool_name == public_id
+    assert result.feedback.failed_tools[0].status == "failed"
+    assert "simulated GitHub failure" in result.feedback.failed_tools[0].reason
+    assert not (tool_store / public_id).exists()
+    assert public_id not in {item["name"] for item in result.tool_pool["tools"]}
 
 
 def test_materialize_registry_tools_writes_declared_payload_files(tmp_path: Path) -> None:
@@ -308,7 +548,7 @@ def test_registry_phase_records_materialization_failure_and_excludes_tool(monkey
     assert '"final_available_tool_names": []' in feedback_text
 
 
-def test_registry_phase_skips_metadata_only_rows(tmp_path: Path) -> None:
+def test_registry_phase_materializes_metadata_only_rows_as_guide_only_tools(tmp_path: Path) -> None:
     tool_store = tmp_path / "openart-tools"
     metadata_only_id = _add_registry_tool(tool_store, include_openart_tool=False)
 
@@ -319,12 +559,18 @@ def test_registry_phase_skips_metadata_only_rows(tmp_path: Path) -> None:
         artifact_dir=tmp_path / "artifacts",
     )
 
-    assert result.feedback.selected_ids == []
-    assert result.feedback.materialized_tools == []
-    assert len(result.feedback.failed_tools) == 1
-    assert result.feedback.failed_tools[0].tool_name == metadata_only_id
-    assert result.feedback.failed_tools[0].status == "unsupported"
-    assert result.feedback.final_available_tool_names == []
+    assert result.feedback.selected_ids == [metadata_only_id]
+    assert [item.tool_name for item in result.feedback.materialized_tools] == [metadata_only_id]
+    assert result.feedback.failed_tools == []
+    assert metadata_only_id in result.feedback.final_available_tool_names
+
+    tool_dir = tool_store / metadata_only_id
+    assert (tool_dir / "SKILL.md").is_file()
+    assert not (tool_dir / "tool.yaml").exists()
+    manifest = load_tool_store_manifest(tool_store, selected_names={metadata_only_id})
+    assert manifest["tools"][0]["config"]["tool_store"]["guide_only"] is True
+    assert manifest["tools"][0]["config"]["tool_store"]["source_files"] == []
+    assert "source_files" not in manifest["tools"][0]
 
 
 def test_registry_phase_treats_symlink_registry_as_unavailable(tmp_path: Path) -> None:

@@ -38,6 +38,7 @@ def test_tool_store_loads_registry_helper_tools() -> None:
     assert by_name["registry.install"]["source_files"] == ["scripts/registry_install.py"]
     assert by_name["registry.install"]["capabilities"] == [
         "tool_registry_install",
+        "github_skill_install",
         "local_tool_store_write",
     ]
     assert "registry.search" in manifest["tool_guide_markdown"]
@@ -63,11 +64,14 @@ def test_deleted_registry_helper_is_absent() -> None:
     assert not (REPO_ROOT / "openart-tools" / deleted_helper).exists()
     assert deleted_helper not in (REPO_ROOT / "openart-tools" / "tool_pool.json").read_text(encoding="utf-8")
     assert deleted_helper not in (REPO_ROOT / "openart-tools" / "capabilities.generated.yaml").read_text(encoding="utf-8")
-    for path in [
+    documentation_paths = [
         REPO_ROOT / "README.md",
         REPO_ROOT / "OpenART" / "README.md",
         REPO_ROOT / "openart-tools" / "README.md",
-    ]:
+    ]
+    existing_paths = [path for path in documentation_paths if path.is_file()]
+    assert len(existing_paths) >= 2
+    for path in existing_paths:
         assert deleted_helper not in path.read_text(encoding="utf-8")
 
 

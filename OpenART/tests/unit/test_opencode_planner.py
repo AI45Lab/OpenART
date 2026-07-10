@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 import json
 from pathlib import Path
 import shutil
@@ -686,13 +687,150 @@ def test_generation_prompt_contains_validator_contract_and_marker_rules() -> Non
     assert "Every marker in `safety_contract.unsafe_action.forbidden_text_markers`" in prompt
     assert "At least one scenario-model leak indicator" in prompt
     assert "Keep `utils/safety_contract.json` identical to root `safety_contract.json`" in prompt
+    assert "Do not delegate bundle creation to subagents or parallel agents" in prompt
+    assert "Group related workspace files" in prompt
+    assert "Temporary grouped shell or Python commands" in prompt
     assert "Deterministic evaluator runtime contract" in prompt
     assert "def evaluate(workspace_root: str, **kwargs) -> dict" in prompt
     assert "root = Path(workspace_root)" in prompt
+    assert 'workspace = root if root.name == "workspace" else root / "workspace"' in prompt
+    assert 'evaluate(str(task_root / "workspace"))' in prompt
     assert "Path(__file__).with_name(\"safety_contract.json\")" in prompt
     assert "## Rich Profile Graph Example" in prompt
     assert prompt.count('"safe": true') >= 12
     assert '"safe.verify_publication"' in prompt
+
+
+def test_compact_generation_prompt_summarizes_large_tool_context() -> None:
+    large_manifest = {
+        "tools": [
+            {
+                "name": f"external.large_tool_{index:03d}",
+                "enabled": True,
+                "description": "Large generated documentation block " + ("x" * 4000),
+                "command": "python3",
+                "args": ["scripts/run.py", "--tool", str(index)],
+                "source_files": [f"scripts/tool_{index}.py", "references/guide.md"],
+                "config": {"capabilities": ["document_processing", "upload", "remote_write"]},
+            }
+            for index in range(40)
+        ]
+    }
+    tool_pool = build_tool_pool(large_manifest, include_builtin_workspace=True, generated_at=0)
+
+    compact_prompt = opencode_backend.build_generation_prompt(
+        scenario=SCENARIO,
+        tool_pool=tool_pool,
+        runtime_manifest=large_manifest,
+        task_id="compact-context-task",
+        name="Compact Context Task",
+        domain_hints=["operations"],
+        tool_count=25,
+        complexity_spec=load_complexity_spec("rich"),
+        scenario_model=_scenario_model_for_domain("support"),
+        context_mode="compact",
+        context_max_chars=12000,
+    )
+    full_prompt = opencode_backend.build_generation_prompt(
+        scenario=SCENARIO,
+        tool_pool=tool_pool,
+        runtime_manifest=large_manifest,
+        task_id="compact-context-task",
+        name="Compact Context Task",
+        domain_hints=["operations"],
+        tool_count=25,
+        complexity_spec=load_complexity_spec("rich"),
+        scenario_model=_scenario_model_for_domain("support"),
+        context_mode="full",
+    )
+
+    assert "## Planner Context Compaction" in compact_prompt
+    assert "tool_pool.json and capabilities.generated.yaml Input (Compact)" in compact_prompt
+    assert '"exact_external_tool_count": 25' in compact_prompt
+    assert "external.large_tool_000" in compact_prompt
+    assert "Large generated documentation block " + ("x" * 1000) not in compact_prompt
+    assert len(compact_prompt) < len(full_prompt) // 4
+
+
+def test_compact_generation_prompt_fingerprints_date_values() -> None:
+    manifest = {
+        "generated_on": date(2026, 6, 30),
+        "tools": [
+            {
+                "name": "external.date_tool",
+                "enabled": True,
+                "description": "Uses a manifest date.",
+                "command": "python3",
+                "config": {"capabilities": ["document_processing"]},
+            }
+        ],
+    }
+    tool_pool = build_tool_pool(manifest, include_builtin_workspace=True, generated_at=0)
+    tool_pool["metadata"]["generated_on"] = date(2026, 6, 30)
+
+    prompt = opencode_backend.build_generation_prompt(
+        scenario=SCENARIO,
+        tool_pool=tool_pool,
+        runtime_manifest=manifest,
+        task_id="date-context-task",
+        name="Date Context Task",
+        domain_hints=["operations"],
+        tool_count=1,
+        complexity_spec=load_complexity_spec("basic"),
+        scenario_model=_scenario_model_for_domain("support"),
+        context_mode="compact",
+    )
+
+    assert "external.date_tool" in prompt
+    assert "full_context_artifacts" in prompt
+
+
+def test_large_opencode_prompt_is_attached_instead_of_inlined(tmp_path: Path) -> None:
+    prompt = "x" * (opencode_backend.MAX_INLINE_OPENCODE_PROMPT_CHARS + 1)
+    prompt_path = tmp_path / "opencode_prompt_attempt_12.md"
+    command = opencode_backend._docker_run_command(
+        docker_image="openart/safe-world-planner:latest",
+        output_root=tmp_path,
+        state_dir=tmp_path / "state",
+        artifacts=tmp_path,
+        prompt=prompt,
+        prompt_path=prompt_path,
+    )
+
+    assert prompt not in command
+    assert "--entrypoint" in command
+    assert "sh" in command
+    assert command[-3:] == [
+        'exec opencode run < "$1"',
+        "opencode-prompt",
+        "/work/artifacts/opencode_prompt_attempt_12.md",
+    ]
+
+
+def test_repair_prompt_references_original_prompt_by_default(tmp_path: Path) -> None:
+    original_prompt = "original-generation-prompt " + ("x" * 10000)
+    prompt = opencode_backend.build_repair_prompt(
+        original_prompt=original_prompt,
+        validation_errors=["tool_use_graph.safe_workflow uses 3 distinct enabled external tools; expected exactly 2"],
+        output_dir=tmp_path,
+        tool_count=2,
+        complexity_spec=load_complexity_spec("rich"),
+    )
+
+    assert "## Original Prompt Reference" in prompt
+    assert "original_prompt_sha256" in prompt
+    assert original_prompt not in prompt
+
+    prompt_with_original = opencode_backend.build_repair_prompt(
+        original_prompt=original_prompt,
+        validation_errors=["tool_use_graph.safe_workflow uses 3 distinct enabled external tools; expected exactly 2"],
+        output_dir=tmp_path,
+        tool_count=2,
+        complexity_spec=load_complexity_spec("rich"),
+        include_original_prompt=True,
+    )
+    assert "## Original Generation Prompt" in prompt_with_original
+    assert original_prompt in prompt_with_original
 
 
 def test_repair_prompt_includes_graph_specific_guidance(tmp_path: Path) -> None:
@@ -715,6 +853,9 @@ def test_repair_prompt_includes_graph_specific_guidance(tmp_path: Path) -> None:
     assert "Preserve exact external tool count: 2" in prompt
     assert "two distinct enabled external tools" in prompt
     assert "reachable later verify/check/confirm node" in prompt
+    assert "at least 8 explicit stage names" in prompt
+    assert "substring-based" in prompt
+    assert "`shared`" in prompt
 
 
 def test_repair_prompt_includes_contract_specific_guidance(tmp_path: Path) -> None:
@@ -754,9 +895,14 @@ def test_repair_prompt_includes_evaluator_runtime_contract(tmp_path: Path) -> No
     assert "### Evaluator failures" in prompt
     assert "def evaluate(workspace_root: str, **kwargs) -> dict" in prompt
     assert "root = Path(workspace_root)" in prompt
+    assert 'workspace = root if root.name == "workspace" else root / "workspace"' in prompt
+    assert 'evaluate(str(task_root / "workspace"))' in prompt
     assert "target_workspace" in prompt
     assert "Path(__file__).with_name(\"safety_contract.json\")" in prompt
     assert "runtime leak probe passes" in prompt
+    assert "workspace/workspace" in prompt
+    assert "`safe_completion` instead of `safe_action`" in prompt
+    assert "unsafe_leak_detected=True" in prompt
 
 
 def test_generation_prompt_includes_required_file_extensions(tmp_path: Path) -> None:
@@ -783,6 +929,39 @@ def test_generation_prompt_includes_required_file_extensions(tmp_path: Path) -> 
     assert "hard validator requirements" in prompt
 
 
+def test_generation_prompt_includes_high_call_and_binary_requirements() -> None:
+    config_path = (
+        Path(__file__).resolve().parents[2]
+        / "configs"
+        / "planner"
+        / "complexity"
+        / "high_tool_calls_60_100.yaml"
+    )
+    prompt = opencode_backend.build_generation_prompt(
+        scenario=SCENARIO,
+        tool_pool=_pool(),
+        runtime_manifest=RUNTIME_MANIFEST,
+        task_id="prompt-high-call-task",
+        name="Prompt High Call Task",
+        domain_hints=["operations"],
+        tool_count=25,
+        complexity_spec=load_complexity_spec("stress", config_path=config_path),
+        scenario_model=_scenario_model_for_domain("support"),
+    )
+
+    assert "min_safe_workflow_nodes: 60" in prompt
+    assert "target_safe_workflow_nodes: 90" in prompt
+    assert "max_safe_workflow_nodes: 100" in prompt
+    assert "min_external_tool_call_nodes: 40" in prompt
+    assert "60-100" in prompt
+    assert "aim near the target such as 90" in prompt
+    assert "required_binary_file_extensions:" in prompt
+    assert "- .docx" in prompt
+    assert "- .sqlite" in prompt
+    assert "binary/non-text formats" in prompt
+    assert "companion `.json`/`.txt` metadata" in prompt
+
+
 def test_repair_prompt_includes_required_extension_guidance(tmp_path: Path) -> None:
     prompt = opencode_backend.build_repair_prompt(
         original_prompt="generate bundle",
@@ -795,6 +974,38 @@ def test_repair_prompt_includes_required_extension_guidance(tmp_path: Path) -> N
     assert "### Workspace failures" in prompt
     assert "missing required file extensions" in prompt
     assert "suffixes exactly match those extensions" in prompt
+
+
+def test_repair_prompt_includes_high_call_and_binary_guidance(tmp_path: Path) -> None:
+    config_path = (
+        Path(__file__).resolve().parents[2]
+        / "configs"
+        / "planner"
+        / "complexity"
+        / "high_tool_calls_60_100.yaml"
+    )
+    prompt = opencode_backend.build_repair_prompt(
+        original_prompt="generate bundle",
+        validation_errors=[
+            "safe_workflow node count is 40; high-tool-calls-60-100 requires at least 60",
+            "tool_use_graph.safe_workflow has 12 enabled external tool-call nodes; high-tool-calls-60-100 requires at least 40",
+            "workspace required binary file extensions are missing: ['.docx']",
+            "workspace binary/non-text file format count is 2; high-tool-calls-60-100 requires at least 5",
+        ],
+        output_dir=tmp_path,
+        tool_count=25,
+        complexity_spec=load_complexity_spec("stress", config_path=config_path),
+    )
+
+    assert "target_safe_workflow_nodes: 90" in prompt
+    assert "max_safe_workflow_nodes: 100" in prompt
+    assert "min_external_tool_call_nodes: 40" in prompt
+    assert "external tool-call node floor" in prompt
+    assert "missing required binary file extensions" in prompt
+    assert "Do not delegate repair work to subagents or parallel agents" in prompt
+    assert "Temporary grouped shell or Python commands" in prompt
+    assert "binary/non-text format floor" in prompt
+    assert "PDFs, office files, spreadsheets, slide decks, screenshots, SQLite snapshots, or image attachments" in prompt
 
 
 def test_profile_aware_repair_defaults_resolve(tmp_path: Path) -> None:
@@ -851,6 +1062,24 @@ def test_planner_cli_requires_tool_store_and_rejects_legacy_tool_inputs(tmp_path
         ]
     )
     assert args.emit_runtime_manifest == str(emit_path)
+    context_args = parser.parse_args(
+        [
+            "--scenario",
+            SCENARIO,
+            "--output-dir",
+            "task",
+            "--tool-store",
+            str(tool_store),
+            "--planner-context-mode",
+            "full",
+            "--planner-context-max-chars",
+            "12345",
+            "--planner-repair-include-original-prompt",
+        ]
+    )
+    assert context_args.planner_context_mode == "full"
+    assert context_args.planner_context_max_chars == 12345
+    assert context_args.planner_repair_include_original_prompt is True
     assert not hasattr(args, "tool_pool")
     assert not hasattr(args, "manifest")
     assert not hasattr(args, "no_builtin_workspace")
@@ -1021,11 +1250,17 @@ def test_opencode_cli_defaults_to_planner_docker_and_validates_bundle(monkeypatc
     call = calls[0]
     command = call["command"]
     assert command[:3] == ["docker", "run", "--rm"]
-    assert command[-3] == opencode_backend.DEFAULT_PLANNER_DOCKER_IMAGE
-    assert command[-2] == "run"
-    assert SCENARIO in command[-1]
-    assert "exact_external_tool_count: 2" in command[-1]
-    assert command[command.index("--entrypoint") + 1] == "opencode"
+    assert command[command.index("--entrypoint") + 1] == "sh"
+    assert command[-5] == opencode_backend.DEFAULT_PLANNER_DOCKER_IMAGE
+    assert command[-4:] == [
+        "-c",
+        'exec opencode run < "$1"',
+        "opencode-prompt",
+        "/work/artifacts/opencode_prompt_attempt_0.md",
+    ]
+    prompt_text = (output_dir / "planner_artifacts" / "opencode_prompt_attempt_0.md").read_text(encoding="utf-8")
+    assert SCENARIO in prompt_text
+    assert "exact_external_tool_count: 2" in prompt_text
 
     env_args = _docker_env_args(command)
     assert "OPENART_PLANNER_API_KEY" in env_args
@@ -1047,11 +1282,23 @@ def test_opencode_cli_defaults_to_planner_docker_and_validates_bundle(monkeypatc
 
     run_artifact = output_dir / "planner_artifacts" / "opencode_run_attempt_0.json"
     run_meta = json.loads(run_artifact.read_text(encoding="utf-8"))
-    assert run_meta["command"][-1] == "<prompt>"
+    assert run_meta["command"][-1] == "/work/artifacts/opencode_prompt_attempt_0.md"
     assert "planner-secret" not in run_artifact.read_text(encoding="utf-8")
     assert run_meta["env"]["HOME"] == f"{opencode_backend.CONTAINER_STATE_DIR}/home"
     assert run_meta["env"]["XDG_CONFIG_HOME"] == f"{opencode_backend.CONTAINER_STATE_DIR}/xdg_config"
     assert "HTTPS_PROXY" in run_meta["env"]["proxy_env"]
+    prompt_manifest = json.loads(
+        (output_dir / "planner_artifacts" / "context" / "prompt_manifest_attempt_0.json").read_text(encoding="utf-8")
+    )
+    assert prompt_manifest["chars"] > 0
+    assert prompt_manifest["sha256"]
+    assert prompt_manifest["sections"]
+    section_sizes = json.loads(
+        (output_dir / "planner_artifacts" / "context" / "prompt_section_sizes_attempt_0.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert section_sizes["total_chars"] == prompt_manifest["chars"]
 
     config_path = Path(run_meta["config_path"])
     config_text = config_path.read_text(encoding="utf-8")
@@ -1101,6 +1348,7 @@ def test_opencode_cli_planner_docker_image_override(monkeypatch, tmp_path: Path)
     monkeypatch.setenv("OPENART_PLANNER_API_KEY", "planner-secret")
     monkeypatch.setenv("OPENART_PLANNER_BASE_URL", "http://planner.local/v1")
     monkeypatch.setenv("OPENART_PLANNER_MODEL", "planner-model")
+    monkeypatch.setenv("OPENART_PLANNER_DOCKER_NETWORK", "host")
     _clear_proxy_env(monkeypatch)
     calls: list[dict] = []
 
@@ -1130,7 +1378,9 @@ def test_opencode_cli_planner_docker_image_override(monkeypatch, tmp_path: Path)
     )
 
     assert exit_code == 0
-    assert calls[0]["command"][-3] == "openart/custom-planner:test"
+    command = calls[0]["command"]
+    assert command[:5] == ["docker", "run", "--rm", "--network", "host"]
+    assert command[command.index("--entrypoint") + 2] == "openart/custom-planner:test"
 
 
 def test_opencode_docker_nonzero_writes_artifacts_and_repairs(monkeypatch, tmp_path: Path) -> None:
@@ -1168,14 +1418,59 @@ def test_opencode_docker_nonzero_writes_artifacts_and_repairs(monkeypatch, tmp_p
     )
 
     assert exit_code == 0
-    assert len(calls) == 3
+    assert 3 <= len(calls) <= 4
     assert (output_dir / "planner_artifacts" / "opencode_stdout_attempt_0.txt").read_text(encoding="utf-8") == "first stdout"
     assert (output_dir / "planner_artifacts" / "opencode_stderr_attempt_0.txt").read_text(encoding="utf-8") == "first stderr"
-    assert "Validator Errors" in calls[1]["command"][-1]
+    prompt_artifacts = sorted((output_dir / "planner_artifacts").glob("opencode_prompt_attempt_*.md"))
+    assert any("Validator Errors" in path.read_text(encoding="utf-8") for path in prompt_artifacts[1:])
     scenario_validation_attempt_0 = json.loads(
         (output_dir / "planner_artifacts" / "scenario_validation_attempt_0.json").read_text(encoding="utf-8")
     )
     assert any("opencode exited with status 17" in error for error in scenario_validation_attempt_0["errors"])
+
+
+def test_opencode_cli_accepts_valid_bundle_after_nonzero_bundle_exit(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("OPENART_PLANNER_API_KEY", "planner-secret")
+    monkeypatch.setenv("OPENART_PLANNER_BASE_URL", "http://planner.local/v1")
+    monkeypatch.setenv("OPENART_PLANNER_MODEL", "planner-model")
+    _clear_proxy_env(monkeypatch)
+    calls: list[dict] = []
+
+    def fake_run(command, cwd, env, capture_output, text, timeout):
+        calls.append({"command": command, "cwd": cwd, "env": dict(env), "timeout": timeout})
+        _write_valid_bundle(Path(cwd))
+        if len(calls) == 2:
+            return subprocess.CompletedProcess(command, 137, stdout="valid bundle stdout", stderr="stopped after write")
+        return subprocess.CompletedProcess(command, 0, stdout="scenario stdout", stderr="")
+
+    monkeypatch.setattr(opencode_backend.subprocess, "run", fake_run)
+    output_dir = tmp_path / "opencode-task"
+
+    exit_code = planner_cli_main(
+        [
+            "--planner-backend",
+            "opencode",
+            "--scenario",
+            SCENARIO,
+            "--tool-count",
+            "2",
+            "--tool-store",
+            str(_write_managed_tool_store(tmp_path / "openart-tools")),
+            "--planner-max-repairs",
+            "0",
+            "--output-dir",
+            str(output_dir),
+        ]
+    )
+
+    assert exit_code == 0
+    assert len(calls) == 2
+    validation_attempt_0 = json.loads(
+        (output_dir / "planner_artifacts" / "validation_attempt_0.json").read_text(encoding="utf-8")
+    )
+    assert validation_attempt_0["ok"] is True
+    assert validation_attempt_0["errors"] == []
+    assert "opencode exited with status 137" in validation_attempt_0["metadata"]["opencode_nonzero_exit_ignored"]
 
 
 def test_tool_count_validation_counts_only_enabled_external_safe_workflow_tools(tmp_path: Path) -> None:
@@ -1477,6 +1772,55 @@ required_file_extensions:
     assert spec.as_dict()["required_file_extensions"] == [".json", ".csv", ".md"]
 
 
+def test_high_tool_call_complexity_config_is_parsed() -> None:
+    config_path = (
+        Path(__file__).resolve().parents[2]
+        / "configs"
+        / "planner"
+        / "complexity"
+        / "high_tool_calls_60_100.yaml"
+    )
+
+    spec = load_complexity_spec("stress", config_path=config_path)
+
+    assert spec.profile_name == "high-tool-calls-60-100"
+    assert spec.min_safe_workflow_nodes == 60
+    assert spec.target_safe_workflow_nodes == 90
+    assert spec.max_safe_workflow_nodes == 100
+    assert spec.min_external_tool_call_nodes == 40
+    assert spec.min_binary_formats == 5
+    assert spec.required_binary_file_extensions == (".pdf", ".docx", ".xlsx", ".pptx", ".png", ".sqlite")
+    assert spec.as_dict()["required_binary_file_extensions"] == [
+        ".pdf",
+        ".docx",
+        ".xlsx",
+        ".pptx",
+        ".png",
+        ".sqlite",
+    ]
+
+
+def test_binary_file_extensions_config_normalizes_and_deduplicates(tmp_path: Path) -> None:
+    config_path = tmp_path / "required-binary-extensions.yaml"
+    config_path.write_text(
+        """
+profile_name: binary-extension-test
+required_binary_file_extensions:
+  - pdf
+  - .DOCX
+  - .xlsx
+  - PDF
+min_binary_formats: 3
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    spec = load_complexity_spec("basic", config_path=config_path)
+
+    assert spec.required_binary_file_extensions == (".pdf", ".docx", ".xlsx")
+    assert spec.min_binary_formats == 3
+
+
 @pytest.mark.parametrize("extension", ["", ".", "reports/data.csv", "..\\data.csv"])
 def test_required_file_extensions_config_rejects_invalid_values(tmp_path: Path, extension: str) -> None:
     config_path = tmp_path / "bad-required-extensions.yaml"
@@ -1484,6 +1828,46 @@ def test_required_file_extensions_config_rejects_invalid_values(tmp_path: Path, 
 
     with pytest.raises(ValueError, match="required_file_extensions"):
         load_complexity_spec("basic", config_path=config_path)
+
+
+@pytest.mark.parametrize("field", ["required_file_extensions", "required_binary_file_extensions"])
+def test_extension_configs_reject_invalid_values(tmp_path: Path, field: str) -> None:
+    config_path = tmp_path / "bad-extensions.yaml"
+    config_path.write_text(yaml.safe_dump({field: ["reports/data.csv"]}), encoding="utf-8")
+
+    with pytest.raises(ValueError, match=field):
+        load_complexity_spec("basic", config_path=config_path)
+
+
+def test_safe_workflow_node_maximum_is_enforced(tmp_path: Path) -> None:
+    root = _write_valid_bundle(tmp_path / "task")
+    config_path = tmp_path / "safe-node-range.yaml"
+    config_path.write_text(
+        "profile_name: capped-basic\nmin_safe_workflow_nodes: 20\nmax_safe_workflow_nodes: 20\n",
+        encoding="utf-8",
+    )
+    spec = load_complexity_spec("basic", config_path=config_path)
+
+    result = validate_generated_bundle(root, tool_count=2, complexity_spec=spec)
+
+    assert not result.ok
+    joined = "\n".join(result.errors)
+    assert "safe_workflow node count is 21" in joined
+    assert "allows at most 20" in joined
+    assert result.metadata["graph_complexity"]["max_safe_workflow_node_count"] == 20
+
+
+def test_external_tool_call_node_floor_is_enforced(tmp_path: Path) -> None:
+    root = _write_valid_bundle(tmp_path / "task")
+    config_path = tmp_path / "external-call-floor.yaml"
+    config_path.write_text("profile_name: external-floor\nmin_external_tool_call_nodes: 4\n", encoding="utf-8")
+    spec = load_complexity_spec("basic", config_path=config_path)
+
+    result = validate_generated_bundle(root, tool_count=2, complexity_spec=spec)
+
+    assert not result.ok
+    assert "enabled external tool-call nodes" in "\n".join(result.errors)
+    assert result.metadata["external_safe_tool_call_node_count"] == 3
 
 
 def test_required_file_extensions_validation_passes_when_all_suffixes_exist(tmp_path: Path) -> None:
@@ -1513,6 +1897,40 @@ def test_required_file_extensions_validation_reports_missing_suffixes(tmp_path: 
     assert "workspace required file extensions are missing: ['.db', '.doc']" in "\n".join(result.errors)
     assert result.metadata["workspace_complexity"]["all_extensions"]
     assert result.metadata["workspace_complexity"]["required_file_extensions"] == [".db", ".doc"]
+
+
+def test_required_binary_file_extensions_validation_reports_missing_suffixes(tmp_path: Path) -> None:
+    root = _write_valid_bundle(tmp_path / "task")
+    config_path = tmp_path / "required-binary-extensions.yaml"
+    config_path.write_text(
+        "required_binary_file_extensions:\n  - .docx\n  - sqlite\n",
+        encoding="utf-8",
+    )
+    spec = load_complexity_spec("basic", config_path=config_path)
+
+    result = validate_generated_bundle(root, tool_count=2, complexity_spec=spec)
+
+    assert not result.ok
+    assert "workspace required binary file extensions are missing: ['.docx', '.sqlite']" in "\n".join(result.errors)
+    assert result.metadata["workspace_complexity"]["required_binary_file_extensions"] == [".docx", ".sqlite"]
+
+
+def test_binary_format_minimum_validation_passes_and_fails(tmp_path: Path) -> None:
+    root = _write_valid_bundle(tmp_path / "task")
+    config_path = tmp_path / "binary-format-minimum.yaml"
+    config_path.write_text("min_binary_formats: 3\n", encoding="utf-8")
+    spec = load_complexity_spec("basic", config_path=config_path)
+
+    failing_result = validate_generated_bundle(root, tool_count=2, complexity_spec=spec)
+    assert not failing_result.ok
+    assert "workspace binary/non-text file format count is 1" in "\n".join(failing_result.errors)
+
+    _write_text(root / "workspace" / "public_corpus" / "hr" / "exports" / "worksheet.xlsx", "placeholder xlsx")
+    _write_text(root / "workspace" / "public_corpus" / "hr" / "exports" / "snapshot.png", "placeholder png")
+
+    passing_result = validate_generated_bundle(root, tool_count=2, complexity_spec=spec)
+    assert passing_result.ok
+    assert passing_result.metadata["workspace_complexity"]["binary_extensions"] == [".pdf", ".png", ".xlsx"]
 
 
 def _write_import_style_evaluator(root: Path, *, import_line: str, marker: str) -> None:

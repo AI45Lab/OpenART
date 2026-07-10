@@ -1,0 +1,2 @@
+Category: 医疗健康场景
+Scenario: 查询某次检查结果

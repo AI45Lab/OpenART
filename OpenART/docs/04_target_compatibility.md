@@ -34,7 +34,7 @@ pi
 prompt_cli
 ```
 
-OpenCode, Claude Code, Codex, Gemini, and Cursor should be configured with:
+OpenCode, Claude Code, Codex, Gemini, Continue CLI, and Reasonix should be configured with:
 
 ```yaml
 target:
@@ -239,13 +239,21 @@ XDG_CONFIG_HOME/...
 | Target config | Runner | Surface family | Delivery |
 |---------------|--------|----------------|----------|
 | `target-configs/target.yaml` | `prompt_cli` | `opencode` | hybrid env + `opencode.json` |
+| `target-configs/target.aider.yaml` | `prompt_cli` | `aider` | env only |
 | `target-configs/target.claude-code.yaml` | `prompt_cli` | `claude_code` | env only + pre-run settings hook |
 | `target-configs/target.codex.yaml` | `prompt_cli` | `codex` | hybrid env + TOML template |
+| `target-configs/target.copilot-cli.yaml` | `prompt_cli` | `copilot_cli` | env only |
 | `target-configs/target.gemini.yaml` | `prompt_cli` | `gemini` | env only |
-| `target-configs/target.cursor.yaml` | `prompt_cli` | `cursor` | env only |
+| `target-configs/target.continue-cli.yaml` | `prompt_cli` | `continue_cli` | hybrid env + YAML template |
+| `target-configs/target.reasonix.yaml` | `prompt_cli` | `reasonix` | env only |
+| `target-configs/target.deepseek-tui.yaml` | `prompt_cli` | `deepseek_tui` | hybrid env + TOML template |
+| `target-configs/target.goose.yaml` | `prompt_cli` | `goose` | hybrid env + YAML template |
 | `target-configs/target.hermes.yaml` | `hermes` | `hermes` | hybrid env + YAML |
+| `target-configs/target.kilo.yaml` | `prompt_cli` | `kilo` | hybrid env + JSON template |
 | `target-configs/target.nanobot.yaml` | `nanobot` | `nanobot` | JSON template |
+| `target-configs/target.oh-my-pi.yaml` | `prompt_cli` | `oh_my_pi` | hybrid env + YAML template |
 | `target-configs/target.pi.yaml` | `pi` | `pi` | hybrid env + JSON template |
+| `target-configs/target.qwen-code.yaml` | `prompt_cli` | `qwen_code` | hybrid env + JSON template |
 | `target-configs/target.local-smoke.yaml` | `prompt_cli` | none | stdin smoke command |
 
 ## OpenCode Example
@@ -358,19 +366,6 @@ The attacker can only make effective target-native changes when:
 2. the attacker has `target_control_plane: true`
 3. the attacker lists the vector in `vector_permissions`, or provider defaults apply
 
-## Workspace vs Mounted Surface Mode
-
-`target_surface_mount_mode` controls how final target-native files reach the
-target:
-
-| Mode | Meaning |
-|------|---------|
-| `workspace` | Materialize final control files into the shared workspace |
-| `mounted` | Keep control files in an overlay area and mount/merge as needed |
-
-Targets with HOME-relative control files, such as Codex config, often use
-`mounted` mode to reduce leakage into the normal workspace tree.
-
 ## Adding A New Target
 
 1. Prefer `framework: prompt_cli`.
@@ -378,10 +373,8 @@ Targets with HOME-relative control files, such as Codex config, often use
 3. Set `surface_family` when the target has native surface files.
 4. Add `model_integration.binding` and `model_integration.delivery`.
 5. Add `attack_surfaces` for native files the target actually trusts.
-6. Use `target_surface_mount_mode: mounted` only when files should be overlaid
-   into runner HOME or config locations instead of normal workspace paths.
-7. Add a target config under `configs/target-configs/target.<name>.yaml`.
-8. Add a unit test for command rendering/model delivery when behavior is new.
+6. Add a target config under `configs/target-configs/target.<name>.yaml`.
+7. Add a unit test for command rendering/model delivery when behavior is new.
 
 ## Audit Points
 

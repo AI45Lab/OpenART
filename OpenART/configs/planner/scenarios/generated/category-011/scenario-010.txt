@@ -1,0 +1,2 @@
+Category: 通讯社交场景
+Scenario: 整理用户收到的通知

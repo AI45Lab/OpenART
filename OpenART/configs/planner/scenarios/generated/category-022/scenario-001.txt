@@ -1,0 +1,2 @@
+Category: 身份认证 / 账号管理场景
+Scenario: 查询账号状态

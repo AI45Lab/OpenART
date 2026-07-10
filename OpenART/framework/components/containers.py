@@ -10,13 +10,15 @@ This module merges all container types:
 
 from __future__ import annotations
 
-import base64
+from contextlib import contextmanager
 import json
+import os
 import shlex
 import subprocess
+import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 
 from framework.core.helpers import append_runtime_log, snapshot_dir
 from framework.models.container import ContainerSpec, MountSpec
@@ -25,6 +27,35 @@ from framework.models.common import ContainerState
 
 OPENART_MANAGED_LABEL = "org.openart.managed"
 OPENART_RUN_ID_LABEL = "org.openart.run_id"
+_DOCKER_ENV_INLINE_MAX_BYTES = 32 * 1024
+_DOCKER_ENV_INLINE_MAX_ITEM_BYTES = 8 * 1024
+_DOCKER_ENV_INLINE_MAX_VARS = 64
+_DOCKER_ENV_FILE_DIR = "/tmp"
+
+
+def _normalize_env(env: dict[str, str]) -> list[tuple[str, str]]:
+    return [(str(key), str(value)) for key, value in env.items()]
+
+
+def _inline_env_size(env_items: list[tuple[str, str]]) -> int:
+    return sum(len(key.encode("utf-8")) + len(value.encode("utf-8")) + 2 for key, value in env_items)
+
+
+def _inline_env_item_size(key: str, value: str) -> int:
+    return len(key.encode("utf-8")) + len(value.encode("utf-8")) + 1
+
+
+def _validate_env_file_item(key: str, value: str) -> None:
+    if not key:
+        raise ValueError("Docker environment variable name cannot be empty")
+    if "=" in key:
+        raise ValueError(f"Docker environment variable name cannot contain '=': {key!r}")
+    if "\x00" in key or "\x00" in value:
+        raise ValueError(f"Docker environment variable {key!r} cannot contain NUL bytes")
+    if "\n" in key or "\r" in key or "\n" in value or "\r" in value:
+        raise ValueError(
+            f"Docker --env-file cannot safely encode newline characters in environment variable {key!r}"
+        )
 
 
 class ContainerBase(ABC):
@@ -99,8 +130,59 @@ class DockerContainer(ContainerBase):
         except OSError as exc:
             raise RuntimeError(f"OS error running command: {exc}") from exc
 
+    def _run_with_input(self, cmd: list[str], input_data: bytes) -> tuple[int, str, str]:
+        try:
+            proc = subprocess.run(cmd, input=input_data, capture_output=True, check=False)
+            stdout = proc.stdout.decode("utf-8", errors="replace")
+            stderr = proc.stderr.decode("utf-8", errors="replace")
+            return proc.returncode, stdout, stderr
+        except FileNotFoundError as exc:
+            raise RuntimeError(f"Command not found: {cmd[0]}. Is Docker installed?") from exc
+        except PermissionError as exc:
+            raise RuntimeError(f"Permission denied running: {' '.join(cmd)}") from exc
+        except OSError as exc:
+            raise RuntimeError(f"OS error running command: {exc}") from exc
+
     def _target(self) -> str:
         return self.container_id or self.spec.name
+
+    @contextmanager
+    def _docker_env_args(self, env: Optional[dict[str, str]]) -> Iterator[list[str]]:
+        if not env:
+            yield []
+            return
+
+        env_items = _normalize_env(env)
+        if (
+            len(env_items) <= _DOCKER_ENV_INLINE_MAX_VARS
+            and _inline_env_size(env_items) <= _DOCKER_ENV_INLINE_MAX_BYTES
+            and all(_inline_env_item_size(key, value) <= _DOCKER_ENV_INLINE_MAX_ITEM_BYTES for key, value in env_items)
+        ):
+            args: list[str] = []
+            for key, value in env_items:
+                args.extend(["-e", f"{key}={value}"])
+            yield args
+            return
+
+        for key, value in env_items:
+            _validate_env_file_item(key, value)
+
+        fd, path = tempfile.mkstemp(
+            prefix="openart-docker-env-",
+            suffix=".env",
+            dir=_DOCKER_ENV_FILE_DIR,
+            text=True,
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                for key, value in env_items:
+                    handle.write(f"{key}={value}\n")
+            yield ["--env-file", path]
+        finally:
+            try:
+                os.unlink(path)
+            except FileNotFoundError:
+                pass
 
     def build(self) -> None:
         if not self.spec.build_context:
@@ -162,33 +244,33 @@ class DockerContainer(ContainerBase):
         for key, value in labels.items():
             cmd.extend(["--label", f"{key}={value}"])
 
-        for key, value in self.spec.env.items():
-            cmd.extend(["-e", f"{key}={value}"])
+        with self._docker_env_args(self.spec.env) as env_args:
+            cmd.extend(env_args)
 
-        for mount in self.spec.mounts:
-            spec = f"type=bind,src={mount.host_path},dst={mount.container_path}"
-            if mount.read_only:
-                spec += ",readonly"
-            cmd.extend(["--mount", spec])
+            for mount in self.spec.mounts:
+                spec = f"type=bind,src={mount.host_path},dst={mount.container_path}"
+                if mount.read_only:
+                    spec += ",readonly"
+                cmd.extend(["--mount", spec])
 
-        for port in self.spec.ports:
-            mapping = f"{port.container_port}/{port.protocol}"
-            if port.host_port is not None:
-                mapping = f"{port.host_port}:{mapping}"
-            cmd.extend(["-p", mapping])
+            for port in self.spec.ports:
+                mapping = f"{port.container_port}/{port.protocol}"
+                if port.host_port is not None:
+                    mapping = f"{port.host_port}:{mapping}"
+                cmd.extend(["-p", mapping])
 
-        if self.spec.healthcheck:
-            health = self.spec.healthcheck
-            cmd.extend(["--health-cmd", " ".join(health.command)])
-            cmd.extend(["--health-interval", f"{health.interval_seconds}s"])
-            cmd.extend(["--health-timeout", f"{health.timeout_seconds}s"])
-            cmd.extend(["--health-retries", str(health.retries)])
+            if self.spec.healthcheck:
+                health = self.spec.healthcheck
+                cmd.extend(["--health-cmd", " ".join(health.command)])
+                cmd.extend(["--health-interval", f"{health.interval_seconds}s"])
+                cmd.extend(["--health-timeout", f"{health.timeout_seconds}s"])
+                cmd.extend(["--health-retries", str(health.retries)])
 
-        cmd.append(image)
-        if self.spec.command:
-            cmd.extend(self.spec.command)
+            cmd.append(image)
+            if self.spec.command:
+                cmd.extend(self.spec.command)
 
-        code, stdout, stderr = self._run(cmd)
+            code, stdout, stderr = self._run(cmd)
         if code != 0:
             self.state = ContainerState.FAILED.value
             raise RuntimeError(f"docker create failed: {stderr.strip()}")
@@ -241,19 +323,31 @@ class DockerContainer(ContainerBase):
         timeout_seconds: Optional[int] = None,
     ) -> tuple[int, str, str]:
         docker_cmd = ["docker", "exec"]
-        if env:
-            for key, value in env.items():
-                docker_cmd.extend(["-e", f"{key}={value}"])
-        docker_cmd.append(self._target())
-        if timeout_seconds and timeout_seconds > 0:
-            docker_cmd.extend([
-                "/usr/bin/timeout",
-                "--signal=TERM",
-                "--kill-after=10s",
-                f"{int(timeout_seconds)}s",
-            ])
-        docker_cmd.extend(cmd)
-        return self._run(docker_cmd)
+        with self._docker_env_args(env) as env_args:
+            docker_cmd.extend(env_args)
+            docker_cmd.append(self._target())
+            if timeout_seconds and timeout_seconds > 0:
+                docker_cmd.extend([
+                    "/usr/bin/timeout",
+                    "--signal=TERM",
+                    "--kill-after=10s",
+                    f"{int(timeout_seconds)}s",
+                ])
+            docker_cmd.extend(cmd)
+            return self._run(docker_cmd)
+
+    def exec_with_stdin(
+        self,
+        cmd: list[str],
+        input_data: bytes,
+        env: Optional[dict[str, str]] = None,
+    ) -> tuple[int, str, str]:
+        docker_cmd = ["docker", "exec", "-i"]
+        with self._docker_env_args(env) as env_args:
+            docker_cmd.extend(env_args)
+            docker_cmd.append(self._target())
+            docker_cmd.extend(cmd)
+            return self._run_with_input(docker_cmd, input_data)
 
     def logs(self, tail: int = 500) -> str:
         code, stdout, stderr = self._run(
@@ -400,28 +494,18 @@ class RunnerContainer(DockerContainer):
     """Container for runner execution with file I/O helpers."""
 
     def write_bytes_file(self, path: str, content: bytes, env: Optional[dict[str, str]] = None) -> None:
-        payload = base64.b64encode(content).decode("ascii")
         script = (
-            "import base64, pathlib, sys; "
+            "import pathlib, sys; "
             "p=pathlib.Path(sys.argv[1]); "
             "p.parent.mkdir(parents=True, exist_ok=True); "
-            "p.write_bytes(base64.b64decode(sys.argv[2]))"
+            "p.write_bytes(sys.stdin.buffer.read())"
         )
-        code, _, stderr = self.exec(["python3", "-c", script, path, payload], env=env)
+        code, _, stderr = self.exec_with_stdin(["python3", "-c", script, path], content, env=env)
         if code != 0:
             raise RuntimeError(f"failed writing file {path}: {stderr.strip()}")
 
     def write_text_file(self, path: str, content: str, env: Optional[dict[str, str]] = None) -> None:
-        payload = base64.b64encode(content.encode("utf-8")).decode("ascii")
-        script = (
-            "import base64, pathlib, sys; "
-            "p=pathlib.Path(sys.argv[1]); "
-            "p.parent.mkdir(parents=True, exist_ok=True); "
-            "p.write_bytes(base64.b64decode(sys.argv[2]))"
-        )
-        code, _, stderr = self.exec(["python3", "-c", script, path, payload], env=env)
-        if code != 0:
-            raise RuntimeError(f"failed writing file {path}: {stderr.strip()}")
+        self.write_bytes_file(path, content.encode("utf-8"), env=env)
 
     def ensure_dir(self, path: str, env: Optional[dict[str, str]] = None) -> None:
         code, _, stderr = self.exec(["mkdir", "-p", path], env=env)

@@ -13,9 +13,12 @@ from .complexity import (
     load_complexity_spec,
 )
 from .opencode_backend import (
+    DEFAULT_PLANNER_CONTEXT_MAX_CHARS,
+    DEFAULT_PLANNER_CONTEXT_MODE,
     DEFAULT_PLANNER_DOCKER_IMAGE,
     OpenCodePlannerBackend,
     OpenCodePlannerError,
+    PLANNER_CONTEXT_MODES,
     build_generation_prompt,
     build_repair_prompt,
     build_scenario_model_prompt,
@@ -70,6 +73,26 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=None,
         help="Maximum OpenCode repair attempts after validation failure. Default: profile-aware auto.",
+    )
+    parser.add_argument(
+        "--planner-context-mode",
+        choices=PLANNER_CONTEXT_MODES,
+        default=DEFAULT_PLANNER_CONTEXT_MODE,
+        help=(
+            "Prompt context mode. compact summarizes large tool inputs and references full on-disk artifacts; "
+            "full embeds complete tool_pool.json and capabilities.generated.yaml. Default: compact."
+        ),
+    )
+    parser.add_argument(
+        "--planner-context-max-chars",
+        type=int,
+        default=DEFAULT_PLANNER_CONTEXT_MAX_CHARS,
+        help=f"Soft character budget for compact planner context blocks. Default: {DEFAULT_PLANNER_CONTEXT_MAX_CHARS}.",
+    )
+    parser.add_argument(
+        "--planner-repair-include-original-prompt",
+        action="store_true",
+        help="Embed the full original prompt in repair prompts instead of the default hash/reference.",
     )
     parser.add_argument(
         "--tool-count",
@@ -161,6 +184,8 @@ def _run_opencode_backend(
     )
     if planner_max_repairs < 0:
         raise ValueError("--planner-max-repairs must be non-negative")
+    if args.planner_context_max_chars <= 0:
+        raise ValueError("--planner-context-max-chars must be positive")
 
     output_dir = prepare_output_dir(args.output_dir, overwrite=args.overwrite)
     artifacts = output_dir / "planner_artifacts"
@@ -189,6 +214,8 @@ def _run_opencode_backend(
         tool_count=args.tool_count,
         complexity_spec=complexity_spec,
         registry_feedback=registry_feedback,
+        context_mode=args.planner_context_mode,
+        context_max_chars=args.planner_context_max_chars,
     )
     backend = OpenCodePlannerBackend(docker_image=args.planner_docker_image)
     scenario_errors: list[str] = []
@@ -204,6 +231,7 @@ def _run_opencode_backend(
                 output_dir=output_dir,
                 tool_count=args.tool_count,
                 complexity_spec=complexity_spec,
+                include_original_prompt=True,
             )
         )
         run = backend.run_prompt(prompt, output_dir=output_dir, artifact_root=artifacts, attempt=attempt)
@@ -237,6 +265,8 @@ def _run_opencode_backend(
         complexity_spec=complexity_spec,
         scenario_model=scenario_model,
         registry_feedback=registry_feedback,
+        context_mode=args.planner_context_mode,
+        context_max_chars=args.planner_context_max_chars,
     )
     validation_errors: list[str] = []
     report_path = artifacts / "validation_attempt_0.json"
@@ -253,6 +283,7 @@ def _run_opencode_backend(
                 tool_count=args.tool_count,
                 complexity_spec=complexity_spec,
                 failure_type="bundle",
+                include_original_prompt=args.planner_repair_include_original_prompt,
             )
         )
         run = backend.run_prompt(
@@ -263,8 +294,12 @@ def _run_opencode_backend(
         )
         result = validate_generated_bundle(output_dir, tool_count=args.tool_count, complexity_spec=complexity_spec)
         if run.returncode != 0:
-            result.errors.append(f"opencode exited with status {run.returncode}; see {run.stderr[:500]}")
-            result.ok = False
+            exit_note = f"opencode exited with status {run.returncode}; see {run.stderr[:500]}"
+            if result.ok:
+                result.metadata["opencode_nonzero_exit_ignored"] = exit_note
+            else:
+                result.errors.append(exit_note)
+                result.ok = False
         report_path = write_validation_report(output_dir, result, attempt=attempt)
         if result.ok:
             emitted_manifest = _copy_manifest_if_requested(output_dir / "capabilities.generated.yaml", args.emit_runtime_manifest)

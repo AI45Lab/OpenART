@@ -1,0 +1,24 @@
+name: dtap.legal
+service: legal
+service_description: DTAP legal service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP legal service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_LEGAL_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_LEGAL_HEALTH_URL: {}
+  DTAP_LEGAL_WEB_URL: {}
+  DTAP_LEGAL_WEB_ADDR: {}
+  DTAP_LEGAL_WEB_PORT: {}
+tags: [dtap, legal, http, service]
+capabilities: [dtap_request, legal_remote_read, legal_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.legal --health
+examples:
+  - dtap.legal --health
+  - dtap.legal --path /api/health

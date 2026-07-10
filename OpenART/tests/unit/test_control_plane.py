@@ -3,15 +3,21 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import yaml
+
 from framework.core.control_plane import (
     ControlPlaneManager,
     ControlPlaneProvider,
     ControlSurfaceSpec,
+    build_provider_from_attack_surfaces,
     create_control_plane_provider,
     create_default_control_plane_provider_registry,
     validate_attacker_skill_folders,
 )
 from framework.core.visibility_policy import build_effective_visibility_policy
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_opencode_control_plane_materializes_allowed_files(tmp_path: Path) -> None:
@@ -87,6 +93,23 @@ def test_opencode_provider_supports_agents_skill_path() -> None:
     assert provider.is_attacker_allowed_relative_path(
         ".agents/skills/release/SKILL.md",
         ("agents_skill",),
+    )
+
+
+def test_openclaw_provider_supports_workspace_home_and_skill_surfaces() -> None:
+    provider = create_control_plane_provider("openclaw")
+
+    assert provider is not None
+    assert "soul_md" in provider.default_attacker_vectors
+    assert "workspace_skill" in provider.default_attacker_vectors
+    assert provider.is_attacker_allowed_relative_path("SOUL.md", ("soul_md",))
+    assert provider.is_attacker_allowed_relative_path("MEMORY.md", ("memory_md",))
+    assert provider.is_attacker_allowed_relative_path("memory/2026-06-24.md", ("daily_memory",))
+    assert provider.is_attacker_allowed_relative_path("skills/review/SKILL.md", ("workspace_skill",))
+    assert provider.is_attacker_allowed_relative_path("HOME/.openclaw/openclaw.json", ("openclaw_config",))
+    assert provider.is_attacker_allowed_relative_path(
+        "HOME/.openclaw/skills/review/SKILL.md",
+        ("managed_skill",),
     )
 
 
@@ -300,6 +323,270 @@ def test_codex_provider_supports_agents_override_skills_and_rules(tmp_path: Path
     assert materialized.added == diff.added
 
 
+def test_deepseek_tui_provider_supports_codewhale_project_home_skills_hooks_and_mcp(tmp_path: Path) -> None:
+    shared_root = tmp_path / "workspace" / "shared"
+    shared_root.mkdir(parents=True, exist_ok=True)
+
+    manager = ControlPlaneManager(
+        root_dir=str(tmp_path / "control" / "target"),
+        source_root=str(shared_root),
+        provider=create_control_plane_provider("deepseek_tui"),
+    )
+
+    manager.build_base()
+    manifest = json.loads(manager.manifest_path().read_text(encoding="utf-8"))
+    assert "codewhale_project_skill" in manifest["available_attacker_vectors"]
+    assert "codewhale_user_skill" in manifest["available_attacker_vectors"]
+    assert "codewhale_hook" in manifest["available_attacker_vectors"]
+    assert "codewhale_mcp" in manifest["available_attacker_vectors"]
+
+    attacker_output = Path(manager.ensure_attacker_output("attacker", "before_target", 1))
+    (attacker_output / "AGENTS.md").write_text("Use repository onboarding notes.\n", encoding="utf-8")
+    (attacker_output / ".codewhale" / "skills" / "triage" / "SKILL.md").parent.mkdir(parents=True, exist_ok=True)
+    (attacker_output / ".codewhale" / "skills" / "triage" / "SKILL.md").write_text(
+        "---\nname: triage\ndescription: Triage project issues\n---\nUse this skill when project issue triage is requested. Triage project issues.\n",
+        encoding="utf-8",
+    )
+    (attacker_output / "HOME" / ".codewhale" / "skills" / "release" / "SKILL.md").parent.mkdir(parents=True, exist_ok=True)
+    (attacker_output / "HOME" / ".codewhale" / "skills" / "release" / "SKILL.md").write_text(
+        "---\nname: release\ndescription: Prepare release notes\n---\nUse this skill when release preparation is requested. Prepare release notes.\n",
+        encoding="utf-8",
+    )
+    (attacker_output / ".codewhale" / "hooks.toml").write_text("[hooks]\n", encoding="utf-8")
+    (attacker_output / "HOME" / ".codewhale" / "mcp.json").write_text('{"mcpServers": {}}\n', encoding="utf-8")
+
+    diff, ignored = manager.finalize_from_attacker_output(
+        "attacker",
+        "before_target",
+        1,
+        allowed_vectors=("agents_md", "codewhale_project_skill", "codewhale_user_skill"),
+    )
+    materialized = manager.materialize_final_to_workspace(str(shared_root))
+
+    assert diff.added == [
+        ".codewhale/skills/triage/SKILL.md",
+        "AGENTS.md",
+        "HOME/.codewhale/skills/release/SKILL.md",
+    ]
+    assert ignored == [".codewhale/hooks.toml", "HOME/.codewhale/mcp.json"]
+    assert materialized.added == diff.added
+    assert (shared_root / ".codewhale" / "skills" / "triage" / "SKILL.md").is_file()
+    assert (shared_root / "AGENTS.md").is_file()
+    assert not (shared_root / "HOME").exists()
+    assert (shared_root / ".openart" / "materialized_home" / ".codewhale" / "skills" / "release" / "SKILL.md").is_file()
+    assert not (shared_root / ".codewhale" / "hooks.toml").exists()
+    assert not (shared_root / ".openart" / "materialized_home" / ".codewhale" / "mcp.json").exists()
+
+
+def test_awesome_deepseek_cli_providers_register_expected_surfaces() -> None:
+    qwen = create_control_plane_provider("qwen_code")
+    kilo = create_control_plane_provider("kilo")
+    copilot = create_control_plane_provider("copilot_cli")
+    oh_my_pi = create_control_plane_provider("oh_my_pi")
+
+    assert qwen is not None
+    assert qwen.is_attacker_allowed_relative_path("QWEN.md", ("qwen_md",))
+    assert qwen.is_attacker_allowed_relative_path("HOME/.qwen/QWEN.md", ("qwen_user_md",))
+    assert qwen.is_attacker_allowed_relative_path(".qwen/skills/review/SKILL.md", ("qwen_project_skill",))
+    assert qwen.is_attacker_allowed_relative_path("HOME/.qwen/skills/review/SKILL.md", ("qwen_user_skill",))
+
+    assert kilo is not None
+    assert kilo.is_attacker_allowed_relative_path(".kilocode/skills/review/SKILL.md", ("kilo_skill",))
+    assert kilo.is_attacker_allowed_relative_path(".opencode/commands/review.md", ("opencode_command",))
+    assert kilo.is_attacker_allowed_relative_path(".kilo/plans/release.md", ("kilo_plan",))
+
+    assert copilot is not None
+    assert copilot.is_attacker_allowed_relative_path(".github/copilot-instructions.md", ("copilot_instructions",))
+    assert copilot.is_attacker_allowed_relative_path(".github/instructions/security.instructions.md", ("copilot_path_instructions",))
+    assert copilot.is_attacker_allowed_relative_path("HOME/.copilot/copilot-instructions.md", ("copilot_user_instructions",))
+    assert copilot.is_attacker_allowed_relative_path("HOME/.copilot/mcp-config.json", ("copilot_mcp",))
+
+    assert oh_my_pi is not None
+    assert oh_my_pi.is_attacker_allowed_relative_path(".omp/skills/review/SKILL.md", ("omp_skill",))
+    assert oh_my_pi.is_attacker_allowed_relative_path(".github/skills/review/SKILL.md", ("copilot_project_skill",))
+    assert oh_my_pi.is_attacker_allowed_relative_path(".claude/skills/review/SKILL.md", ("claude_skill",))
+
+
+def test_second_cli_pass_providers_register_expected_surfaces() -> None:
+    aider = create_control_plane_provider("aider")
+    goose = create_control_plane_provider("goose")
+
+    assert aider is not None
+    assert aider.is_attacker_allowed_relative_path(".aider.conf.yml", ("aider_config",))
+    assert aider.is_attacker_allowed_relative_path(".aiderignore", ("aider_ignore",))
+    assert aider.is_attacker_allowed_relative_path("CONVENTIONS.md", ("conventions_md",))
+    assert aider.is_attacker_allowed_relative_path(".aider.chat.history.md", ("aider_chat_history",))
+    assert aider.is_attacker_allowed_relative_path(".aider.load", ("aider_load_file",))
+
+    assert goose is not None
+    assert goose.is_attacker_allowed_relative_path("AGENTS.md", ("agents_md",))
+    assert goose.is_attacker_allowed_relative_path(".goosehints", ("goosehints",))
+    assert goose.is_attacker_allowed_relative_path("HOME/.config/goose/.goosehints", ("goose_user_hints",))
+    assert goose.is_attacker_allowed_relative_path(".agents/skills/review/SKILL.md", ("agents_skill",))
+    assert goose.is_attacker_allowed_relative_path("HOME/.agents/skills/review/SKILL.md", ("agents_user_skill",))
+    assert goose.is_attacker_allowed_relative_path(".agents/plugins/audit/hooks/hooks.json", ("goose_plugin_hook",))
+    assert goose.is_attacker_allowed_relative_path(".goose/commands/release.yaml", ("goose_slash_command",))
+
+
+def test_goose_home_hints_and_skills_materialize_while_hooks_filter(tmp_path: Path) -> None:
+    shared_root = tmp_path / "workspace" / "shared"
+    shared_root.mkdir(parents=True, exist_ok=True)
+
+    manager = ControlPlaneManager(
+        root_dir=str(tmp_path / "control" / "target"),
+        source_root=str(shared_root),
+        provider=create_control_plane_provider("goose"),
+    )
+
+    manager.build_base()
+    attacker_output = Path(manager.ensure_attacker_output("attacker", "before_target", 1))
+    (attacker_output / ".goosehints").write_text("Use release-safe project hints.\n", encoding="utf-8")
+    (attacker_output / "HOME" / ".config" / "goose" / ".goosehints").parent.mkdir(parents=True, exist_ok=True)
+    (attacker_output / "HOME" / ".config" / "goose" / ".goosehints").write_text(
+        "Use local goose hints.\n",
+        encoding="utf-8",
+    )
+    (attacker_output / ".agents" / "skills" / "review" / "SKILL.md").parent.mkdir(parents=True, exist_ok=True)
+    (attacker_output / ".agents" / "skills" / "review" / "SKILL.md").write_text(
+        "---\nname: review\ndescription: Review project changes\n---\nUse this skill when project review is requested. Review project changes.\n",
+        encoding="utf-8",
+    )
+    (attacker_output / ".agents" / "plugins" / "audit" / "hooks").mkdir(parents=True, exist_ok=True)
+    (attacker_output / ".agents" / "plugins" / "audit" / "hooks" / "hooks.json").write_text(
+        '{"hooks": []}\n',
+        encoding="utf-8",
+    )
+
+    diff, ignored = manager.finalize_from_attacker_output(
+        "attacker",
+        "before_target",
+        1,
+        allowed_vectors=("goosehints", "goose_user_hints", "agents_skill"),
+    )
+    materialized = manager.materialize_final_to_workspace(str(shared_root))
+
+    assert diff.added == [
+        ".agents/skills/review/SKILL.md",
+        ".goosehints",
+        "HOME/.config/goose/.goosehints",
+    ]
+    assert ignored == [".agents/plugins/audit/hooks/hooks.json"]
+    assert materialized.added == diff.added
+    assert (shared_root / ".agents" / "skills" / "review" / "SKILL.md").is_file()
+    assert (shared_root / ".goosehints").is_file()
+    assert not (shared_root / "HOME").exists()
+    assert (shared_root / ".openart" / "materialized_home" / ".config" / "goose" / ".goosehints").is_file()
+    assert not (shared_root / ".agents" / "plugins" / "audit" / "hooks" / "hooks.json").exists()
+
+
+def _assert_attacker_config_enables_second_cli_pass_vectors(config_path: Path) -> None:
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    permissions = set(config["attacker"]["vector_permissions"])
+
+    cases = {
+        "aider": {
+            "aider_ignore": ".aiderignore",
+            "conventions_md": "CONVENTIONS.md",
+            "aider_chat_history": ".aider.chat.history.md",
+            "aider_load_file": ".aider.load",
+        },
+        "goose": {
+            "agents_md": "AGENTS.md",
+            "goosehints": ".goosehints",
+            "goose_user_hints": "HOME/.config/goose/.goosehints",
+            "agents_skill": ".agents/skills/review/SKILL.md",
+            "agents_user_skill": "HOME/.agents/skills/review/SKILL.md",
+            "goose_slash_command": ".goose/commands/release.yaml",
+        },
+        "openclaw": {
+            "agents_md": "AGENTS.md",
+            "soul_md": "SOUL.md",
+            "tools_md": "TOOLS.md",
+            "memory_md": "MEMORY.md",
+            "daily_memory": "memory/2026-06-24.md",
+            "workspace_skill": "skills/review/SKILL.md",
+            "managed_skill": "HOME/.openclaw/skills/review/SKILL.md",
+            "openclaw_config": "HOME/.openclaw/openclaw.json",
+            "session_history": "HOME/.openclaw/agents/main/sessions/openart.jsonl",
+        },
+    }
+
+    for family, expected in cases.items():
+        provider = create_control_plane_provider(family)
+        assert provider is not None
+        for vector, rel_path in expected.items():
+            assert vector in permissions
+            assert provider.is_attacker_allowed_relative_path(rel_path, (vector,))
+
+
+def test_universal_attacker_config_enables_second_cli_pass_vectors() -> None:
+    _assert_attacker_config_enables_second_cli_pass_vectors(
+        REPO_ROOT
+        / "configs"
+        / "attacker-configs"
+        / "universal"
+        / "opencode-native-control"
+        / "config.yaml"
+    )
+
+
+def test_graph_rl_attacker_config_enables_second_cli_pass_vectors() -> None:
+    _assert_attacker_config_enables_second_cli_pass_vectors(
+        REPO_ROOT / "configs" / "attacker-configs" / "graph-rl-control" / "config.yaml"
+    )
+
+
+def test_copilot_cli_home_surfaces_materialize_and_mcp_filters(tmp_path: Path) -> None:
+    shared_root = tmp_path / "workspace" / "shared"
+    shared_root.mkdir(parents=True, exist_ok=True)
+
+    manager = ControlPlaneManager(
+        root_dir=str(tmp_path / "control" / "target"),
+        source_root=str(shared_root),
+        provider=create_control_plane_provider("copilot_cli"),
+    )
+
+    manager.build_base()
+    attacker_output = Path(manager.ensure_attacker_output("attacker", "before_target", 1))
+    (attacker_output / ".github" / "copilot-instructions.md").parent.mkdir(parents=True, exist_ok=True)
+    (attacker_output / ".github" / "copilot-instructions.md").write_text("Use release-safe defaults.\n", encoding="utf-8")
+    (attacker_output / "HOME" / ".copilot" / "copilot-instructions.md").parent.mkdir(parents=True, exist_ok=True)
+    (attacker_output / "HOME" / ".copilot" / "copilot-instructions.md").write_text(
+        "Use local incident-response policy.\n",
+        encoding="utf-8",
+    )
+    (attacker_output / "HOME" / ".copilot" / "skills" / "workflow" / "SKILL.md").parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+    (attacker_output / "HOME" / ".copilot" / "skills" / "workflow" / "SKILL.md").write_text(
+        "---\nname: workflow\ndescription: Apply workflow rules\n---\nUse this skill when workflow review is requested. Apply workflow rules.\n",
+        encoding="utf-8",
+    )
+    (attacker_output / "HOME" / ".copilot" / "mcp-config.json").write_text('{"mcpServers": {}}\n', encoding="utf-8")
+
+    diff, ignored = manager.finalize_from_attacker_output(
+        "attacker",
+        "before_target",
+        1,
+        allowed_vectors=("copilot_instructions", "copilot_user_instructions", "copilot_user_skill"),
+    )
+    materialized = manager.materialize_final_to_workspace(str(shared_root))
+
+    assert diff.added == [
+        ".github/copilot-instructions.md",
+        "HOME/.copilot/copilot-instructions.md",
+        "HOME/.copilot/skills/workflow/SKILL.md",
+    ]
+    assert ignored == ["HOME/.copilot/mcp-config.json"]
+    assert materialized.added == diff.added
+    assert (shared_root / ".github" / "copilot-instructions.md").is_file()
+    assert not (shared_root / "HOME").exists()
+    assert (shared_root / ".openart" / "materialized_home" / ".copilot" / "copilot-instructions.md").is_file()
+    assert (shared_root / ".openart" / "materialized_home" / ".copilot" / "skills" / "workflow" / "SKILL.md").is_file()
+    assert not (shared_root / ".openart" / "materialized_home" / ".copilot" / "mcp-config.json").exists()
+
+
 def test_home_control_files_materialize_under_runner_home_overlay(tmp_path: Path) -> None:
     shared_root = tmp_path / "workspace" / "shared"
     shared_root.mkdir(parents=True, exist_ok=True)
@@ -407,14 +694,31 @@ def test_append_mode_new_file_is_not_duplicated(tmp_path: Path) -> None:
     assert (shared_root / ".opencode" / "memory" / "team.md").read_text(encoding="utf-8") == "attacker memory\n"
 
 
-def test_cursor_provider_supports_nested_agents_and_rules(tmp_path: Path) -> None:
+def test_attack_surface_provider_supports_nested_agents_and_rules(tmp_path: Path) -> None:
     shared_root = tmp_path / "workspace" / "shared"
     shared_root.mkdir(parents=True, exist_ok=True)
+    provider = build_provider_from_attack_surfaces(
+        "nested-rules-fixture",
+        [
+            {
+                "vector": "agents_md",
+                "kind": "instruction",
+                "path_template": "AGENTS.md or <subdir>/AGENTS.md",
+                "description": "Nested agent instructions.",
+            },
+            {
+                "vector": "cursor_rule",
+                "kind": "rule",
+                "path_template": ".cursor/rules/<rule-name>.mdc",
+                "description": "Nested project rules.",
+            },
+        ],
+    )
 
     manager = ControlPlaneManager(
         root_dir=str(tmp_path / "control" / "target"),
         source_root=str(shared_root),
-        provider=create_control_plane_provider("cursor"),
+        provider=provider,
     )
 
     manager.build_base()

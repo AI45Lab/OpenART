@@ -1,7 +1,6 @@
 target:
   framework: prompt_cli
   surface_family: gemini
-  target_surface_mount_mode: mounted
   runner_image: openart/gemini:latest
   launch_cmd: gemini --model ${TARGET_MODEL}
   model_integration:
@@ -10,10 +9,17 @@ target:
       api_key: ${TARGET_API_KEY}
       model: ${TARGET_MODEL}
     delivery:
-      type: env_only
+      type: hybrid
       env_names:
         api_key: GEMINI_API_KEY
         model: GEMINI_MODEL
+      env:
+        GEMINI_CLI_TRUST_WORKSPACE: "true"
+        NODE_USE_ENV_PROXY: "1"
+      config_template:
+        source: repo:configs/target-model-json/gemini.settings.json
+        destination: HOME/.gemini/settings.json
+        format: json
   attack_surfaces:
   - vector: gemini_md
     kind: instruction
@@ -32,5 +38,5 @@ target:
     path_template: .gemini/commands/<command-name>.toml
     description: Gemini CLI custom command definition discovered from the workspace.
   config_overlay:
-    prompt_transport: argv
+    prompt_transport: file_ref_argv
     prompt_flag: -p

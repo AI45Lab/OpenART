@@ -73,6 +73,7 @@ _SYMBOLIC_DESTINATION_ROOTS = {
 }
 _LEGACY_TARGET_MODEL_FIELDS = ("model", "base_url", "api_base_url", "api_key", "api_key_env")
 _LEGACY_TARGET_SURFACE_FIELDS = ("control_plane", "control_plane_mount_mode")
+_OBSOLETE_TARGET_SURFACE_FIELDS = ("target_surface_mount_mode",)
 
 
 # =============================================================================
@@ -152,12 +153,6 @@ class OrchestratorFactory:
         self.attacker_timeout_seconds = max(0, int(attacker_timeout_seconds or 0))
         self._runner_registry = runner_registry or create_default_runner_registry()
         self._control_plane_registry = control_plane_registry or create_default_control_plane_provider_registry()
-        self._target_control_plane_mount_mode = str(
-            resolve_env_value((self.target_config or {}).get("target_surface_mount_mode"))
-            if isinstance((self.target_config or {}).get("target_surface_mount_mode"), str)
-            else (self.target_config or {}).get("target_surface_mount_mode")
-            or "workspace"
-        ).strip().lower()
 
         # Workspace path - canonical shared workspace used by task container and target runner
         self._workspace_path: Optional[str] = None
@@ -175,6 +170,18 @@ class OrchestratorFactory:
             "org.openart.role": role,
             "org.openart.task_id": self.bundle.task_id,
         }
+
+    def _resolve_container_network(self, role: str, explicit: str | None = None) -> str | None:
+        role_key = "".join(ch if ch.isalnum() else "_" for ch in role.upper())
+        candidates: list[Any] = [explicit, os.environ.get(f"OPENART_{role_key}_DOCKER_NETWORK")]
+        if role in {"target", "attacker"}:
+            candidates.append(os.environ.get("OPENART_RUNNER_DOCKER_NETWORK"))
+        candidates.append(os.environ.get("OPENART_DOCKER_NETWORK"))
+        for candidate in candidates:
+            network = str(resolve_env_value(candidate) or "").strip()
+            if network:
+                return network
+        return None
 
     def build(self) -> Orchestrator:
         """Build and return a fully configured Orchestrator."""
@@ -204,7 +211,6 @@ class OrchestratorFactory:
             task_container=task_container,
             workspace_manager=self._workspace_manager,
             control_manager=self._control_manager,
-            target_control_plane_mount_mode=self._target_control_plane_mount_mode,
             max_iterations=self.max_iterations,
             adaptive_iterations=self.adaptive_iterations,
             trace_sink=self.trace_sink,
@@ -227,11 +233,47 @@ class OrchestratorFactory:
         ]
         if not config_surfaces or not staged_files:
             return
+        template_destination = self._model_integration_config_template_destination()
+        if not template_destination:
+            return
         for staged in staged_files:
             for surface in config_surfaces:
+                if not self._config_template_destination_matches_surface(
+                    template_destination,
+                    str(surface.path_template or ""),
+                ):
+                    continue
                 dest = shared / surface.path_template
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(staged, dest)
+
+    def _model_integration_config_template_destination(self) -> str:
+        integration = self._role_model_integration(self.target_config)
+        delivery = integration.get("delivery") if isinstance(integration.get("delivery"), dict) else {}
+        template = delivery.get("config_template") if isinstance(delivery.get("config_template"), dict) else {}
+        return str(template.get("destination", "") or "").strip()
+
+    @staticmethod
+    def _config_template_destination_matches_surface(destination: str, surface_template: str) -> bool:
+        destination = str(destination or "").strip().strip("/")
+        surface_template = str(surface_template or "").strip().strip("/")
+        if not destination or not surface_template:
+            return False
+        if any(marker in surface_template for marker in ("<", ">", "*")):
+            return False
+        if destination == surface_template:
+            return True
+        aliases = {
+            "XDG_CONFIG_HOME/": ("HOME/.config/",),
+            "XDG_DATA_HOME/": ("HOME/.local/share/",),
+            "XDG_CACHE_HOME/": ("HOME/.cache/",),
+        }
+        for prefix, replacements in aliases.items():
+            if destination.startswith(prefix):
+                suffix = destination[len(prefix):]
+                if any(f"{replacement}{suffix}".strip("/") == surface_template for replacement in replacements):
+                    return True
+        return False
 
 
     # =========================================================================
@@ -281,6 +323,7 @@ class OrchestratorFactory:
             command=["tail", "-f", "/dev/null"],
             env=self._runtime_env(),
             working_dir="/workspace",
+            network=self._resolve_container_network("task"),
             lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
             labels=self._container_labels("task"),
         )
@@ -380,11 +423,12 @@ class OrchestratorFactory:
         model = first_non_empty(self.runner_model)
         api_key = ""
 
-        runner_network = str(
+        explicit_runner_network = str(
             resolve_env_value(role_cfg.get("network"))
             if use_role_runner_profile and isinstance(role_cfg.get("network"), str)
             else ""
-        ).strip() or None
+        ).strip()
+        runner_network = self._resolve_container_network(role, explicit_runner_network)
 
         container_spec = ContainerSpec(
             name=f"openart-{role}-{self.run_id}",
@@ -578,6 +622,14 @@ class OrchestratorFactory:
         )
 
     def _validate_no_legacy_target_surface_fields(self, role_cfg: dict[str, Any]) -> None:
+        obsolete_fields = [name for name in _OBSOLETE_TARGET_SURFACE_FIELDS if name in role_cfg]
+        if obsolete_fields:
+            raise ValueError(
+                "obsolete target surface config keys are no longer supported: "
+                + ", ".join(obsolete_fields)
+                + ". Mounted target-control delivery was removed; "
+                + "target-control files are always materialized to the workspace."
+            )
         legacy_fields = [name for name in _LEGACY_TARGET_SURFACE_FIELDS if name in role_cfg]
         if not legacy_fields:
             return
@@ -585,8 +637,8 @@ class OrchestratorFactory:
             "legacy target surface config keys are no longer supported: "
             + ", ".join(legacy_fields)
             + ". Use target.attack_surfaces as the source of truth, "
-            + "target.target_surface_mount_mode for mounted materialization, and "
-            + "target.surface_family to label the target-native surface family."
+            + "target.surface_family to label the target-native surface family, and "
+            + "workspace materialization for target-control files."
         )
 
     def _create_attacker(self) -> tuple[AttackerBase | None, AttackerContext | None]:
@@ -650,6 +702,7 @@ class OrchestratorFactory:
             command=["tail", "-f", "/dev/null"],
             env=self._runtime_env(),
             working_dir="/workspace",
+            network=self._resolve_container_network("attacker"),
             lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
             labels=self._container_labels("attacker"),
         )
@@ -782,9 +835,7 @@ class OrchestratorFactory:
             )
             judge_model = first_non_empty(
                 os.environ.get("JUDGE_MODEL", ""),
-                os.environ.get("OPENAI_MODEL", ""),
-                os.environ.get("DEFAULT_MODEL", ""),
-                "gpt-4.1-mini",
+                "deepseek-v4-pro",
             )
 
             if judge_base_url and judge_api_key:

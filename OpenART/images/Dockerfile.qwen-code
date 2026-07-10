@@ -1,0 +1,19 @@
+FROM openart/opencode:latest
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with Qwen Code installed"
+LABEL version="1.0.0"
+
+ARG QWEN_CODE_VERSION=latest
+
+RUN npm install -g n \
+    && n 22 \
+    && node --version \
+    && npm --version \
+    && npm install -g "@qwen-code/qwen-code@${QWEN_CODE_VERSION}" \
+    && command -v qwen \
+    && qwen --version
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

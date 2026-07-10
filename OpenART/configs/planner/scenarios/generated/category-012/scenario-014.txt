@@ -1,0 +1,2 @@
+Category: 医疗健康场景
+Scenario: 帮用户理解检查报告中的术语

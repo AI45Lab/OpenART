@@ -4,14 +4,16 @@ import importlib.util
 import json
 import os
 import subprocess
+from datetime import date
 from pathlib import Path
 
 import pytest
+import yaml
 
 from framework.attackers.methods import GenericCommandAttacker
 from framework.attackers.models import AttackerContext, AttackerSpec
 from framework.components.runners import PromptCLIRunner
-from framework.models.common import CommandSpec, CredentialBundle, ToolSpec
+from framework.models.common import CommandSpec, CredentialBundle, SkillSpec, ToolSpec
 from framework.models.container import ContainerSpec
 
 
@@ -56,6 +58,7 @@ def _make_opencode_args(module, tmp_path: Path, target_text: str, attacker_text:
 class _FakeRunnerContainer:
     def __init__(self, name: str, default_path: str = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin") -> None:
         self.spec = ContainerSpec(name=name)
+        self.container_id = "fake-container-id"
         self.files: dict[str, str] = {}
         self.exec_calls: list[list[str]] = []
         self.default_path = default_path
@@ -162,6 +165,94 @@ def test_prompt_cli_opencode_reads_prompt_text_not_file_path() -> None:
     assert "OPENART_TOOL_STORE_DIR" in command
     assert "Start with SKILL.md, skills.md, TOOL.md, or tools.md" in command
     assert "Prefer managed PATH wrappers" in command
+    assert "write it under /workspace (or a child directory) rather than /tmp" in command
+
+
+def test_default_opencode_target_config_uses_stdin_prompt_transport() -> None:
+    config = yaml.safe_load((REPO_ROOT / "configs" / "target-configs" / "target.yaml").read_text(encoding="utf-8"))
+
+    assert config["target"]["launch_cmd"] == "opencode run"
+    assert config["target"]["config_overlay"]["prompt_transport"] == "stdin"
+
+
+def test_continue_cli_target_config_uses_argv_prompt_transport() -> None:
+    config = yaml.safe_load((REPO_ROOT / "configs" / "target-configs" / "target.continue-cli.yaml").read_text(encoding="utf-8"))
+
+    assert config["target"]["launch_cmd"].startswith("cn -p")
+    assert config["target"]["config_overlay"]["prompt_transport"] == "argv"
+    assert config["target"]["config_overlay"]["prompt_flag"] == ""
+
+
+def test_aider_target_config_disables_url_scraping_and_tty_features() -> None:
+    config = yaml.safe_load((REPO_ROOT / "configs" / "target-configs" / "target.aider.yaml").read_text(encoding="utf-8"))
+    launch_cmd = config["target"]["launch_cmd"]
+    overlay = config["target"]["config_overlay"]
+    env = config["target"]["model_integration"]["delivery"]["env"]
+
+    assert config["target"]["pre_run_hook"] == "repo:configs/target-hooks/aider-bootstrap-load.sh"
+    assert "--no-detect-urls" in launch_cmd
+    assert "--disable-playwright" in launch_cmd
+    assert "--no-fancy-input" in launch_cmd
+    assert "--load /workspace/.openart/runners/target/state/aider_bootstrap.load" in launch_cmd
+    assert overlay["prompt_transport"] == "file"
+    assert overlay["prompt_file_flag"] == "--message-file"
+    assert "Do not fetch URLs" in overlay["runtime_note_append"]
+    assert "Do not ask the user to share files" in overlay["runtime_note_append"]
+    assert "Do not fabricate placeholder source data" in overlay["runtime_note_append"]
+    assert env["AIDER_DETECT_URLS"] == "false"
+    assert env["AIDER_DISABLE_PLAYWRIGHT"] == "true"
+    assert env["AIDER_FANCY_INPUT"] == "false"
+
+
+def test_aider_bootstrap_hook_creates_read_only_load_file(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    (workspace / "src").mkdir()
+    (workspace / "src" / "report.md").write_text("public report\n", encoding="utf-8")
+    (workspace / "data.csv").write_text("id,value\n1,alpha\n", encoding="utf-8")
+    (workspace / ".openart" / "runners").mkdir(parents=True)
+    (workspace / ".openart" / "hidden.txt").write_text("internal\n", encoding="utf-8")
+    (workspace / ".git").mkdir()
+    (workspace / ".git" / "config").write_text("[core]\n", encoding="utf-8")
+    (workspace / "node_modules").mkdir()
+    (workspace / "node_modules" / "pkg.js").write_text("module.exports = {}\n", encoding="utf-8")
+    (workspace / "image.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+
+    state_dir = tmp_path / "state"
+    prompt_file = state_dir / "prompt.md"
+    state_dir.mkdir()
+    prompt_file.write_text("Use src/report.md and data.csv.\n", encoding="utf-8")
+
+    completed = subprocess.run(
+        ["bash", str(REPO_ROOT / "configs" / "target-hooks" / "aider-bootstrap-load.sh")],
+        text=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "OPENART_AIDER_WORKSPACE": str(workspace),
+            "OPENART_AIDER_STATE_DIR": str(state_dir),
+            "OPENART_AIDER_PROMPT_FILE": str(prompt_file),
+        },
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    load_file = state_dir / "aider_bootstrap.load"
+    content = load_file.read_text(encoding="utf-8")
+    assert f"/read-only {workspace / 'src' / 'report.md'}" in content
+    assert f"/read-only {workspace / 'data.csv'}" in content
+    assert ".openart" not in content
+    assert ".git" not in content
+    assert "node_modules" not in content
+    assert "image.png" not in content
+
+
+def test_reasonix_target_config_uses_direct_argv_prompt_transport() -> None:
+    config = yaml.safe_load((REPO_ROOT / "configs" / "target-configs" / "target.reasonix.yaml").read_text(encoding="utf-8"))
+
+    assert config["target"]["launch_cmd"].startswith("reasonix run")
+    assert config["target"]["config_overlay"]["prompt_transport"] == "argv"
+    assert config["target"]["config_overlay"]["prompt_flag"] == ""
 
 
 def test_prompt_cli_mentions_extra_control_plane_probe_paths() -> None:
@@ -245,6 +336,74 @@ def test_runner_installs_user_model_config_json_and_skips_managed_framework_conf
 
     assert container.files[destination_path] == '{"provider": "openai-compatible"}\n'
     assert container.files[destination_path] != json.dumps(runner.make_framework_config(), indent=2)
+
+
+def test_runner_prepare_serializes_dates_in_json_artifacts() -> None:
+    container = _FakeRunnerContainer("openart-target-test")
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=container,
+        command=CommandSpec(template="opencode run"),
+        credentials=CredentialBundle(values={}),
+        tools=[
+            ToolSpec(
+                name="calendar.lookup",
+                command="calendar.lookup",
+                config={"skill": {"updated": date(2026, 3, 1)}},
+            )
+        ],
+        skills=[
+            SkillSpec(
+                name="enterprise-ops",
+                config={"metadata": {"updated": date(2026, 3, 2)}},
+            )
+        ],
+        extra_config={
+            "prompt_transport": "stdin",
+            "metadata": {"updated": date(2026, 3, 3)},
+        },
+    )
+
+    runner.prepare()
+
+    tools_payload = json.loads(container.files[runner.runtime_env["OPENART_TOOLS_FILE"]])
+    skills_payload = json.loads(container.files[runner.runtime_env["OPENART_SKILLS_FILE"]])
+    framework_config = json.loads(container.files[runner.framework_config_path() or ""])
+
+    assert tools_payload[0]["config"]["skill"]["updated"] == "2026-03-01"
+    assert skills_payload[0]["config"]["metadata"]["updated"] == "2026-03-02"
+    assert framework_config["metadata"]["updated"] == "2026-03-03"
+
+
+def test_runner_expands_model_config_env_refs_inside_container_only(tmp_path: Path) -> None:
+    container = _FakeRunnerContainer("openart-target-test")
+    source_path = "/workspace/.openart_model_integration_target.yaml"
+    destination_path = "/tmp/openart/runners/target/home/.continue/config.yaml"
+    container.files[source_path] = "models:\n- apiKey: ${OPENAI_API_KEY}\n"
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=container,
+        command=CommandSpec(template="cn -p --config /tmp/openart/runners/target/home/.continue/config.yaml"),
+        credentials=CredentialBundle(values={}),
+        runtime_env={
+            "OPENART_MODEL_CONFIG_SOURCE_FILE": source_path,
+            "OPENART_MODEL_CONFIG_DESTINATION": destination_path,
+            "OPENART_MODEL_CONFIG_FORMAT": "yaml",
+            "OPENART_MODEL_CONFIG_EXPAND_ENV_REFS": "1",
+            "OPENAI_API_KEY": "secret-key",
+        },
+        artifact_dir=str(tmp_path),
+    )
+
+    runner._install_user_model_config_json()
+    runner._capture_prepare_artifacts()
+
+    assert container.files[source_path] == "models:\n- apiKey: ${OPENAI_API_KEY}\n"
+    assert container.files[destination_path] == "models:\n- apiKey: secret-key\n"
+    prepared = tmp_path / "runner_outputs" / "target" / "prepared" / "model_integration_config.yaml"
+    assert prepared.read_text(encoding="utf-8") == "models:\n- apiKey: <redacted>\n"
 
 
 def test_runner_merges_materialized_and_mounted_home_overlays() -> None:
@@ -485,6 +644,37 @@ def test_runner_stages_only_declared_tool_source_files(tmp_path: Path) -> None:
     assert ["chmod", "+x", f"{staged_folder}/scripts/owncloud_upload_file.py"] in container.exec_calls
 
 
+def test_runner_redacts_sensitive_tool_env_from_artifacts_and_wrappers() -> None:
+    container = _FakeRunnerContainer("openart-target-test")
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=container,
+        command=CommandSpec(template="python agent.py"),
+        credentials=CredentialBundle(values={}),
+        runtime_env={"OWNCLOUD_PASSWORD": "runtime-secret"},
+        tools=[
+            ToolSpec(
+                name="owncloud.list_dir",
+                command="/opt/openart-venv/bin/python3",
+                args=["list.py"],
+                env={"OWNCLOUD_PASSWORD": "static-secret", "OWNCLOUD_URL": "http://owncloud.local"},
+            )
+        ],
+    )
+
+    runner._install_tools()
+
+    tools_payload = container.files[runner.runtime_env["OPENART_TOOLS_FILE"]]
+    wrapper = container.files["/workspace/.openart/runners/target/state/tools/bin/owncloud.list_dir"]
+    payload = json.loads(tools_payload)
+    assert payload[0]["env"]["OWNCLOUD_PASSWORD"] == "<redacted>"
+    assert payload[0]["env"]["OWNCLOUD_URL"] == "http://owncloud.local"
+    assert "static-secret" not in tools_payload
+    assert "static-secret" not in wrapper
+    assert 'export OWNCLOUD_PASSWORD="${OWNCLOUD_PASSWORD}"' in wrapper
+
+
 def test_runner_stages_guide_only_tool_folder_without_wrapper(tmp_path: Path) -> None:
     tool_root = tmp_path / "docs.search"
     (tool_root / "scripts").mkdir(parents=True)
@@ -621,6 +811,34 @@ def test_attacker_stages_managed_tool_folder(tmp_path: Path) -> None:
     assert container.files[f"{staged_folder}/scripts/search.py"] == "print('search')\n"
 
 
+def test_attacker_redacts_sensitive_tool_env_from_artifacts_and_wrappers() -> None:
+    container = _FakeRunnerContainer("openart-attacker-test")
+    attacker = GenericCommandAttacker(
+        spec=AttackerSpec(name="attacker", cmd="python3"),
+        container=container,
+        runtime_env={"GITLAB_ACCESS_TOKEN": "runtime-secret"},
+        tools=[
+            ToolSpec(
+                name="gitlab.get_file",
+                command="/opt/openart-venv/bin/python3",
+                args=["get.py"],
+                env={"GITLAB_ACCESS_TOKEN": "static-secret", "GITLAB_BASEURL": "http://gitlab.local"},
+            )
+        ],
+    )
+
+    attacker._install_tools()
+
+    tools_payload = container.files[attacker.runtime_env["OPENART_TOOLS_FILE"]]
+    wrapper = container.files["/tmp/openart/attackers/attacker/state/tools/bin/gitlab.get_file"]
+    payload = json.loads(tools_payload)
+    assert payload[0]["env"]["GITLAB_ACCESS_TOKEN"] == "<redacted>"
+    assert payload[0]["env"]["GITLAB_BASEURL"] == "http://gitlab.local"
+    assert "static-secret" not in tools_payload
+    assert "static-secret" not in wrapper
+    assert 'export GITLAB_ACCESS_TOKEN="${GITLAB_ACCESS_TOKEN}"' in wrapper
+
+
 def test_prompt_cli_runner_argv_transport_uses_prompt_flag() -> None:
     runner = PromptCLIRunner(
         name="runner",
@@ -642,15 +860,118 @@ def test_prompt_cli_runner_argv_transport_allows_positional_prompt_without_flag(
         name="runner",
         role="target",
         container=_FakeRunnerContainer("openart-target-test"),
-        command=CommandSpec(template="cursor-agent --print"),
+        command=CommandSpec(template="reasonix run --no-config --no-proxy --model glm-5"),
         credentials=CredentialBundle(values={}),
         extra_config={"prompt_transport": "argv", "prompt_flag": ""},
     )
 
     command = runner.render_command("/task/instructions/target.md")
 
-    assert "exec cursor-agent --print \"$prompt\"" in command
-    assert " --print -p " not in command
+    assert "exec reasonix run --no-config --no-proxy --model glm-5 \"$prompt\"" in command
+    assert " --model glm-5 -p " not in command
+
+
+def test_prompt_cli_continue_direct_command_appends_prompt_after_print_flag() -> None:
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="cn -p --silent"),
+        credentials=CredentialBundle(values={}),
+        extra_config={"prompt_transport": "argv", "prompt_flag": ""},
+    )
+
+    command = runner.render_command("/task/instructions/target.md")
+
+    assert "exec cn -p --silent \"$prompt\"" in command
+    assert "cn -p --silent -p" not in command
+
+
+def test_prompt_cli_runner_file_transport_writes_prompt_file() -> None:
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="aider --yes-always"),
+        credentials=CredentialBundle(values={}),
+        extra_config={
+            "prompt_transport": "file",
+            "prompt_file_flag": "--message-file",
+            "prompt_file_path": "/workspace/.openart/prompt-target.md",
+        },
+    )
+
+    command = runner.render_command("/task/instructions/target.md")
+
+    assert "prompt_file=/workspace/.openart/prompt-target.md" in command
+    assert "printf '%s' \"$prompt\" > \"$prompt_file\"" in command
+    assert "exec aider --yes-always --message-file \"$prompt_file\"" in command
+    assert "exec aider --yes-always --message-file \"$prompt\"" not in command
+
+
+def test_prompt_cli_runner_appends_target_runtime_note() -> None:
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="aider --yes-always"),
+        credentials=CredentialBundle(values={}),
+        extra_config={
+            "prompt_transport": "file",
+            "prompt_file_flag": "--message-file",
+            "runtime_note_append": "Aider-specific note: use local workspace files only.",
+        },
+    )
+
+    command = runner.render_command("/task/instructions/target.md")
+
+    assert "Aider-specific note: use local workspace files only." in command
+    assert "exec aider --yes-always --message-file \"$prompt_file\"" in command
+
+
+def test_prompt_cli_runner_file_ref_argv_uses_small_bootstrap_prompt() -> None:
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="reasonix run --model glm-5"),
+        credentials=CredentialBundle(values={}),
+        extra_config={
+            "prompt_transport": "file_ref_argv",
+            "prompt_flag": "",
+            "prompt_file_path": "/workspace/.openart/full-prompt.md",
+        },
+    )
+
+    command = runner.render_command("/task/instructions/target.md")
+
+    assert "prompt_file=/workspace/.openart/full-prompt.md" in command
+    assert "prompt_ref=$(printf '%s'" in command
+    assert "Read the complete OpenART task prompt from /workspace/.openart/full-prompt.md" in command
+    assert "exec reasonix run --model glm-5 \"$prompt_ref\"" in command
+    assert "exec reasonix run --model glm-5 \"$prompt\"" not in command
+
+
+def test_prompt_cli_openclaw_direct_command_appends_prompt_after_message() -> None:
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(
+            template=(
+                "openclaw --no-color agent --local --json --model openart/glm-5 "
+                "--session-key agent:main:openart-target --thinking medium --timeout 600 --message"
+            )
+        ),
+        credentials=CredentialBundle(values={}),
+        extra_config={"prompt_transport": "argv", "prompt_flag": ""},
+    )
+
+    command = runner.render_command("/task/instructions/target.md")
+
+    assert "openclaw-openart-runner" not in command
+    assert "exec openclaw --no-color agent" in command
+    assert "--message \"$prompt\"" in command
 
 
 def test_prompt_cli_runner_stdin_transport_pipes_prompt() -> None:
@@ -667,3 +988,23 @@ def test_prompt_cli_runner_stdin_transport_pipes_prompt() -> None:
 
     assert "printf '%s' \"$prompt\" | exec gemini --sandbox" in command
     assert "/task/instructions/target.md" in command
+
+
+def test_prompt_cli_runner_stdin_transport_runs_pre_hook_before_prompt_pipe() -> None:
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="claude -p"),
+        credentials=CredentialBundle(values={}),
+        runtime_env={
+            "OPENART_PRE_RUN_HOOK": "bash /workspace/.openart/runners/target/hooks/claude-code-enforce-settings.sh"
+        },
+        extra_config={"prompt_transport": "stdin"},
+    )
+
+    command = runner.render_command("/task/instructions/target.md")
+
+    hook_index = command.index("claude-code-enforce-settings.sh")
+    pipe_index = command.index("printf '%s' \"$prompt\" | exec claude -p")
+    assert hook_index < pipe_index

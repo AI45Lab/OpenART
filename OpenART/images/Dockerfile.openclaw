@@ -1,0 +1,24 @@
+FROM openart/opencode:latest
+
+LABEL maintainer="OpenART Framework"
+LABEL description="OpenART runner image with OpenClaw installed"
+LABEL version="1.0.0"
+
+ARG OPENCLAW_VERSION=latest
+
+ENV NO_COLOR=1
+ENV OPENCLAW_DISABLE_BONJOUR=1
+ENV OPENCLAW_SKIP_ONBOARDING=1
+
+RUN npm install -g n \
+    && n 24 \
+    && hash -r \
+    && node --version \
+    && npm --version \
+    && npm install -g "openclaw@${OPENCLAW_VERSION}" \
+    && command -v openclaw \
+    && openclaw --version
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

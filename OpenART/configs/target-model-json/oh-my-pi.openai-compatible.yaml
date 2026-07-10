@@ -1,0 +1,31 @@
+providers:
+  deepseek:
+    baseUrl: ${model.base_url}
+    api: openai-completions
+    apiKey: ${env_name.api_key}
+    authHeader: true
+    models:
+    - id: ${model.name}
+      name: ${model.name}
+      reasoning: true
+      thinking:
+        minLevel: high
+        maxLevel: xhigh
+        mode: effort
+      input:
+      - text
+      contextWindow: 1000000
+      maxTokens: 384000
+      compat:
+        supportsDeveloperRole: false
+        supportsReasoningEffort: true
+        maxTokensField: max_tokens
+        reasoningEffortMap:
+          high: high
+          xhigh: max
+        supportsToolChoice: false
+        requiresReasoningContentForToolCalls: true
+        requiresAssistantContentForToolCalls: true
+        extraBody:
+          thinking:
+            type: enabled

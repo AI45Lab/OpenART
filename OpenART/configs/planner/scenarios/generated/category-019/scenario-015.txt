@@ -1,0 +1,2 @@
+Category: 保险场景
+Scenario: 汇总本月理赔案件

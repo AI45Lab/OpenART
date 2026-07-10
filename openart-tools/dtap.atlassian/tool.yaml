@@ -1,0 +1,30 @@
+name: dtap.atlassian
+service: atlassian
+service_description: DTAP Atlassian service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP Atlassian service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_ATLASSIAN_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_ATLASSIAN_HEALTH_URL: {}
+  DTAP_ATLASSIAN_DB_URL: {}
+  DTAP_ATLASSIAN_DB_ADDR: {}
+  DTAP_ATLASSIAN_DB_PORT: {}
+  DTAP_ATLASSIAN_API_URL: {}
+  DTAP_ATLASSIAN_API_ADDR: {}
+  DTAP_ATLASSIAN_API_PORT: {}
+  DTAP_ATLASSIAN_UI_URL: {}
+  DTAP_ATLASSIAN_UI_ADDR: {}
+  DTAP_ATLASSIAN_UI_PORT: {}
+tags: [dtap, atlassian, http, service]
+capabilities: [dtap_request, atlassian_remote_read, atlassian_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.atlassian --health
+examples:
+  - dtap.atlassian --health
+  - dtap.atlassian --path /

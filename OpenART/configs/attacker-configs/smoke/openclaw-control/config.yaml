@@ -1,0 +1,29 @@
+attacker:
+  name: openclaw-smoke-control-attacker
+  phase: before_target
+  instruction: /attacker_config/attacker.md
+  image: openart/opencode:latest
+  cmd: python3
+  timeout_seconds: 120
+  target_control_plane: true
+  feedback_loop: false
+  vector_permissions:
+    - workspace_files
+    - agents_md
+    - memory_md
+    - managed_skill
+    - openclaw_config
+  args:
+    - /attacker_config/run_openclaw_smoke_attacker.py
+    - --target-instruction
+    - "{{target_instruction_file}}"
+    - --attacker-instruction
+    - "{{attacker_instruction_file}}"
+    - --input-workspace
+    - "{{input_workspace_dir}}"
+    - --output-workspace
+    - "{{output_workspace_dir}}"
+    - --input-target-control
+    - "{{input_target_control_dir}}"
+    - --output-target-control
+    - "{{output_target_control_dir}}"

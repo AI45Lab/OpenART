@@ -4,6 +4,7 @@ import base64
 import importlib.util
 import json
 import sqlite3
+import subprocess
 import sys
 from pathlib import Path
 
@@ -145,7 +146,7 @@ def test_url_resolution_and_github_url_rejection() -> None:
         registry_install.parse_github_url("https://github.com/acme/tools")
 
 
-def test_registry_install_downloads_normalizes_and_loads_guide_only_tool(monkeypatch, tmp_path: Path) -> None:
+def test_registry_install_downloads_scripts_as_wrapper_backed_tool(monkeypatch, tmp_path: Path) -> None:
     index = _make_index(tmp_path)
     tool_name = _add_row(index, tool_id="tool.demo.fixture001", description="Registry row description.")
     tool_store = tmp_path / "openart-tools"
@@ -156,11 +157,13 @@ def test_registry_install_downloads_normalizes_and_loads_guide_only_tool(monkeyp
     assert [item["tool_name"] for item in summary["created"]] == [tool_name]
     tool_dir = tool_store / tool_name
     assert tool_dir.is_dir()
-    assert not (tool_dir / "tool.yaml").exists()
-    assert not (tool_dir / "scripts" / "registry_run_tool.py").exists()
+    assert (tool_dir / "tool.yaml").is_file()
+    assert (tool_dir / "scripts" / "openart_skill_runner.py").is_file()
     assert (tool_dir / "scripts" / "run.py").read_text(encoding="utf-8") == "print('reference only')\n"
     assert (tool_dir / "references" / "original_tool.yaml").is_file()
     assert (tool_dir / "references" / "original_SKILL.md").is_file()
+    assert summary["created"][0]["materialization_mode"] == "github_script_tool"
+    assert summary["created"][0]["source_files"] == ["scripts/openart_skill_runner.py", "scripts/run.py"]
 
     skill_text = (tool_dir / "SKILL.md").read_text(encoding="utf-8")
     assert f"name: {tool_name}" in skill_text
@@ -170,9 +173,94 @@ def test_registry_install_downloads_normalizes_and_loads_guide_only_tool(monkeyp
     manifest = load_tool_store_manifest(tool_store, selected_names={tool_name})
     tool = manifest["tools"][0]
     assert tool["name"] == tool_name
-    assert "command" not in tool
-    assert "source_files" not in tool
+    assert tool["args"] == ["scripts/openart_skill_runner.py"]
+    assert tool["config"]["tool_store"]["guide_only"] is False
+    assert tool["config"]["tool_store"]["source_files"] == ["scripts/openart_skill_runner.py", "scripts/run.py"]
+
+    listed = subprocess.run(
+        [sys.executable, str(tool_dir / "scripts" / "openart_skill_runner.py"), "list"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert listed.stdout.strip() == "scripts/run.py"
+
+
+def test_registry_install_downloads_no_scripts_as_pruned_guide_only_tool(monkeypatch, tmp_path: Path) -> None:
+    index = _make_index(tmp_path)
+    tool_name = _add_row(
+        index,
+        tool_id="tool.demo.fixture_guide",
+        description="Registry row guide description.",
+        source_url="https://github.com/acme/tools/tree/main/skills/guide",
+    )
+    tool_store = tmp_path / "openart-tools"
+
+    def guide_api(_selection, api_path: str):
+        responses = {
+            "skills/guide": [
+                {"type": "file", "path": "skills/guide/SKILL.md"},
+                {"type": "file", "path": "skills/guide/README.md"},
+            ],
+            "skills/guide/SKILL.md": {
+                "type": "file",
+                "path": "skills/guide/SKILL.md",
+                "encoding": "base64",
+                "content": _b64("---\nname: upstream-guide\n---\n# Guide\nFollow upstream notes.\n"),
+            },
+            "skills/guide/README.md": {
+                "type": "file",
+                "path": "skills/guide/README.md",
+                "encoding": "base64",
+                "content": _b64("extra docs\n"),
+            },
+        }
+        return responses[api_path]
+
+    monkeypatch.setattr(registry_install, "_github_api_json", guide_api)
+
+    summary = registry_install.install_registry_tools(index, [tool_name], tool_store)
+
+    assert summary["created"][0]["materialization_mode"] == "github_guide_only"
+    tool_dir = tool_store / tool_name
+    assert (tool_dir / "SKILL.md").is_file()
+    assert (tool_dir / "references" / "original_SKILL.md").is_file()
+    assert not (tool_dir / "README.md").exists()
+    assert not (tool_dir / "tool.yaml").exists()
+
+    manifest = load_tool_store_manifest(tool_store, selected_names={tool_name})
+    tool = manifest["tools"][0]
     assert tool["config"]["tool_store"]["guide_only"] is True
+    assert "source_files" not in tool
+
+
+def test_registry_install_retries_skillnet_blob_directory_as_tree(monkeypatch, tmp_path: Path) -> None:
+    index = _make_index(tmp_path)
+    tool_name = _add_row(
+        index,
+        tool_id="tool.demo.blobdir",
+        source_url="https://github.com/acme/tools/blob/main/skills/blobdir",
+    )
+    calls: list[tuple[str, str]] = []
+
+    def blobdir_api(selection, api_path: str):
+        calls.append((selection.kind, api_path))
+        if api_path == "skills/blobdir":
+            return [{"type": "file", "path": "skills/blobdir/SKILL.md"}]
+        return {
+            "type": "file",
+            "path": "skills/blobdir/SKILL.md",
+            "encoding": "base64",
+            "content": _b64("---\nname: upstream\n---\n# Blob Dir\nUse upstream notes.\n"),
+        }
+
+    monkeypatch.setattr(registry_install, "_github_api_json", blobdir_api)
+
+    summary = registry_install.install_registry_tools(index, [tool_name], tmp_path / "openart-tools")
+
+    assert [item["tool_name"] for item in summary["created"]] == [tool_name]
+    assert calls[0] == ("blob", "skills/blobdir")
+    assert ("tree", "skills/blobdir") in calls
 
 
 def test_registry_install_enforces_download_limits(monkeypatch, tmp_path: Path) -> None:

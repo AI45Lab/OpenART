@@ -1,0 +1,30 @@
+name: dtap.whatsapp
+service: whatsapp
+service_description: DTAP WhatsApp service endpoint wrapper.
+description: Send generic no-proxy HTTP requests to the DTAP WhatsApp service.
+command: /opt/openart-venv/bin/python3
+args:
+  - scripts/dtap_request.py
+source_files:
+  - scripts/dtap_request.py
+required_env:
+  DTAP_WHATSAPP_URL: {}
+optional_env:
+  DTAP_HOST: {}
+  DTAP_WHATSAPP_HEALTH_URL: {}
+  DTAP_WHATSAPP_PG_URL: {}
+  DTAP_WHATSAPP_PG_ADDR: {}
+  DTAP_WHATSAPP_PG_PORT: {}
+  DTAP_WHATSAPP_API_URL: {}
+  DTAP_WHATSAPP_API_ADDR: {}
+  DTAP_WHATSAPP_API_PORT: {}
+  DTAP_WHATSAPP_FRONTEND_URL: {}
+  DTAP_WHATSAPP_FRONTEND_ADDR: {}
+  DTAP_WHATSAPP_FRONTEND_PORT: {}
+tags: [dtap, whatsapp, http, service]
+capabilities: [dtap_request, whatsapp_remote_read, whatsapp_remote_write, remote_read, remote_write]
+side_effects: [remote_read, remote_write]
+usage: dtap.whatsapp --health
+examples:
+  - dtap.whatsapp --health
+  - dtap.whatsapp --path /

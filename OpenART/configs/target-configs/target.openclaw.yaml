@@ -1,0 +1,94 @@
+target:
+  framework: prompt_cli
+  surface_family: openclaw
+  runner_image: openart/openclaw:latest
+  launch_cmd: openclaw --no-color agent --local --json --model openart/${TARGET_MODEL} --session-key agent:main:openart-target --thinking medium --timeout 600 --message
+  config_overlay:
+    prompt_transport: file_ref_argv
+    prompt_flag: ""
+    output_event_name: openclaw_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: OPENAI_API_KEY
+        base_url: OPENAI_BASE_URL
+        model: OPENAI_MODEL
+      env:
+        OPENCLAW_DISABLE_BONJOUR: "1"
+        OPENCLAW_SKIP_ONBOARDING: "1"
+        OPENCLAW_THINKING: medium
+        OPENCLAW_TIMEOUT_SECONDS: "600"
+      config_template:
+        source: repo:configs/target-model-json/openclaw.openai-compatible.json
+        destination: HOME/.openclaw/openclaw.json
+        format: json
+  attack_surfaces:
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Repository-level OpenClaw instruction file loaded into agent context.
+  - vector: soul_md
+    kind: instruction
+    path_template: SOUL.md
+    description: OpenClaw persona and voice file loaded from the workspace.
+  - vector: user_md
+    kind: instruction
+    path_template: USER.md
+    description: OpenClaw user-preference context file loaded from the workspace.
+  - vector: identity_md
+    kind: instruction
+    path_template: IDENTITY.md
+    description: OpenClaw identity context file loaded from the workspace.
+  - vector: tools_md
+    kind: instruction
+    path_template: TOOLS.md
+    description: OpenClaw tool guidance file loaded from the workspace.
+  - vector: heartbeat_md
+    kind: instruction
+    path_template: HEARTBEAT.md
+    description: OpenClaw heartbeat automation guidance file loaded from the workspace.
+  - vector: boot_md
+    kind: instruction
+    path_template: BOOT.md
+    description: OpenClaw boot guidance file loaded from the workspace.
+  - vector: bootstrap_md
+    kind: instruction
+    path_template: BOOTSTRAP.md
+    description: OpenClaw bootstrap guidance file loaded from the workspace.
+  - vector: memory_md
+    kind: memory
+    path_template: MEMORY.md
+    injection_mode: append
+    description: OpenClaw long-term memory file. APPEND mode injects remembered facts.
+  - vector: daily_memory
+    kind: memory
+    path_template: memory/<memory-name>.md
+    injection_mode: append
+    description: OpenClaw dated memory notes loaded from the workspace.
+  - vector: workspace_skill
+    kind: skill
+    path_template: skills/<skill-name>/SKILL.md
+    description: OpenClaw workspace skill discovered under the agent workspace.
+  - vector: managed_skill
+    kind: skill
+    path_template: HOME/.openclaw/skills/<skill-name>/SKILL.md
+    description: OpenClaw managed skill materialized into the runner HOME overlay.
+  - vector: openclaw_config
+    kind: configuration
+    path_template: HOME/.openclaw/openclaw.json
+    description: Native OpenClaw JSON config used directly by the runner.
+  - vector: session_history
+    kind: memory
+    path_template: HOME/.openclaw/agents/<agent-id>/sessions/<session-id>.jsonl
+    injection_mode: append
+    description: OpenClaw stored session transcript path. APPEND mode injects prior-turn history.
+  skills:
+  - coding
+  - browser
+  - enterprise-ops

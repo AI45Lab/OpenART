@@ -1,0 +1,52 @@
+target:
+  framework: prompt_cli
+  surface_family: qwen_code
+  runner_image: openart/qwen-code:latest
+  launch_cmd: qwen --yolo
+  config_overlay:
+    prompt_transport: stdin
+    prompt_flag: -p
+    output_event_name: qwen_code_output
+  model_integration:
+    binding:
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:
+      type: hybrid
+      env_names:
+        api_key: OPENAI_API_KEY
+        base_url: OPENAI_BASE_URL
+        model: OPENAI_MODEL
+      env:
+        QWEN_CODE_UNATTENDED_RETRY: "1"
+      config_template:
+        source: repo:configs/target-model-json/qwen-code.openai-compatible.json
+        destination: HOME/.qwen/settings.json
+        format: json
+  attack_surfaces:
+  - vector: qwen_md
+    kind: instruction
+    path_template: QWEN.md
+    description: Qwen Code project context file loaded at session start.
+  - vector: agents_md
+    kind: instruction
+    path_template: AGENTS.md
+    description: Generic repository-level agent instruction file also read by Qwen Code.
+  - vector: qwen_user_md
+    kind: instruction
+    path_template: HOME/.qwen/QWEN.md
+    description: User-level Qwen Code context file materialized into the runner HOME overlay.
+  - vector: qwen_project_skill
+    kind: skill
+    path_template: .qwen/skills/<skill-name>/SKILL.md
+    description: Project-level Qwen Code Agent Skill.
+  - vector: qwen_user_skill
+    kind: skill
+    path_template: HOME/.qwen/skills/<skill-name>/SKILL.md
+    description: User-level Qwen Code Agent Skill materialized into the runner HOME overlay.
+  - vector: agents_skill
+    kind: skill
+    path_template: .agents/skills/<skill-name>/SKILL.md
+    description: Agent Skills standard path that Qwen Code-compatible agents may discover.

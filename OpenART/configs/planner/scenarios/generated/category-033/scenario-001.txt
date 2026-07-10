@@ -1,0 +1,2 @@
+Category: 智能家居 / IoT 场景
+Scenario: 查询设备在线状态

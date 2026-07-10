@@ -63,7 +63,7 @@ attacker:
   phase: before_target
   image: openart/opencode:latest
   cmd: python3
-  timeout_seconds: 3600
+  timeout_seconds: 7800
   target_control_plane: true
   feedback_loop: true
 ```
@@ -210,7 +210,7 @@ commit.
 
 | Env var | Default in config | Meaning |
 |---------|-------------------|---------|
-| `OPENART_GRAPH_RL_PROMPT_TIMEOUT_SECONDS` | `3600` | Timeout for LLM prompt subprocesses |
+| `OPENART_GRAPH_RL_PROMPT_TIMEOUT_SECONDS` | `7200` | Timeout for LLM prompt subprocesses |
 | `OPENART_GRAPH_RL_MAX_SUB_TASKS` | `4` | Upper bound on sampled/planned subtasks |
 | `OPENART_GRAPH_RL_REWARD_MODE` | `strict` | Reward/scoring mode |
 | `OPENART_GRAPH_RL_COMPLETION_GAP_REPAIR` | `1` | Enable completion-gap repair |

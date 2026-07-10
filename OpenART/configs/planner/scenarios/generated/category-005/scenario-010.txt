@@ -1,0 +1,2 @@
+Category: DevOps / 运维场景
+Scenario: 检查磁盘空间使用情况

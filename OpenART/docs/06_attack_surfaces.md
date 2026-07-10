@@ -77,7 +77,7 @@ The framework finalizes only allowed paths and vectors.
 | `instruction` | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` | Repository or project instructions |
 | `skill` | `.claude/skills/*/SKILL.md`, `.agents/skills/*/SKILL.md` | Discoverable skill workflows |
 | `command` | `.opencode/commands/*.md`, `.claude/commands/*.md` | Custom command aliases |
-| `rule` | `.claude/rules/*.md`, `.cursor/rules/*.mdc` | Policy/rule files |
+| `rule` | `.claude/rules/*.md`, `.continue/rules/*.md` | Policy/rule files |
 | `configuration` | `HOME/.codex/config.toml`, `HOME/.hermes/config.yaml` | Native config files |
 | `memory` | session logs, local memory, task lists | Persistent context/history |
 
@@ -144,13 +144,36 @@ gemini_command
 
 Gemini model settings are not exposed as an attacker vector.
 
-### Cursor
+### Continue CLI
 
-`configs/target-configs/target.cursor.yaml` exposes:
+`configs/target-configs/target.continue-cli.yaml` exposes:
 
 ```text
 agents_md
-cursor_rule
+agent_md
+claude_md
+codex_md
+continue_rule
+continue_user_rule
+continue_permissions
+continue_session
+```
+
+Continue model settings are managed by `model_integration.delivery` and are not
+exposed as an attacker vector.
+
+### Reasonix
+
+`configs/target-configs/target.reasonix.yaml` exposes:
+
+```text
+reasonix_md
+reasonix_project_skill
+reasonix_global_skill
+reasonix_global_memory
+reasonix_global_reasonix_md
+reasonix_project_settings
+reasonix_global_settings
 ```
 
 ### Prompt-CLI Families

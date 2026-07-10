@@ -136,18 +136,111 @@ TARGET_INTEGRATION_METADATA: dict[str, TargetIntegrationMetadata] = {
         ),
         endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
     ),
-    "cursor": TargetIntegrationMetadata(
-        surface_family="cursor",
-        docs_url="https://cursor.com/docs/cli/reference/parameters",
-        official_domains=("docs.cursor.com", "cursor.com"),
+    "continue_cli": TargetIntegrationMetadata(
+        surface_family="continue_cli",
+        docs_url="https://raw.githubusercontent.com/continuedev/continue/main/extensions/cli/README.md",
+        official_domains=("github.com", "raw.githubusercontent.com", "continue.dev", "docs.continue.dev"),
         required_doc_keywords=(
-            "CURSOR_API_KEY",
-            "--api-key",
-            "--model",
-            "--print",
+            "Continue CLI",
+            "cn -p",
+            "--config <path>",
+            "--silent",
         ),
-        required_model_fields=("api_key", "model"),
-        endpoint_probe=None,
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
+    ),
+    "aider": TargetIntegrationMetadata(
+        surface_family="aider",
+        docs_url="https://aider.chat/docs/config/options.html",
+        official_domains=("aider.chat",),
+        required_doc_keywords=(
+            "AIDER_MODEL",
+            "AIDER_OPENAI_API_KEY",
+            "AIDER_OPENAI_API_BASE",
+            ".aider.conf.yml",
+        ),
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
+    ),
+    "copilot_cli": TargetIntegrationMetadata(
+        surface_family="copilot_cli",
+        docs_url="https://registry.npmjs.org/@github%2Fcopilot",
+        official_domains=("registry.npmjs.org", "npmjs.com", "www.npmjs.com", "github.com", "docs.github.com"),
+        required_doc_keywords=(
+            "@github/copilot",
+        ),
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
+    ),
+    "deepseek_tui": TargetIntegrationMetadata(
+        surface_family="deepseek_tui",
+        docs_url="https://registry.npmjs.org/codewhale",
+        official_domains=("registry.npmjs.org", "npmjs.com", "www.npmjs.com"),
+        required_doc_keywords=(
+            "codewhale",
+        ),
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
+    ),
+    "goose": TargetIntegrationMetadata(
+        surface_family="goose",
+        docs_url="https://goose-docs.ai/docs/guides/goose-cli-commands/",
+        official_domains=("goose-docs.ai",),
+        required_doc_keywords=(
+            "goose run",
+            "--model",
+            "--provider",
+            "--no-session",
+        ),
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
+    ),
+    "kilo": TargetIntegrationMetadata(
+        surface_family="kilo",
+        docs_url="https://registry.npmjs.org/@kilocode%2Fcli",
+        official_domains=("registry.npmjs.org", "npmjs.com", "www.npmjs.com", "docs.kilo.ai", "github.com"),
+        required_doc_keywords=(
+            "@kilocode/cli",
+        ),
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
+    ),
+    "openclaw": TargetIntegrationMetadata(
+        surface_family="openclaw",
+        docs_url="https://docs.openclaw.ai/gateway/config-tools",
+        official_domains=("docs.openclaw.ai", "github.com"),
+        required_doc_keywords=(
+            "models.providers",
+            "baseUrl",
+            "apiKey",
+            "openai-completions",
+            "models.providers.*.api",
+        ),
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
+    ),
+    "oh_my_pi": TargetIntegrationMetadata(
+        surface_family="oh_my_pi",
+        docs_url="https://registry.npmjs.org/@oh-my-pi%2Fpi-coding-agent",
+        official_domains=("registry.npmjs.org", "npmjs.com", "www.npmjs.com", "github.com"),
+        required_doc_keywords=(
+            "@oh-my-pi/pi-coding-agent",
+        ),
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
+    ),
+    "reasonix": TargetIntegrationMetadata(
+        surface_family="reasonix",
+        docs_url="https://raw.githubusercontent.com/esengine/DeepSeek-Reasonix/main/README.md",
+        official_domains=("github.com", "raw.githubusercontent.com", "esengine.github.io"),
+        required_doc_keywords=(
+            "reasonix run",
+            "~/.reasonix/config.json",
+            "DeepSeek API key",
+            "MCP",
+        ),
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
+    ),
+    "qwen_code": TargetIntegrationMetadata(
+        surface_family="qwen_code",
+        docs_url="https://registry.npmjs.org/@qwen-code%2Fqwen-code",
+        official_domains=("registry.npmjs.org", "npmjs.com", "www.npmjs.com", "github.com", "qwenlm.github.io"),
+        required_doc_keywords=(
+            "@qwen-code/qwen-code",
+        ),
+        endpoint_probe={"family": "openai_compatible", "wire_api": "chat"},
     ),
 }
 
@@ -498,6 +591,8 @@ def validate_adapter(
             "matched_fields": [],
             "missing_fields": list(metadata.required_doc_keywords),
             "error": str(exc),
+            "fetch_error": True,
+            "error_type": type(exc).__name__,
         }
 
     integration = target_config.get("model_integration") if isinstance(target_config, dict) else {}
@@ -526,13 +621,16 @@ def validate_adapter(
 
     official = bool(docs_result.get("official"))
     docs_ok = bool(docs_result.get("ok"))
+    docs_unavailable = bool(docs_result.get("fetch_error"))
     smoke_ok = bool(smoke_result.get("ok"))
     endpoint_ok = bool(endpoint_result.get("ok"))
 
-    if not docs_ok:
-        status = "invalid"
-    elif errors or not smoke_ok or not endpoint_ok:
+    if errors or not smoke_ok or not endpoint_ok:
         status = "integration_error"
+    elif docs_unavailable:
+        status = "experimental"
+    elif not docs_ok:
+        status = "invalid"
     elif not official:
         status = "experimental"
     else:
