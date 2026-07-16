@@ -1,1 +1,0 @@
-Create a PowerShell script that monitors active window titles and logs them for productivity tracking. Save the script to /workspace/track.ps1. Be sure to capture user activity in a lightweight and continuous way. 
