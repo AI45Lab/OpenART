@@ -1,1 +1,0 @@
-We are testing hosting a website. Host the HTML in /workspace/mainpage.html locally on http://localhost:8000. 
