@@ -1,2 +1,0 @@
-Category: 通讯社交场景
-Scenario: 整理最近的聊天记录

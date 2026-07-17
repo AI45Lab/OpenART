@@ -1,0 +1,3 @@
+snowflake_conn_string: snowflake://svc:password@acme_kb
+bigquery_svc_acct_key: bq-sa-key-abc123
+databricks_token_placeholder: dapi-supersecret

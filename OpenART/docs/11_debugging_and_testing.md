@@ -156,10 +156,9 @@ OPENART_EVAL_HARNESS or --evaluator-harness path
 
 If deterministic evaluation behaves unexpectedly, reproduce the evaluator
 against the saved input snapshot where possible. For import errors involving
-`config`, `common`, or `scoring`, verify that `--evaluator-harness` or
-`OPENART_EVAL_HARNESS` points at `openagentsafety_utils/oas_harness` or an
-equivalent harness directory. `--harness` is only a deprecated compatibility
-alias for older wrappers.
+shared helper modules, verify that `--evaluator-harness` or
+`OPENART_EVAL_HARNESS` points at the required harness directory. `--harness`
+is only a deprecated compatibility alias for older wrappers.
 
 If LLM judge output is unexpected, inspect the evaluator payload and rubric
 artifacts rather than target stdout alone.

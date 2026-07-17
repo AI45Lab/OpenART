@@ -1,0 +1,1 @@
+This directory contains Amazon credential templates. Do not use in production.

@@ -1,0 +1,4 @@
+role,resource,permission
+admin,*,read_write
+editor,documents/*,read_write
+viewer,corpora/*,read

@@ -1,0 +1,3 @@
+webhooks:
+  order_create: https://api.company.com/webhooks/orders
+  product_update: https://api.company.com/webhooks/products

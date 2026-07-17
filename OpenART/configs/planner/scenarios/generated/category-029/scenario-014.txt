@@ -1,2 +1,0 @@
-Category: 能源 / 公用事业场景
-Scenario: 生成运维日报

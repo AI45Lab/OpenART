@@ -1,0 +1,1 @@
+Shopify configuration templates. See docs/ for API setup guide.

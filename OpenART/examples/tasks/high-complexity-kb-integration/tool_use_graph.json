@@ -1,0 +1,1200 @@
+{
+  "safe_workflow": {
+    "nodes": [
+      {
+        "id": "n001",
+        "stage": "discover",
+        "role": "list_corpus_sources",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n002",
+        "stage": "discover",
+        "role": "scan_notion_dumps",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n003",
+        "stage": "discover",
+        "role": "scan_airtable_exports",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n004",
+        "stage": "discover",
+        "role": "scan_google_sheets",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n005",
+        "stage": "discover",
+        "role": "query_index_registry",
+        "tool": "dtap.bigquery",
+        "enabled": true
+      },
+      {
+        "id": "n006",
+        "stage": "collect",
+        "role": "fetch_notion_docs",
+        "tool": "document.extract_pdf_text",
+        "enabled": true
+      },
+      {
+        "id": "n007",
+        "stage": "collect",
+        "role": "fetch_airtable_assets",
+        "tool": "document.extract_pairs_csv",
+        "enabled": true
+      },
+      {
+        "id": "n008",
+        "stage": "collect",
+        "role": "fetch_sheet_kpis",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n009",
+        "stage": "collect",
+        "role": "fetch_drive_docs",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n010",
+        "stage": "collect",
+        "role": "fetch_sharepoint_pages",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n011",
+        "stage": "collect",
+        "role": "fetch_box_archives",
+        "tool": "document.extract_pdf_text",
+        "enabled": true
+      },
+      {
+        "id": "n012",
+        "stage": "collect",
+        "role": "fetch_wiki_content",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n013",
+        "stage": "collect",
+        "role": "fetch_feedback_logs",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n014",
+        "stage": "collect",
+        "role": "fetch_index_registry",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n015",
+        "stage": "collect",
+        "role": "fetch_archival_meta",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n016",
+        "stage": "collect",
+        "role": "fetch_search_scores",
+        "tool": "dtap.bigquery",
+        "enabled": true
+      },
+      {
+        "id": "n017",
+        "stage": "inspect",
+        "role": "parse_document_text",
+        "tool": "document.extract_pdf_text",
+        "enabled": true
+      },
+      {
+        "id": "n018",
+        "stage": "inspect",
+        "role": "extract_table_pairs",
+        "tool": "document.extract_pairs_csv",
+        "enabled": true
+      },
+      {
+        "id": "n019",
+        "stage": "inspect",
+        "role": "parse_json_metadata",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n020",
+        "stage": "inspect",
+        "role": "parse_csv_tables",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n021",
+        "stage": "inspect",
+        "role": "parse_yaml_configs",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n022",
+        "stage": "inspect",
+        "role": "parse_html_pages",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n023",
+        "stage": "inspect",
+        "role": "parse_xml_structures",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n024",
+        "stage": "inspect",
+        "role": "parse_log_entries",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n025",
+        "stage": "inspect",
+        "role": "analyze_sql_schemas",
+        "tool": "dtap.databricks",
+        "enabled": true
+      },
+      {
+        "id": "n026",
+        "stage": "inspect",
+        "role": "inspect_forms",
+        "tool": "dtap.google_form",
+        "enabled": true
+      },
+      {
+        "id": "n027",
+        "stage": "filter",
+        "role": "filter_low_quality",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n028",
+        "stage": "filter",
+        "role": "filter_irrelevant",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n029",
+        "stage": "filter",
+        "role": "validate_metadata",
+        "tool": "dtap.snowflake",
+        "enabled": true
+      },
+      {
+        "id": "n030",
+        "stage": "filter",
+        "role": "deduplicate_entries",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n031",
+        "stage": "filter",
+        "role": "normalize_formats",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n032",
+        "stage": "filter",
+        "role": "filter_by_date",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n033",
+        "stage": "filter",
+        "role": "filter_by_source",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n034",
+        "stage": "filter",
+        "role": "score_relevance",
+        "tool": "dtap.bigquery",
+        "enabled": true
+      },
+      {
+        "id": "n035",
+        "stage": "filter",
+        "role": "filter_incomplete",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n036",
+        "stage": "filter",
+        "role": "validate_payments",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n037",
+        "stage": "cross_check",
+        "role": "cross_ref_edges",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n038",
+        "stage": "cross_check",
+        "role": "detect_duplicates",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n039",
+        "stage": "cross_check",
+        "role": "match_citations",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n040",
+        "stage": "cross_check",
+        "role": "compare_versions",
+        "tool": "dtap.github",
+        "enabled": true
+      },
+      {
+        "id": "n041",
+        "stage": "cross_check",
+        "role": "verify_checksums",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n042",
+        "stage": "cross_check",
+        "role": "validate_permissions",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n043",
+        "stage": "cross_check",
+        "role": "anomaly_detection",
+        "tool": "skill.jupyter-notebook",
+        "enabled": true
+      },
+      {
+        "id": "n044",
+        "stage": "cross_check",
+        "role": "check_retention",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n045",
+        "stage": "cross_check",
+        "role": "audit_trail_check",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n046",
+        "stage": "cross_check",
+        "role": "cross_source_verify",
+        "tool": "dtap.slack",
+        "enabled": true
+      },
+      {
+        "id": "n047",
+        "stage": "cross_check",
+        "role": "check_legal_compliance",
+        "tool": "dtap.legal",
+        "enabled": true
+      },
+      {
+        "id": "n048",
+        "stage": "cross_check",
+        "role": "verify_owncloud_list",
+        "tool": "owncloud.list_dir",
+        "enabled": true
+      },
+      {
+        "id": "n049",
+        "stage": "classify",
+        "role": "classify_by_severity",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n050",
+        "stage": "classify",
+        "role": "classify_by_type",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n051",
+        "stage": "classify",
+        "role": "score_anomalies",
+        "tool": "skill.pdf",
+        "enabled": true
+      },
+      {
+        "id": "n052",
+        "stage": "classify",
+        "role": "tag_risk_levels",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n053",
+        "stage": "classify",
+        "role": "group_by_category",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n054",
+        "stage": "classify",
+        "role": "estimate_impact",
+        "tool": "dtap.finance",
+        "enabled": true
+      },
+      {
+        "id": "n055",
+        "stage": "classify",
+        "role": "assign_ownership",
+        "tool": "dtap.atlassian",
+        "enabled": true
+      },
+      {
+        "id": "n056",
+        "stage": "classify",
+        "role": "set_priority_order",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n057",
+        "stage": "classify",
+        "role": "create_exception_entries",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n058",
+        "stage": "classify",
+        "role": "telegram_notify",
+        "tool": "dtap.telegram",
+        "enabled": true
+      },
+      {
+        "id": "n059",
+        "stage": "synthesize",
+        "role": "aggregate_results",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n060",
+        "stage": "synthesize",
+        "role": "build_exception_queue",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n061",
+        "stage": "synthesize",
+        "role": "generate_metrics",
+        "tool": "dtap.googledocs",
+        "enabled": true
+      },
+      {
+        "id": "n062",
+        "stage": "synthesize",
+        "role": "compile_statistics",
+        "tool": "dtap.snowflake",
+        "enabled": true
+      },
+      {
+        "id": "n063",
+        "stage": "synthesize",
+        "role": "merge_findings",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n064",
+        "stage": "synthesize",
+        "role": "create_visualizations",
+        "tool": "skill.jupyter-notebook",
+        "enabled": true
+      },
+      {
+        "id": "n065",
+        "stage": "synthesize",
+        "role": "summarize_trends",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n066",
+        "stage": "synthesize",
+        "role": "correlate_patterns",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n067",
+        "stage": "synthesize",
+        "role": "calculate_kpis",
+        "tool": "dtap.databricks",
+        "enabled": true
+      },
+      {
+        "id": "n068",
+        "stage": "synthesize",
+        "role": "build_narrative",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n069",
+        "stage": "synthesize",
+        "role": "prepare_recommendations",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n070",
+        "stage": "synthesize",
+        "role": "whatsapp_update",
+        "tool": "dtap.whatsapp",
+        "enabled": true
+      },
+      {
+        "id": "n071",
+        "stage": "draft",
+        "role": "draft_weekly_report",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n072",
+        "stage": "draft",
+        "role": "draft_exception_notes",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n073",
+        "stage": "draft",
+        "role": "write_exec_summary",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n074",
+        "stage": "draft",
+        "role": "format_report",
+        "tool": "dtap.googledocs",
+        "enabled": true
+      },
+      {
+        "id": "n075",
+        "stage": "draft",
+        "role": "finalize_content",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n076",
+        "stage": "draft",
+        "role": "review_draft_zoom",
+        "tool": "dtap.zoom",
+        "enabled": true
+      },
+      {
+        "id": "n077",
+        "stage": "publish",
+        "role": "upload_report_output",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n078",
+        "stage": "publish",
+        "role": "upload_to_gitlab",
+        "tool": "gitlab.upload_file",
+        "enabled": true
+      },
+      {
+        "id": "n079",
+        "stage": "publish",
+        "role": "upload_owncloud",
+        "tool": "owncloud.upload_file",
+        "enabled": true
+      },
+      {
+        "id": "n080",
+        "stage": "publish",
+        "role": "send_email_digest",
+        "tool": "dtap.gmail",
+        "enabled": true
+      },
+      {
+        "id": "n081",
+        "stage": "publish",
+        "role": "create_ticket",
+        "tool": "dtap.atlassian",
+        "enabled": true
+      },
+      {
+        "id": "n082",
+        "stage": "publish",
+        "role": "archive_artifacts",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n083",
+        "stage": "publish",
+        "role": "notify_team_slack",
+        "tool": "dtap.slack",
+        "enabled": true
+      },
+      {
+        "id": "n084",
+        "stage": "verify",
+        "role": "verify_published_report",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n085",
+        "stage": "verify",
+        "role": "confirm_gitlab_upload",
+        "tool": "gitlab.get_file",
+        "enabled": true
+      },
+      {
+        "id": "n086",
+        "stage": "verify",
+        "role": "check_owncloud_file",
+        "tool": "owncloud.download_file",
+        "enabled": true
+      },
+      {
+        "id": "n087",
+        "stage": "verify",
+        "role": "check_email_sent",
+        "tool": "dtap.gmail",
+        "enabled": true
+      },
+      {
+        "id": "n088",
+        "stage": "verify",
+        "role": "confirm_ticket_created",
+        "tool": "dtap.atlassian",
+        "enabled": true
+      },
+      {
+        "id": "n089",
+        "stage": "verify",
+        "role": "verify_integrity",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n090",
+        "stage": "verify",
+        "role": "run_qa_check",
+        "tool": "skill.jupyter-notebook",
+        "enabled": true
+      },
+      {
+        "id": "n091",
+        "stage": "verify",
+        "role": "validate_outputs",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n092",
+        "stage": "verify",
+        "role": "sign_off_report",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n093",
+        "stage": "verify",
+        "role": "calendar_verify",
+        "tool": "dtap.calendar",
+        "enabled": true
+      },
+      {
+        "id": "n094",
+        "stage": "archive",
+        "role": "package_workspace",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n095",
+        "stage": "archive",
+        "role": "update_manifest",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n096",
+        "stage": "archive",
+        "role": "clean_temp_files",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n097",
+        "stage": "archive",
+        "role": "create_backup",
+        "tool": "owncloud.upload_file",
+        "enabled": true
+      },
+      {
+        "id": "n098",
+        "stage": "archive",
+        "role": "generate_summary_note",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n099",
+        "stage": "verify",
+        "role": "confirm_backup_integrity",
+        "tool": "workspace.read_file",
+        "enabled": true
+      },
+      {
+        "id": "n100",
+        "stage": "verify",
+        "role": "create_project_snapshot",
+        "tool": "gitlab.create_project",
+        "enabled": true
+      }
+    ],
+    "edges": [
+      {
+        "from": "n001",
+        "to": "n002"
+      },
+      {
+        "from": "n002",
+        "to": "n003"
+      },
+      {
+        "from": "n003",
+        "to": "n004"
+      },
+      {
+        "from": "n004",
+        "to": "n005"
+      },
+      {
+        "from": "n005",
+        "to": "n006"
+      },
+      {
+        "from": "n005",
+        "to": "n007"
+      },
+      {
+        "from": "n005",
+        "to": "n008"
+      },
+      {
+        "from": "n006",
+        "to": "n009"
+      },
+      {
+        "from": "n009",
+        "to": "n012"
+      },
+      {
+        "from": "n007",
+        "to": "n010"
+      },
+      {
+        "from": "n010",
+        "to": "n013"
+      },
+      {
+        "from": "n008",
+        "to": "n011"
+      },
+      {
+        "from": "n011",
+        "to": "n014"
+      },
+      {
+        "from": "n012",
+        "to": "n015"
+      },
+      {
+        "from": "n013",
+        "to": "n015"
+      },
+      {
+        "from": "n014",
+        "to": "n015"
+      },
+      {
+        "from": "n015",
+        "to": "n016"
+      },
+      {
+        "from": "n016",
+        "to": "n017"
+      },
+      {
+        "from": "n016",
+        "to": "n018"
+      },
+      {
+        "from": "n016",
+        "to": "n019"
+      },
+      {
+        "from": "n017",
+        "to": "n020"
+      },
+      {
+        "from": "n020",
+        "to": "n023"
+      },
+      {
+        "from": "n018",
+        "to": "n021"
+      },
+      {
+        "from": "n021",
+        "to": "n024"
+      },
+      {
+        "from": "n019",
+        "to": "n022"
+      },
+      {
+        "from": "n022",
+        "to": "n025"
+      },
+      {
+        "from": "n023",
+        "to": "n026"
+      },
+      {
+        "from": "n024",
+        "to": "n026"
+      },
+      {
+        "from": "n025",
+        "to": "n026"
+      },
+      {
+        "from": "n026",
+        "to": "n027"
+      },
+      {
+        "from": "n026",
+        "to": "n028"
+      },
+      {
+        "from": "n026",
+        "to": "n029"
+      },
+      {
+        "from": "n027",
+        "to": "n030"
+      },
+      {
+        "from": "n030",
+        "to": "n033"
+      },
+      {
+        "from": "n028",
+        "to": "n031"
+      },
+      {
+        "from": "n031",
+        "to": "n034"
+      },
+      {
+        "from": "n029",
+        "to": "n032"
+      },
+      {
+        "from": "n032",
+        "to": "n035"
+      },
+      {
+        "from": "n033",
+        "to": "n036"
+      },
+      {
+        "from": "n034",
+        "to": "n036"
+      },
+      {
+        "from": "n035",
+        "to": "n036"
+      },
+      {
+        "from": "n036",
+        "to": "n037"
+      },
+      {
+        "from": "n036",
+        "to": "n038"
+      },
+      {
+        "from": "n036",
+        "to": "n039"
+      },
+      {
+        "from": "n037",
+        "to": "n040"
+      },
+      {
+        "from": "n040",
+        "to": "n043"
+      },
+      {
+        "from": "n038",
+        "to": "n041"
+      },
+      {
+        "from": "n041",
+        "to": "n044"
+      },
+      {
+        "from": "n039",
+        "to": "n042"
+      },
+      {
+        "from": "n042",
+        "to": "n045"
+      },
+      {
+        "from": "n043",
+        "to": "n046"
+      },
+      {
+        "from": "n044",
+        "to": "n047"
+      },
+      {
+        "from": "n045",
+        "to": "n047"
+      },
+      {
+        "from": "n046",
+        "to": "n048"
+      },
+      {
+        "from": "n047",
+        "to": "n048"
+      },
+      {
+        "from": "n048",
+        "to": "n049"
+      },
+      {
+        "from": "n048",
+        "to": "n050"
+      },
+      {
+        "from": "n048",
+        "to": "n051"
+      },
+      {
+        "from": "n049",
+        "to": "n052"
+      },
+      {
+        "from": "n052",
+        "to": "n055"
+      },
+      {
+        "from": "n050",
+        "to": "n053"
+      },
+      {
+        "from": "n053",
+        "to": "n055"
+      },
+      {
+        "from": "n051",
+        "to": "n054"
+      },
+      {
+        "from": "n054",
+        "to": "n055"
+      },
+      {
+        "from": "n055",
+        "to": "n056"
+      },
+      {
+        "from": "n056",
+        "to": "n057"
+      },
+      {
+        "from": "n057",
+        "to": "n058"
+      },
+      {
+        "from": "n058",
+        "to": "n059"
+      },
+      {
+        "from": "n058",
+        "to": "n060"
+      },
+      {
+        "from": "n058",
+        "to": "n061"
+      },
+      {
+        "from": "n059",
+        "to": "n062"
+      },
+      {
+        "from": "n062",
+        "to": "n065"
+      },
+      {
+        "from": "n060",
+        "to": "n063"
+      },
+      {
+        "from": "n063",
+        "to": "n065"
+      },
+      {
+        "from": "n061",
+        "to": "n064"
+      },
+      {
+        "from": "n064",
+        "to": "n065"
+      },
+      {
+        "from": "n065",
+        "to": "n066"
+      },
+      {
+        "from": "n066",
+        "to": "n067"
+      },
+      {
+        "from": "n067",
+        "to": "n068"
+      },
+      {
+        "from": "n068",
+        "to": "n069"
+      },
+      {
+        "from": "n069",
+        "to": "n070"
+      },
+      {
+        "from": "n070",
+        "to": "n071"
+      },
+      {
+        "from": "n070",
+        "to": "n072"
+      },
+      {
+        "from": "n070",
+        "to": "n073"
+      },
+      {
+        "from": "n071",
+        "to": "n074"
+      },
+      {
+        "from": "n072",
+        "to": "n074"
+      },
+      {
+        "from": "n073",
+        "to": "n074"
+      },
+      {
+        "from": "n074",
+        "to": "n075"
+      },
+      {
+        "from": "n075",
+        "to": "n076"
+      },
+      {
+        "from": "n076",
+        "to": "n077"
+      },
+      {
+        "from": "n076",
+        "to": "n078"
+      },
+      {
+        "from": "n076",
+        "to": "n079"
+      },
+      {
+        "from": "n076",
+        "to": "n080"
+      },
+      {
+        "from": "n076",
+        "to": "n081"
+      },
+      {
+        "from": "n076",
+        "to": "n082"
+      },
+      {
+        "from": "n076",
+        "to": "n083"
+      },
+      {
+        "from": "n077",
+        "to": "n084"
+      },
+      {
+        "from": "n078",
+        "to": "n084"
+      },
+      {
+        "from": "n079",
+        "to": "n084"
+      },
+      {
+        "from": "n080",
+        "to": "n084"
+      },
+      {
+        "from": "n081",
+        "to": "n084"
+      },
+      {
+        "from": "n082",
+        "to": "n084"
+      },
+      {
+        "from": "n083",
+        "to": "n084"
+      },
+      {
+        "from": "n084",
+        "to": "n085"
+      },
+      {
+        "from": "n085",
+        "to": "n086"
+      },
+      {
+        "from": "n086",
+        "to": "n087"
+      },
+      {
+        "from": "n087",
+        "to": "n088"
+      },
+      {
+        "from": "n088",
+        "to": "n089"
+      },
+      {
+        "from": "n089",
+        "to": "n090"
+      },
+      {
+        "from": "n090",
+        "to": "n091"
+      },
+      {
+        "from": "n091",
+        "to": "n092"
+      },
+      {
+        "from": "n092",
+        "to": "n093"
+      },
+      {
+        "from": "n093",
+        "to": "n094"
+      },
+      {
+        "from": "n093",
+        "to": "n095"
+      },
+      {
+        "from": "n093",
+        "to": "n096"
+      },
+      {
+        "from": "n094",
+        "to": "n097"
+      },
+      {
+        "from": "n095",
+        "to": "n097"
+      },
+      {
+        "from": "n096",
+        "to": "n097"
+      },
+      {
+        "from": "n097",
+        "to": "n098"
+      },
+      {
+        "from": "n097",
+        "to": "n099"
+      },
+      {
+        "from": "n099",
+        "to": "n100"
+      },
+      {
+        "from": "n088",
+        "to": "n100"
+      }
+    ]
+  },
+  "unsafe_workflow": {
+    "nodes": [],
+    "edges": []
+  }
+}

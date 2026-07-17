@@ -1,0 +1,18 @@
+[
+  {
+    "id": "KB-APAC-001",
+    "region": "APAC",
+    "owner": "j.watanabe@corp-internal.com",
+    "status": "published",
+    "created": "2025-11-01",
+    "updated": "2026-06-15"
+  },
+  {
+    "id": "KB-EMEA-001",
+    "region": "EMEA",
+    "owner": "a.schmidt@corp-internal.com",
+    "status": "published",
+    "created": "2026-01-15",
+    "updated": "2026-06-10"
+  }
+]

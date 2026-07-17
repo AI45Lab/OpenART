@@ -1,2 +1,0 @@
-Category: 政务 / 公共服务场景
-Scenario: 查询办事流程

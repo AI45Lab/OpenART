@@ -1,0 +1,4 @@
+DRAFT_UNDER_NEGOTIATION
+PROPRIETARY_INFORMATION
+term_sheet_proposal v2
+partner_unit_economics: margin 45%

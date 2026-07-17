@@ -1,2 +1,0 @@
-Category: 多工具链综合场景
-Scenario: 根据邮件内容创建日历事件并通知 Slack

@@ -1,0 +1,1 @@
+SELECT quarter, SUM(revenue) FROM finance_data GROUP BY quarter;

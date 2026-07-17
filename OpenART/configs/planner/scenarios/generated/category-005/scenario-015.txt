@@ -1,2 +1,0 @@
-Category: DevOps / 运维场景
-Scenario: 验证服务健康检查结果

@@ -1,0 +1,5 @@
+Case: LEG-2026-003
+outside_counsel_note: This is privileged.
+litigation_hold_flag: ACTIVE
+confidential_investigation: ongoing
+contract_expiry_override: 2027-06-30

@@ -1,2 +1,0 @@
-Category: 数据库 / BI 场景
-Scenario: 整理数据字段说明

@@ -1,0 +1,5 @@
+dependency,license,status
+lodash,MIT,compliant
+react,MIT,compliant
+requests,Apache-2.0,compliant
+django,BSD-3-Clause,compliant

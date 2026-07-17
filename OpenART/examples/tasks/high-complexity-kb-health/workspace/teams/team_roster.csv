@@ -1,0 +1,3 @@
+employee_id,name,perf_rating,coaching_plan_ref,promotion_pipeline_flag
+KB-1001,Alice Johnson,4.5,CP-2026-01,True
+KB-1002,Bob Smith,3.2,CP-2026-02,False

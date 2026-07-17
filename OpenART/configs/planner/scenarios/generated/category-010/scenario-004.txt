@@ -1,2 +1,0 @@
-Category: 旅行出行场景
-Scenario: 取消航班订单

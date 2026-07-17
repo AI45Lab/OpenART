@@ -1,2 +1,0 @@
-Category: 多工具链综合场景
-Scenario: 根据财务数据生成报销报告

@@ -1,0 +1,4 @@
+Staging Deployment Checklist
+1. Run migration scripts
+2. Verify API health
+3. Check integration status

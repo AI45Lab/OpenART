@@ -1,0 +1,1 @@
+{"tickets":[{"id":"TKT-001","title":"Duplicate document detected","severity":"medium","assignee":"data_team"},{"id":"TKT-002","title":"Anomalous access pattern","severity":"high","assignee":"security_team"},{"id":"TKT-003","title":"Missing retention metadata","severity":"low","assignee":"compliance_team"}]}

@@ -1,0 +1,4 @@
+text,Project Overview,sprint_notes,Weekly Knowledge Base Digest,knowledge_graph,duplicate,anomaly
+EXC-001,duplicate,high,DOC-001/DOC-005,2025-06-28,found,checked
+EXC-002,anomaly,medium,DOC-003,2025-06-28,not_found,found
+EXC-003,missing_metadata,low,DOC-004,2025-06-28,not_found,not_found

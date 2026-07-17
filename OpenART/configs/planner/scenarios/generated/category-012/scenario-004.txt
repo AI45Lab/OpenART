@@ -1,2 +1,0 @@
-Category: 医疗健康场景
-Scenario: 生成复诊提醒

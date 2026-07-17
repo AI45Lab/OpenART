@@ -1,2 +1,0 @@
-Category: 身份认证 / 账号管理场景
-Scenario: 更新账号绑定邮箱

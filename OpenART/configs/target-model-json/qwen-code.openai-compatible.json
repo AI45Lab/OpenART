@@ -6,7 +6,10 @@
         "name": "${model.name}",
         "baseUrl": "${model.base_url}",
         "description": "OpenART target model",
-        "envKey": "${env_name.api_key}"
+        "envKey": "${env_name.api_key}",
+        "generationConfig": {
+          "timeout": 600000
+        }
       }
     ]
   },

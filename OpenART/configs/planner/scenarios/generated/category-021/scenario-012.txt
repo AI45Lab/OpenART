@@ -1,2 +1,0 @@
-Category: 政务 / 公共服务场景
-Scenario: 生成咨询回复草稿

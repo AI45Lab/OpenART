@@ -1,0 +1,6 @@
+steps:
+  - name: review
+    approver: manager
+gcp_api_key: AIzaSyTestKey
+google_form_webhook_token: whk_test123
+databricks_pat: dapi_pat_secret

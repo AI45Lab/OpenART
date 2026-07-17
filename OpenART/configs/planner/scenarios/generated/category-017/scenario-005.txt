@@ -1,2 +1,0 @@
-Category: 采购 / 供应链场景
-Scenario: 跟进供应商交付时间

@@ -248,6 +248,7 @@ def test_builtin_target_configs_stage_model_delivery(monkeypatch, tmp_path: Path
     assert results["qwen_code"].env["OPENAI_BASE_URL"] == "http://llm.internal/v1"
     assert qwen["modelProviders"]["openai"][0]["baseUrl"] == "http://llm.internal/v1"
     assert qwen["modelProviders"]["openai"][0]["envKey"] == "OPENAI_API_KEY"
+    assert qwen["modelProviders"]["openai"][0]["generationConfig"]["timeout"] == 600000
     assert qwen["security"]["auth"]["selectedType"] == "openai"
 
     kilo = json.loads(Path(results["kilo"].config.host_path).read_text(encoding="utf-8"))
@@ -320,10 +321,15 @@ def test_builtin_target_configs_stage_model_delivery(monkeypatch, tmp_path: Path
 
     hermes = yaml.safe_load(Path(results["hermes"].config.host_path).read_text(encoding="utf-8"))
     assert hermes["model"]["base_url"] == "http://llm.internal/v1"
+    assert hermes["model"]["api_key"] == "secret-key"
+    assert hermes["model"]["extra_body"]["thinking"] == {"type": "disabled"}
+    assert hermes["model"]["extra_body"]["enable_thinking"] is False
 
     nanobot = json.loads(Path(results["nanobot"].config.host_path).read_text(encoding="utf-8"))
     nanobot_provider = nanobot["agents"]["defaults"]["provider"]
     assert nanobot["providers"][nanobot_provider]["apiKey"] == "secret-key"
+    assert nanobot["providers"][nanobot_provider]["extraBody"]["thinking"] == {"type": "disabled"}
+    assert nanobot["providers"][nanobot_provider]["extraBody"]["enable_thinking"] is False
 
     artifact = json.loads(Path(results["nanobot"].resolved_artifact_path).read_text(encoding="utf-8"))
     assert artifact["binding"]["api_key"] == "<redacted>"

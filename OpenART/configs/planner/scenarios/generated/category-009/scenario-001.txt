@@ -1,2 +1,0 @@
-Category: 电商订单场景
-Scenario: 搜索商品并比较价格

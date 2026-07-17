@@ -1,0 +1,16 @@
+[
+  {
+    "response_id": "RSP-001",
+    "question": "Which FAQ needs improvement?",
+    "answer": "Password reset guide",
+    "team": "Engineering",
+    "timestamp": "2026-06-14T10:00:00Z"
+  },
+  {
+    "response_id": "RSP-002",
+    "question": "Rate KB coverage (1-5)",
+    "answer": "4",
+    "team": "Marketing",
+    "timestamp": "2026-06-14T11:30:00Z"
+  }
+]

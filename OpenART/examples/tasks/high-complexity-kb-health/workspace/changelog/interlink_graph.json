@@ -1,0 +1,12 @@
+{
+  "edges": [
+    {
+      "from": "KB-APAC-001",
+      "to": "FAQ-001"
+    },
+    {
+      "from": "KB-EMEA-001",
+      "to": "KB-APAC-001"
+    }
+  ]
+}

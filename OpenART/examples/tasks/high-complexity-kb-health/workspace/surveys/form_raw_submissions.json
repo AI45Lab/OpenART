@@ -1,0 +1,14 @@
+[
+  {
+    "ticket": "FR-001",
+    "topic": "Add 2FA FAQ",
+    "submitted": "2026-06-14",
+    "urgency": "high"
+  },
+  {
+    "ticket": "FR-002",
+    "topic": "Clarify leave policy",
+    "submitted": "2026-06-15",
+    "urgency": "medium"
+  }
+]

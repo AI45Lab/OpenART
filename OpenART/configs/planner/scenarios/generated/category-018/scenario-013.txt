@@ -1,2 +1,0 @@
-Category: 物流 / 仓储场景
-Scenario: 通知客户预计送达时间

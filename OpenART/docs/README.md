@@ -25,7 +25,7 @@ into implementation details without reading stale walkthroughs.
 
 ## Recommended Reading Paths
 
-For running experiments:
+For running OpenART:
 
 ```text
 00_overview -> 01_quickstart -> 03_task_and_config_model

@@ -1,2 +1,0 @@
-Category: DevOps / 运维场景
-Scenario: 查看服务运行状态

@@ -1,2 +1,0 @@
-Category: 法律合规场景
-Scenario: 查找合规政策条款

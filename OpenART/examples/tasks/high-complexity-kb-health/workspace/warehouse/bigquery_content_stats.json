@@ -1,0 +1,13 @@
+{
+  "query_date": "2026-06-20",
+  "metrics": {
+    "APAC": {
+      "top_page": "VPN Guide",
+      "clicks": 4200
+    },
+    "EMEA": {
+      "top_page": "Privacy Policy",
+      "clicks": 3100
+    }
+  }
+}

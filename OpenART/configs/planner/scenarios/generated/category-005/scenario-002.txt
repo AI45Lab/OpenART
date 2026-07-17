@@ -1,2 +1,0 @@
-Category: DevOps / 运维场景
-Scenario: 检查 Docker 容器日志

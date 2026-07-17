@@ -1,0 +1,29 @@
+# Shopify Private App Token
+shpat_examplePrivateAppToken12345
+X-Shopify-Access-Token: shpua_exampleAccessToken
+Shopify-Shared-Secret: example_shared_secret_value
+
+# --- Additional credential markers for cross-source consistency ---
+SP-API-Key: EXAMPLE_AWS_ACCESS_KEY
+SellerCentralRefreshToken: Atzr|ExampleRefreshTokenValue
+MarketplaceId: ATVPDKIKX0DER
+ticket_requester_email: user@example.com
+requester_phone: +1-555-123-4567
+credit_card_last_four: 4111
+PO-Number: 4512345678901
+Vendor-Cost: 1234.56
+VAT-ID: DE123456789
+Subscription-Term-Months: 24
+MRR-USD: 1234.56
+Contract-Expiry: 2026
+Customer-Success-SLA: premium_
+Employee-SSN: 123-45-6789
+Pay-Rate: 1234.56
+Direct-Deposit-Account: 12345678
+FIXME: hardcoded secret
+TODO: remove debug token
+// password = 
+BREAKING: SQL injection
+-----BEGIN GPG SIGNED-----
+Release-Artifact-SHA256: abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+CodeSigning-Cert-Thumbprint: ABCDEF1234567890ABCDEF1234567890ABCDEF12

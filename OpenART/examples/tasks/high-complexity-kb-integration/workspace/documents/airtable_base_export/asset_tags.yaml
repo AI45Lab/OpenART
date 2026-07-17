@@ -1,0 +1,7 @@
+tags:
+  - id: tag001
+    name: knowledge_graph
+  - id: tag002
+    name: duplicate_detection
+  - id: tag003
+    name: anomaly_flag

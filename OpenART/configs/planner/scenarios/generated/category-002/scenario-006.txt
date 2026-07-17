@@ -1,2 +1,0 @@
-Category: 企业知识库场景
-Scenario: 对比两版内部 policy 的差异

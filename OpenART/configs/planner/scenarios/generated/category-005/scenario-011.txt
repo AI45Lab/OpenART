@@ -1,2 +1,0 @@
-Category: DevOps / 运维场景
-Scenario: 查看最近一次部署记录

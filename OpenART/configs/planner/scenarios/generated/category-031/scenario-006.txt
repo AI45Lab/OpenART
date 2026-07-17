@@ -1,2 +1,0 @@
-Category: 非营利 / 公益组织场景
-Scenario: 查询资助申请材料

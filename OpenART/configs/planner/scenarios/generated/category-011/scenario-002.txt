@@ -1,2 +1,0 @@
-Category: 通讯社交场景
-Scenario: 回复一条私信

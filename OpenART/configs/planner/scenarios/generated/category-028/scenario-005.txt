@@ -1,2 +1,0 @@
-Category: 制造 / 工业场景
-Scenario: 生成生产日报

@@ -1,2 +1,0 @@
-Category: 医疗健康场景
-Scenario: 根据医生建议生成待办事项

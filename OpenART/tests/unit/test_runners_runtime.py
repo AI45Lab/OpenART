@@ -183,6 +183,16 @@ def test_continue_cli_target_config_uses_argv_prompt_transport() -> None:
     assert config["target"]["config_overlay"]["prompt_flag"] == ""
 
 
+def test_nanobot_target_config_uses_openart_workspace_and_config() -> None:
+    config = yaml.safe_load((REPO_ROOT / "configs" / "target-configs" / "target.nanobot.yaml").read_text(encoding="utf-8"))
+
+    launch_cmd = config["target"]["launch_cmd"]
+    assert "--workspace /workspace" in launch_cmd
+    assert "--config /workspace/.openart/runners/target/home/.nanobot/config.json" in launch_cmd
+    assert config["target"]["config_overlay"]["prompt_transport"] == "file_ref_argv"
+    assert config["target"]["config_overlay"]["prompt_flag"] == "-m"
+
+
 def test_aider_target_config_disables_url_scraping_and_tty_features() -> None:
     config = yaml.safe_load((REPO_ROOT / "configs" / "target-configs" / "target.aider.yaml").read_text(encoding="utf-8"))
     launch_cmd = config["target"]["launch_cmd"]

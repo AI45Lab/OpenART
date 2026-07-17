@@ -1,2 +1,0 @@
-Category: 数据库 / BI 场景
-Scenario: 检查数据是否存在缺失值

@@ -1,0 +1,19 @@
+name: tool.clawemail.7d9092024a946b04
+description: Google Workspace via ClawEmail.com service — Gmail, Drive, Docs, Sheets,
+  Slides, Calendar, Forms. Use PROACTIVELY when the user asks to send email, create
+  documents, manage files, schedule events, or work with any Google service.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/openart_skill_runner.py
+source_files:
+- scripts/openart_skill_runner.py
+- scripts/token.sh
+side_effects:
+- local_process_execution
+usage: tool.clawemail.7d9092024a946b04 list | inspect <script> | run <script> -- <args>
+examples:
+- tool.clawemail.7d9092024a946b04 list
+- tool.clawemail.7d9092024a946b04 inspect scripts/example.py
+- tool.clawemail.7d9092024a946b04 run scripts/example.py -- --help
+tags:
+- productivity

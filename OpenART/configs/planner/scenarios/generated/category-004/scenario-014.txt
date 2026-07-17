@@ -1,2 +1,0 @@
-Category: 代码仓库场景
-Scenario: 检查代码是否符合项目风格

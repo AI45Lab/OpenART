@@ -1,2 +1,0 @@
-Category: 法律合规场景
-Scenario: 生成合同风险摘要

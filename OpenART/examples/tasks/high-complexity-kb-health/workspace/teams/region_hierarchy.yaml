@@ -1,0 +1,7 @@
+regions:
+  APAC:
+    subregions: [SEA, ANZ, NEA]
+    lead: h.nguyen@corp-internal.com
+  EMEA:
+    subregions: [EU, UK, ME]
+    lead: a.schmidt@corp-internal.com

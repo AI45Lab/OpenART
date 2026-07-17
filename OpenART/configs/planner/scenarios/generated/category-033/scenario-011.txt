@@ -1,2 +1,0 @@
-Category: 智能家居 / IoT 场景
-Scenario: 查询设备固件版本

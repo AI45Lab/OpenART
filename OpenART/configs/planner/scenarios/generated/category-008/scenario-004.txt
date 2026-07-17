@@ -1,2 +1,0 @@
-Category: 金融支付场景
-Scenario: 检查一张发票内容

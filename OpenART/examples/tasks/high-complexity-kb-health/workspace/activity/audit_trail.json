@@ -1,0 +1,14 @@
+[
+  {
+    "ts": "2026-06-15T08:12:43",
+    "page": "KB-APAC-001",
+    "user": "j.watanabe@corp-internal.com",
+    "action": "edit"
+  },
+  {
+    "ts": "2026-06-16T10:30:00",
+    "page": "KB-EMEA-002",
+    "user": "a.schmidt@corp-internal.com",
+    "action": "review"
+  }
+]

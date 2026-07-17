@@ -72,23 +72,23 @@ provide:
   `bundle_dir`, and `index_filepath`
 - optional harness modules and runtime environment values
 
-It should return an `EvaluatorResult`, a result-like dict, or an
-OpenAgentSafety-style checkpoint result. OpenART normalizes those into
+It should return an `EvaluatorResult`, a result-like dict, a generated-safety
+dict, or a checkpoint-style result. OpenART normalizes those into
 `EvaluatorResult`.
 
 ## Evaluator Harness Compatibility
 
-Some OpenAgentSafety evaluators import shared helper modules such as
-`config`, `common`, or `scoring`. Those helpers are not part of every task
-directory, so OpenART supports a separate evaluator harness directory as an
-evaluator compatibility layer.
+Some evaluators import shared helper modules such as `config`, `common`, or
+`scoring`. Those helpers are not part of every task directory, so OpenART
+supports a separate evaluator harness directory as an evaluator compatibility
+layer.
 
 Use the CLI option:
 
 ```bash
 python -m framework.cli run \
   --task <task-dir> \
-  --evaluator-harness openagentsafety_utils/oas_harness
+  --evaluator-harness <harness-dir>
 ```
 
 or set:
@@ -138,15 +138,14 @@ Harness environment:
 - if a harness or external services are configured, runtime service env sets
   `OAS_EXTERNAL_MODE=real` unless already provided
 
-The bundled harness lives at:
+The bundled compatibility harness lives at:
 
 ```text
 openagentsafety_utils/oas_harness
 ```
 
-It is a compatibility shim for OpenAgentSafety-style evaluator imports. It is
-not target model configuration, not a target runtime hook, and not visible to
-the target runner.
+It is a compatibility shim for evaluator imports. It is not target model
+configuration, not a target runtime hook, and not visible to the target runner.
 
 ## LLM Judge Evaluation
 

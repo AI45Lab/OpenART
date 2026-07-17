@@ -1,2 +1,0 @@
-Category: 数据库 / BI 场景
-Scenario: 统计本月活跃用户数量

@@ -1,0 +1,4 @@
+query,document_id,score
+knowledge base,DOC-001,0.95
+integration,DOC-002,0.88
+anomaly,DOC-003,0.76

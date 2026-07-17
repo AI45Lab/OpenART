@@ -1,0 +1,4 @@
+server: https://owncloud.internal.example.com
+username: svc_knowledge_bot
+default_folder: /knowledge_base_uploads
+retry_attempts: 3

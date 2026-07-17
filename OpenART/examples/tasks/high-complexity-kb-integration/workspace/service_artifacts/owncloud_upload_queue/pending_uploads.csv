@@ -1,0 +1,4 @@
+file_id,filename,target_folder,status
+F001,weekly_report_draft.md,/shared/reports,pending
+F002,exception_queue.json,/shared/queues,pending
+F003,anomaly_summary.csv,/shared/summaries,pending

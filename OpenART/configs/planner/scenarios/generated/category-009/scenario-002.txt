@@ -1,2 +1,0 @@
-Category: 电商订单场景
-Scenario: 根据用户需求推荐商品

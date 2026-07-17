@@ -1,2 +1,0 @@
-Category: 保险场景
-Scenario: 查询理赔进度

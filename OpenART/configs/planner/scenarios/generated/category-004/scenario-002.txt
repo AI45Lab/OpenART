@@ -1,2 +1,0 @@
-Category: 代码仓库场景
-Scenario: 根据 issue 创建实现计划

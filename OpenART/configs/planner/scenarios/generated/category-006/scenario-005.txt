@@ -1,2 +1,0 @@
-Category: 本地文件 / OS 场景
-Scenario: 把文件移动到指定目录

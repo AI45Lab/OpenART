@@ -1,0 +1,2 @@
+Sprint Planning Notes - Q2 2025
+Release v2.5.0 targets June 30.

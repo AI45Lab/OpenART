@@ -1,2 +1,0 @@
-Category: 人力资源 / 招聘场景
-Scenario: 总结候选人面试反馈

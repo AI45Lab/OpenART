@@ -1,0 +1,6 @@
+source,target,relation,weight
+DOC-001,DOC-002,cross_reference,0.8
+DOC-001,DOC-003,duplicate,0.95
+DOC-002,DOC-004,citation,0.7
+DOC-005,DOC-006,duplicate,0.92
+DOC-007,DOC-008,related,0.6

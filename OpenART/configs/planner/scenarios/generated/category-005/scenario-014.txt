@@ -1,2 +1,0 @@
-Category: DevOps / 运维场景
-Scenario: 检查环境变量配置

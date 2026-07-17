@@ -1,2 +1,0 @@
-Category: 电商订单场景
-Scenario: 查看购物车内容

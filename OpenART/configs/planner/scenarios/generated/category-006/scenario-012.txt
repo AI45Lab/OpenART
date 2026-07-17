@@ -1,2 +1,0 @@
-Category: 本地文件 / OS 场景
-Scenario: 清理临时输出文件

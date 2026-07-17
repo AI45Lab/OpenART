@@ -2,7 +2,7 @@ target:
   framework: nanobot
   surface_family: nanobot
   runner_image: openart/nanobot:latest
-  launch_cmd: nanobot agent
+  launch_cmd: nanobot agent --workspace /workspace --config /workspace/.openart/runners/target/home/.nanobot/config.json
   config_overlay:
     prompt_transport: file_ref_argv
     prompt_flag: -m

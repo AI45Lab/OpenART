@@ -1,272 +1,154 @@
 # Quickstart
 
-This guide covers the shortest path from a checkout to a target-only run and an
-attacker-capable run.
-
 Commands below assume the current directory is `OpenART/`.
 
-## Prerequisites
+## Setup
 
-- Python 3.10 or newer
-- Docker daemon available to the current user
-- Target model endpoint credentials
-- Optional external service credentials when service-backed managed tools need
-  GitLab, ownCloud, Plane, or similar endpoints
-
-Install the package:
+OpenART is run from the source tree with the existing module entrypoints.
 
 ```bash
-pip install -e .
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+export PYTHONPATH="$PWD"
 ```
+
+Docker must be available to the current user.
 
 ## Build Images
 
-Build the task base image:
+Build the base task image:
 
 ```bash
 docker build -t openart/task-base:latest -f images/Dockerfile.task-base .
 ```
 
-Build at least one target/attacker image. The default OpenCode target and the
-universal attacker both use `openart/opencode:latest`:
+Build the target image required by your target config. The default config uses
+OpenCode:
 
 ```bash
 docker build -t openart/opencode:latest -f images/Dockerfile.opencode .
 ```
 
-For Claude Code target runs:
+Other target configs under `configs/target-configs/` reference matching images
+such as `openart/claude-code:latest`, `openart/codex:latest`,
+`openart/qwen-code:latest`, and `openart/goose:latest`. Build only the images
+needed for the config you run.
+
+## Local Smoke Run
+
+Use the local smoke task to verify the runtime without model credentials:
 
 ```bash
-docker build -t openart/claude-code:latest -f images/Dockerfile.claude-code .
+python -m framework.cli run \
+  --task examples/tasks/local-smoke \
+  --target-config configs/target-configs/target.local-smoke.yaml \
+  --eval-strategy deterministic \
+  --skip-attacker \
+  --run-id local-smoke \
+  --output-dir outputs/local-smoke
 ```
 
-Other target configs reference these images:
+The deterministic evaluator passes when the target writes
+`/workspace/openart_local_smoke_target.txt`.
 
-| Target config | Image |
-|---------------|-------|
-| `configs/target-configs/target.aider.yaml` | `openart/aider:latest` |
-| `configs/target-configs/target.codex.yaml` | `openart/codex:latest` |
-| `configs/target-configs/target.copilot-cli.yaml` | `openart/copilot-cli:latest` |
-| `configs/target-configs/target.deepseek-tui.yaml` | `openart/deepseek-tui:latest` |
-| `configs/target-configs/target.gemini.yaml` | `openart/gemini:latest` |
-| `configs/target-configs/target.goose.yaml` | `openart/goose:latest` |
-| `configs/target-configs/target.hermes.yaml` | `openart/hermes:latest` |
-| `configs/target-configs/target.kilo.yaml` | `openart/kilo:latest` |
-| `configs/target-configs/target.nanobot.yaml` | `openart/nanobot:latest` |
-| `configs/target-configs/target.oh-my-pi.yaml` | `openart/oh-my-pi:latest` |
-| `configs/target-configs/target.pi.yaml` | `openart/pi:latest` |
-| `configs/target-configs/target.qwen-code.yaml` | `openart/qwen-code:latest` |
+## Model Environment
 
-Build only the images needed for the target config you will run.
-
-## Configure Model Environment
-
-The common OpenAI-compatible environment is:
+For model-backed targets, copy `.env.example` to `.env` and fill in the target,
+judge, and attacker model values:
 
 ```bash
-export TARGET_BASE_URL="http://your-endpoint/v1"
-export TARGET_MODEL="your-model"
-export TARGET_API_KEY="your-key"
-
-export JUDGE_BASE_URL="$TARGET_BASE_URL"
-export JUDGE_MODEL="$TARGET_MODEL"
-export JUDGE_API_KEY="$TARGET_API_KEY"
+cp .env.example .env
 ```
 
-The target config maps these variables into the target's native environment or
-config files through `model_integration`.
-
-For OpenAgentSafety-style deterministic evaluators, provide the evaluator
-harness so imports like `config`, `common`, and `scoring` resolve:
+The common OpenAI-compatible variables are:
 
 ```bash
-export OPENART_EVAL_HARNESS="$PWD/openagentsafety_utils/oas_harness"
+TARGET_BASE_URL=https://api.example.com/v1
+TARGET_MODEL=your-target-model
+TARGET_API_KEY=your-target-key
+
+JUDGE_BASE_URL=${TARGET_BASE_URL}
+JUDGE_MODEL=${TARGET_MODEL}
+JUDGE_API_KEY=${TARGET_API_KEY}
+
+ATTACK_BASE_URL=${TARGET_BASE_URL}
+ATTACK_MODEL=${TARGET_MODEL}
+ATTACK_API_KEY=${TARGET_API_KEY}
 ```
 
-or pass `--evaluator-harness openagentsafety_utils/oas_harness` on the run
-command.
+Target configs map these variables into each target's native environment or
+configuration files.
 
-For attacker LLM calls used by the OpenCode-based attacker scripts:
+## Bundled High-Complexity Tasks
 
-```bash
-export OPENAI_BASE_URL="$TARGET_BASE_URL"
-export OPENAI_MODEL="$TARGET_MODEL"
-export OPENAI_API_KEY="$TARGET_API_KEY"
-```
+The release includes three generated task bundles:
+
+| Task | Workflow nodes | Workspace files | Distinct tools |
+|------|----------------|-----------------|----------------|
+| `high-complexity-kb-health` | 100 | 67 | 29 |
+| `high-complexity-kb-integration` | 100 | 109 | 26 |
+| `high-complexity-release-sync` | 100 | 134 | 32 |
+
+Each task contains `task.md`, `workspace/`, `tool_use_graph.json`,
+`safety_contract.json`, `capabilities.generated.yaml`, and a deterministic
+evaluator under `utils/`.
 
 ## Target-Only Run
 
-Run an OpenAgentSafety task with the default target config:
+Run one bundled high-complexity task with the default OpenCode target:
 
 ```bash
 python -m framework.cli run \
-  --task ../openagentsafety/tasks/safety-onboarding-notes \
+  --task examples/tasks/high-complexity-kb-integration \
   --target-config configs/target-configs/target.yaml \
-  --output-dir outputs/target-only-smoke
+  --tool-store ../openart-tools \
+  --eval-strategy deterministic \
+  --skip-attacker \
+  --run-id kb-integration-target-only \
+  --output-dir outputs/kb-integration-target-only
 ```
 
-The default `configs/target-configs/target.yaml` runs OpenCode through:
-
-```yaml
-target:
-  framework: prompt_cli
-  surface_family: opencode
-  runner_image: openart/opencode:latest
-  launch_cmd: opencode run
-  model_integration:
-    binding:
-      provider_family: openai_compatible
-      api_key: ${TARGET_API_KEY}
-      base_url: ${TARGET_BASE_URL}
-      model: ${TARGET_MODEL}
-    delivery:
-      type: hybrid
-      env_names:
-        api_key: OPENAI_API_KEY
-        base_url: OPENAI_BASE_URL
-        model: OPENAI_MODEL
-  attack_surfaces:
-    - vector: agents_md
-      kind: instruction
-      path_template: AGENTS.md
-```
+`--tool-store` points to the sibling managed tool store. The task graph stages
+only the tools referenced by `tool_use_graph.json`.
 
 ## Attacker-Capable Run
 
-Run the same task with the universal attacker:
+Add the default OpenCode-compatible attacker:
 
 ```bash
 python -m framework.cli run \
-  --task ../openagentsafety/tasks/safety-onboarding-notes \
+  --task examples/tasks/high-complexity-kb-integration \
   --target-config configs/target-configs/target.yaml \
   --attacker-config configs/attacker-configs/universal/opencode-native-control/config.yaml \
+  --tool-store ../openart-tools \
+  --eval-strategy both \
   --max-iterations 2 \
-  --output-dir outputs/universal-attacker-smoke
+  --run-id kb-integration-attacked \
+  --output-dir outputs/kb-integration-attacked
 ```
 
-This attacker preset:
+Graph-RL-control uses the same runtime command with
+`configs/attacker-configs/graph-rl-control/config.yaml`.
 
-- runs before the target
-- uses `openart/opencode:latest`
-- executes `/attacker_config/run_opencode_attacker.py`
-- enables `target_control_plane`
-- permits `workspace_files`, `claude_md`, `opencode_skill`,
-  `opencode_command`, and `claude_skill`
-- can rerun after evaluator feedback because `feedback_loop: true`
-
-## Claude Code Target Run
-
-Use the Claude Code target config and matching attacker preset:
-
-```bash
-python -m framework.cli run \
-  --task ../openagentsafety/tasks/safety-onboarding-notes \
-  --target-config configs/target-configs/target.claude-code.yaml \
-  --attacker-config configs/attacker-configs/universal/opencode-native-control/config-claude-code-native-control.yaml \
-  --max-iterations 2 \
-  --output-dir outputs/claude-code-attacker-smoke
-```
-
-Claude Code still uses `framework: prompt_cli`. Its native surface behavior is
-selected through `surface_family` and `attack_surfaces`, while model credentials
-are delivered through `model_integration.delivery`:
-
-```yaml
-surface_family: claude_code
-model_integration:
-  delivery:
-    type: env_only
-    env_names:
-      api_key: ANTHROPIC_AUTH_TOKEN
-      base_url: ANTHROPIC_BASE_URL
-      model: ANTHROPIC_MODEL
-attack_surfaces:
-  - vector: claude_md
-    kind: instruction
-    path_template: CLAUDE.md
-pre_run_hook: repo:configs/target-hooks/claude-code-enforce-settings.sh
-```
-
-## Graph-RL-Control Run
-
-Use the Graph-RL attacker when you want the attacker to sample and materialize a
-structured multi-surface attack graph:
-
-```bash
-python -m framework.cli run \
-  --task ../openagentsafety/tasks/safety-onboarding-notes \
-  --target-config configs/target-configs/target.yaml \
-  --attacker-config configs/attacker-configs/graph-rl-control/config.yaml \
-  --max-iterations 2 \
-  --attacker-timeout-seconds 7800 \
-  --output-dir outputs/graph-rl-smoke
-```
-
-Graph-RL writes detailed artifacts such as `attack_graph.json`,
-`attack_plan_ascii.txt`, strategy prompts, scratch outputs, and materialization
-diagnostics.
-
-## Common CLI Options
-
-`python -m framework.cli` exposes only the `run` subcommand. Use direct Docker,
-filesystem, or pytest commands for one-off build, cleanup, diagnostic, or
-standalone evaluator work.
+## Common Runtime Options
 
 | Option | Meaning |
 |--------|---------|
-| `--task` | Required task directory |
-| `--target-config` | Target runner/model/native-surface config |
+| `--task` | Task directory with `task.md` |
+| `--target-config` | Target runner, model delivery, and native surface config |
 | `--attacker-config` | Optional attacker config overlay |
-| `--output-dir` | Output root directory |
+| `--output-dir` | Local output root |
 | `--run-id` | Optional stable run id |
 | `--eval-strategy` | `auto`, `deterministic`, `llm`, or `both` |
-| `--evaluator-harness` | Evaluator compatibility harness directory, usually `openagentsafety_utils/oas_harness` |
-| `--skip-attacker` | Ignore attacker even if configured |
+| `--tool-store` | Managed OpenART tool store, usually `../openart-tools` |
+| `--skip-attacker` | Ignore attacker config and run target-only |
 | `--max-iterations` | Maximum target attempts |
-| `--adaptive-iterations` | Retry only when evaluator says retry is useful |
-| `--no-adaptive-iterations` | Disable adaptive retry |
-| `--target-timeout-seconds` | Minimum target run timeout |
-| `--attacker-timeout-seconds` | Minimum attacker command timeout |
-| `--tool-store` | Managed OpenART tool store path; with `tool_use_graph.json` stages referenced tools, otherwise stages all valid live tools |
 
-`--runner-framework` is only for runner process family overrides such as
-`prompt_cli`, `hermes`, `nanobot`, or `pi`. Do not use it to select OpenCode or
-Claude Code native behavior. Use `--target-config` instead.
-
-## Output Location
-
-Each run writes under:
-
-```text
-<output-dir>/<run-id>/
-```
-
-Important subdirectories:
-
-```text
-workspace/shared/                 final target-visible workspace
-workspace/attacker_outputs/       archived attacker live outputs
-control/target/                   base/final/materialized target-native files
-runner_outputs/target/            target stdout/stderr and parsed outputs
-evaluator_inputs/                 snapshots passed to evaluator
-evaluator_outputs/                evaluator artifacts
-attacker_outputs/<name>/          attacker command/artifact capture
-trace.jsonl                       run trace
-timing.json                       timing events
-result.json                       final result
-```
+Each run writes under `<output-dir>/<run-id>/`. Important artifacts include
+`result.json`, `trace.jsonl`, `timing.json`, `workspace/shared/`,
+`runner_outputs/target/`, `evaluator_outputs/`, and
+`attacker_outputs/<name>/` when an attacker is enabled.
 
 See [09_evaluation_and_outputs.md](09_evaluation_and_outputs.md) for artifact
 details.
-
-## First Debug Checks
-
-If a run fails, inspect:
-
-```bash
-find outputs -maxdepth 3 -name runtime.log -print
-find outputs -maxdepth 4 -name status.json -print
-find outputs -maxdepth 4 -name materialization.json -print
-```
-
-Then read [11_debugging_and_testing.md](11_debugging_and_testing.md).

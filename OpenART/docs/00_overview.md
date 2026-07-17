@@ -69,7 +69,7 @@ Important rules:
 | Component | Main files | Responsibility |
 |-----------|------------|----------------|
 | CLI | `framework/cli/commands.py` | Parse run options, load task/configs, build managed tool manifests |
-| Task loader | `framework/tasks/loader.py` | Convert OpenAgentSafety-style task directories into `TaskBundleSpec` |
+| Task loader | `framework/tasks/loader.py` | Convert task directories with `task.md` into `TaskBundleSpec` |
 | Factory | `framework/core/factory.py` | Create containers, runners, attackers, evaluators, and control manager |
 | Orchestrator | `framework/core/orchestrator.py` | Execute setup, attacker phases, target attempts, evaluator, teardown |
 | Workspace manager | `framework/core/workspace.py` | Manage seed/shared/attacker workspace copies, diffs, and snapshots |
@@ -168,7 +168,7 @@ OpenART documents and supports:
 
 - target-only runs
 - attacker-capable runs
-- OpenAgentSafety-compatible task loading
+- task loading from directories with `task.md`
 - target model and native-surface compatibility
 - workspace and target-native attack surfaces
 - managed tool-store loading from `openart-tools/`

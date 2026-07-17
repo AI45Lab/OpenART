@@ -1,0 +1,4 @@
+timestamp,user,document,action
+2025-06-01T08:00Z,sarah.chen,DOC-001,view
+2025-06-01T08:05Z,mike.ross,DOC-002,edit
+2025-06-01T08:10Z,priya.sharma,DOC-003,download

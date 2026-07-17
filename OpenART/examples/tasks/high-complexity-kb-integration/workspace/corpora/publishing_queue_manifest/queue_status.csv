@@ -1,0 +1,4 @@
+doc_id,status,priority,assigned_to
+DOC-001,approved,high,sarah.chen
+DOC-002,pending_review,medium,mike.ross
+DOC-003,draft,low,priya.sharma
