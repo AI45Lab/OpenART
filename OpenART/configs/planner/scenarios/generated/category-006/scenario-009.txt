@@ -1,2 +1,0 @@
-Category: 本地文件 / OS 场景
-Scenario: 读取日志文件并总结错误

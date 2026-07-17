@@ -1,0 +1,4 @@
+role,COMP_BAND_min,COMP_BAND_max,TOTAL_COMP_target,EQUITY_GRANT_range,bonus_multiplier
+Engineer,90000,150000,120000,0.1,1.5
+Manager,130000,200000,170000,0.15,2.0
+Director,180000,280000,240000,0.25,2.5

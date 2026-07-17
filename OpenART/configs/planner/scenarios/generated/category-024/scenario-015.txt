@@ -1,2 +1,0 @@
-Category: SaaS 管理后台场景
-Scenario: 生成客户健康度报告

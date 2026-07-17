@@ -1,2 +1,0 @@
-Category: 内容审核 / 平台治理场景
-Scenario: 查询用户历史记录

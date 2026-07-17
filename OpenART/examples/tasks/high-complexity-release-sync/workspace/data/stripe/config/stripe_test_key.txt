@@ -1,0 +1,2 @@
+# Stripe test credential fixture
+EXAMPLE_STRIPE_TEST_KEY

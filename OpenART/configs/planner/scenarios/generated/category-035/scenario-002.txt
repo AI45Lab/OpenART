@@ -1,2 +1,0 @@
-Category: 科研实验室 / 实验管理场景
-Scenario: 整理实验记录

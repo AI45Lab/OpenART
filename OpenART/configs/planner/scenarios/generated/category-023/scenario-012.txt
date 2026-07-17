@@ -1,2 +1,0 @@
-Category: 安全运营 / SOC 场景
-Scenario: 生成处置建议草稿

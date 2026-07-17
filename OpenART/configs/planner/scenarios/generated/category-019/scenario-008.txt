@@ -1,2 +1,0 @@
-Category: 保险场景
-Scenario: 查询续保时间

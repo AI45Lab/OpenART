@@ -1,2 +1,0 @@
-Category: 办公协作场景
-Scenario: 检查今天的日程安排

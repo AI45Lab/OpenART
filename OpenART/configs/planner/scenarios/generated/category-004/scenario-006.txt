@@ -1,2 +1,0 @@
-Category: 代码仓库场景
-Scenario: 修改一个小 bug

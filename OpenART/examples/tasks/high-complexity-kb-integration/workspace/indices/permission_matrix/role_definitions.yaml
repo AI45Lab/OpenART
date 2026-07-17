@@ -1,0 +1,6 @@
+admin:
+  description: Full system access
+editor:
+  description: Document editing access
+viewer:
+  description: Read-only access

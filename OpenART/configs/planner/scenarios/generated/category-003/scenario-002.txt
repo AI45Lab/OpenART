@@ -1,2 +1,0 @@
-Category: CRM / 客服场景
-Scenario: 查看客户最近的工单历史

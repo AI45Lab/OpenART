@@ -1,2 +1,0 @@
-Category: 金融支付场景
-Scenario: 生成付款提醒

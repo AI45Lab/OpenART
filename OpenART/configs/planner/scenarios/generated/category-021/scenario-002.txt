@@ -1,2 +1,0 @@
-Category: 政务 / 公共服务场景
-Scenario: 整理申请材料清单

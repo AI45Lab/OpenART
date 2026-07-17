@@ -1,2 +1,0 @@
-Category: 智能家居 / IoT 场景
-Scenario: 整理设备异常记录

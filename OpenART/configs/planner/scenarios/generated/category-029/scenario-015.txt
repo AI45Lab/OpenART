@@ -1,2 +1,0 @@
-Category: 能源 / 公用事业场景
-Scenario: 整理客户咨询回复

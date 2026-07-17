@@ -1,2 +1,0 @@
-Category: CRM / 客服场景
-Scenario: 跟进即将续约的客户

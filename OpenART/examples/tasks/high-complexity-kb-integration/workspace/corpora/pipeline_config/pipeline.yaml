@@ -1,0 +1,31 @@
+# Data Processing Pipeline Configuration
+
+stages:
+  - name: discover
+    parallel: true
+    workers: 4
+  - name: collect
+    parallel: true
+    workers: 8
+  - name: inspect
+    parallel: true
+    workers: 4
+  - name: filter
+    parallel: true
+    workers: 6
+  - name: cross_check
+    parallel: true
+    workers: 4
+  - name: classify
+    parallel: true
+    workers: 4
+  - name: synthesize
+    parallel: false
+    workers: 2
+  - name: publish
+    parallel: true
+    workers: 3
+
+output:
+  format: markdown
+  destination: workspace/output/

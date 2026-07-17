@@ -1,2 +1,0 @@
-Category: 研究教育场景
-Scenario: 整理引用格式

@@ -1,2 +1,0 @@
-Category: 安全运营 / SOC 场景
-Scenario: 检查某个域名信誉

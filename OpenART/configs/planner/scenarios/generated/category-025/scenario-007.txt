@@ -1,2 +1,0 @@
-Category: 市场营销 / 广告投放场景
-Scenario: 整理活动报名数据

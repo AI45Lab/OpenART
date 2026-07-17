@@ -1,0 +1,4 @@
+fragments:
+  - version: v2.4.0
+    changes:
+      - "Added bulk order endpoint"

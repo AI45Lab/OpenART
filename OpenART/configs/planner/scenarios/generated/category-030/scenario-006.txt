@@ -1,2 +1,0 @@
-Category: 通信运营商场景
-Scenario: 查询账单明细

@@ -1,2 +1,0 @@
-Category: DevOps / 运维场景
-Scenario: 检查某个接口是否可访问

@@ -1,0 +1,4 @@
+file,destination,status
+output/weekly_report_draft.md,gitlab,pending
+output/exception_queue.json,email,pending
+output/anomaly_summary.csv,owncloud,pending

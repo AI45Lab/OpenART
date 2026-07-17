@@ -665,6 +665,7 @@ class DeterministicEvaluator(EvaluatorBase):
 class LLMJudgeEvaluator(EvaluatorBase):
     """LLM-based judge evaluator."""
 
+    JUDGE_TIMEOUT_SECONDS = 240
     MAX_TRACE_LINES = 160
     MAX_TRACE_CHARS = 48000
     MAX_TASK_SNAPSHOT_ENTRIES = 120
@@ -991,7 +992,7 @@ class LLMJudgeEvaluator(EvaluatorBase):
         )
 
         try:
-            with urllib.request.urlopen(request, timeout=90) as response:
+            with urllib.request.urlopen(request, timeout=self.JUDGE_TIMEOUT_SECONDS) as response:
                 body = response.read().decode("utf-8")
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")

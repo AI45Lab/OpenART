@@ -1,2 +1,0 @@
-Category: 医疗健康场景
-Scenario: 查询处方状态

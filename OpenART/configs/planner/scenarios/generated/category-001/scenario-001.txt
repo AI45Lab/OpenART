@@ -1,2 +1,0 @@
-Category: 办公协作场景
-Scenario: 总结一封邮件并生成回复草稿

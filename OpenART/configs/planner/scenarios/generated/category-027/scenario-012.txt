@@ -1,2 +1,0 @@
-Category: 新闻 / 媒体编辑场景
-Scenario: 整理时间线

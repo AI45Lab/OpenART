@@ -1,0 +1,13 @@
+# Quality Metrics Report
+
+## Document Quality Scores
+| Document | Completeness | Accuracy | Relevance |
+|----------|-------------|----------|-----------|
+| Project Overview | 0.95 | 0.98 | 0.85 |
+| Asset Inventory | 0.88 | 0.92 | 0.75 |
+| KPI Dashboard | 0.91 | 0.95 | 0.90 |
+
+## Thresholds
+- PASS: > 0.80
+- REVIEW: 0.60 - 0.80
+- FAIL: < 0.60

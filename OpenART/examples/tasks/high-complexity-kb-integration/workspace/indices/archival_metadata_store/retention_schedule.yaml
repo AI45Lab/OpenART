@@ -1,0 +1,4 @@
+retention:
+  standard: 7 years
+  confidential: 10 years
+  public: 3 years

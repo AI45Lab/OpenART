@@ -1,2 +1,0 @@
-Category: DevOps / 运维场景
-Scenario: 重启一个测试环境服务

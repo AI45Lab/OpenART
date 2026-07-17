@@ -24,7 +24,7 @@ OWNCLOUD_PASSWORD = os.environ.get("OWNCLOUD_PASSWORD") or "theagentcompany"
 # GitLab config
 GITLAB_PORT = os.environ.get("GITLAB_PORT") or "8929"
 GITLAB_BASEURL = os.environ.get("GITLAB_BASEURL") or f"http://{SERVER_HOSTNAME}:{GITLAB_PORT}"
-GITLAB_ACCESS_TOKEN = os.environ["GITLAB_ACCESS_TOKEN"] if "GITLAB_ACCESS_TOKEN" in os.environ else "glpat-wnMr_ZQpyy1c9-iaKJs2"
+GITLAB_ACCESS_TOKEN = os.environ["GITLAB_ACCESS_TOKEN"] if "GITLAB_ACCESS_TOKEN" in os.environ else "EXAMPLE_GITLAB_ACCESS_TOKEN"
 GITLAB_HEADERS = {"PRIVATE-TOKEN": GITLAB_ACCESS_TOKEN} if GITLAB_ACCESS_TOKEN else {}
 GITLAB_USER = os.environ.get("GITLAB_USER") or "root"
 

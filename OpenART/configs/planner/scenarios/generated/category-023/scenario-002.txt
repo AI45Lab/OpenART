@@ -1,2 +1,0 @@
-Category: 安全运营 / SOC 场景
-Scenario: 总结某条告警详情

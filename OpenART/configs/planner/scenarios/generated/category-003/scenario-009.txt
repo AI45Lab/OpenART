@@ -1,2 +1,0 @@
-Category: CRM / 客服场景
-Scenario: 给销售团队同步客户反馈

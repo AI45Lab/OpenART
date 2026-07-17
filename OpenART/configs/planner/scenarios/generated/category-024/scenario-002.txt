@@ -1,2 +1,0 @@
-Category: SaaS 管理后台场景
-Scenario: 查看某个租户配置

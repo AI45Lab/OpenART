@@ -1,2 +1,0 @@
-Category: 本地文件 / OS 场景
-Scenario: 根据文件内容生成摘要

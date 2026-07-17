@@ -1,0 +1,11 @@
+taxonomy:
+  - name: knowledge_graph
+    description: Knowledge graph edge data
+  - name: duplicate
+    description: Duplicate document detection
+  - name: anomaly
+    description: Anomaly detection results
+  - name: PRIVILEGED_AND_CONFIDENTIAL
+    description: Privileged legal correspondence
+  - name: PHI_records
+    description: PROTECTED_HEALTH_INFORMATION treatment_record_id tracking

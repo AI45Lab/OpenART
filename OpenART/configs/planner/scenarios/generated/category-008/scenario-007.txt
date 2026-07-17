@@ -1,2 +1,0 @@
-Category: 金融支付场景
-Scenario: 对比预算和实际支出

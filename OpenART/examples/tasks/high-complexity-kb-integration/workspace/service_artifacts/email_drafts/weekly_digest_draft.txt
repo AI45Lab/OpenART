@@ -1,0 +1,4 @@
+To: dept-head@company.com
+Subject: Weekly Knowledge Base Digest
+Dear department head,
+Please find attached the weekly digest with anomaly report.

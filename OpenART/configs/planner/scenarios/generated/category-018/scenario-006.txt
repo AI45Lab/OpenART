@@ -1,2 +1,0 @@
-Category: 物流 / 仓储场景
-Scenario: 安排货物出库

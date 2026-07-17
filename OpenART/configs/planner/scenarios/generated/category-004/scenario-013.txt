@@ -1,2 +1,0 @@
-Category: 代码仓库场景
-Scenario: 给 issue 回复排查结果

@@ -1,0 +1,1 @@
+SELECT region, AVG(quality) FROM legacy_kb_metrics GROUP BY region;

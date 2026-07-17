@@ -1,0 +1,1 @@
+{"roles":[{"name":"admin","access":"all"},{"name":"editor","access":["documents/notion_page_dump/*","documents/airtable_base_export/*","indices/*"]},{"name":"viewer","access":["corpora/knowledge_graph_edge_list/*","corpora/search_relevance_scores/*"]}]}

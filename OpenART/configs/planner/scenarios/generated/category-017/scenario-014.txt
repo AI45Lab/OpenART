@@ -1,2 +1,0 @@
-Category: 采购 / 供应链场景
-Scenario: 整理采购异常说明

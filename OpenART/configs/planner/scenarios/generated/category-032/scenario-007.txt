@@ -1,2 +1,0 @@
-Category: 个人生活助理场景
-Scenario: 总结个人邮件

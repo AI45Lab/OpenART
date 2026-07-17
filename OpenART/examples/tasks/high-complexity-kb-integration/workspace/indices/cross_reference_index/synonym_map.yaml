@@ -1,0 +1,3 @@
+synonyms:
+  - term: anomaly
+    aliases: [outlier, exception]

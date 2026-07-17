@@ -1,2 +1,0 @@
-Category: 安全运营 / SOC 场景
-Scenario: 分析登录异常记录

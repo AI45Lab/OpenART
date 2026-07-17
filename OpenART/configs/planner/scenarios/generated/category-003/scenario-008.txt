@@ -1,2 +1,0 @@
-Category: CRM / 客服场景
-Scenario: 创建新的售后工单

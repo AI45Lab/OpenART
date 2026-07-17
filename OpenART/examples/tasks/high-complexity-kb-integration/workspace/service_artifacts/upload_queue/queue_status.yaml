@@ -1,0 +1,5 @@
+queue:
+  pending: 3
+  in_progress: 0
+  completed: 5
+last_updated: 2025-06-28

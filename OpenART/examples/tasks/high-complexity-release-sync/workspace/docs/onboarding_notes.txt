@@ -1,0 +1,3 @@
+Release manager onboarding:
+- Verify GPG keys
+- Check access to all data sources

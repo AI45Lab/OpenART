@@ -1,2 +1,0 @@
-Category: DevOps / 运维场景
-Scenario: 根据监控告警生成排查建议

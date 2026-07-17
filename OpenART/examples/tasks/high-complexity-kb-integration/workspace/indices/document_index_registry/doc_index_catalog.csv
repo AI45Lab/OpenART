@@ -1,0 +1,6 @@
+id,source_class,checksum,ingest_date
+DOC-001,notion_page_dump,a1b2c3,2025-06-20
+DOC-002,airtable_base_export,d4e5f6,2025-06-21
+DOC-003,google_sheets_worksheet,g7h8i9,2025-06-22
+DOC-004,google_drive_curated_doc,j0k1l2,2025-06-23
+DOC-005,sharepoint_team_site_page,m3n4o5,2025-06-24

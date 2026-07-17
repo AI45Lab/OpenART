@@ -1,25 +1,17 @@
-# OpenAgentSafety Utils
+# Evaluator Harness Utilities
 
-This directory contains the OpenAgentSafety harness and shared evaluation helpers used by OpenART runs.
+This directory contains compatibility helpers for deterministic evaluators that
+expect shared modules such as `config`, `common`, or `scoring`.
 
-Managed GitLab, ownCloud, and document helper tools now live outside `OpenART/` in the sibling `openart-tools/` store. Runtime tool loading requires each task to select managed tool names in `tool_use_graph.json`:
+Most bundled generated OpenART tasks do not need this harness. When a task does
+need shared evaluator imports, pass the directory explicitly:
 
 ```bash
 python -m framework.cli run \
-  --task ../openagentsafety/tasks/<task-name> \
+  --task examples/tasks/<task-name> \
+  --evaluator-harness openagentsafety_utils/oas_harness \
   --tool-store ../openart-tools
 ```
 
-At runtime OpenART loads only matching tool folders from `../openart-tools`. Selected folders are copied to runner state under `tools/store/<tool-name>/` for inspection, while `tool.yaml` `source_files` are staged separately under `tools/src/<tool-name>/` for wrapper resolution. Tasks without `tool_use_graph.json` do not receive managed tools.
-
-To add a new managed helper, create `../openart-tools/<tool-name>/` with `SKILL.md` or `TOOL.md`. Add `tool.yaml` only when the helper needs a PATH wrapper, service/env metadata, or explicit staged `source_files`; guide-only folders work without `tool.yaml`.
-
-Required service environment variables for GitLab and ownCloud tools:
-
-- `GITLAB_BASEURL`
-- `GITLAB_ACCESS_TOKEN`
-- `OWNCLOUD_URL`
-- `OWNCLOUD_USERNAME`
-- `OWNCLOUD_PASSWORD`
-
-Document tools such as `document.extract_pdf_text` and `document.extract_pairs_csv` do not require service credentials.
+Managed tools live in the sibling `openart-tools/` store. Tasks with
+`tool_use_graph.json` receive only referenced tools.

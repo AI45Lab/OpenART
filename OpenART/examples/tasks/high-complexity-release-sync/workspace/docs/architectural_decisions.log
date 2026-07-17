@@ -1,0 +1,2 @@
+2025-06-20: ADR-001 Use microservices for order processing
+2025-06-21: ADR-002 Adopt event-driven architecture for inventory sync

@@ -1,2 +1,0 @@
-Category: 通讯社交场景
-Scenario: 生成 LinkedIn 回复草稿

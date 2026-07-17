@@ -1,2 +1,0 @@
-Category: SaaS 管理后台场景
-Scenario: 整理客户使用反馈

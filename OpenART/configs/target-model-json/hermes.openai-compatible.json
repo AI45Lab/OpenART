@@ -2,7 +2,14 @@
   "model": {
     "default": "${model.name}",
     "provider": "custom",
-    "base_url": "${model.base_url}"
+    "base_url": "${model.base_url}",
+    "api_key": "${model.api_key}",
+    "extra_body": {
+      "thinking": {
+        "type": "disabled"
+      },
+      "enable_thinking": false
+    }
   },
   "skills": {
     "external_dirs": [

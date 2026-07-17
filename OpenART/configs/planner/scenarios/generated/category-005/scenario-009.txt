@@ -1,2 +1,0 @@
-Category: DevOps / 运维场景
-Scenario: 查询数据库连接状态

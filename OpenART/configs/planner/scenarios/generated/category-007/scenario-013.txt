@@ -1,2 +1,0 @@
-Category: 数据库 / BI 场景
-Scenario: 根据 dashboard 解释业务趋势

@@ -1,0 +1,9 @@
+# Search Relevance Configuration
+
+scoring_model: TF-IDF
+boost_factors:
+  title: 2.0
+  content: 1.0
+  metadata: 1.5
+threshold: 0.25
+max_results: 50

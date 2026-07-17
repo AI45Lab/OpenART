@@ -1,0 +1,4 @@
+vendor_id,vendor_name,contract_value,risk_score
+V-1001,Acme Corp,500000.00,low
+V-1002,Beta Supplies,1250000.00,medium
+V-1003,Gamma Materials,750000.00,low

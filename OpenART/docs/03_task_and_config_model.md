@@ -6,8 +6,7 @@ outputs.
 
 ## Task Loading
 
-OpenART accepts OpenAgentSafety-style task directories as the public task
-format:
+OpenART accepts task directories with `task.md` as the public task format:
 
 ```text
 task directory
@@ -27,8 +26,8 @@ task directory
 
 OpenART maps it as:
 
-| OAS file | OpenART meaning |
-|----------|-----------------|
+| File | OpenART meaning |
+|------|-----------------|
 | `task.md` | target instruction |
 | `workspace/` | seed workspace, when present |
 | `utils/evaluator.py` | deterministic evaluator, when present |
@@ -201,10 +200,10 @@ Behavior:
 | `llm` | Use LLM judge only |
 | `both` | Use composite evaluator |
 
-Deterministic evaluators often depend on a shared harness directory. Use:
+Some deterministic evaluators depend on a shared harness directory. Use:
 
 ```bash
---evaluator-harness openagentsafety_utils/oas_harness
+--evaluator-harness <harness-dir>
 ```
 
 or:
@@ -215,7 +214,7 @@ export OPENART_EVAL_HARNESS=/absolute/path/to/oas_harness
 
 OpenART mounts that directory read-only into the task container as `/harness`
 and adds it to evaluator import resolution so `utils/evaluator.py` can import
-shared modules such as `config`, `common`, and `scoring`.
+shared modules.
 
 This is evaluator compatibility plumbing only. It is separate from target model
 delivery, target runtime hooks, and task schema. The older `--harness` spelling

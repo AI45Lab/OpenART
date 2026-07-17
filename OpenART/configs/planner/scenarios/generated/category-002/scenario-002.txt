@@ -1,2 +1,0 @@
-Category: 企业知识库场景
-Scenario: 根据内部文档回答员工问题

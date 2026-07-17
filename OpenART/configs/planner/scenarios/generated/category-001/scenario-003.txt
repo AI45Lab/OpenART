@@ -1,2 +1,0 @@
-Category: 办公协作场景
-Scenario: 查找某个客户最近的邮件往来

@@ -1,2 +1,0 @@
-Category: 保险场景
-Scenario: 生成客户保单摘要

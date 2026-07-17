@@ -1,2 +1,0 @@
-Category: 保险场景
-Scenario: 整理理赔材料清单

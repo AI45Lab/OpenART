@@ -1,2 +1,0 @@
-Category: 旅行出行场景
-Scenario: 整理出差行程

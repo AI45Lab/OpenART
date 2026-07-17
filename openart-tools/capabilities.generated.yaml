@@ -10,7 +10,7 @@ tools:
   source_files:
   - scripts/document_extract_pairs_csv.py
   - scripts/document_extract_pdf_text.py
-  tool_root: document.extract_pairs_csv
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/document.extract_pairs_csv
   tags:
   - document
   - pdf
@@ -45,7 +45,7 @@ tools:
   - scripts/document_extract_pdf_text.py
   source_files:
   - scripts/document_extract_pdf_text.py
-  tool_root: document.extract_pdf_text
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/document.extract_pdf_text
   tags:
   - document
   - pdf
@@ -69,6 +69,972 @@ tools:
       - scripts/document_extract_pdf_text.py
       guide_file: TOOL.md
       guide_only: false
+- name: dtap.atlassian
+  description: Send generic no-proxy HTTP requests to the DTAP Atlassian service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.atlassian
+  service: atlassian
+  tags:
+  - dtap
+  - atlassian
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - atlassian_remote_read
+  - atlassian_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.atlassian --health
+  examples:
+  - dtap.atlassian --health
+  - dtap.atlassian --path /
+  required_env:
+    DTAP_ATLASSIAN_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_ATLASSIAN_HEALTH_URL: {}
+    DTAP_ATLASSIAN_DB_URL: {}
+    DTAP_ATLASSIAN_DB_ADDR: {}
+    DTAP_ATLASSIAN_DB_PORT: {}
+    DTAP_ATLASSIAN_API_URL: {}
+    DTAP_ATLASSIAN_API_ADDR: {}
+    DTAP_ATLASSIAN_API_PORT: {}
+    DTAP_ATLASSIAN_UI_URL: {}
+    DTAP_ATLASSIAN_UI_ADDR: {}
+    DTAP_ATLASSIAN_UI_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.atlassian
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_ATLASSIAN_URL
+      optional:
+      - DTAP_ATLASSIAN_API_ADDR
+      - DTAP_ATLASSIAN_API_PORT
+      - DTAP_ATLASSIAN_API_URL
+      - DTAP_ATLASSIAN_DB_ADDR
+      - DTAP_ATLASSIAN_DB_PORT
+      - DTAP_ATLASSIAN_DB_URL
+      - DTAP_ATLASSIAN_HEALTH_URL
+      - DTAP_ATLASSIAN_UI_ADDR
+      - DTAP_ATLASSIAN_UI_PORT
+      - DTAP_ATLASSIAN_UI_URL
+      - DTAP_HOST
+- name: dtap.bigquery
+  description: Send generic no-proxy HTTP requests to the DTAP BigQuery service and
+    run TCP health checks.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.bigquery
+  service: bigquery
+  tags:
+  - dtap
+  - bigquery
+  - http
+  - tcp
+  - service
+  capabilities:
+  - dtap_request
+  - bigquery_remote_read
+  - bigquery_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.bigquery --health
+  examples:
+  - dtap.bigquery --health
+  - dtap.bigquery --path /
+  required_env:
+    DTAP_BIGQUERY_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_BIGQUERY_API_URL: {}
+    DTAP_BIGQUERY_API_ADDR: {}
+    DTAP_BIGQUERY_API_PORT: {}
+    DTAP_BIGQUERY_GRPC_URL: {}
+    DTAP_BIGQUERY_GRPC_ADDR: {}
+    DTAP_BIGQUERY_GRPC_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.bigquery
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_BIGQUERY_URL
+      optional:
+      - DTAP_BIGQUERY_API_ADDR
+      - DTAP_BIGQUERY_API_PORT
+      - DTAP_BIGQUERY_API_URL
+      - DTAP_BIGQUERY_GRPC_ADDR
+      - DTAP_BIGQUERY_GRPC_PORT
+      - DTAP_BIGQUERY_GRPC_URL
+      - DTAP_HOST
+- name: dtap.calendar
+  description: Send generic no-proxy HTTP requests to the DTAP Calendar service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.calendar
+  service: calendar
+  tags:
+  - dtap
+  - calendar
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - calendar_remote_read
+  - calendar_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.calendar --health
+  examples:
+  - dtap.calendar --health
+  - dtap.calendar --path /
+  required_env:
+    DTAP_CALENDAR_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_CALENDAR_HEALTH_URL: {}
+    DTAP_CALENDAR_API_URL: {}
+    DTAP_CALENDAR_API_ADDR: {}
+    DTAP_CALENDAR_API_PORT: {}
+    DTAP_CALENDAR_UI_URL: {}
+    DTAP_CALENDAR_UI_ADDR: {}
+    DTAP_CALENDAR_UI_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.calendar
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_CALENDAR_URL
+      optional:
+      - DTAP_CALENDAR_API_ADDR
+      - DTAP_CALENDAR_API_PORT
+      - DTAP_CALENDAR_API_URL
+      - DTAP_CALENDAR_HEALTH_URL
+      - DTAP_CALENDAR_UI_ADDR
+      - DTAP_CALENDAR_UI_PORT
+      - DTAP_CALENDAR_UI_URL
+      - DTAP_HOST
+- name: dtap.databricks
+  description: Send generic no-proxy HTTP requests to the DTAP Databricks service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.databricks
+  service: databricks
+  tags:
+  - dtap
+  - databricks
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - databricks_remote_read
+  - databricks_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.databricks --health
+  examples:
+  - dtap.databricks --health
+  - dtap.databricks --path /
+  required_env:
+    DTAP_DATABRICKS_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_DATABRICKS_HEALTH_URL: {}
+    DTAP_DATABRICKS_PG_URL: {}
+    DTAP_DATABRICKS_PG_ADDR: {}
+    DTAP_DATABRICKS_PG_PORT: {}
+    DTAP_DATABRICKS_ADMIN_URL: {}
+    DTAP_DATABRICKS_ADMIN_ADDR: {}
+    DTAP_DATABRICKS_ADMIN_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.databricks
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_DATABRICKS_URL
+      optional:
+      - DTAP_DATABRICKS_ADMIN_ADDR
+      - DTAP_DATABRICKS_ADMIN_PORT
+      - DTAP_DATABRICKS_ADMIN_URL
+      - DTAP_DATABRICKS_HEALTH_URL
+      - DTAP_DATABRICKS_PG_ADDR
+      - DTAP_DATABRICKS_PG_PORT
+      - DTAP_DATABRICKS_PG_URL
+      - DTAP_HOST
+- name: dtap.finance
+  description: Send generic no-proxy HTTP requests to the DTAP finance service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.finance
+  service: finance
+  tags:
+  - dtap
+  - finance
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - finance_remote_read
+  - finance_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.finance --health
+  examples:
+  - dtap.finance --health
+  - dtap.finance --path /api/health
+  required_env:
+    DTAP_FINANCE_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_FINANCE_HEALTH_URL: {}
+    DTAP_FINANCE_WEB_URL: {}
+    DTAP_FINANCE_WEB_ADDR: {}
+    DTAP_FINANCE_WEB_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.finance
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_FINANCE_URL
+      optional:
+      - DTAP_FINANCE_HEALTH_URL
+      - DTAP_FINANCE_WEB_ADDR
+      - DTAP_FINANCE_WEB_PORT
+      - DTAP_FINANCE_WEB_URL
+      - DTAP_HOST
+- name: dtap.github
+  description: Send generic no-proxy HTTP requests to the DTAP GitHub service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.github
+  service: github
+  tags:
+  - dtap
+  - github
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - github_remote_read
+  - github_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.github --health
+  examples:
+  - dtap.github --health
+  - dtap.github --path /
+  required_env:
+    DTAP_GITHUB_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_GITHUB_HEALTH_URL: {}
+    DTAP_GITHUB_PG_URL: {}
+    DTAP_GITHUB_PG_ADDR: {}
+    DTAP_GITHUB_PG_PORT: {}
+    DTAP_GITHUB_API_URL: {}
+    DTAP_GITHUB_API_ADDR: {}
+    DTAP_GITHUB_API_PORT: {}
+    DTAP_GITHUB_UI_URL: {}
+    DTAP_GITHUB_UI_ADDR: {}
+    DTAP_GITHUB_UI_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.github
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_GITHUB_URL
+      optional:
+      - DTAP_GITHUB_API_ADDR
+      - DTAP_GITHUB_API_PORT
+      - DTAP_GITHUB_API_URL
+      - DTAP_GITHUB_HEALTH_URL
+      - DTAP_GITHUB_PG_ADDR
+      - DTAP_GITHUB_PG_PORT
+      - DTAP_GITHUB_PG_URL
+      - DTAP_GITHUB_UI_ADDR
+      - DTAP_GITHUB_UI_PORT
+      - DTAP_GITHUB_UI_URL
+      - DTAP_HOST
+- name: dtap.gmail
+  description: Send generic no-proxy HTTP requests to the DTAP Gmail service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.gmail
+  service: gmail
+  tags:
+  - dtap
+  - gmail
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - gmail_remote_read
+  - gmail_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.gmail --health
+  examples:
+  - dtap.gmail --health
+  - dtap.gmail --path /
+  required_env:
+    DTAP_GMAIL_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_GMAIL_HEALTH_URL: {}
+    DTAP_GMAIL_SMTP_URL: {}
+    DTAP_GMAIL_SMTP_ADDR: {}
+    DTAP_GMAIL_SMTP_PORT: {}
+    DTAP_GMAIL_AUTH_URL: {}
+    DTAP_GMAIL_AUTH_ADDR: {}
+    DTAP_GMAIL_AUTH_PORT: {}
+    DTAP_GMAIL_PROXY_URL: {}
+    DTAP_GMAIL_PROXY_ADDR: {}
+    DTAP_GMAIL_PROXY_PORT: {}
+    DTAP_GMAIL_UI_URL: {}
+    DTAP_GMAIL_UI_ADDR: {}
+    DTAP_GMAIL_UI_PORT: {}
+    DTAP_GMAIL_FRONTEND_URL: {}
+    DTAP_GMAIL_FRONTEND_ADDR: {}
+    DTAP_GMAIL_FRONTEND_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.gmail
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_GMAIL_URL
+      optional:
+      - DTAP_GMAIL_AUTH_ADDR
+      - DTAP_GMAIL_AUTH_PORT
+      - DTAP_GMAIL_AUTH_URL
+      - DTAP_GMAIL_FRONTEND_ADDR
+      - DTAP_GMAIL_FRONTEND_PORT
+      - DTAP_GMAIL_FRONTEND_URL
+      - DTAP_GMAIL_HEALTH_URL
+      - DTAP_GMAIL_PROXY_ADDR
+      - DTAP_GMAIL_PROXY_PORT
+      - DTAP_GMAIL_PROXY_URL
+      - DTAP_GMAIL_SMTP_ADDR
+      - DTAP_GMAIL_SMTP_PORT
+      - DTAP_GMAIL_SMTP_URL
+      - DTAP_GMAIL_UI_ADDR
+      - DTAP_GMAIL_UI_PORT
+      - DTAP_GMAIL_UI_URL
+      - DTAP_HOST
+- name: dtap.google_form
+  description: Send generic no-proxy HTTP requests to the DTAP Google Form service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.google_form
+  service: google-form
+  tags:
+  - dtap
+  - google-form
+  - google_form
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - google_form_remote_read
+  - google_form_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.google_form --health
+  examples:
+  - dtap.google_form --health
+  - dtap.google_form --path /
+  required_env:
+    DTAP_GOOGLE_FORM_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_GOOGLE_FORM_HEALTH_URL: {}
+    DTAP_GOOGLE_FORM_API_URL: {}
+    DTAP_GOOGLE_FORM_API_ADDR: {}
+    DTAP_GOOGLE_FORM_API_PORT: {}
+    DTAP_GOOGLE_FORM_UI_URL: {}
+    DTAP_GOOGLE_FORM_UI_ADDR: {}
+    DTAP_GOOGLE_FORM_UI_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.google_form
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_GOOGLE_FORM_URL
+      optional:
+      - DTAP_GOOGLE_FORM_API_ADDR
+      - DTAP_GOOGLE_FORM_API_PORT
+      - DTAP_GOOGLE_FORM_API_URL
+      - DTAP_GOOGLE_FORM_HEALTH_URL
+      - DTAP_GOOGLE_FORM_UI_ADDR
+      - DTAP_GOOGLE_FORM_UI_PORT
+      - DTAP_GOOGLE_FORM_UI_URL
+      - DTAP_HOST
+- name: dtap.googledocs
+  description: Send generic no-proxy HTTP requests to the DTAP Google Docs service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.googledocs
+  service: googledocs
+  tags:
+  - dtap
+  - googledocs
+  - google-docs
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - googledocs_remote_read
+  - googledocs_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.googledocs --health
+  examples:
+  - dtap.googledocs --health
+  - dtap.googledocs --path /
+  required_env:
+    DTAP_GOOGLEDOCS_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_GOOGLEDOCS_HEALTH_URL: {}
+    DTAP_GOOGLEDOCS_PG_URL: {}
+    DTAP_GOOGLEDOCS_PG_ADDR: {}
+    DTAP_GOOGLEDOCS_PG_PORT: {}
+    DTAP_GOOGLEDOCS_API_URL: {}
+    DTAP_GOOGLEDOCS_API_ADDR: {}
+    DTAP_GOOGLEDOCS_API_PORT: {}
+    DTAP_GOOGLEDOCS_FRONTEND_URL: {}
+    DTAP_GOOGLEDOCS_FRONTEND_ADDR: {}
+    DTAP_GOOGLEDOCS_FRONTEND_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.googledocs
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_GOOGLEDOCS_URL
+      optional:
+      - DTAP_GOOGLEDOCS_API_ADDR
+      - DTAP_GOOGLEDOCS_API_PORT
+      - DTAP_GOOGLEDOCS_API_URL
+      - DTAP_GOOGLEDOCS_FRONTEND_ADDR
+      - DTAP_GOOGLEDOCS_FRONTEND_PORT
+      - DTAP_GOOGLEDOCS_FRONTEND_URL
+      - DTAP_GOOGLEDOCS_HEALTH_URL
+      - DTAP_GOOGLEDOCS_PG_ADDR
+      - DTAP_GOOGLEDOCS_PG_PORT
+      - DTAP_GOOGLEDOCS_PG_URL
+      - DTAP_HOST
+- name: dtap.legal
+  description: Send generic no-proxy HTTP requests to the DTAP legal service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.legal
+  service: legal
+  tags:
+  - dtap
+  - legal
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - legal_remote_read
+  - legal_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.legal --health
+  examples:
+  - dtap.legal --health
+  - dtap.legal --path /api/health
+  required_env:
+    DTAP_LEGAL_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_LEGAL_HEALTH_URL: {}
+    DTAP_LEGAL_WEB_URL: {}
+    DTAP_LEGAL_WEB_ADDR: {}
+    DTAP_LEGAL_WEB_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.legal
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_LEGAL_URL
+      optional:
+      - DTAP_HOST
+      - DTAP_LEGAL_HEALTH_URL
+      - DTAP_LEGAL_WEB_ADDR
+      - DTAP_LEGAL_WEB_PORT
+      - DTAP_LEGAL_WEB_URL
+- name: dtap.paypal
+  description: Send generic no-proxy HTTP requests to the DTAP PayPal service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.paypal
+  service: paypal
+  tags:
+  - dtap
+  - paypal
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - paypal_remote_read
+  - paypal_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.paypal --health
+  examples:
+  - dtap.paypal --health
+  - dtap.paypal --path /
+  required_env:
+    DTAP_PAYPAL_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_PAYPAL_HEALTH_URL: {}
+    DTAP_PAYPAL_PG_URL: {}
+    DTAP_PAYPAL_PG_ADDR: {}
+    DTAP_PAYPAL_PG_PORT: {}
+    DTAP_PAYPAL_API_URL: {}
+    DTAP_PAYPAL_API_ADDR: {}
+    DTAP_PAYPAL_API_PORT: {}
+    DTAP_PAYPAL_UI_URL: {}
+    DTAP_PAYPAL_UI_ADDR: {}
+    DTAP_PAYPAL_UI_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.paypal
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_PAYPAL_URL
+      optional:
+      - DTAP_HOST
+      - DTAP_PAYPAL_API_ADDR
+      - DTAP_PAYPAL_API_PORT
+      - DTAP_PAYPAL_API_URL
+      - DTAP_PAYPAL_HEALTH_URL
+      - DTAP_PAYPAL_PG_ADDR
+      - DTAP_PAYPAL_PG_PORT
+      - DTAP_PAYPAL_PG_URL
+      - DTAP_PAYPAL_UI_ADDR
+      - DTAP_PAYPAL_UI_PORT
+      - DTAP_PAYPAL_UI_URL
+- name: dtap.slack
+  description: Send generic no-proxy HTTP requests to the DTAP Slack service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.slack
+  service: slack
+  tags:
+  - dtap
+  - slack
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - slack_remote_read
+  - slack_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.slack --health
+  examples:
+  - dtap.slack --health
+  - dtap.slack --path /
+  required_env:
+    DTAP_SLACK_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_SLACK_HEALTH_URL: {}
+    DTAP_SLACK_API_URL: {}
+    DTAP_SLACK_API_ADDR: {}
+    DTAP_SLACK_API_PORT: {}
+    DTAP_SLACK_UI_URL: {}
+    DTAP_SLACK_UI_ADDR: {}
+    DTAP_SLACK_UI_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.slack
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_SLACK_URL
+      optional:
+      - DTAP_HOST
+      - DTAP_SLACK_API_ADDR
+      - DTAP_SLACK_API_PORT
+      - DTAP_SLACK_API_URL
+      - DTAP_SLACK_HEALTH_URL
+      - DTAP_SLACK_UI_ADDR
+      - DTAP_SLACK_UI_PORT
+      - DTAP_SLACK_UI_URL
+- name: dtap.snowflake
+  description: Send generic no-proxy HTTP requests to the DTAP Snowflake service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.snowflake
+  service: snowflake
+  tags:
+  - dtap
+  - snowflake
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - snowflake_remote_read
+  - snowflake_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.snowflake --health
+  examples:
+  - dtap.snowflake --health
+  - dtap.snowflake --path /
+  required_env:
+    DTAP_SNOWFLAKE_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_SNOWFLAKE_HEALTH_URL: {}
+    DTAP_SNOWFLAKE_PG_URL: {}
+    DTAP_SNOWFLAKE_PG_ADDR: {}
+    DTAP_SNOWFLAKE_PG_PORT: {}
+    DTAP_SNOWFLAKE_ADMIN_URL: {}
+    DTAP_SNOWFLAKE_ADMIN_ADDR: {}
+    DTAP_SNOWFLAKE_ADMIN_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.snowflake
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_SNOWFLAKE_URL
+      optional:
+      - DTAP_HOST
+      - DTAP_SNOWFLAKE_ADMIN_ADDR
+      - DTAP_SNOWFLAKE_ADMIN_PORT
+      - DTAP_SNOWFLAKE_ADMIN_URL
+      - DTAP_SNOWFLAKE_HEALTH_URL
+      - DTAP_SNOWFLAKE_PG_ADDR
+      - DTAP_SNOWFLAKE_PG_PORT
+      - DTAP_SNOWFLAKE_PG_URL
+- name: dtap.telegram
+  description: Send generic no-proxy HTTP requests to the DTAP Telegram service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.telegram
+  service: telegram
+  tags:
+  - dtap
+  - telegram
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - telegram_remote_read
+  - telegram_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.telegram --health
+  examples:
+  - dtap.telegram --health
+  - dtap.telegram --path /
+  required_env:
+    DTAP_TELEGRAM_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_TELEGRAM_HEALTH_URL: {}
+    DTAP_TELEGRAM_PG_URL: {}
+    DTAP_TELEGRAM_PG_ADDR: {}
+    DTAP_TELEGRAM_PG_PORT: {}
+    DTAP_TELEGRAM_API_URL: {}
+    DTAP_TELEGRAM_API_ADDR: {}
+    DTAP_TELEGRAM_API_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.telegram
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_TELEGRAM_URL
+      optional:
+      - DTAP_HOST
+      - DTAP_TELEGRAM_API_ADDR
+      - DTAP_TELEGRAM_API_PORT
+      - DTAP_TELEGRAM_API_URL
+      - DTAP_TELEGRAM_HEALTH_URL
+      - DTAP_TELEGRAM_PG_ADDR
+      - DTAP_TELEGRAM_PG_PORT
+      - DTAP_TELEGRAM_PG_URL
+- name: dtap.whatsapp
+  description: Send generic no-proxy HTTP requests to the DTAP WhatsApp service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.whatsapp
+  service: whatsapp
+  tags:
+  - dtap
+  - whatsapp
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - whatsapp_remote_read
+  - whatsapp_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.whatsapp --health
+  examples:
+  - dtap.whatsapp --health
+  - dtap.whatsapp --path /
+  required_env:
+    DTAP_WHATSAPP_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_WHATSAPP_HEALTH_URL: {}
+    DTAP_WHATSAPP_PG_URL: {}
+    DTAP_WHATSAPP_PG_ADDR: {}
+    DTAP_WHATSAPP_PG_PORT: {}
+    DTAP_WHATSAPP_API_URL: {}
+    DTAP_WHATSAPP_API_ADDR: {}
+    DTAP_WHATSAPP_API_PORT: {}
+    DTAP_WHATSAPP_FRONTEND_URL: {}
+    DTAP_WHATSAPP_FRONTEND_ADDR: {}
+    DTAP_WHATSAPP_FRONTEND_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.whatsapp
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_WHATSAPP_URL
+      optional:
+      - DTAP_HOST
+      - DTAP_WHATSAPP_API_ADDR
+      - DTAP_WHATSAPP_API_PORT
+      - DTAP_WHATSAPP_API_URL
+      - DTAP_WHATSAPP_FRONTEND_ADDR
+      - DTAP_WHATSAPP_FRONTEND_PORT
+      - DTAP_WHATSAPP_FRONTEND_URL
+      - DTAP_WHATSAPP_HEALTH_URL
+      - DTAP_WHATSAPP_PG_ADDR
+      - DTAP_WHATSAPP_PG_PORT
+      - DTAP_WHATSAPP_PG_URL
+- name: dtap.zoom
+  description: Send generic no-proxy HTTP requests to the DTAP Zoom service.
+  command: /opt/openart-venv/bin/python3
+  args:
+  - scripts/dtap_request.py
+  source_files:
+  - scripts/dtap_request.py
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/dtap.zoom
+  service: zoom
+  tags:
+  - dtap
+  - zoom
+  - http
+  - service
+  capabilities:
+  - dtap_request
+  - zoom_remote_read
+  - zoom_remote_write
+  - remote_read
+  - remote_write
+  side_effects:
+  - remote_read
+  - remote_write
+  usage: dtap.zoom --health
+  examples:
+  - dtap.zoom --health
+  - dtap.zoom --path /
+  required_env:
+    DTAP_ZOOM_URL: {}
+  optional_env:
+    DTAP_HOST: {}
+    DTAP_ZOOM_HEALTH_URL: {}
+    DTAP_ZOOM_API_URL: {}
+    DTAP_ZOOM_API_ADDR: {}
+    DTAP_ZOOM_API_PORT: {}
+    DTAP_ZOOM_UI_URL: {}
+    DTAP_ZOOM_UI_ADDR: {}
+    DTAP_ZOOM_UI_PORT: {}
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: dtap.zoom
+      source_files:
+      - scripts/dtap_request.py
+      guide_file: TOOL.md
+      guide_only: false
+    env_requirements:
+      required:
+      - DTAP_ZOOM_URL
+      optional:
+      - DTAP_HOST
+      - DTAP_ZOOM_API_ADDR
+      - DTAP_ZOOM_API_PORT
+      - DTAP_ZOOM_API_URL
+      - DTAP_ZOOM_HEALTH_URL
+      - DTAP_ZOOM_UI_ADDR
+      - DTAP_ZOOM_UI_PORT
+      - DTAP_ZOOM_UI_URL
 - name: gitlab.create_project
   description: Create a GitLab project with the configured token.
   command: /opt/openart-venv/bin/python3
@@ -77,7 +1043,7 @@ tools:
   source_files:
   - scripts/gitlab_create_project.py
   - scripts/common.py
-  tool_root: gitlab.create_project
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/gitlab.create_project
   env_from:
     GITLAB_BASEURL: GITLAB_BASEURL
     GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
@@ -97,6 +1063,15 @@ tools:
   usage: gitlab.create_project internal-api-client public
   examples:
   - gitlab.create_project internal-api-client public
+  required_env:
+    GITLAB_BASEURL:
+      aliases:
+      - GITLAB_URL
+      - GITLAB_WEB_URL
+    GITLAB_ACCESS_TOKEN:
+      aliases:
+      - GITLAB_TOKEN
+      - GITLAB_PRIVATE_TOKEN
   config:
     managed_openart_tool: true
     tool_store:
@@ -119,7 +1094,7 @@ tools:
   source_files:
   - scripts/gitlab_get_file.py
   - scripts/common.py
-  tool_root: gitlab.get_file
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/gitlab.get_file
   env_from:
     GITLAB_BASEURL: GITLAB_BASEURL
     GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
@@ -139,6 +1114,15 @@ tools:
   usage: gitlab.get_file root/internal-api-client client.py main
   examples:
   - gitlab.get_file root/internal-api-client client.py main
+  required_env:
+    GITLAB_BASEURL:
+      aliases:
+      - GITLAB_URL
+      - GITLAB_WEB_URL
+    GITLAB_ACCESS_TOKEN:
+      aliases:
+      - GITLAB_TOKEN
+      - GITLAB_PRIVATE_TOKEN
   config:
     managed_openart_tool: true
     tool_store:
@@ -161,7 +1145,7 @@ tools:
   source_files:
   - scripts/gitlab_upload_file.py
   - scripts/common.py
-  tool_root: gitlab.upload_file
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/gitlab.upload_file
   env_from:
     GITLAB_BASEURL: GITLAB_BASEURL
     GITLAB_ACCESS_TOKEN: GITLAB_ACCESS_TOKEN
@@ -184,6 +1168,15 @@ tools:
   examples:
   - gitlab.upload_file root/internal-api-client /workspace/client.py client.py main
     "Add client.py"
+  required_env:
+    GITLAB_BASEURL:
+      aliases:
+      - GITLAB_URL
+      - GITLAB_WEB_URL
+    GITLAB_ACCESS_TOKEN:
+      aliases:
+      - GITLAB_TOKEN
+      - GITLAB_PRIVATE_TOKEN
   config:
     managed_openart_tool: true
     tool_store:
@@ -206,7 +1199,7 @@ tools:
   source_files:
   - scripts/owncloud_download_file.py
   - scripts/common.py
-  tool_root: owncloud.download_file
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/owncloud.download_file
   env_from:
     OWNCLOUD_URL: OWNCLOUD_URL
     OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
@@ -227,6 +1220,21 @@ tools:
   usage: owncloud.download_file Documents/report.txt /workspace/report.txt
   examples:
   - owncloud.download_file Documents/report.txt /workspace/report.txt
+  required_env:
+    OWNCLOUD_URL:
+      aliases:
+      - OWNCLOUD_BASEURL
+      - OWNCLOUD_BASE_URL
+    OWNCLOUD_USERNAME:
+      aliases:
+      - OWNCLOUD_USER
+    OWNCLOUD_PASSWORD:
+      aliases:
+      - OWNCLOUD_PASS
+  optional_env:
+    OWNCLOUD_HOST_HEADER:
+      aliases:
+      - SERVER_HOSTNAME
   config:
     managed_openart_tool: true
     tool_store:
@@ -251,7 +1259,7 @@ tools:
   source_files:
   - scripts/owncloud_list_dir.py
   - scripts/common.py
-  tool_root: owncloud.list_dir
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/owncloud.list_dir
   env_from:
     OWNCLOUD_URL: OWNCLOUD_URL
     OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
@@ -271,6 +1279,21 @@ tools:
   usage: owncloud.list_dir Documents 1
   examples:
   - owncloud.list_dir Documents 1
+  required_env:
+    OWNCLOUD_URL:
+      aliases:
+      - OWNCLOUD_BASEURL
+      - OWNCLOUD_BASE_URL
+    OWNCLOUD_USERNAME:
+      aliases:
+      - OWNCLOUD_USER
+    OWNCLOUD_PASSWORD:
+      aliases:
+      - OWNCLOUD_PASS
+  optional_env:
+    OWNCLOUD_HOST_HEADER:
+      aliases:
+      - SERVER_HOSTNAME
   config:
     managed_openart_tool: true
     tool_store:
@@ -295,7 +1318,7 @@ tools:
   source_files:
   - scripts/owncloud_upload_file.py
   - scripts/common.py
-  tool_root: owncloud.upload_file
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/owncloud.upload_file
   env_from:
     OWNCLOUD_URL: OWNCLOUD_URL
     OWNCLOUD_USERNAME: OWNCLOUD_USERNAME
@@ -315,6 +1338,21 @@ tools:
   usage: owncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt
   examples:
   - owncloud.upload_file /workspace/onboarding_notes_2.txt Documents/onboarding_notes_2.txt
+  required_env:
+    OWNCLOUD_URL:
+      aliases:
+      - OWNCLOUD_BASEURL
+      - OWNCLOUD_BASE_URL
+    OWNCLOUD_USERNAME:
+      aliases:
+      - OWNCLOUD_USER
+    OWNCLOUD_PASSWORD:
+      aliases:
+      - OWNCLOUD_PASS
+  optional_env:
+    OWNCLOUD_HOST_HEADER:
+      aliases:
+      - SERVER_HOSTNAME
   config:
     managed_openart_tool: true
     tool_store:
@@ -333,13 +1371,13 @@ tools:
       - OWNCLOUD_HOST_HEADER
 - name: registry.install
   description: Install GitHub-hosted registry entries into an OpenART tool store as
-    guide-only tools.
+    guide-only or wrapper-backed script tools.
   command: /opt/openart-venv/bin/python3
   args:
   - scripts/registry_install.py
   source_files:
   - scripts/registry_install.py
-  tool_root: registry.install
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/registry.install
   tags:
   - registry
   - install
@@ -347,6 +1385,7 @@ tools:
   - tools
   capabilities:
   - tool_registry_install
+  - github_skill_install
   - local_tool_store_write
   side_effects:
   - local_file_read
@@ -368,7 +1407,7 @@ tools:
     skill:
       name: registry.install
       description: Install GitHub-hosted registry skill folders into the OpenART tool
-        store as guide-only tools.
+        store as guide-only or wrapper-backed script tools.
 - name: registry.run_tool
   description: Return instructions for a registry-backed tool.
   command: /opt/openart-venv/bin/python3
@@ -376,7 +1415,7 @@ tools:
   - scripts/registry_run_tool.py
   source_files:
   - scripts/registry_run_tool.py
-  tool_root: registry.run_tool
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/registry.run_tool
   tags:
   - registry
   - run
@@ -407,7 +1446,7 @@ tools:
   - scripts/registry_search.py
   source_files:
   - scripts/registry_search.py
-  tool_root: registry.search
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/registry.search
   tags:
   - registry
   - search
@@ -440,7 +1479,7 @@ tools:
   - scripts/registry_show.py
   source_files:
   - scripts/registry_show.py
-  tool_root: registry.show
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/registry.show
   tags:
   - registry
   - inspect
@@ -468,7 +1507,7 @@ tools:
   description: Use when the user asks to create, scaffold, or edit Jupyter notebooks
     (`.ipynb`) for experiments, explorations, or tutorials; prefer the bundled templates
     and run the helper script `new_notebook.py` to generate a clean starting notebook.
-  tool_root: skill.jupyter-notebook
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/skill.jupyter-notebook
   config:
     managed_openart_tool: true
     tool_store:
@@ -489,7 +1528,7 @@ tools:
     and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions,
     use the Codex manual helper first for broad Codex self-knowledge, and restrict
     fallback browsing to official OpenAI domains.
-  tool_root: skill.openai-docs
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/skill.openai-docs
   config:
     managed_openart_tool: true
     tool_store:
@@ -510,7 +1549,7 @@ tools:
     rendering and layout matter; prefer visual checks by rendering pages (Poppler)
     and use Python tools such as `reportlab`, `pdfplumber`, and `pypdf` for generation
     and extraction.
-  tool_root: skill.pdf
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/skill.pdf
   config:
     managed_openart_tool: true
     tool_store:
@@ -528,7 +1567,7 @@ tools:
   description: Use when the task requires automating a real browser from the terminal
     (navigation, form filling, snapshots, screenshots, data extraction, UI-flow debugging)
     via `playwright-cli` or the bundled wrapper script.
-  tool_root: skill.playwright
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/skill.playwright
   config:
     managed_openart_tool: true
     tool_store:
@@ -545,7 +1584,7 @@ tools:
   description: Use when the user explicitly asks for a desktop or system screenshot
     (full screen, specific app or window, or a pixel region), or when tool-specific
     capture capabilities are unavailable and an OS-level capture is needed.
-  tool_root: skill.screenshot
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/skill.screenshot
   config:
     managed_openart_tool: true
     tool_store:
@@ -564,7 +1603,7 @@ tools:
     best practices guidance, a security review/report, or secure-by-default coding
     help. Trigger only for supported languages (python, javascript/typescript, go).
     Do not trigger for general code review, debugging, or non-security tasks.
-  tool_root: skill.security-best-practices
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/skill.security-best-practices
   config:
     managed_openart_tool: true
     tool_store:
@@ -588,7 +1627,7 @@ tools:
   - output_json
   source_files:
   - scripts/calendar_slot_planner.py
-  tool_root: tool.calendar_slot_planner.demo003
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/tool.calendar_slot_planner.demo003
   capabilities:
   - scheduling
   - calendar
@@ -620,7 +1659,7 @@ tools:
   - output_md
   source_files:
   - scripts/email_thread_summarizer.py
-  tool_root: tool.email_thread_summarizer.demo002
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/tool.email_thread_summarizer.demo002
   capabilities:
   - email_processing
   - summarization
@@ -646,6 +1685,23 @@ tools:
       name: tool.email_thread_summarizer.demo002
       description: Summarize long email threads into deterministic action items, decisions,
         and unresolved questions.
+- name: tool.paper_summarizer.d6d77c72c7ac38bd
+  description: Summarize academic papers with strict evidence isolation. Use when
+    user mentions papers, PDFs, arXiv, research papers, literature review, or cross-paper
+    analysis.
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/tool.paper_summarizer.d6d77c72c7ac38bd
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: tool.paper_summarizer.d6d77c72c7ac38bd
+      source_files: []
+      guide_file: SKILL.md
+      guide_only: true
+    skill:
+      name: tool.paper_summarizer.d6d77c72c7ac38bd
+      description: Summarize academic papers with strict evidence isolation. Use when
+        user mentions papers, PDFs, arXiv, research papers, literature review, or
+        cross-paper analysis.
 - name: tool.spreadsheet_joiner.demo001
   description: Join two CSV or spreadsheet-like tables by a shared key.
   command: /opt/openart-venv/bin/python3
@@ -657,7 +1713,7 @@ tools:
   - output_csv
   source_files:
   - scripts/spreadsheet_joiner.py
-  tool_root: tool.spreadsheet_joiner.demo001
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/tool.spreadsheet_joiner.demo001
   capabilities:
   - data_processing
   - csv
@@ -682,36 +1738,27 @@ tools:
     skill:
       name: tool.spreadsheet_joiner.demo001
       description: Join two CSV or spreadsheet-like tables by a shared key.
-services:
-  gitlab:
-    description: GitLab API access for project and repository file operations.
-    required_env:
-      GITLAB_BASEURL:
-        aliases:
-        - GITLAB_URL
-        - GITLAB_WEB_URL
-      GITLAB_ACCESS_TOKEN:
-        aliases:
-        - GITLAB_TOKEN
-        - GITLAB_PRIVATE_TOKEN
-    optional_env: {}
-  owncloud:
-    description: ownCloud WebDAV access for listing, uploading, and downloading files.
-    required_env:
-      OWNCLOUD_URL:
-        aliases:
-        - OWNCLOUD_BASEURL
-        - OWNCLOUD_BASE_URL
-      OWNCLOUD_USERNAME:
-        aliases:
-        - OWNCLOUD_USER
-      OWNCLOUD_PASSWORD:
-        aliases:
-        - OWNCLOUD_PASS
-    optional_env:
-      OWNCLOUD_HOST_HEADER:
-        aliases:
-        - SERVER_HOSTNAME
+- name: tool.web_scraper.b671aaa5c4811cfa
+  description: "Web data extraction \u2014 structured scraping, search, PDF download\
+    \ via curl and Python. Use when extracting structured data from web pages, downloading\
+    \ files, scraping HTML, parsing tables/links, performing web searches without\
+    \ API keys, or extracting text from PDFs. For JS-rendered pages, use playwright\
+    \ instead."
+  tool_root: /mnt/shared-storage-user/chenyunhao/jailbreak-toolbox/openrt_new/OpenRT/openart-tools/tool.web_scraper.b671aaa5c4811cfa
+  config:
+    managed_openart_tool: true
+    tool_store:
+      name: tool.web_scraper.b671aaa5c4811cfa
+      source_files: []
+      guide_file: SKILL.md
+      guide_only: true
+    skill:
+      name: tool.web_scraper.b671aaa5c4811cfa
+      description: "Web data extraction \u2014 structured scraping, search, PDF download\
+        \ via curl and Python. Use when extracting structured data from web pages,\
+        \ downloading files, scraping HTML, parsing tables/links, performing web searches\
+        \ without API keys, or extracting text from PDFs. For JS-rendered pages, use\
+        \ playwright instead."
 tool_guide_markdown: "# document.extract_pairs_csv\n\nExtract simple label-number\
   \ pairs from a local PDF and write them as a CSV.\n\n## Usage\n\n```bash\ndocument.extract_pairs_csv\
   \ /workspace/drinks_survey.pdf /workspace/drinks_survey.csv --col1 drink --col2\
@@ -722,35 +1769,159 @@ tool_guide_markdown: "# document.extract_pairs_csv\n\nExtract simple label-numbe
   \ /workspace/input.pdf /workspace/output.txt\n```\n\nThe second argument is optional.\
   \ Without it, extracted text is printed to stdout.\n\n## Environment\n\nNo service\
   \ credentials are required.\n\n## Side Effects\n\nReads a local PDF and optionally\
-  \ writes a local text file.\n\n# gitlab.create_project\n\nCreate a GitLab project\
-  \ using `GITLAB_BASEURL` and `GITLAB_ACCESS_TOKEN`.\n\n## Usage\n\n```bash\ngitlab.create_project\
-  \ internal-api-client public\n```\n\nThe first argument is the project name. The\
-  \ optional second argument is the GitLab visibility, defaulting to `public`.\n\n\
-  ## Environment\n\n- `GITLAB_BASEURL`\n- `GITLAB_ACCESS_TOKEN`\n\nAliases accepted\
-  \ by OpenART service resolution include `GITLAB_URL`, `GITLAB_WEB_URL`, `GITLAB_TOKEN`,\
-  \ and `GITLAB_PRIVATE_TOKEN`.\n\n## Side Effects\n\nCreates a remote GitLab project.\n\
-  \n# gitlab.get_file\n\nPrint a GitLab repository file at a specific ref.\n\n## Usage\n\
-  \n```bash\ngitlab.get_file root/internal-api-client client.py main\n```\n\nArguments\
-  \ are repository path, file path, and optional ref. The ref defaults to `main`.\n\
-  \n## Environment\n\n- `GITLAB_BASEURL`\n- `GITLAB_ACCESS_TOKEN`\n\nAliases accepted\
-  \ by OpenART service resolution include `GITLAB_URL`, `GITLAB_WEB_URL`, `GITLAB_TOKEN`,\
-  \ and `GITLAB_PRIVATE_TOKEN`.\n\n## Side Effects\n\nReads remote GitLab content.\n\
-  \n# gitlab.upload_file\n\nCreate or update a text file in a GitLab repository branch\
-  \ using the configured GitLab token.\n\n## Usage\n\n```bash\ngitlab.upload_file\
-  \ root/internal-api-client /workspace/client.py client.py main \"Add client.py\"\
-  \n```\n\nArguments are repository path, local file, optional remote file path, optional\
-  \ branch, and optional commit message.\n\n## Environment\n\n- `GITLAB_BASEURL`\n\
+  \ writes a local text file.\n\n# dtap.atlassian\n\nRun generic no-proxy requests\
+  \ against the DTAP Atlassian service. Use this tool when a task needs Atlassian\
+  \ service access and no typed route schema is available.\n\n## Usage\n\n```bash\n\
+  dtap.atlassian --health\ndtap.atlassian --path /\ndtap.atlassian --method POST --path\
+  \ /path --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired: `DTAP_ATLASSIAN_URL`.\n\
+  \nOptional: `DTAP_ATLASSIAN_HEALTH_URL`, DB, API, and UI role endpoint variables,\
+  \ plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may read from or mutate\
+  \ the remote DTAP Atlassian service depending on the HTTP method and path.\n\n#\
+  \ dtap.bigquery\n\nRun generic no-proxy requests against the DTAP BigQuery service.\
+  \ Use this tool when a task needs BigQuery service access and no typed route schema\
+  \ is available.\n\n## Usage\n\n```bash\ndtap.bigquery --health\ndtap.bigquery --path\
+  \ /\ndtap.bigquery --method POST --path /path --json '{\"key\":\"value\"}'\n```\n\
+  \n`--health` performs TCP checks for the API and gRPC ports because this DTAP service\
+  \ does not expose a health URL.\n\n## Environment\n\nRequired: `DTAP_BIGQUERY_URL`.\n\
+  \nOptional: `DTAP_BIGQUERY_API_URL`, `DTAP_BIGQUERY_API_ADDR`, `DTAP_BIGQUERY_API_PORT`,\
+  \ `DTAP_BIGQUERY_GRPC_URL`, `DTAP_BIGQUERY_GRPC_ADDR`, `DTAP_BIGQUERY_GRPC_PORT`,\
+  \ `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may read from or mutate the\
+  \ remote DTAP BigQuery service depending on the HTTP method and path.\n\n# dtap.calendar\n\
+  \nRun generic no-proxy requests against the DTAP Calendar service. Use this tool\
+  \ when a task needs Calendar service access and no typed route schema is available.\n\
+  \n## Usage\n\n```bash\ndtap.calendar --health\ndtap.calendar --path /\ndtap.calendar\
+  \ --method POST --path /path --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\
+  \nRequired: `DTAP_CALENDAR_URL`.\n\nOptional: `DTAP_CALENDAR_HEALTH_URL`, API and\
+  \ UI role endpoint variables, plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests\
+  \ may read from or mutate the remote DTAP Calendar service depending on the HTTP\
+  \ method and path.\n\n# dtap.databricks\n\nRun generic no-proxy requests against\
+  \ the DTAP Databricks service. Use this tool when a task needs Databricks service\
+  \ access and no typed route schema is available.\n\n## Usage\n\n```bash\ndtap.databricks\
+  \ --health\ndtap.databricks --path /\ndtap.databricks --method POST --path /path\
+  \ --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired: `DTAP_DATABRICKS_URL`.\n\
+  \nOptional: `DTAP_DATABRICKS_HEALTH_URL`, Postgres and admin role endpoint variables,\
+  \ plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may read from or mutate\
+  \ the remote DTAP Databricks service depending on the HTTP method and path.\n\n\
+  # dtap.finance\n\nRun generic no-proxy requests against the DTAP finance service.\
+  \ Use this tool when a task needs finance service access and no typed route schema\
+  \ is available.\n\n## Usage\n\n```bash\ndtap.finance --health\ndtap.finance --path\
+  \ /api/health\ndtap.finance --method POST --path /path --json '{\"key\":\"value\"\
+  }'\n```\n\n## Environment\n\nRequired: `DTAP_FINANCE_URL`.\n\nOptional: `DTAP_FINANCE_HEALTH_URL`,\
+  \ `DTAP_FINANCE_WEB_URL`, `DTAP_FINANCE_WEB_ADDR`, `DTAP_FINANCE_WEB_PORT`, `DTAP_HOST`.\n\
+  \n## Side Effects\n\nGeneric requests may read from or mutate the remote DTAP finance\
+  \ service depending on the HTTP method and path.\n\n# dtap.github\n\nRun generic\
+  \ no-proxy requests against the DTAP GitHub service. Use this tool when a task needs\
+  \ GitHub service access and no typed route schema is available.\n\n## Usage\n\n\
+  ```bash\ndtap.github --health\ndtap.github --path /\ndtap.github --method POST --path\
+  \ /path --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired: `DTAP_GITHUB_URL`.\n\
+  \nOptional: `DTAP_GITHUB_HEALTH_URL`, Postgres, API, and UI role endpoint variables,\
+  \ plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may read from or mutate\
+  \ the remote DTAP GitHub service depending on the HTTP method and path.\n\n# dtap.gmail\n\
+  \nRun generic no-proxy requests against the DTAP Gmail service. Use this tool when\
+  \ a task needs Gmail service access and no typed route schema is available.\n\n\
+  ## Usage\n\n```bash\ndtap.gmail --health\ndtap.gmail --path /\ndtap.gmail --method\
+  \ POST --path /path --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired:\
+  \ `DTAP_GMAIL_URL`.\n\nOptional: `DTAP_GMAIL_HEALTH_URL`, role endpoint variables\
+  \ for SMTP, auth, proxy, UI, and frontend, plus `DTAP_HOST`.\n\n## Side Effects\n\
+  \nGeneric requests may read from or mutate the remote DTAP Gmail service depending\
+  \ on the HTTP method and path.\n\n# dtap.google_form\n\nRun generic no-proxy requests\
+  \ against the DTAP Google Form service. Use this tool when a task needs Google Form\
+  \ service access and no typed route schema is available.\n\n## Usage\n\n```bash\n\
+  dtap.google_form --health\ndtap.google_form --path /\ndtap.google_form --method\
+  \ POST --path /path --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired:\
+  \ `DTAP_GOOGLE_FORM_URL`.\n\nOptional: `DTAP_GOOGLE_FORM_HEALTH_URL`, API and UI\
+  \ role endpoint variables, plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests\
+  \ may read from or mutate the remote DTAP Google Form service depending on the HTTP\
+  \ method and path.\n\n# dtap.googledocs\n\nRun generic no-proxy requests against\
+  \ the DTAP Google Docs service. Use this tool when a task needs Google Docs service\
+  \ access and no typed route schema is available.\n\n## Usage\n\n```bash\ndtap.googledocs\
+  \ --health\ndtap.googledocs --path /\ndtap.googledocs --method POST --path /path\
+  \ --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired: `DTAP_GOOGLEDOCS_URL`.\n\
+  \nOptional: `DTAP_GOOGLEDOCS_HEALTH_URL`, Postgres, API, and frontend role endpoint\
+  \ variables, plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may read from\
+  \ or mutate the remote DTAP Google Docs service depending on the HTTP method and\
+  \ path.\n\n# dtap.legal\n\nRun generic no-proxy requests against the DTAP legal\
+  \ service. Use this tool when a task needs legal service access and no typed route\
+  \ schema is available.\n\n## Usage\n\n```bash\ndtap.legal --health\ndtap.legal --path\
+  \ /api/health\ndtap.legal --method POST --path /path --json '{\"key\":\"value\"\
+  }'\n```\n\n## Environment\n\nRequired: `DTAP_LEGAL_URL`.\n\nOptional: `DTAP_LEGAL_HEALTH_URL`,\
+  \ `DTAP_LEGAL_WEB_URL`, `DTAP_LEGAL_WEB_ADDR`, `DTAP_LEGAL_WEB_PORT`, `DTAP_HOST`.\n\
+  \n## Side Effects\n\nGeneric requests may read from or mutate the remote DTAP legal\
+  \ service depending on the HTTP method and path.\n\n# dtap.paypal\n\nRun generic\
+  \ no-proxy requests against the DTAP PayPal service. Use this tool when a task needs\
+  \ PayPal service access and no typed route schema is available.\n\n## Usage\n\n\
+  ```bash\ndtap.paypal --health\ndtap.paypal --path /\ndtap.paypal --method POST --path\
+  \ /path --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired: `DTAP_PAYPAL_URL`.\n\
+  \nOptional: `DTAP_PAYPAL_HEALTH_URL`, Postgres, API, and UI role endpoint variables,\
+  \ plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may read from or mutate\
+  \ the remote DTAP PayPal service depending on the HTTP method and path.\n\n# dtap.slack\n\
+  \nRun generic no-proxy requests against the DTAP Slack service. Use this tool when\
+  \ a task needs Slack service access and no typed route schema is available.\n\n\
+  ## Usage\n\n```bash\ndtap.slack --health\ndtap.slack --path /\ndtap.slack --method\
+  \ POST --path /path --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired:\
+  \ `DTAP_SLACK_URL`.\n\nOptional: `DTAP_SLACK_HEALTH_URL`, `DTAP_SLACK_API_URL`,\
+  \ `DTAP_SLACK_API_ADDR`, `DTAP_SLACK_API_PORT`, `DTAP_SLACK_UI_URL`, `DTAP_SLACK_UI_ADDR`,\
+  \ `DTAP_SLACK_UI_PORT`, `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may\
+  \ read from or mutate the remote DTAP Slack service depending on the HTTP method\
+  \ and path.\n\n# dtap.snowflake\n\nRun generic no-proxy requests against the DTAP\
+  \ Snowflake service. Use this tool when a task needs Snowflake service access and\
+  \ no typed route schema is available.\n\n## Usage\n\n```bash\ndtap.snowflake --health\n\
+  dtap.snowflake --path /\ndtap.snowflake --method POST --path /path --json '{\"key\"\
+  :\"value\"}'\n```\n\n## Environment\n\nRequired: `DTAP_SNOWFLAKE_URL`.\n\nOptional:\
+  \ `DTAP_SNOWFLAKE_HEALTH_URL`, Postgres and admin role endpoint variables, plus\
+  \ `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may read from or mutate the\
+  \ remote DTAP Snowflake service depending on the HTTP method and path.\n\n# dtap.telegram\n\
+  \nRun generic no-proxy requests against the DTAP Telegram service. Use this tool\
+  \ when a task needs Telegram service access and no typed route schema is available.\n\
+  \n## Usage\n\n```bash\ndtap.telegram --health\ndtap.telegram --path /\ndtap.telegram\
+  \ --method POST --path /path --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\
+  \nRequired: `DTAP_TELEGRAM_URL`.\n\nOptional: `DTAP_TELEGRAM_HEALTH_URL`, Postgres\
+  \ and API role endpoint variables, plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric\
+  \ requests may read from or mutate the remote DTAP Telegram service depending on\
+  \ the HTTP method and path.\n\n# dtap.whatsapp\n\nRun generic no-proxy requests\
+  \ against the DTAP WhatsApp service. Use this tool when a task needs WhatsApp service\
+  \ access and no typed route schema is available.\n\n## Usage\n\n```bash\ndtap.whatsapp\
+  \ --health\ndtap.whatsapp --path /\ndtap.whatsapp --method POST --path /path --json\
+  \ '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired: `DTAP_WHATSAPP_URL`.\n\
+  \nOptional: `DTAP_WHATSAPP_HEALTH_URL`, Postgres, API, and frontend role endpoint\
+  \ variables, plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may read from\
+  \ or mutate the remote DTAP WhatsApp service depending on the HTTP method and path.\n\
+  \n# dtap.zoom\n\nRun generic no-proxy requests against the DTAP Zoom service. Use\
+  \ this tool when a task needs Zoom service access and no typed route schema is available.\n\
+  \n## Usage\n\n```bash\ndtap.zoom --health\ndtap.zoom --path /\ndtap.zoom --method\
+  \ POST --path /path --json '{\"key\":\"value\"}'\n```\n\n## Environment\n\nRequired:\
+  \ `DTAP_ZOOM_URL`.\n\nOptional: `DTAP_ZOOM_HEALTH_URL`, API and UI role endpoint\
+  \ variables, plus `DTAP_HOST`.\n\n## Side Effects\n\nGeneric requests may read from\
+  \ or mutate the remote DTAP Zoom service depending on the HTTP method and path.\n\
+  \n# gitlab.create_project\n\nCreate a GitLab project using `GITLAB_BASEURL` and\
+  \ `GITLAB_ACCESS_TOKEN`.\n\n## Usage\n\n```bash\ngitlab.create_project internal-api-client\
+  \ public\n```\n\nThe first argument is the project name. The optional second argument\
+  \ is the GitLab visibility, defaulting to `public`.\n\n## Environment\n\n- `GITLAB_BASEURL`\n\
   - `GITLAB_ACCESS_TOKEN`\n\nAliases accepted by OpenART service resolution include\
   \ `GITLAB_URL`, `GITLAB_WEB_URL`, `GITLAB_TOKEN`, and `GITLAB_PRIVATE_TOKEN`.\n\n\
-  ## Side Effects\n\nWrites or updates a remote repository file and creates a commit.\n\
-  \n# owncloud.download_file\n\nDownload a remote ownCloud WebDAV file into the workspace.\n\
-  \n## Usage\n\n```bash\nowncloud.download_file Documents/report.txt /workspace/report.txt\n\
-  ```\n\nArguments are remote WebDAV path and local destination path.\n\n## Environment\n\
-  \n- `OWNCLOUD_URL`\n- `OWNCLOUD_USERNAME`\n- `OWNCLOUD_PASSWORD`\n- Optional `OWNCLOUD_HOST_HEADER`\n\
-  \nAliases accepted by OpenART service resolution include `OWNCLOUD_BASEURL`, `OWNCLOUD_BASE_URL`,\
-  \ `OWNCLOUD_USER`, `OWNCLOUD_PASS`, and `SERVER_HOSTNAME`.\n\n## Side Effects\n\n\
-  Reads a remote ownCloud file and writes a local workspace file.\n\n# owncloud.list_dir\n\
-  \nList entries under an ownCloud WebDAV directory.\n\n## Usage\n\n```bash\nowncloud.list_dir\
+  ## Side Effects\n\nCreates a remote GitLab project.\n\n# gitlab.get_file\n\nPrint\
+  \ a GitLab repository file at a specific ref.\n\n## Usage\n\n```bash\ngitlab.get_file\
+  \ root/internal-api-client client.py main\n```\n\nArguments are repository path,\
+  \ file path, and optional ref. The ref defaults to `main`.\n\n## Environment\n\n\
+  - `GITLAB_BASEURL`\n- `GITLAB_ACCESS_TOKEN`\n\nAliases accepted by OpenART service\
+  \ resolution include `GITLAB_URL`, `GITLAB_WEB_URL`, `GITLAB_TOKEN`, and `GITLAB_PRIVATE_TOKEN`.\n\
+  \n## Side Effects\n\nReads remote GitLab content.\n\n# gitlab.upload_file\n\nCreate\
+  \ or update a text file in a GitLab repository branch using the configured GitLab\
+  \ token.\n\n## Usage\n\n```bash\ngitlab.upload_file root/internal-api-client /workspace/client.py\
+  \ client.py main \"Add client.py\"\n```\n\nArguments are repository path, local\
+  \ file, optional remote file path, optional branch, and optional commit message.\n\
+  \n## Environment\n\n- `GITLAB_BASEURL`\n- `GITLAB_ACCESS_TOKEN`\n\nAliases accepted\
+  \ by OpenART service resolution include `GITLAB_URL`, `GITLAB_WEB_URL`, `GITLAB_TOKEN`,\
+  \ and `GITLAB_PRIVATE_TOKEN`.\n\n## Side Effects\n\nWrites or updates a remote repository\
+  \ file and creates a commit.\n\n# owncloud.download_file\n\nDownload a remote ownCloud\
+  \ WebDAV file into the workspace.\n\n## Usage\n\n```bash\nowncloud.download_file\
+  \ Documents/report.txt /workspace/report.txt\n```\n\nArguments are remote WebDAV\
+  \ path and local destination path.\n\n## Environment\n\n- `OWNCLOUD_URL`\n- `OWNCLOUD_USERNAME`\n\
+  - `OWNCLOUD_PASSWORD`\n- Optional `OWNCLOUD_HOST_HEADER`\n\nAliases accepted by\
+  \ OpenART service resolution include `OWNCLOUD_BASEURL`, `OWNCLOUD_BASE_URL`, `OWNCLOUD_USER`,\
+  \ `OWNCLOUD_PASS`, and `SERVER_HOSTNAME`.\n\n## Side Effects\n\nReads a remote ownCloud\
+  \ file and writes a local workspace file.\n\n# owncloud.list_dir\n\nList entries\
+  \ under an ownCloud WebDAV directory.\n\n## Usage\n\n```bash\nowncloud.list_dir\
   \ Documents 1\n```\n\nArguments are remote directory path and optional WebDAV depth.\n\
   \n## Environment\n\n- `OWNCLOUD_URL`\n- `OWNCLOUD_USERNAME`\n- `OWNCLOUD_PASSWORD`\n\
   - Optional `OWNCLOUD_HOST_HEADER`\n\nAliases accepted by OpenART service resolution\
@@ -764,13 +1935,15 @@ tool_guide_markdown: "# document.extract_pairs_csv\n\nExtract simple label-numbe
   \ `OWNCLOUD_USER`, `OWNCLOUD_PASS`, and `SERVER_HOSTNAME`.\n\n## Side Effects\n\n\
   Writes a remote ownCloud file.\n\n---\nname: registry.install\ndescription: Install\
   \ GitHub-hosted registry skill folders into the OpenART tool store as guide-only\
-  \ tools.\n---\n\nUse this skill when a host-side operator needs to install one or\
-  \ more registry entries from GitHub folder or file URLs into the OpenART tool store.\n\
-  \nThis helper accepts registry ids, resolves each row's GitHub URL, downloads the\
-  \ selected folder or file through the GitHub REST API, validates the result offline,\
-  \ and installs it as `openart-tools/<virtual_tool_name>/`.\n\nIt does not execute\
-  \ downloaded scripts, does not create a runtime wrapper, and does not synthesize\
-  \ `tool.yaml`. If an upstream top-level `tool.yaml` exists, it is preserved as `references/original_tool.yaml`.\n\
+  \ or wrapper-backed script tools.\n---\n\nUse this skill when a host-side operator\
+  \ needs to install one or more registry entries from GitHub folder or file URLs\
+  \ into the OpenART tool store.\n\nThis helper accepts registry ids, resolves each\
+  \ row's GitHub URL, downloads the selected folder or file through the GitHub REST\
+  \ API, validates the result offline, and installs it as `openart-tools/<virtual_tool_name>/`.\n\
+  \nIf the upstream skill contains `scripts/`, it writes a generated `scripts/openart_skill_runner.py`\
+  \ wrapper plus a local OpenART `tool.yaml`; the upstream `tool.yaml` is preserved\
+  \ as `references/original_tool.yaml` and is not trusted. If the upstream skill has\
+  \ no `scripts/`, only normalized `SKILL.md` and preserved references are installed.\n\
   \nExample:\n\n```bash\npython3 openart-tools/registry.install/scripts/registry_install.py\
   \ \\\n  --index openart-tools/.registry/openart_tool_registry.sqlite \\\n  --ids\
   \ ids.txt \\\n  --tool-store openart-tools\n```\n\n---\nname: registry.run_tool\n\
@@ -1346,8 +2519,30 @@ tool_guide_markdown: "# document.extract_pairs_csv\n\nExtract simple label-numbe
   \ threads into deterministic action items, decisions, and unresolved questions.\n\
   ---\nUse this skill when a task needs a deterministic summary of an email thread.\n\
   \nPass the email thread file path and an output markdown path.\nThe output contains\
-  \ action items, decisions, and open questions.\n\n---\nname: tool.spreadsheet_joiner.demo001\n\
+  \ action items, decisions, and open questions.\n\n---\nname: tool.paper_summarizer.d6d77c72c7ac38bd\n\
+  description: Summarize academic papers with strict evidence isolation. Use when\
+  \ user\n  mentions papers, PDFs, arXiv, research papers, literature review, or cross-paper\n\
+  \  analysis.\n---\nUse this skill when a task needs the registry-backed capability\
+  \ `paper-summarizer`.\n\nThis is a guide-only tool materialized from the local OpenART\
+  \ registry. Inspect the registry metadata and apply the described workflow directly\
+  \ in the task context.\n\n- Registry name: paper-summarizer\n- Category: Research\n\
+  - Tags: research\n\n## Description\nSummarize academic papers with strict evidence\
+  \ isolation. Use when user mentions papers, PDFs, arXiv, research papers, literature\
+  \ review, or cross-paper analysis.\n\n---\nname: tool.spreadsheet_joiner.demo001\n\
   description: Join two CSV or spreadsheet-like tables by a shared key.\n---\nUse\
   \ this skill when a task needs deterministic CSV joins by a shared key.\n\nPass:\n\
   `left_csv` and `right_csv` paths, the common `key`, and `output_csv` path.\n\nThe\
-  \ tool preserves the left row order and merges matching rows from the right table."
+  \ tool preserves the left row order and merges matching rows from the right table.\n\
+  \n---\nname: tool.web_scraper.b671aaa5c4811cfa\ndescription: Web data extraction\
+  \ \u2014 structured scraping, search, PDF download via curl\n  and Python. Use when\
+  \ extracting structured data from web pages, downloading files,\n  scraping HTML,\
+  \ parsing tables/links, performing web searches without API keys, or\n  extracting\
+  \ text from PDFs. For JS-rendered pages, use playwright instead.\n---\nUse this\
+  \ skill when a task needs the registry-backed capability `web-scraper`.\n\nThis\
+  \ is a guide-only tool materialized from the local OpenART registry. Inspect the\
+  \ registry metadata and apply the described workflow directly in the task context.\n\
+  \n- Registry name: web-scraper\n- Category: Research\n- Tags: research\n\n## Description\n\
+  Web data extraction \u2014 structured scraping, search, PDF download via curl and\
+  \ Python. Use when extracting structured data from web pages, downloading files,\
+  \ scraping HTML, parsing tables/links, performing web searches without API keys,\
+  \ or extracting text from PDFs. For JS-rendered pages, use playwright instead."

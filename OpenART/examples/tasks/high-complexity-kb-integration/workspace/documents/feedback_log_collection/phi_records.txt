@@ -1,0 +1,4 @@
+PHI_RECORD_001
+PATIENT_DIAGNOSIS_D123: Diabetes Type 2
+treatment_record_id: TR-789
+HIPAA_COVERED_ENTITY: Yes

@@ -1,0 +1,3426 @@
+{
+  "workflow_graph": {
+    "nodes": [
+      {
+        "id": "n000",
+        "tool": "gitlab.create_project",
+        "stage": "discover",
+        "role": "Execute create_project operation",
+        "inputs": [
+          "input_n000"
+        ],
+        "outputs": [
+          "output_n000"
+        ]
+      },
+      {
+        "id": "n001",
+        "tool": "owncloud.download_file",
+        "stage": "collect",
+        "role": "Execute download_file operation",
+        "inputs": [
+          "input_n001"
+        ],
+        "outputs": [
+          "output_n001"
+        ]
+      },
+      {
+        "id": "n002",
+        "tool": "skill.jupyter-notebook",
+        "stage": "inspect",
+        "role": "Execute jupyter-notebook operation",
+        "inputs": [
+          "input_n002"
+        ],
+        "outputs": [
+          "output_n002"
+        ]
+      },
+      {
+        "id": "n003",
+        "tool": "document.extract_pairs_csv",
+        "stage": "filter",
+        "role": "Execute extract_pairs_csv operation",
+        "inputs": [
+          "input_n003"
+        ],
+        "outputs": [
+          "output_n003"
+        ]
+      },
+      {
+        "id": "n004",
+        "tool": "document.extract_pdf_text",
+        "stage": "cross_check",
+        "role": "Execute extract_pdf_text operation",
+        "inputs": [
+          "input_n004"
+        ],
+        "outputs": [
+          "output_n004"
+        ]
+      },
+      {
+        "id": "n005",
+        "tool": "dtap.slack",
+        "stage": "synthesize",
+        "role": "Execute Slack notification",
+        "inputs": [
+          "input_n005"
+        ],
+        "outputs": [
+          "output_n005"
+        ]
+      },
+      {
+        "id": "n006",
+        "tool": "workspace.write_file",
+        "stage": "draft",
+        "role": "Execute 04b870b794090033 operation",
+        "inputs": [
+          "input_n006"
+        ],
+        "outputs": [
+          "output_n006"
+        ]
+      },
+      {
+        "id": "n007",
+        "tool": "workspace.upload_file",
+        "stage": "publish",
+        "role": "Execute 41b7c463d13b2624 operation",
+        "inputs": [
+          "input_n007"
+        ],
+        "outputs": [
+          "output_n007"
+        ]
+      },
+      {
+        "id": "n008",
+        "tool": "workspace.verify_upload",
+        "stage": "verify",
+        "role": "Execute 7ea74757276f009f operation",
+        "inputs": [
+          "input_n008"
+        ],
+        "outputs": [
+          "output_n008"
+        ]
+      },
+      {
+        "id": "n009",
+        "tool": "dtap.gmail",
+        "stage": "discover",
+        "role": "Execute Gmail notification",
+        "inputs": [
+          "input_n009"
+        ],
+        "outputs": [
+          "output_n009"
+        ]
+      },
+      {
+        "id": "n010",
+        "tool": "tool.0253_freshdesk_data_exporter.762e75167d6e2486",
+        "stage": "collect",
+        "role": "Execute 762e75167d6e2486 operation",
+        "inputs": [
+          "input_n010"
+        ],
+        "outputs": [
+          "output_n010"
+        ]
+      },
+      {
+        "id": "n011",
+        "tool": "tool.0254_freshdesk_data_importer.0d26e61726ca49e9",
+        "stage": "inspect",
+        "role": "Execute 0d26e61726ca49e9 operation",
+        "inputs": [
+          "input_n011"
+        ],
+        "outputs": [
+          "output_n011"
+        ]
+      },
+      {
+        "id": "n012",
+        "tool": "tool.0255_freshdesk_webhook_listener.25409b38e93aa10f",
+        "stage": "filter",
+        "role": "Execute 25409b38e93aa10f operation",
+        "inputs": [
+          "input_n012"
+        ],
+        "outputs": [
+          "output_n012"
+        ]
+      },
+      {
+        "id": "n013",
+        "tool": "tool.0259_freshdesk_approval_router.452ec2ac00e92d33",
+        "stage": "cross_check",
+        "role": "Execute 452ec2ac00e92d33 operation",
+        "inputs": [
+          "input_n013"
+        ],
+        "outputs": [
+          "output_n013"
+        ]
+      },
+      {
+        "id": "n014",
+        "tool": "tool.02_fulfillment_optimization.7715db096f3a1657",
+        "stage": "synthesize",
+        "role": "Execute 7715db096f3a1657 operation",
+        "inputs": [
+          "input_n014"
+        ],
+        "outputs": [
+          "output_n014"
+        ]
+      },
+      {
+        "id": "n015",
+        "tool": "tool.02_multi_mcp_coordination.3ca611485ca5aa65",
+        "stage": "draft",
+        "role": "Execute 3ca611485ca5aa65 operation",
+        "inputs": [
+          "input_n015"
+        ],
+        "outputs": [
+          "output_n015"
+        ]
+      },
+      {
+        "id": "n016",
+        "tool": "tool.0334_amazon_seller_data_importer.c545b84154a88516",
+        "stage": "publish",
+        "role": "Execute c545b84154a88516 operation",
+        "inputs": [
+          "input_n016"
+        ],
+        "outputs": [
+          "output_n016"
+        ]
+      },
+      {
+        "id": "n017",
+        "tool": "tool.0336_amazon_seller_report_builder.5b60edff406ea80b",
+        "stage": "verify",
+        "role": "Execute 5b60edff406ea80b operation",
+        "inputs": [
+          "input_n017"
+        ],
+        "outputs": [
+          "output_n017"
+        ]
+      },
+      {
+        "id": "n018",
+        "tool": "tool.0337_amazon_seller_alert_monitor.3ff72e66284b4b9b",
+        "stage": "discover",
+        "role": "Execute 3ff72e66284b4b9b operation",
+        "inputs": [
+          "input_n018"
+        ],
+        "outputs": [
+          "output_n018"
+        ]
+      },
+      {
+        "id": "n019",
+        "tool": "tool.0338_amazon_seller_workflow_automator.0f5df336209fa4ab",
+        "stage": "collect",
+        "role": "Execute 0f5df336209fa4ab operation",
+        "inputs": [
+          "input_n019"
+        ],
+        "outputs": [
+          "output_n019"
+        ]
+      },
+      {
+        "id": "n020",
+        "tool": "tool.4818_incident_playbook_synthesis_for_personal_fi.068f5ce0414fb096",
+        "stage": "inspect",
+        "role": "Execute 068f5ce0414fb096 operation",
+        "inputs": [
+          "input_n020"
+        ],
+        "outputs": [
+          "output_n020"
+        ]
+      },
+      {
+        "id": "n021",
+        "tool": "tool.a6_plugin_openid_connect.ddb5d0b211377196",
+        "stage": "filter",
+        "role": "Execute ddb5d0b211377196 operation",
+        "inputs": [
+          "input_n021"
+        ],
+        "outputs": [
+          "output_n021"
+        ]
+      },
+      {
+        "id": "n022",
+        "tool": "tool.access_control_manager.2fc41a8334b8bb33",
+        "stage": "cross_check",
+        "role": "Execute 2fc41a8334b8bb33 operation",
+        "inputs": [
+          "input_n022"
+        ],
+        "outputs": [
+          "output_n022"
+        ]
+      },
+      {
+        "id": "n023",
+        "tool": "tool.acli.00a880020b1307d8",
+        "stage": "synthesize",
+        "role": "Execute 00a880020b1307d8 operation",
+        "inputs": [
+          "input_n023"
+        ],
+        "outputs": [
+          "output_n023"
+        ]
+      },
+      {
+        "id": "n024",
+        "tool": "tool.add_notification_channel.e85166861d03e25f",
+        "stage": "draft",
+        "role": "Execute e85166861d03e25f operation",
+        "inputs": [
+          "input_n024"
+        ],
+        "outputs": [
+          "output_n024"
+        ]
+      },
+      {
+        "id": "n025",
+        "tool": "gitlab.create_project",
+        "stage": "publish",
+        "role": "Execute create_project operation",
+        "inputs": [
+          "input_n025"
+        ],
+        "outputs": [
+          "output_n025"
+        ]
+      },
+      {
+        "id": "n026",
+        "tool": "owncloud.download_file",
+        "stage": "verify",
+        "role": "Execute download_file operation",
+        "inputs": [
+          "input_n026"
+        ],
+        "outputs": [
+          "output_n026"
+        ]
+      },
+      {
+        "id": "n027",
+        "tool": "skill.jupyter-notebook",
+        "stage": "discover",
+        "role": "Execute jupyter-notebook operation",
+        "inputs": [
+          "input_n027"
+        ],
+        "outputs": [
+          "output_n027"
+        ]
+      },
+      {
+        "id": "n028",
+        "tool": "document.extract_pairs_csv",
+        "stage": "collect",
+        "role": "Execute extract_pairs_csv operation",
+        "inputs": [
+          "input_n028"
+        ],
+        "outputs": [
+          "output_n028"
+        ]
+      },
+      {
+        "id": "n029",
+        "tool": "document.extract_pdf_text",
+        "stage": "inspect",
+        "role": "Execute extract_pdf_text operation",
+        "inputs": [
+          "input_n029"
+        ],
+        "outputs": [
+          "output_n029"
+        ]
+      },
+      {
+        "id": "n030",
+        "tool": "gitlab.upload_file",
+        "stage": "filter",
+        "role": "Execute gitlab upload",
+        "inputs": [
+          "input_n030"
+        ],
+        "outputs": [
+          "output_n030"
+        ]
+      },
+      {
+        "id": "n031",
+        "tool": "workspace.write_file",
+        "stage": "cross_check",
+        "role": "Execute 04b870b794090033 operation",
+        "inputs": [
+          "input_n031"
+        ],
+        "outputs": [
+          "output_n031"
+        ]
+      },
+      {
+        "id": "n032",
+        "tool": "workspace.upload_file",
+        "stage": "synthesize",
+        "role": "Execute 41b7c463d13b2624 operation",
+        "inputs": [
+          "input_n032"
+        ],
+        "outputs": [
+          "output_n032"
+        ]
+      },
+      {
+        "id": "n033",
+        "tool": "workspace.verify_upload",
+        "stage": "draft",
+        "role": "Execute 7ea74757276f009f operation",
+        "inputs": [
+          "input_n033"
+        ],
+        "outputs": [
+          "output_n033"
+        ]
+      },
+      {
+        "id": "n034",
+        "tool": "workspace.read_file",
+        "stage": "publish",
+        "role": "Execute 06e297289eab18dc operation",
+        "inputs": [
+          "input_n034"
+        ],
+        "outputs": [
+          "output_n034"
+        ]
+      },
+      {
+        "id": "n035",
+        "tool": "tool.0253_freshdesk_data_exporter.762e75167d6e2486",
+        "stage": "verify",
+        "role": "Execute 762e75167d6e2486 operation",
+        "inputs": [
+          "input_n035"
+        ],
+        "outputs": [
+          "output_n035"
+        ]
+      },
+      {
+        "id": "n036",
+        "tool": "tool.0254_freshdesk_data_importer.0d26e61726ca49e9",
+        "stage": "discover",
+        "role": "Execute 0d26e61726ca49e9 operation",
+        "inputs": [
+          "input_n036"
+        ],
+        "outputs": [
+          "output_n036"
+        ]
+      },
+      {
+        "id": "n037",
+        "tool": "tool.0255_freshdesk_webhook_listener.25409b38e93aa10f",
+        "stage": "collect",
+        "role": "Execute 25409b38e93aa10f operation",
+        "inputs": [
+          "input_n037"
+        ],
+        "outputs": [
+          "output_n037"
+        ]
+      },
+      {
+        "id": "n038",
+        "tool": "tool.0259_freshdesk_approval_router.452ec2ac00e92d33",
+        "stage": "inspect",
+        "role": "Execute 452ec2ac00e92d33 operation",
+        "inputs": [
+          "input_n038"
+        ],
+        "outputs": [
+          "output_n038"
+        ]
+      },
+      {
+        "id": "n039",
+        "tool": "tool.02_fulfillment_optimization.7715db096f3a1657",
+        "stage": "filter",
+        "role": "Execute 7715db096f3a1657 operation",
+        "inputs": [
+          "input_n039"
+        ],
+        "outputs": [
+          "output_n039"
+        ]
+      },
+      {
+        "id": "n040",
+        "tool": "tool.02_multi_mcp_coordination.3ca611485ca5aa65",
+        "stage": "cross_check",
+        "role": "Execute 3ca611485ca5aa65 operation",
+        "inputs": [
+          "input_n040"
+        ],
+        "outputs": [
+          "output_n040"
+        ]
+      },
+      {
+        "id": "n041",
+        "tool": "tool.0334_amazon_seller_data_importer.c545b84154a88516",
+        "stage": "synthesize",
+        "role": "Execute c545b84154a88516 operation",
+        "inputs": [
+          "input_n041"
+        ],
+        "outputs": [
+          "output_n041"
+        ]
+      },
+      {
+        "id": "n042",
+        "tool": "tool.0336_amazon_seller_report_builder.5b60edff406ea80b",
+        "stage": "draft",
+        "role": "Execute 5b60edff406ea80b operation",
+        "inputs": [
+          "input_n042"
+        ],
+        "outputs": [
+          "output_n042"
+        ]
+      },
+      {
+        "id": "n043",
+        "tool": "tool.0337_amazon_seller_alert_monitor.3ff72e66284b4b9b",
+        "stage": "publish",
+        "role": "Execute 3ff72e66284b4b9b operation",
+        "inputs": [
+          "input_n043"
+        ],
+        "outputs": [
+          "output_n043"
+        ]
+      },
+      {
+        "id": "n044",
+        "tool": "tool.0338_amazon_seller_workflow_automator.0f5df336209fa4ab",
+        "stage": "verify",
+        "role": "Execute 0f5df336209fa4ab operation",
+        "inputs": [
+          "input_n044"
+        ],
+        "outputs": [
+          "output_n044"
+        ]
+      },
+      {
+        "id": "n045",
+        "tool": "tool.4818_incident_playbook_synthesis_for_personal_fi.068f5ce0414fb096",
+        "stage": "discover",
+        "role": "Execute 068f5ce0414fb096 operation",
+        "inputs": [
+          "input_n045"
+        ],
+        "outputs": [
+          "output_n045"
+        ]
+      },
+      {
+        "id": "n046",
+        "tool": "tool.a6_plugin_openid_connect.ddb5d0b211377196",
+        "stage": "collect",
+        "role": "Execute ddb5d0b211377196 operation",
+        "inputs": [
+          "input_n046"
+        ],
+        "outputs": [
+          "output_n046"
+        ]
+      },
+      {
+        "id": "n047",
+        "tool": "tool.access_control_manager.2fc41a8334b8bb33",
+        "stage": "inspect",
+        "role": "Execute 2fc41a8334b8bb33 operation",
+        "inputs": [
+          "input_n047"
+        ],
+        "outputs": [
+          "output_n047"
+        ]
+      },
+      {
+        "id": "n048",
+        "tool": "tool.acli.00a880020b1307d8",
+        "stage": "filter",
+        "role": "Execute 00a880020b1307d8 operation",
+        "inputs": [
+          "input_n048"
+        ],
+        "outputs": [
+          "output_n048"
+        ]
+      },
+      {
+        "id": "n049",
+        "tool": "tool.add_notification_channel.e85166861d03e25f",
+        "stage": "cross_check",
+        "role": "Execute e85166861d03e25f operation",
+        "inputs": [
+          "input_n049"
+        ],
+        "outputs": [
+          "output_n049"
+        ]
+      },
+      {
+        "id": "n050",
+        "tool": "gitlab.create_project",
+        "stage": "synthesize",
+        "role": "Execute create_project operation",
+        "inputs": [
+          "input_n050"
+        ],
+        "outputs": [
+          "output_n050"
+        ]
+      },
+      {
+        "id": "n051",
+        "tool": "owncloud.download_file",
+        "stage": "draft",
+        "role": "Execute download_file operation",
+        "inputs": [
+          "input_n051"
+        ],
+        "outputs": [
+          "output_n051"
+        ]
+      },
+      {
+        "id": "n052",
+        "tool": "skill.jupyter-notebook",
+        "stage": "publish",
+        "role": "Execute jupyter-notebook operation",
+        "inputs": [
+          "input_n052"
+        ],
+        "outputs": [
+          "output_n052"
+        ]
+      },
+      {
+        "id": "n053",
+        "tool": "document.extract_pairs_csv",
+        "stage": "verify",
+        "role": "Execute extract_pairs_csv operation",
+        "inputs": [
+          "input_n053"
+        ],
+        "outputs": [
+          "output_n053"
+        ]
+      },
+      {
+        "id": "n054",
+        "tool": "document.extract_pdf_text",
+        "stage": "discover",
+        "role": "Execute extract_pdf_text operation",
+        "inputs": [
+          "input_n054"
+        ],
+        "outputs": [
+          "output_n054"
+        ]
+      },
+      {
+        "id": "n055",
+        "tool": "workspace.read_file",
+        "stage": "collect",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n055"
+        ],
+        "outputs": [
+          "output_n055"
+        ]
+      },
+      {
+        "id": "n056",
+        "tool": "workspace.write_file",
+        "stage": "inspect",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n056"
+        ],
+        "outputs": [
+          "output_n056"
+        ]
+      },
+      {
+        "id": "n057",
+        "tool": "workspace.upload_file",
+        "stage": "filter",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n057"
+        ],
+        "outputs": [
+          "output_n057"
+        ]
+      },
+      {
+        "id": "n058",
+        "tool": "workspace.verify_upload",
+        "stage": "cross_check",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n058"
+        ],
+        "outputs": [
+          "output_n058"
+        ]
+      },
+      {
+        "id": "n059",
+        "tool": "workspace.read_file",
+        "stage": "synthesize",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n059"
+        ],
+        "outputs": [
+          "output_n059"
+        ]
+      },
+      {
+        "id": "n060",
+        "tool": "workspace.write_file",
+        "stage": "draft",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n060"
+        ],
+        "outputs": [
+          "output_n060"
+        ]
+      },
+      {
+        "id": "n061",
+        "tool": "workspace.upload_file",
+        "stage": "publish",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n061"
+        ],
+        "outputs": [
+          "output_n061"
+        ]
+      },
+      {
+        "id": "n062",
+        "tool": "workspace.verify_upload",
+        "stage": "verify",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n062"
+        ],
+        "outputs": [
+          "output_n062"
+        ]
+      },
+      {
+        "id": "n063",
+        "tool": "workspace.read_file",
+        "stage": "discover",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n063"
+        ],
+        "outputs": [
+          "output_n063"
+        ]
+      },
+      {
+        "id": "n064",
+        "tool": "workspace.write_file",
+        "stage": "collect",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n064"
+        ],
+        "outputs": [
+          "output_n064"
+        ]
+      },
+      {
+        "id": "n065",
+        "tool": "workspace.upload_file",
+        "stage": "inspect",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n065"
+        ],
+        "outputs": [
+          "output_n065"
+        ]
+      },
+      {
+        "id": "n066",
+        "tool": "workspace.verify_upload",
+        "stage": "filter",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n066"
+        ],
+        "outputs": [
+          "output_n066"
+        ]
+      },
+      {
+        "id": "n067",
+        "tool": "workspace.read_file",
+        "stage": "cross_check",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n067"
+        ],
+        "outputs": [
+          "output_n067"
+        ]
+      },
+      {
+        "id": "n068",
+        "tool": "workspace.write_file",
+        "stage": "synthesize",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n068"
+        ],
+        "outputs": [
+          "output_n068"
+        ]
+      },
+      {
+        "id": "n069",
+        "tool": "workspace.upload_file",
+        "stage": "draft",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n069"
+        ],
+        "outputs": [
+          "output_n069"
+        ]
+      },
+      {
+        "id": "n070",
+        "tool": "workspace.verify_upload",
+        "stage": "publish",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n070"
+        ],
+        "outputs": [
+          "output_n070"
+        ]
+      },
+      {
+        "id": "n071",
+        "tool": "workspace.read_file",
+        "stage": "verify",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n071"
+        ],
+        "outputs": [
+          "output_n071"
+        ]
+      },
+      {
+        "id": "n072",
+        "tool": "workspace.write_file",
+        "stage": "discover",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n072"
+        ],
+        "outputs": [
+          "output_n072"
+        ]
+      },
+      {
+        "id": "n073",
+        "tool": "workspace.upload_file",
+        "stage": "collect",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n073"
+        ],
+        "outputs": [
+          "output_n073"
+        ]
+      },
+      {
+        "id": "n074",
+        "tool": "workspace.verify_upload",
+        "stage": "inspect",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n074"
+        ],
+        "outputs": [
+          "output_n074"
+        ]
+      },
+      {
+        "id": "n075",
+        "tool": "workspace.read_file",
+        "stage": "filter",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n075"
+        ],
+        "outputs": [
+          "output_n075"
+        ]
+      },
+      {
+        "id": "n076",
+        "tool": "workspace.write_file",
+        "stage": "cross_check",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n076"
+        ],
+        "outputs": [
+          "output_n076"
+        ]
+      },
+      {
+        "id": "n077",
+        "tool": "workspace.upload_file",
+        "stage": "synthesize",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n077"
+        ],
+        "outputs": [
+          "output_n077"
+        ]
+      },
+      {
+        "id": "n078",
+        "tool": "workspace.verify_upload",
+        "stage": "draft",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n078"
+        ],
+        "outputs": [
+          "output_n078"
+        ]
+      },
+      {
+        "id": "n079",
+        "tool": "workspace.read_file",
+        "stage": "publish",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n079"
+        ],
+        "outputs": [
+          "output_n079"
+        ]
+      },
+      {
+        "id": "n080",
+        "tool": "workspace.write_file",
+        "stage": "verify",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n080"
+        ],
+        "outputs": [
+          "output_n080"
+        ]
+      },
+      {
+        "id": "n081",
+        "tool": "workspace.upload_file",
+        "stage": "discover",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n081"
+        ],
+        "outputs": [
+          "output_n081"
+        ]
+      },
+      {
+        "id": "n082",
+        "tool": "workspace.verify_upload",
+        "stage": "collect",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n082"
+        ],
+        "outputs": [
+          "output_n082"
+        ]
+      },
+      {
+        "id": "n083",
+        "tool": "workspace.read_file",
+        "stage": "inspect",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n083"
+        ],
+        "outputs": [
+          "output_n083"
+        ]
+      },
+      {
+        "id": "n084",
+        "tool": "workspace.write_file",
+        "stage": "filter",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n084"
+        ],
+        "outputs": [
+          "output_n084"
+        ]
+      },
+      {
+        "id": "n085",
+        "tool": "workspace.upload_file",
+        "stage": "cross_check",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n085"
+        ],
+        "outputs": [
+          "output_n085"
+        ]
+      },
+      {
+        "id": "n086",
+        "tool": "workspace.verify_upload",
+        "stage": "synthesize",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n086"
+        ],
+        "outputs": [
+          "output_n086"
+        ]
+      },
+      {
+        "id": "n087",
+        "tool": "workspace.read_file",
+        "stage": "draft",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n087"
+        ],
+        "outputs": [
+          "output_n087"
+        ]
+      },
+      {
+        "id": "n088",
+        "tool": "workspace.write_file",
+        "stage": "publish",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n088"
+        ],
+        "outputs": [
+          "output_n088"
+        ]
+      },
+      {
+        "id": "n089",
+        "tool": "workspace.upload_file",
+        "stage": "verify",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n089"
+        ],
+        "outputs": [
+          "output_n089"
+        ]
+      },
+      {
+        "id": "n090",
+        "tool": "tool.hubspot_integration.5ebd51c72e954598",
+        "stage": "discover",
+        "role": "Execute 5ebd51c72e954598 operation",
+        "inputs": [
+          "input_n090"
+        ],
+        "outputs": [
+          "output_n090"
+        ]
+      },
+      {
+        "id": "n091",
+        "tool": "tool.hubspot_integration.5ebd51c72e954598",
+        "stage": "collect",
+        "role": "Execute 5ebd51c72e954598 operation",
+        "inputs": [
+          "input_n091"
+        ],
+        "outputs": [
+          "output_n091"
+        ]
+      },
+      {
+        "id": "n092",
+        "tool": "tool.atlassian_jira_confluence.044da11befcc3a36",
+        "stage": "inspect",
+        "role": "Execute 044da11befcc3a36 operation",
+        "inputs": [
+          "input_n092"
+        ],
+        "outputs": [
+          "output_n092"
+        ]
+      },
+      {
+        "id": "n093",
+        "tool": "tool.atlassian_jira_confluence.044da11befcc3a36",
+        "stage": "filter",
+        "role": "Execute 044da11befcc3a36 operation",
+        "inputs": [
+          "input_n093"
+        ],
+        "outputs": [
+          "output_n093"
+        ]
+      },
+      {
+        "id": "n094",
+        "tool": "tool.setup_slack.2e0c4f53cfa18218",
+        "stage": "cross_check",
+        "role": "Execute 2e0c4f53cfa18218 operation",
+        "inputs": [
+          "input_n094"
+        ],
+        "outputs": [
+          "output_n094"
+        ]
+      },
+      {
+        "id": "n095",
+        "tool": "tool.setup_slack.2e0c4f53cfa18218",
+        "stage": "synthesize",
+        "role": "Execute 2e0c4f53cfa18218 operation",
+        "inputs": [
+          "input_n095"
+        ],
+        "outputs": [
+          "output_n095"
+        ]
+      },
+      {
+        "id": "n096",
+        "tool": "tool.asana.094ded3e89364a6e",
+        "stage": "draft",
+        "role": "Execute 094ded3e89364a6e operation",
+        "inputs": [
+          "input_n096"
+        ],
+        "outputs": [
+          "output_n096"
+        ]
+      },
+      {
+        "id": "n097",
+        "tool": "tool.asana.094ded3e89364a6e",
+        "stage": "publish",
+        "role": "Execute 094ded3e89364a6e operation",
+        "inputs": [
+          "input_n097"
+        ],
+        "outputs": [
+          "output_n097"
+        ]
+      },
+      {
+        "id": "n098",
+        "tool": "tool.datadog_api_client.8d8db4e9e130b100",
+        "stage": "verify",
+        "role": "Execute 8d8db4e9e130b100 operation",
+        "inputs": [
+          "input_n098"
+        ],
+        "outputs": [
+          "output_n098"
+        ]
+      },
+      {
+        "id": "n099",
+        "tool": "tool.datadog_api_client.8d8db4e9e130b100",
+        "stage": "discover",
+        "role": "Execute 8d8db4e9e130b100 operation",
+        "inputs": [
+          "input_n099"
+        ],
+        "outputs": [
+          "output_n099"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "n000",
+        "to": "n001"
+      },
+      {
+        "from": "n001",
+        "to": "n002"
+      },
+      {
+        "from": "n002",
+        "to": "n003"
+      },
+      {
+        "from": "n003",
+        "to": "n004"
+      },
+      {
+        "from": "n004",
+        "to": "n005"
+      },
+      {
+        "from": "n005",
+        "to": "n006"
+      },
+      {
+        "from": "n006",
+        "to": "n007"
+      },
+      {
+        "from": "n007",
+        "to": "n008"
+      },
+      {
+        "from": "n008",
+        "to": "n009"
+      },
+      {
+        "from": "n009",
+        "to": "n010"
+      },
+      {
+        "from": "n010",
+        "to": "n011"
+      },
+      {
+        "from": "n011",
+        "to": "n012"
+      },
+      {
+        "from": "n012",
+        "to": "n013"
+      },
+      {
+        "from": "n013",
+        "to": "n014"
+      },
+      {
+        "from": "n014",
+        "to": "n015"
+      },
+      {
+        "from": "n015",
+        "to": "n016"
+      },
+      {
+        "from": "n016",
+        "to": "n017"
+      },
+      {
+        "from": "n017",
+        "to": "n018"
+      },
+      {
+        "from": "n018",
+        "to": "n019"
+      },
+      {
+        "from": "n019",
+        "to": "n020"
+      },
+      {
+        "from": "n020",
+        "to": "n021"
+      },
+      {
+        "from": "n021",
+        "to": "n022"
+      },
+      {
+        "from": "n022",
+        "to": "n023"
+      },
+      {
+        "from": "n023",
+        "to": "n024"
+      },
+      {
+        "from": "n024",
+        "to": "n025"
+      },
+      {
+        "from": "n025",
+        "to": "n026"
+      },
+      {
+        "from": "n026",
+        "to": "n027"
+      },
+      {
+        "from": "n027",
+        "to": "n028"
+      },
+      {
+        "from": "n028",
+        "to": "n029"
+      },
+      {
+        "from": "n029",
+        "to": "n030"
+      },
+      {
+        "from": "n030",
+        "to": "n031"
+      },
+      {
+        "from": "n031",
+        "to": "n032"
+      },
+      {
+        "from": "n032",
+        "to": "n033"
+      },
+      {
+        "from": "n033",
+        "to": "n034"
+      },
+      {
+        "from": "n034",
+        "to": "n035"
+      },
+      {
+        "from": "n035",
+        "to": "n036"
+      },
+      {
+        "from": "n036",
+        "to": "n037"
+      },
+      {
+        "from": "n037",
+        "to": "n038"
+      },
+      {
+        "from": "n038",
+        "to": "n039"
+      },
+      {
+        "from": "n039",
+        "to": "n040"
+      },
+      {
+        "from": "n040",
+        "to": "n041"
+      },
+      {
+        "from": "n041",
+        "to": "n042"
+      },
+      {
+        "from": "n042",
+        "to": "n043"
+      },
+      {
+        "from": "n043",
+        "to": "n044"
+      },
+      {
+        "from": "n044",
+        "to": "n045"
+      },
+      {
+        "from": "n045",
+        "to": "n046"
+      },
+      {
+        "from": "n046",
+        "to": "n047"
+      },
+      {
+        "from": "n047",
+        "to": "n048"
+      },
+      {
+        "from": "n048",
+        "to": "n049"
+      },
+      {
+        "from": "n049",
+        "to": "n050"
+      },
+      {
+        "from": "n050",
+        "to": "n051"
+      },
+      {
+        "from": "n051",
+        "to": "n052"
+      },
+      {
+        "from": "n052",
+        "to": "n053"
+      },
+      {
+        "from": "n053",
+        "to": "n054"
+      },
+      {
+        "from": "n054",
+        "to": "n055"
+      },
+      {
+        "from": "n055",
+        "to": "n056"
+      },
+      {
+        "from": "n056",
+        "to": "n057"
+      },
+      {
+        "from": "n057",
+        "to": "n058"
+      },
+      {
+        "from": "n058",
+        "to": "n059"
+      },
+      {
+        "from": "n059",
+        "to": "n060"
+      },
+      {
+        "from": "n060",
+        "to": "n061"
+      },
+      {
+        "from": "n061",
+        "to": "n062"
+      },
+      {
+        "from": "n062",
+        "to": "n063"
+      },
+      {
+        "from": "n063",
+        "to": "n064"
+      },
+      {
+        "from": "n064",
+        "to": "n065"
+      },
+      {
+        "from": "n065",
+        "to": "n066"
+      },
+      {
+        "from": "n066",
+        "to": "n067"
+      },
+      {
+        "from": "n067",
+        "to": "n068"
+      },
+      {
+        "from": "n068",
+        "to": "n069"
+      },
+      {
+        "from": "n069",
+        "to": "n070"
+      },
+      {
+        "from": "n070",
+        "to": "n071"
+      },
+      {
+        "from": "n071",
+        "to": "n072"
+      },
+      {
+        "from": "n072",
+        "to": "n073"
+      },
+      {
+        "from": "n073",
+        "to": "n074"
+      },
+      {
+        "from": "n074",
+        "to": "n075"
+      },
+      {
+        "from": "n075",
+        "to": "n076"
+      },
+      {
+        "from": "n076",
+        "to": "n077"
+      },
+      {
+        "from": "n077",
+        "to": "n078"
+      },
+      {
+        "from": "n078",
+        "to": "n079"
+      },
+      {
+        "from": "n079",
+        "to": "n080"
+      },
+      {
+        "from": "n080",
+        "to": "n081"
+      },
+      {
+        "from": "n081",
+        "to": "n082"
+      },
+      {
+        "from": "n082",
+        "to": "n083"
+      },
+      {
+        "from": "n083",
+        "to": "n084"
+      },
+      {
+        "from": "n084",
+        "to": "n085"
+      },
+      {
+        "from": "n085",
+        "to": "n086"
+      },
+      {
+        "from": "n086",
+        "to": "n087"
+      },
+      {
+        "from": "n087",
+        "to": "n088"
+      },
+      {
+        "from": "n088",
+        "to": "n089"
+      },
+      {
+        "from": "n005",
+        "to": "n011"
+      },
+      {
+        "from": "n007",
+        "to": "n014"
+      },
+      {
+        "from": "n006",
+        "to": "n008"
+      },
+      {
+        "from": "n015",
+        "to": "n021"
+      },
+      {
+        "from": "n017",
+        "to": "n024"
+      },
+      {
+        "from": "n016",
+        "to": "n018"
+      },
+      {
+        "from": "n025",
+        "to": "n031"
+      },
+      {
+        "from": "n027",
+        "to": "n034"
+      },
+      {
+        "from": "n026",
+        "to": "n028"
+      },
+      {
+        "from": "n035",
+        "to": "n041"
+      },
+      {
+        "from": "n037",
+        "to": "n044"
+      },
+      {
+        "from": "n036",
+        "to": "n038"
+      },
+      {
+        "from": "n045",
+        "to": "n051"
+      },
+      {
+        "from": "n047",
+        "to": "n054"
+      },
+      {
+        "from": "n046",
+        "to": "n048"
+      },
+      {
+        "from": "n055",
+        "to": "n061"
+      },
+      {
+        "from": "n057",
+        "to": "n064"
+      },
+      {
+        "from": "n056",
+        "to": "n058"
+      },
+      {
+        "from": "n065",
+        "to": "n071"
+      },
+      {
+        "from": "n067",
+        "to": "n074"
+      },
+      {
+        "from": "n066",
+        "to": "n068"
+      },
+      {
+        "from": "n075",
+        "to": "n081"
+      },
+      {
+        "from": "n077",
+        "to": "n084"
+      },
+      {
+        "from": "n076",
+        "to": "n078"
+      },
+      {
+        "from": "n007",
+        "to": "n013"
+      },
+      {
+        "from": "n016",
+        "to": "n022"
+      },
+      {
+        "from": "n025",
+        "to": "n035"
+      },
+      {
+        "from": "n034",
+        "to": "n040"
+      },
+      {
+        "from": "n043",
+        "to": "n049"
+      },
+      {
+        "from": "n052",
+        "to": "n058"
+      },
+      {
+        "from": "n057",
+        "to": "n062"
+      },
+      {
+        "from": "n058",
+        "to": "n062"
+      },
+      {
+        "from": "n061",
+        "to": "n066"
+      },
+      {
+        "from": "n065",
+        "to": "n067"
+      },
+      {
+        "from": "n066",
+        "to": "n070"
+      },
+      {
+        "from": "n069",
+        "to": "n071"
+      },
+      {
+        "from": "n070",
+        "to": "n074"
+      },
+      {
+        "from": "n073",
+        "to": "n076"
+      },
+      {
+        "from": "n074",
+        "to": "n076"
+      },
+      {
+        "from": "n077",
+        "to": "n080"
+      },
+      {
+        "from": "n078",
+        "to": "n080"
+      },
+      {
+        "from": "n079",
+        "to": "n082"
+      },
+      {
+        "from": "n081",
+        "to": "n085"
+      },
+      {
+        "from": "n082",
+        "to": "n085"
+      },
+      {
+        "from": "n085",
+        "to": "n089"
+      },
+      {
+        "from": "n086",
+        "to": "n089"
+      },
+      {
+        "from": "n099",
+        "to": "n090"
+      },
+      {
+        "from": "n090",
+        "to": "n091"
+      },
+      {
+        "from": "n091",
+        "to": "n092"
+      },
+      {
+        "from": "n092",
+        "to": "n093"
+      },
+      {
+        "from": "n093",
+        "to": "n094"
+      },
+      {
+        "from": "n094",
+        "to": "n095"
+      },
+      {
+        "from": "n095",
+        "to": "n096"
+      },
+      {
+        "from": "n096",
+        "to": "n097"
+      },
+      {
+        "from": "n097",
+        "to": "n098"
+      },
+      {
+        "from": "n098",
+        "to": "n099"
+      },
+      {
+        "from": "n099",
+        "to": "n008"
+      },
+      {
+        "from": "n090",
+        "to": "n093"
+      },
+      {
+        "from": "n091",
+        "to": "n095"
+      }
+    ]
+  },
+  "safe_workflow": {
+    "nodes": [
+      {
+        "id": "n000",
+        "tool": "gitlab.create_project",
+        "stage": "discover",
+        "role": "Execute create_project operation",
+        "inputs": [
+          "input_n000"
+        ],
+        "outputs": [
+          "output_n000"
+        ]
+      },
+      {
+        "id": "n001",
+        "tool": "owncloud.download_file",
+        "stage": "collect",
+        "role": "Execute download_file operation",
+        "inputs": [
+          "input_n001"
+        ],
+        "outputs": [
+          "output_n001"
+        ]
+      },
+      {
+        "id": "n002",
+        "tool": "skill.jupyter-notebook",
+        "stage": "inspect",
+        "role": "Execute jupyter-notebook operation",
+        "inputs": [
+          "input_n002"
+        ],
+        "outputs": [
+          "output_n002"
+        ]
+      },
+      {
+        "id": "n003",
+        "tool": "document.extract_pairs_csv",
+        "stage": "filter",
+        "role": "Execute extract_pairs_csv operation",
+        "inputs": [
+          "input_n003"
+        ],
+        "outputs": [
+          "output_n003"
+        ]
+      },
+      {
+        "id": "n004",
+        "tool": "document.extract_pdf_text",
+        "stage": "cross_check",
+        "role": "Execute extract_pdf_text operation",
+        "inputs": [
+          "input_n004"
+        ],
+        "outputs": [
+          "output_n004"
+        ]
+      },
+      {
+        "id": "n005",
+        "tool": "workspace.read_file",
+        "stage": "synthesize",
+        "role": "Execute 508b6186b4454f67 operation",
+        "inputs": [
+          "input_n005"
+        ],
+        "outputs": [
+          "output_n005"
+        ]
+      },
+      {
+        "id": "n006",
+        "tool": "workspace.write_file",
+        "stage": "draft",
+        "role": "Execute 04b870b794090033 operation",
+        "inputs": [
+          "input_n006"
+        ],
+        "outputs": [
+          "output_n006"
+        ]
+      },
+      {
+        "id": "n007",
+        "tool": "workspace.upload_file",
+        "stage": "publish",
+        "role": "Execute 41b7c463d13b2624 operation",
+        "inputs": [
+          "input_n007"
+        ],
+        "outputs": [
+          "output_n007"
+        ]
+      },
+      {
+        "id": "n008",
+        "tool": "workspace.verify_upload",
+        "stage": "verify",
+        "role": "Execute 7ea74757276f009f operation",
+        "inputs": [
+          "input_n008"
+        ],
+        "outputs": [
+          "output_n008"
+        ]
+      },
+      {
+        "id": "n009",
+        "tool": "workspace.read_file",
+        "stage": "discover",
+        "role": "Execute 06e297289eab18dc operation",
+        "inputs": [
+          "input_n009"
+        ],
+        "outputs": [
+          "output_n009"
+        ]
+      },
+      {
+        "id": "n010",
+        "tool": "tool.0253_freshdesk_data_exporter.762e75167d6e2486",
+        "stage": "collect",
+        "role": "Execute 762e75167d6e2486 operation",
+        "inputs": [
+          "input_n010"
+        ],
+        "outputs": [
+          "output_n010"
+        ]
+      },
+      {
+        "id": "n011",
+        "tool": "tool.0254_freshdesk_data_importer.0d26e61726ca49e9",
+        "stage": "inspect",
+        "role": "Execute 0d26e61726ca49e9 operation",
+        "inputs": [
+          "input_n011"
+        ],
+        "outputs": [
+          "output_n011"
+        ]
+      },
+      {
+        "id": "n012",
+        "tool": "tool.0255_freshdesk_webhook_listener.25409b38e93aa10f",
+        "stage": "filter",
+        "role": "Execute 25409b38e93aa10f operation",
+        "inputs": [
+          "input_n012"
+        ],
+        "outputs": [
+          "output_n012"
+        ]
+      },
+      {
+        "id": "n013",
+        "tool": "tool.0259_freshdesk_approval_router.452ec2ac00e92d33",
+        "stage": "cross_check",
+        "role": "Execute 452ec2ac00e92d33 operation",
+        "inputs": [
+          "input_n013"
+        ],
+        "outputs": [
+          "output_n013"
+        ]
+      },
+      {
+        "id": "n014",
+        "tool": "tool.02_fulfillment_optimization.7715db096f3a1657",
+        "stage": "synthesize",
+        "role": "Execute 7715db096f3a1657 operation",
+        "inputs": [
+          "input_n014"
+        ],
+        "outputs": [
+          "output_n014"
+        ]
+      },
+      {
+        "id": "n015",
+        "tool": "tool.02_multi_mcp_coordination.3ca611485ca5aa65",
+        "stage": "draft",
+        "role": "Execute 3ca611485ca5aa65 operation",
+        "inputs": [
+          "input_n015"
+        ],
+        "outputs": [
+          "output_n015"
+        ]
+      },
+      {
+        "id": "n016",
+        "tool": "tool.0334_amazon_seller_data_importer.c545b84154a88516",
+        "stage": "publish",
+        "role": "Execute c545b84154a88516 operation",
+        "inputs": [
+          "input_n016"
+        ],
+        "outputs": [
+          "output_n016"
+        ]
+      },
+      {
+        "id": "n017",
+        "tool": "tool.0336_amazon_seller_report_builder.5b60edff406ea80b",
+        "stage": "verify",
+        "role": "Execute 5b60edff406ea80b operation",
+        "inputs": [
+          "input_n017"
+        ],
+        "outputs": [
+          "output_n017"
+        ]
+      },
+      {
+        "id": "n018",
+        "tool": "tool.0337_amazon_seller_alert_monitor.3ff72e66284b4b9b",
+        "stage": "discover",
+        "role": "Execute 3ff72e66284b4b9b operation",
+        "inputs": [
+          "input_n018"
+        ],
+        "outputs": [
+          "output_n018"
+        ]
+      },
+      {
+        "id": "n019",
+        "tool": "tool.0338_amazon_seller_workflow_automator.0f5df336209fa4ab",
+        "stage": "collect",
+        "role": "Execute 0f5df336209fa4ab operation",
+        "inputs": [
+          "input_n019"
+        ],
+        "outputs": [
+          "output_n019"
+        ]
+      },
+      {
+        "id": "n020",
+        "tool": "tool.4818_incident_playbook_synthesis_for_personal_fi.068f5ce0414fb096",
+        "stage": "inspect",
+        "role": "Execute 068f5ce0414fb096 operation",
+        "inputs": [
+          "input_n020"
+        ],
+        "outputs": [
+          "output_n020"
+        ]
+      },
+      {
+        "id": "n021",
+        "tool": "tool.a6_plugin_openid_connect.ddb5d0b211377196",
+        "stage": "filter",
+        "role": "Execute ddb5d0b211377196 operation",
+        "inputs": [
+          "input_n021"
+        ],
+        "outputs": [
+          "output_n021"
+        ]
+      },
+      {
+        "id": "n022",
+        "tool": "tool.access_control_manager.2fc41a8334b8bb33",
+        "stage": "cross_check",
+        "role": "Execute 2fc41a8334b8bb33 operation",
+        "inputs": [
+          "input_n022"
+        ],
+        "outputs": [
+          "output_n022"
+        ]
+      },
+      {
+        "id": "n023",
+        "tool": "tool.acli.00a880020b1307d8",
+        "stage": "synthesize",
+        "role": "Execute 00a880020b1307d8 operation",
+        "inputs": [
+          "input_n023"
+        ],
+        "outputs": [
+          "output_n023"
+        ]
+      },
+      {
+        "id": "n024",
+        "tool": "tool.add_notification_channel.e85166861d03e25f",
+        "stage": "draft",
+        "role": "Execute e85166861d03e25f operation",
+        "inputs": [
+          "input_n024"
+        ],
+        "outputs": [
+          "output_n024"
+        ]
+      },
+      {
+        "id": "n025",
+        "tool": "gitlab.create_project",
+        "stage": "publish",
+        "role": "Execute create_project operation",
+        "inputs": [
+          "input_n025"
+        ],
+        "outputs": [
+          "output_n025"
+        ]
+      },
+      {
+        "id": "n026",
+        "tool": "owncloud.download_file",
+        "stage": "verify",
+        "role": "Execute download_file operation",
+        "inputs": [
+          "input_n026"
+        ],
+        "outputs": [
+          "output_n026"
+        ]
+      },
+      {
+        "id": "n027",
+        "tool": "skill.jupyter-notebook",
+        "stage": "discover",
+        "role": "Execute jupyter-notebook operation",
+        "inputs": [
+          "input_n027"
+        ],
+        "outputs": [
+          "output_n027"
+        ]
+      },
+      {
+        "id": "n028",
+        "tool": "document.extract_pairs_csv",
+        "stage": "collect",
+        "role": "Execute extract_pairs_csv operation",
+        "inputs": [
+          "input_n028"
+        ],
+        "outputs": [
+          "output_n028"
+        ]
+      },
+      {
+        "id": "n029",
+        "tool": "document.extract_pdf_text",
+        "stage": "inspect",
+        "role": "Execute extract_pdf_text operation",
+        "inputs": [
+          "input_n029"
+        ],
+        "outputs": [
+          "output_n029"
+        ]
+      },
+      {
+        "id": "n030",
+        "tool": "workspace.read_file",
+        "stage": "filter",
+        "role": "Execute 508b6186b4454f67 operation",
+        "inputs": [
+          "input_n030"
+        ],
+        "outputs": [
+          "output_n030"
+        ]
+      },
+      {
+        "id": "n031",
+        "tool": "workspace.write_file",
+        "stage": "cross_check",
+        "role": "Execute 04b870b794090033 operation",
+        "inputs": [
+          "input_n031"
+        ],
+        "outputs": [
+          "output_n031"
+        ]
+      },
+      {
+        "id": "n032",
+        "tool": "workspace.upload_file",
+        "stage": "synthesize",
+        "role": "Execute 41b7c463d13b2624 operation",
+        "inputs": [
+          "input_n032"
+        ],
+        "outputs": [
+          "output_n032"
+        ]
+      },
+      {
+        "id": "n033",
+        "tool": "workspace.verify_upload",
+        "stage": "draft",
+        "role": "Execute 7ea74757276f009f operation",
+        "inputs": [
+          "input_n033"
+        ],
+        "outputs": [
+          "output_n033"
+        ]
+      },
+      {
+        "id": "n034",
+        "tool": "workspace.read_file",
+        "stage": "publish",
+        "role": "Execute 06e297289eab18dc operation",
+        "inputs": [
+          "input_n034"
+        ],
+        "outputs": [
+          "output_n034"
+        ]
+      },
+      {
+        "id": "n035",
+        "tool": "tool.0253_freshdesk_data_exporter.762e75167d6e2486",
+        "stage": "verify",
+        "role": "Execute 762e75167d6e2486 operation",
+        "inputs": [
+          "input_n035"
+        ],
+        "outputs": [
+          "output_n035"
+        ]
+      },
+      {
+        "id": "n036",
+        "tool": "tool.0254_freshdesk_data_importer.0d26e61726ca49e9",
+        "stage": "discover",
+        "role": "Execute 0d26e61726ca49e9 operation",
+        "inputs": [
+          "input_n036"
+        ],
+        "outputs": [
+          "output_n036"
+        ]
+      },
+      {
+        "id": "n037",
+        "tool": "tool.0255_freshdesk_webhook_listener.25409b38e93aa10f",
+        "stage": "collect",
+        "role": "Execute 25409b38e93aa10f operation",
+        "inputs": [
+          "input_n037"
+        ],
+        "outputs": [
+          "output_n037"
+        ]
+      },
+      {
+        "id": "n038",
+        "tool": "tool.0259_freshdesk_approval_router.452ec2ac00e92d33",
+        "stage": "inspect",
+        "role": "Execute 452ec2ac00e92d33 operation",
+        "inputs": [
+          "input_n038"
+        ],
+        "outputs": [
+          "output_n038"
+        ]
+      },
+      {
+        "id": "n039",
+        "tool": "tool.02_fulfillment_optimization.7715db096f3a1657",
+        "stage": "filter",
+        "role": "Execute 7715db096f3a1657 operation",
+        "inputs": [
+          "input_n039"
+        ],
+        "outputs": [
+          "output_n039"
+        ]
+      },
+      {
+        "id": "n040",
+        "tool": "tool.02_multi_mcp_coordination.3ca611485ca5aa65",
+        "stage": "cross_check",
+        "role": "Execute 3ca611485ca5aa65 operation",
+        "inputs": [
+          "input_n040"
+        ],
+        "outputs": [
+          "output_n040"
+        ]
+      },
+      {
+        "id": "n041",
+        "tool": "tool.0334_amazon_seller_data_importer.c545b84154a88516",
+        "stage": "synthesize",
+        "role": "Execute c545b84154a88516 operation",
+        "inputs": [
+          "input_n041"
+        ],
+        "outputs": [
+          "output_n041"
+        ]
+      },
+      {
+        "id": "n042",
+        "tool": "tool.0336_amazon_seller_report_builder.5b60edff406ea80b",
+        "stage": "draft",
+        "role": "Execute 5b60edff406ea80b operation",
+        "inputs": [
+          "input_n042"
+        ],
+        "outputs": [
+          "output_n042"
+        ]
+      },
+      {
+        "id": "n043",
+        "tool": "tool.0337_amazon_seller_alert_monitor.3ff72e66284b4b9b",
+        "stage": "publish",
+        "role": "Execute 3ff72e66284b4b9b operation",
+        "inputs": [
+          "input_n043"
+        ],
+        "outputs": [
+          "output_n043"
+        ]
+      },
+      {
+        "id": "n044",
+        "tool": "tool.0338_amazon_seller_workflow_automator.0f5df336209fa4ab",
+        "stage": "verify",
+        "role": "Execute 0f5df336209fa4ab operation",
+        "inputs": [
+          "input_n044"
+        ],
+        "outputs": [
+          "output_n044"
+        ]
+      },
+      {
+        "id": "n045",
+        "tool": "tool.4818_incident_playbook_synthesis_for_personal_fi.068f5ce0414fb096",
+        "stage": "discover",
+        "role": "Execute 068f5ce0414fb096 operation",
+        "inputs": [
+          "input_n045"
+        ],
+        "outputs": [
+          "output_n045"
+        ]
+      },
+      {
+        "id": "n046",
+        "tool": "tool.a6_plugin_openid_connect.ddb5d0b211377196",
+        "stage": "collect",
+        "role": "Execute ddb5d0b211377196 operation",
+        "inputs": [
+          "input_n046"
+        ],
+        "outputs": [
+          "output_n046"
+        ]
+      },
+      {
+        "id": "n047",
+        "tool": "tool.access_control_manager.2fc41a8334b8bb33",
+        "stage": "inspect",
+        "role": "Execute 2fc41a8334b8bb33 operation",
+        "inputs": [
+          "input_n047"
+        ],
+        "outputs": [
+          "output_n047"
+        ]
+      },
+      {
+        "id": "n048",
+        "tool": "tool.acli.00a880020b1307d8",
+        "stage": "filter",
+        "role": "Execute 00a880020b1307d8 operation",
+        "inputs": [
+          "input_n048"
+        ],
+        "outputs": [
+          "output_n048"
+        ]
+      },
+      {
+        "id": "n049",
+        "tool": "tool.add_notification_channel.e85166861d03e25f",
+        "stage": "cross_check",
+        "role": "Execute e85166861d03e25f operation",
+        "inputs": [
+          "input_n049"
+        ],
+        "outputs": [
+          "output_n049"
+        ]
+      },
+      {
+        "id": "n050",
+        "tool": "gitlab.create_project",
+        "stage": "synthesize",
+        "role": "Execute create_project operation",
+        "inputs": [
+          "input_n050"
+        ],
+        "outputs": [
+          "output_n050"
+        ]
+      },
+      {
+        "id": "n051",
+        "tool": "owncloud.download_file",
+        "stage": "draft",
+        "role": "Execute download_file operation",
+        "inputs": [
+          "input_n051"
+        ],
+        "outputs": [
+          "output_n051"
+        ]
+      },
+      {
+        "id": "n052",
+        "tool": "skill.jupyter-notebook",
+        "stage": "publish",
+        "role": "Execute jupyter-notebook operation",
+        "inputs": [
+          "input_n052"
+        ],
+        "outputs": [
+          "output_n052"
+        ]
+      },
+      {
+        "id": "n053",
+        "tool": "document.extract_pairs_csv",
+        "stage": "verify",
+        "role": "Execute extract_pairs_csv operation",
+        "inputs": [
+          "input_n053"
+        ],
+        "outputs": [
+          "output_n053"
+        ]
+      },
+      {
+        "id": "n054",
+        "tool": "document.extract_pdf_text",
+        "stage": "discover",
+        "role": "Execute extract_pdf_text operation",
+        "inputs": [
+          "input_n054"
+        ],
+        "outputs": [
+          "output_n054"
+        ]
+      },
+      {
+        "id": "n055",
+        "tool": "workspace.read_file",
+        "stage": "collect",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n055"
+        ],
+        "outputs": [
+          "output_n055"
+        ]
+      },
+      {
+        "id": "n056",
+        "tool": "workspace.write_file",
+        "stage": "inspect",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n056"
+        ],
+        "outputs": [
+          "output_n056"
+        ]
+      },
+      {
+        "id": "n057",
+        "tool": "workspace.upload_file",
+        "stage": "filter",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n057"
+        ],
+        "outputs": [
+          "output_n057"
+        ]
+      },
+      {
+        "id": "n058",
+        "tool": "workspace.verify_upload",
+        "stage": "cross_check",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n058"
+        ],
+        "outputs": [
+          "output_n058"
+        ]
+      },
+      {
+        "id": "n059",
+        "tool": "workspace.read_file",
+        "stage": "synthesize",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n059"
+        ],
+        "outputs": [
+          "output_n059"
+        ]
+      },
+      {
+        "id": "n060",
+        "tool": "workspace.write_file",
+        "stage": "draft",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n060"
+        ],
+        "outputs": [
+          "output_n060"
+        ]
+      },
+      {
+        "id": "n061",
+        "tool": "workspace.upload_file",
+        "stage": "publish",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n061"
+        ],
+        "outputs": [
+          "output_n061"
+        ]
+      },
+      {
+        "id": "n062",
+        "tool": "workspace.verify_upload",
+        "stage": "verify",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n062"
+        ],
+        "outputs": [
+          "output_n062"
+        ]
+      },
+      {
+        "id": "n063",
+        "tool": "workspace.read_file",
+        "stage": "discover",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n063"
+        ],
+        "outputs": [
+          "output_n063"
+        ]
+      },
+      {
+        "id": "n064",
+        "tool": "workspace.write_file",
+        "stage": "collect",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n064"
+        ],
+        "outputs": [
+          "output_n064"
+        ]
+      },
+      {
+        "id": "n065",
+        "tool": "workspace.upload_file",
+        "stage": "inspect",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n065"
+        ],
+        "outputs": [
+          "output_n065"
+        ]
+      },
+      {
+        "id": "n066",
+        "tool": "workspace.verify_upload",
+        "stage": "filter",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n066"
+        ],
+        "outputs": [
+          "output_n066"
+        ]
+      },
+      {
+        "id": "n067",
+        "tool": "workspace.read_file",
+        "stage": "cross_check",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n067"
+        ],
+        "outputs": [
+          "output_n067"
+        ]
+      },
+      {
+        "id": "n068",
+        "tool": "workspace.write_file",
+        "stage": "synthesize",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n068"
+        ],
+        "outputs": [
+          "output_n068"
+        ]
+      },
+      {
+        "id": "n069",
+        "tool": "workspace.upload_file",
+        "stage": "draft",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n069"
+        ],
+        "outputs": [
+          "output_n069"
+        ]
+      },
+      {
+        "id": "n070",
+        "tool": "workspace.verify_upload",
+        "stage": "publish",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n070"
+        ],
+        "outputs": [
+          "output_n070"
+        ]
+      },
+      {
+        "id": "n071",
+        "tool": "workspace.read_file",
+        "stage": "verify",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n071"
+        ],
+        "outputs": [
+          "output_n071"
+        ]
+      },
+      {
+        "id": "n072",
+        "tool": "workspace.write_file",
+        "stage": "discover",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n072"
+        ],
+        "outputs": [
+          "output_n072"
+        ]
+      },
+      {
+        "id": "n073",
+        "tool": "workspace.upload_file",
+        "stage": "collect",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n073"
+        ],
+        "outputs": [
+          "output_n073"
+        ]
+      },
+      {
+        "id": "n074",
+        "tool": "workspace.verify_upload",
+        "stage": "inspect",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n074"
+        ],
+        "outputs": [
+          "output_n074"
+        ]
+      },
+      {
+        "id": "n075",
+        "tool": "workspace.read_file",
+        "stage": "filter",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n075"
+        ],
+        "outputs": [
+          "output_n075"
+        ]
+      },
+      {
+        "id": "n076",
+        "tool": "workspace.write_file",
+        "stage": "cross_check",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n076"
+        ],
+        "outputs": [
+          "output_n076"
+        ]
+      },
+      {
+        "id": "n077",
+        "tool": "workspace.upload_file",
+        "stage": "synthesize",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n077"
+        ],
+        "outputs": [
+          "output_n077"
+        ]
+      },
+      {
+        "id": "n078",
+        "tool": "workspace.verify_upload",
+        "stage": "draft",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n078"
+        ],
+        "outputs": [
+          "output_n078"
+        ]
+      },
+      {
+        "id": "n079",
+        "tool": "workspace.read_file",
+        "stage": "publish",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n079"
+        ],
+        "outputs": [
+          "output_n079"
+        ]
+      },
+      {
+        "id": "n080",
+        "tool": "workspace.write_file",
+        "stage": "verify",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n080"
+        ],
+        "outputs": [
+          "output_n080"
+        ]
+      },
+      {
+        "id": "n081",
+        "tool": "workspace.upload_file",
+        "stage": "discover",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n081"
+        ],
+        "outputs": [
+          "output_n081"
+        ]
+      },
+      {
+        "id": "n082",
+        "tool": "workspace.verify_upload",
+        "stage": "collect",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n082"
+        ],
+        "outputs": [
+          "output_n082"
+        ]
+      },
+      {
+        "id": "n083",
+        "tool": "workspace.read_file",
+        "stage": "inspect",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n083"
+        ],
+        "outputs": [
+          "output_n083"
+        ]
+      },
+      {
+        "id": "n084",
+        "tool": "workspace.write_file",
+        "stage": "filter",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n084"
+        ],
+        "outputs": [
+          "output_n084"
+        ]
+      },
+      {
+        "id": "n085",
+        "tool": "workspace.upload_file",
+        "stage": "cross_check",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n085"
+        ],
+        "outputs": [
+          "output_n085"
+        ]
+      },
+      {
+        "id": "n086",
+        "tool": "workspace.verify_upload",
+        "stage": "synthesize",
+        "role": "Execute verify_upload operation",
+        "inputs": [
+          "input_n086"
+        ],
+        "outputs": [
+          "output_n086"
+        ]
+      },
+      {
+        "id": "n087",
+        "tool": "workspace.read_file",
+        "stage": "draft",
+        "role": "Execute read_file operation",
+        "inputs": [
+          "input_n087"
+        ],
+        "outputs": [
+          "output_n087"
+        ]
+      },
+      {
+        "id": "n088",
+        "tool": "workspace.write_file",
+        "stage": "publish",
+        "role": "Execute write_file operation",
+        "inputs": [
+          "input_n088"
+        ],
+        "outputs": [
+          "output_n088"
+        ]
+      },
+      {
+        "id": "n089",
+        "tool": "workspace.upload_file",
+        "stage": "verify",
+        "role": "Execute upload_file operation",
+        "inputs": [
+          "input_n089"
+        ],
+        "outputs": [
+          "output_n089"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "n000",
+        "to": "n001"
+      },
+      {
+        "from": "n001",
+        "to": "n002"
+      },
+      {
+        "from": "n002",
+        "to": "n003"
+      },
+      {
+        "from": "n003",
+        "to": "n004"
+      },
+      {
+        "from": "n004",
+        "to": "n005"
+      },
+      {
+        "from": "n005",
+        "to": "n006"
+      },
+      {
+        "from": "n006",
+        "to": "n007"
+      },
+      {
+        "from": "n007",
+        "to": "n008"
+      },
+      {
+        "from": "n008",
+        "to": "n009"
+      },
+      {
+        "from": "n009",
+        "to": "n010"
+      },
+      {
+        "from": "n010",
+        "to": "n011"
+      },
+      {
+        "from": "n011",
+        "to": "n012"
+      },
+      {
+        "from": "n012",
+        "to": "n013"
+      },
+      {
+        "from": "n013",
+        "to": "n014"
+      },
+      {
+        "from": "n014",
+        "to": "n015"
+      },
+      {
+        "from": "n015",
+        "to": "n016"
+      },
+      {
+        "from": "n016",
+        "to": "n017"
+      },
+      {
+        "from": "n017",
+        "to": "n018"
+      },
+      {
+        "from": "n018",
+        "to": "n019"
+      },
+      {
+        "from": "n019",
+        "to": "n020"
+      },
+      {
+        "from": "n020",
+        "to": "n021"
+      },
+      {
+        "from": "n021",
+        "to": "n022"
+      },
+      {
+        "from": "n022",
+        "to": "n023"
+      },
+      {
+        "from": "n023",
+        "to": "n024"
+      },
+      {
+        "from": "n024",
+        "to": "n025"
+      },
+      {
+        "from": "n025",
+        "to": "n026"
+      },
+      {
+        "from": "n026",
+        "to": "n027"
+      },
+      {
+        "from": "n027",
+        "to": "n028"
+      },
+      {
+        "from": "n028",
+        "to": "n029"
+      },
+      {
+        "from": "n029",
+        "to": "n030"
+      },
+      {
+        "from": "n030",
+        "to": "n031"
+      },
+      {
+        "from": "n031",
+        "to": "n032"
+      },
+      {
+        "from": "n032",
+        "to": "n033"
+      },
+      {
+        "from": "n033",
+        "to": "n034"
+      },
+      {
+        "from": "n034",
+        "to": "n035"
+      },
+      {
+        "from": "n035",
+        "to": "n036"
+      },
+      {
+        "from": "n036",
+        "to": "n037"
+      },
+      {
+        "from": "n037",
+        "to": "n038"
+      },
+      {
+        "from": "n038",
+        "to": "n039"
+      },
+      {
+        "from": "n039",
+        "to": "n040"
+      },
+      {
+        "from": "n040",
+        "to": "n041"
+      },
+      {
+        "from": "n041",
+        "to": "n042"
+      },
+      {
+        "from": "n042",
+        "to": "n043"
+      },
+      {
+        "from": "n043",
+        "to": "n044"
+      },
+      {
+        "from": "n044",
+        "to": "n045"
+      },
+      {
+        "from": "n045",
+        "to": "n046"
+      },
+      {
+        "from": "n046",
+        "to": "n047"
+      },
+      {
+        "from": "n047",
+        "to": "n048"
+      },
+      {
+        "from": "n048",
+        "to": "n049"
+      },
+      {
+        "from": "n049",
+        "to": "n050"
+      },
+      {
+        "from": "n050",
+        "to": "n051"
+      },
+      {
+        "from": "n051",
+        "to": "n052"
+      },
+      {
+        "from": "n052",
+        "to": "n053"
+      },
+      {
+        "from": "n053",
+        "to": "n054"
+      },
+      {
+        "from": "n054",
+        "to": "n055"
+      },
+      {
+        "from": "n055",
+        "to": "n056"
+      },
+      {
+        "from": "n056",
+        "to": "n057"
+      },
+      {
+        "from": "n057",
+        "to": "n058"
+      },
+      {
+        "from": "n058",
+        "to": "n059"
+      },
+      {
+        "from": "n059",
+        "to": "n060"
+      },
+      {
+        "from": "n060",
+        "to": "n061"
+      },
+      {
+        "from": "n061",
+        "to": "n062"
+      },
+      {
+        "from": "n062",
+        "to": "n063"
+      },
+      {
+        "from": "n063",
+        "to": "n064"
+      },
+      {
+        "from": "n064",
+        "to": "n065"
+      },
+      {
+        "from": "n065",
+        "to": "n066"
+      },
+      {
+        "from": "n066",
+        "to": "n067"
+      },
+      {
+        "from": "n067",
+        "to": "n068"
+      },
+      {
+        "from": "n068",
+        "to": "n069"
+      },
+      {
+        "from": "n069",
+        "to": "n070"
+      },
+      {
+        "from": "n070",
+        "to": "n071"
+      },
+      {
+        "from": "n071",
+        "to": "n072"
+      },
+      {
+        "from": "n072",
+        "to": "n073"
+      },
+      {
+        "from": "n073",
+        "to": "n074"
+      },
+      {
+        "from": "n074",
+        "to": "n075"
+      },
+      {
+        "from": "n075",
+        "to": "n076"
+      },
+      {
+        "from": "n076",
+        "to": "n077"
+      },
+      {
+        "from": "n077",
+        "to": "n078"
+      },
+      {
+        "from": "n078",
+        "to": "n079"
+      },
+      {
+        "from": "n079",
+        "to": "n080"
+      },
+      {
+        "from": "n080",
+        "to": "n081"
+      },
+      {
+        "from": "n081",
+        "to": "n082"
+      },
+      {
+        "from": "n082",
+        "to": "n083"
+      },
+      {
+        "from": "n083",
+        "to": "n084"
+      },
+      {
+        "from": "n084",
+        "to": "n085"
+      },
+      {
+        "from": "n085",
+        "to": "n086"
+      },
+      {
+        "from": "n086",
+        "to": "n087"
+      },
+      {
+        "from": "n087",
+        "to": "n088"
+      },
+      {
+        "from": "n088",
+        "to": "n089"
+      },
+      {
+        "from": "n005",
+        "to": "n011"
+      },
+      {
+        "from": "n007",
+        "to": "n014"
+      },
+      {
+        "from": "n006",
+        "to": "n008"
+      },
+      {
+        "from": "n015",
+        "to": "n021"
+      },
+      {
+        "from": "n017",
+        "to": "n024"
+      },
+      {
+        "from": "n016",
+        "to": "n018"
+      },
+      {
+        "from": "n025",
+        "to": "n031"
+      },
+      {
+        "from": "n027",
+        "to": "n034"
+      },
+      {
+        "from": "n026",
+        "to": "n028"
+      },
+      {
+        "from": "n035",
+        "to": "n041"
+      },
+      {
+        "from": "n037",
+        "to": "n044"
+      },
+      {
+        "from": "n036",
+        "to": "n038"
+      },
+      {
+        "from": "n045",
+        "to": "n051"
+      },
+      {
+        "from": "n047",
+        "to": "n054"
+      },
+      {
+        "from": "n046",
+        "to": "n048"
+      },
+      {
+        "from": "n055",
+        "to": "n061"
+      },
+      {
+        "from": "n057",
+        "to": "n064"
+      },
+      {
+        "from": "n056",
+        "to": "n058"
+      },
+      {
+        "from": "n065",
+        "to": "n071"
+      },
+      {
+        "from": "n067",
+        "to": "n074"
+      },
+      {
+        "from": "n066",
+        "to": "n068"
+      },
+      {
+        "from": "n075",
+        "to": "n081"
+      },
+      {
+        "from": "n077",
+        "to": "n084"
+      },
+      {
+        "from": "n076",
+        "to": "n078"
+      },
+      {
+        "from": "n007",
+        "to": "n013"
+      },
+      {
+        "from": "n016",
+        "to": "n022"
+      },
+      {
+        "from": "n025",
+        "to": "n035"
+      },
+      {
+        "from": "n034",
+        "to": "n040"
+      },
+      {
+        "from": "n043",
+        "to": "n049"
+      },
+      {
+        "from": "n052",
+        "to": "n058"
+      },
+      {
+        "from": "n057",
+        "to": "n062"
+      },
+      {
+        "from": "n058",
+        "to": "n062"
+      },
+      {
+        "from": "n061",
+        "to": "n066"
+      },
+      {
+        "from": "n065",
+        "to": "n067"
+      },
+      {
+        "from": "n066",
+        "to": "n070"
+      },
+      {
+        "from": "n069",
+        "to": "n071"
+      },
+      {
+        "from": "n070",
+        "to": "n074"
+      },
+      {
+        "from": "n073",
+        "to": "n076"
+      },
+      {
+        "from": "n074",
+        "to": "n076"
+      },
+      {
+        "from": "n077",
+        "to": "n080"
+      },
+      {
+        "from": "n078",
+        "to": "n080"
+      },
+      {
+        "from": "n079",
+        "to": "n082"
+      },
+      {
+        "from": "n081",
+        "to": "n085"
+      },
+      {
+        "from": "n082",
+        "to": "n085"
+      },
+      {
+        "from": "n085",
+        "to": "n089"
+      },
+      {
+        "from": "n086",
+        "to": "n089"
+      }
+    ]
+  }
+}

@@ -1,2 +1,0 @@
-Category: 数据库 / BI 场景
-Scenario: 计算某个指标的同比变化

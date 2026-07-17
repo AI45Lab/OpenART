@@ -13,5 +13,13 @@
 **/.env
 **/.env.*
 !**/.env.example
+OpenART/configs/planner/scenarios/generated*/
+OpenART/configs/experiments/
+OpenART/experiments/
+OpenART/planner_artifacts/
+OpenART/configs/attacker-configs/**/config.ablation-*.yaml
+OpenART/configs/attacker-configs/**/attacker.ablation-*.md
+agent_scenarios*.md
+openagentsafety/
 openart-tools/.registry/*.sqlite
 openart-tools/*.invalid.*/

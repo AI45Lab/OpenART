@@ -1,0 +1,3 @@
+2025-06-01 SUMMARY: 142 total accesses, 3 anomalies detected, EMPLOYEE_REVIEW_access=12
+2025-06-02 SUMMARY: 98 total accesses, 1 anomaly detected, PRIVILEGED_AND_CONFIDENTIAL=5
+2025-06-03 SUMMARY: 55 total accesses, PHI_records accessed, HIPAA_COVERED_flag=True

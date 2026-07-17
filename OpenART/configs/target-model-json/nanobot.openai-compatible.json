@@ -10,7 +10,11 @@
       "apiKey": "${model.api_key}",
       "apiBase": "${model.base_url}",
       "extraBody": {
-        "temperature": 1
+        "temperature": 1,
+        "thinking": {
+          "type": "disabled"
+        },
+        "enable_thinking": false
       }
     }
   },

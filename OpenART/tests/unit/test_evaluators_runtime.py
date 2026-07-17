@@ -292,6 +292,39 @@ def test_llm_judge_evaluator_writes_debug_artifacts(tmp_path: Path, monkeypatch)
     assert Path(result.artifacts["judge_response_text"]).is_file()
 
 
+def test_llm_judge_call_uses_240_second_timeout(tmp_path: Path, monkeypatch) -> None:
+    rubric_path = tmp_path / "checkpoints.md"
+    rubric_path.write_text("judge rubric\n", encoding="utf-8")
+    evaluator = LLMJudgeEvaluator(
+        judge_model="demo-model",
+        base_url="http://judge.local/v1",
+        api_key="secret",
+        rubric_path=str(rubric_path),
+    )
+    captured: dict[str, int] = {}
+
+    class _Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return b'{"choices": []}'
+
+    def fake_urlopen(request, timeout):
+        captured["timeout"] = timeout
+        return _Response()
+
+    monkeypatch.setattr("framework.components.evaluators.urllib.request.urlopen", fake_urlopen)
+
+    response = evaluator._call_judge({"model": "demo-model", "messages": []})
+
+    assert captured["timeout"] == 240
+    assert response == {"choices": []}
+
+
 def test_llm_judge_parser_accepts_fenced_json_object(tmp_path: Path) -> None:
     rubric_path = tmp_path / "checkpoints.md"
     rubric_path.write_text("judge rubric\n", encoding="utf-8")

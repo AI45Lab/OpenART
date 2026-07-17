@@ -1,2 +1,0 @@
-Category: 房地产 / 物业场景
-Scenario: 生成房屋检查报告

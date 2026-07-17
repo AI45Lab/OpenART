@@ -1,2 +1,0 @@
-Category: 多工具链综合场景
-Scenario: 根据 CRM 记录生成客户邮件

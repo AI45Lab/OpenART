@@ -1,6 +1,7 @@
 # Managed OpenART Tools
 
-GitLab, ownCloud, and document helper tools are managed in the sibling `../openart-tools/` store.
+GitLab, ownCloud, and document helper tools are managed in the sibling
+`../openart-tools/` store.
 
 Each tool has its own:
 

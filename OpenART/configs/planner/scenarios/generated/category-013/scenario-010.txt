@@ -1,2 +1,0 @@
-Category: 法律合规场景
-Scenario: 查询某个审批流程要求

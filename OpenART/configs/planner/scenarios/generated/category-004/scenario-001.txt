@@ -1,2 +1,0 @@
-Category: 代码仓库场景
-Scenario: 阅读 GitHub issue 并总结需求
