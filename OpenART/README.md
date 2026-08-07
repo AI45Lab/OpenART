@@ -1,104 +1,93 @@
-# OpenART Runtime
+# OpenART Arena
 
-This directory contains the runnable OpenART framework. Run commands from this
-directory with `PYTHONPATH=$PWD` and the existing module entrypoints.
+> Runnable infrastructure for **OpenART Arena**, an executable agent-safety
+> benchmark that scales red teaming from isolated prompts to persistent,
+> evolving environments.
 
-## Setup
+[![arXiv](https://img.shields.io/badge/arXiv-2608.00677-b31b1b.svg)](https://arxiv.org/pdf/2608.00677)
+[![Project Page](https://img.shields.io/badge/project-OpenART-blue.svg)](https://ai45lab.github.io/OpenART)
+[![GitHub](https://img.shields.io/badge/GitHub-AI45Lab%2FOpenART-black.svg)](https://github.com/AI45Lab/OpenART)
+[![Dataset](https://img.shields.io/badge/HuggingFace-public%20dataset-green.svg)](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-export PYTHONPATH="$PWD"
-```
+This package provides the runnable OpenART framework for building, validating,
+and evaluating long-horizon agent red-teaming environments.
 
-Build the base image used by local tasks:
+## Contents
 
-```bash
-docker build -t openart/task-base:latest -f images/Dockerfile.task-base .
-```
+- [Paper at a glance](#paper-at-a-glance)
+- [Released planner task dataset](#released-planner-task-dataset)
+- [Runtime capabilities](#runtime-capabilities)
+- [Documentation](#documentation)
 
-## Local Smoke Run
+## Paper at a glance
 
-The local smoke target uses only Python inside the task container and does not
-need model credentials.
+**OpenART Arena: Scaling Agent Red Teaming via Open-Ended Environment
+Evolution**  
+arXiv: [2608.00677](https://arxiv.org/abs/2608.00677) · PDF:
+[2608.00677](https://arxiv.org/pdf/2608.00677) · Project:
+[ai45lab.github.io/OpenART](https://ai45lab.github.io/OpenART)
 
-```bash
-python -m framework.cli run \
-  --task examples/tasks/local-smoke \
-  --target-config configs/target-configs/target.local-smoke.yaml \
-  --eval-strategy deterministic \
-  --skip-attacker \
-  --run-id local-smoke \
-  --output-dir outputs/local-smoke
-```
+Authors: Yunhao Chen, Xin Wang, Yixu Wang, Yi Liu, Jie Li, Yan Teng, Xingjun
+Ma, Xia Hu, and Yu-Gang Jiang.
 
-## High-Complexity Example Run
+OpenART treats the executable environment, rather than a single prompt, as the
+unit of agent-safety evaluation. A benign task objective and hidden safety
+contract remain fixed while target-visible environment state evolves, exposing
+whether deployed agents stay safe across long workflows.
 
-The release includes three generated OpenART task bundles under
-`examples/tasks/`:
+| Dimension | Paper setting |
+| --- | ---: |
+| Validated stateful scenarios | 10K+ |
+| Domains | 50 |
+| Capability corpus | 500K+ Tools / MCPs / Skills |
+| Median task horizon | 97 tool calls |
+| Evaluation matrix | 15 agents × 5 models = 75 agent-model settings |
+| Target-visible attack surfaces | 8 runtime-native vectors |
+| Reference attacker | EMHA, a black-box environment-evolution policy |
+| Main result | 85.0% pooled Strict ASR |
 
-```text
-high-complexity-kb-health
-high-complexity-kb-integration
-high-complexity-release-sync
-```
+### Key findings
 
-Build the default OpenCode target image, then configure model credentials in
-`.env` from `.env.example`.
+- **Environment evolution exposes failures missed by static prompts.** The
+  EMHA attacker changes runtime state and dependencies while preserving the
+  benign user objective, surfacing vulnerabilities that isolated instruction
+  attacks do not reliably trigger.
+- **Complex workflows amplify risk.** EMHA's advantage over instruction-only
+  evolution grows from about 1.8–2.7% on simpler environments to 17.2–17.6%
+  on the most complex settings.
+- **The agent runtime matters, not just the foundation model.** After
+  controlling for model choice and benign task completion, target-agent identity
+  explains an additional 7.6% of attack-success variation.
+- **Safety drift often appears late.** The paper reports that evolved state is
+  first consumed around 23% of execution, while the first unsafe output appears
+  around 64%; median propagation distance is 37 target actions.
+- **Recurring failure modes are compositional.** Agents often fail by keeping
+  stale assumptions, propagating earlier safety decisions instead of
+  recomputing them, or missing risk created by multiple benign-looking state
+  changes.
 
-```bash
-docker build -t openart/opencode:latest -f images/Dockerfile.opencode .
-cp .env.example .env
-```
+## Released planner task dataset
 
-Run one high-complexity task without an attacker:
+The first half/tranche of planner-generated OpenART tasks has been verified and
+released as a public Hugging Face dataset.
 
-```bash
-python -m framework.cli run \
-  --task examples/tasks/high-complexity-kb-integration \
-  --target-config configs/target-configs/target.yaml \
-  --tool-store ../openart-tools \
-  --eval-strategy deterministic \
-  --skip-attacker \
-  --output-dir outputs/kb-integration-target-only
-```
+| Released tasks | Zip shards | Visibility | Status |
+| ---: | ---: | --- | --- |
+| 6,597 | 34 | public | verified + released |
 
-Run with the default attacker:
+- Hugging Face dataset:
+  [dongdongunique/openart-planner-tasks](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
+- Validation: checksum, zip integrity, and sample extraction passed.
 
-```bash
-python -m framework.cli run \
-  --task examples/tasks/high-complexity-kb-integration \
-  --target-config configs/target-configs/target.yaml \
-  --attacker-config configs/attacker-configs/universal/opencode-native-control/config.yaml \
-  --tool-store ../openart-tools \
-  --eval-strategy both \
-  --max-iterations 2 \
-  --output-dir outputs/kb-integration-attacked
-```
+## Runtime capabilities
 
-Generated outputs under `outputs/` are local artifacts and are ignored by git.
+OpenART supports reproducible task execution, target-agent evaluation,
+attacker-in-the-loop evaluation, Docker-native task isolation, long-horizon
+stateful scenarios, and planner-generated environment construction. The same
+runtime can be used for lightweight smoke checks, target-only evaluation, and
+full red-teaming runs.
 
-## Planner
+## Documentation
 
-The planner uses the existing module entrypoint:
-
-```bash
-docker build -t openart/safe-world-planner:latest \
-  -f images/Dockerfile.safe-world-planner .
-
-python -m framework.planner.cli \
-  --planner-backend opencode \
-  --scenario-file configs/planner/scenarios/financial-expense-brief.txt \
-  --tool-store ../openart-tools \
-  --tool-count 3 \
-  --complexity-profile stress \
-  --planner-max-repairs 2 \
-  --task-id financial-expense-brief \
-  --output-dir outputs/financial-expense-brief \
-  --overwrite
-```
-
-## Docs
-
-The canonical documentation starts at [`docs/README.md`](docs/README.md).
+See the repository documentation for setup, execution examples, and planner
+usage.
