@@ -1,24 +1,62 @@
 # OpenART
 
-OpenART is a Docker-native framework for running controlled safety evaluations
-against tool-using code agents. This release checkout keeps a runnable runtime,
-a small set of bundled high-complexity OpenART task examples, and the managed
-tool subset required by those examples.
+OpenART is an executable benchmark for evaluating the safety of tool-using code
+agents in long-running, evolving environments. This repository contains its
+Docker-based runtime, three runnable high-complexity tasks, and the managed
+tools required by those tasks.
 
-This repository intentionally excludes experiment batch drivers, generated
-run outputs, and private scenario-generation corpora.
+OpenART is the agent version of [OpenRT](https://github.com/AI45Lab/OpenRT).
 
-## Repository Layout
+[![arXiv](https://img.shields.io/badge/arXiv-2608.00677-b31b1b.svg)](https://arxiv.org/abs/2608.00677)
+[![Dataset](https://img.shields.io/badge/Hugging%20Face-openart--planner--tasks-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
 
-```text
-OpenART/                         framework runtime, configs, Dockerfiles, docs, tests
-OpenART/examples/tasks/          local smoke task and high-complexity examples
-openart-tools/                   managed tool subset used by bundled examples
-```
+## Paper and dataset
+
+**OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution**
+
+Yunhao Chen, Xin Wang, Yixu Wang, Yi Liu, Jie Li, Yan Teng, Xingjun Ma, Xia Hu,
+and Yu-Gang Jiang
+
+[arXiv abstract](https://arxiv.org/abs/2608.00677) ·
+[PDF](https://arxiv.org/pdf/2608.00677)
+
+OpenART evaluates the executable environment rather than treating a single
+prompt as the entire test. The benign task and hidden safety contract remain
+fixed while target-visible state changes during execution.
+
+| Paper setting | Value |
+| --- | ---: |
+| Validated stateful scenarios | 10K+ |
+| Domains | 50 |
+| Capability corpus | 500K+ tools and skills |
+| Median task horizon | 97 tool calls |
+| Evaluation matrix | 15 agents × 5 models (75 settings) |
+| Target-visible attack surfaces | 8 |
+| Reference attacker | Evolutionary Markov Hypergraph Attack (EMHA) |
+| Pooled strict attack success rate | 85.0% |
+
+The paper reports that environment evolution becomes more effective as
+workflow complexity grows, and that the agent runtime affects safety beyond
+the choice of foundation model. Unsafe behavior also tends to appear well
+after the changed state is first consumed, often through stale assumptions or
+decisions carried forward from earlier steps.
+
+The public
+[OpenART planner task dataset](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
+contains 6,597 verified tasks in 34 zip shards. Its release checks covered
+checksums, archive integrity, and sample extraction.
+
+## Repository layout
+
+| Path | Contents |
+| --- | --- |
+| `OpenART/` | Runtime, configuration, Dockerfiles, documentation, and tests |
+| `OpenART/examples/tasks/` | Local smoke task and bundled high-complexity tasks |
+| `openart-tools/` | Managed tool subset used by the bundled tasks |
 
 ## Setup
 
-Commands below assume the repository root as the starting directory.
+Run the following commands from the repository root:
 
 ```bash
 cd OpenART
@@ -28,15 +66,16 @@ python -m pip install -r requirements.txt
 export PYTHONPATH="$PWD"
 ```
 
-Build the base task image:
+Docker must be available to the current user. Build the base task image:
 
 ```bash
 docker build -t openart/task-base:latest -f images/Dockerfile.task-base .
 ```
 
-## Local Smoke Run
+## Local smoke test
 
-This verifies the container and evaluator path without model credentials.
+The local smoke task checks the container and deterministic evaluator paths. It
+does not require model credentials.
 
 ```bash
 python -m framework.cli run \
@@ -48,29 +87,18 @@ python -m framework.cli run \
   --output-dir outputs/local-smoke
 ```
 
-## High-Complexity Task Run
+## Model-backed evaluations
 
-The bundled generated tasks live under `OpenART/examples/tasks/`:
-
-| Task | Workflow nodes | Workspace files | Distinct tools |
-|------|----------------|-----------------|----------------|
-| `high-complexity-kb-health` | 100 | 67 | 29 |
-| `high-complexity-kb-integration` | 100 | 109 | 26 |
-| `high-complexity-release-sync` | 100 | 134 | 32 |
-
-Build the target image you want to evaluate. The default config uses OpenCode:
+The default target configuration uses OpenCode. Build its image, copy the
+environment template, and add the required model endpoints and credentials to
+`.env`:
 
 ```bash
 docker build -t openart/opencode:latest -f images/Dockerfile.opencode .
-```
-
-Copy `.env.example` to `.env` and fill in your model endpoint values:
-
-```bash
 cp .env.example .env
 ```
 
-Run a high-complexity task without an attacker:
+Run a target without an attacker:
 
 ```bash
 python -m framework.cli run \
@@ -97,13 +125,13 @@ python -m framework.cli run \
   --output-dir outputs/kb-integration-attacked
 ```
 
-The task graph selects the required managed tools from `../openart-tools`.
-Outputs are local artifacts under `OpenART/outputs/` and are ignored by git.
+The task graph selects tools from `../openart-tools`. Run artifacts are written
+under `OpenART/outputs/` and ignored by Git.
 
-## Planner
+## Task generation
 
-The planner uses the existing module entrypoint. Build the planner image, set
-the planner variables in `.env`, and generate one task from a checked-in seed:
+Build the planner image and generate a task from a checked-in scenario. Planner
+model settings are read from `.env`.
 
 ```bash
 docker build -t openart/safe-world-planner:latest \
@@ -121,15 +149,14 @@ python -m framework.planner.cli \
   --overwrite
 ```
 
-Generated planner outputs are local artifacts and are ignored by git.
+Planner outputs are also local, ignored artifacts.
 
 ## Documentation
 
-Start with [`OpenART/docs/README.md`](OpenART/docs/README.md), then read
-[`OpenART/docs/01_quickstart.md`](OpenART/docs/01_quickstart.md) for run
-commands and [`OpenART/docs/12_planner_design_implementation_usage.md`](OpenART/docs/12_planner_design_implementation_usage.md)
-for planner usage.
+- [Documentation index](OpenART/docs/README.md)
+- [Quickstart and runtime options](OpenART/docs/01_quickstart.md)
+- [Planner design and usage](OpenART/docs/12_planner_design_implementation_usage.md)
 
 ## License
 
-OpenART is released under the AGPL-3.0 license. See [`LICENSE`](LICENSE).
+OpenART is licensed under the [GNU Affero General Public License v3.0](LICENSE).
