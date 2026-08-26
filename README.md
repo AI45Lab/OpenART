@@ -9,6 +9,7 @@ OpenART is the agent version of [OpenRT](https://github.com/AI45Lab/OpenRT).
 
 [![arXiv](https://img.shields.io/badge/arXiv-2608.00677-b31b1b.svg)](https://arxiv.org/abs/2608.00677)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-openart--planner--tasks-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
+[![Tools](https://img.shields.io/badge/Hugging%20Face-openart--tools-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-tools)
 
 ## Paper and dataset
 
@@ -45,6 +46,13 @@ The public
 [OpenART planner task dataset](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
 contains 6,597 verified tasks in 34 zip shards. Its release checks covered
 checksums, archive integrity, and sample extraction.
+
+We also release the public
+[OpenART tools dataset](https://huggingface.co/datasets/dongdongunique/openart-tools),
+which packages 63,697 selected materialized tools from the OpenART capability
+corpus. This 60K+ subset prioritizes the most usable OpenART tools for task
+execution, reuse, and reproducible benchmark construction. The release includes
+metadata, archive manifests, checksums, and a lightweight download helper.
 
 ## Repository layout
 
