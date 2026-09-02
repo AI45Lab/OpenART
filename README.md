@@ -9,8 +9,6 @@ OpenART is the agent version of [OpenRT](https://github.com/AI45Lab/OpenRT).
 
 [09/02/2026] ⭐ OpenART reached the 100-star milestone on [GitHub](https://github.com/AI45Lab/OpenART).
 
-[08/13/2026] 🥈 **#2 Paper of the Day on [Hugging Face Papers](https://huggingface.co/papers/2608.00677)**
-
 [![arXiv](https://img.shields.io/badge/arXiv-2608.00677-b31b1b.svg)](https://arxiv.org/abs/2608.00677)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-openart--planner--tasks-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
 [![Tools](https://img.shields.io/badge/Hugging%20Face-openart--tools-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-tools)
