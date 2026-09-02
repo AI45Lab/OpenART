@@ -17,7 +17,7 @@ OpenART is the agent version of [OpenRT](https://github.com/AI45Lab/OpenRT).
 
 **OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution**
 
-🥈 **#2 Paper of the Day on [Hugging Face Papers](https://huggingface.co/papers/2608.00677)**
+[08/13/2026] 🥈 **#2 Paper of the Day on [Hugging Face Papers](https://huggingface.co/papers/2608.00677)**
 
 Yunhao Chen, Xin Wang, Yixu Wang, Yi Liu, Jie Li, Yan Teng, Xingjun Ma, Xia Hu,
 and Yu-Gang Jiang
