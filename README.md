@@ -64,7 +64,31 @@ metadata, archive manifests, checksums, and a lightweight download helper.
 | --- | --- |
 | `OpenART/` | Runtime, configuration, Dockerfiles, documentation, and tests |
 | `OpenART/examples/tasks/` | Local smoke task and bundled high-complexity tasks |
+| `OpenART/skills/openart/SKILL.md` | Unified guide for agents and people using or extending OpenART |
 | `openart-tools/` | Managed tool subset used by the bundled tasks |
+
+## Use the OpenART skill
+
+OpenART includes one consolidated operator skill for planning, scenario
+generation, managed tools, evaluation, extension, and debugging. It routes
+each request to the appropriate existing documentation and command instead of
+duplicating those workflows across several skills.
+
+- For people: read [`OpenART/skills/openart/SKILL.md`](OpenART/skills/openart/SKILL.md)
+  as a workflow map before choosing a detailed guide.
+- For agents: explicitly ask the agent to read that file before working on the
+  framework. For example:
+
+```text
+Read and follow OpenART/skills/openart/SKILL.md. Help me run the local smoke
+task, explain each required setting, and stop before any external or
+destructive action.
+```
+
+Agents that support repository-local skill discovery can use `OpenART/skills/`
+as their skill source. Otherwise, referencing the file directly is the
+portable invocation method. This operator skill is not a managed runtime tool,
+target-visible skill, or attacker payload.
 
 ## Setup
 
