@@ -168,6 +168,7 @@ Planner outputs are also local, ignored artifacts.
 - [Documentation index](OpenART/docs/README.md)
 - [Quickstart and runtime options](OpenART/docs/01_quickstart.md)
 - [Planner design and usage](OpenART/docs/12_planner_design_implementation_usage.md)
+- [Unified operator guide](OpenART/skills/openart/SKILL.md)
 
 ## License
 
