@@ -3,6 +3,10 @@
 This document gives implementation playbooks for extending OpenART. Prefer
 small config-driven extensions before adding new Python classes.
 
+For the general workflow, use the [unified operator guide](../skills/openart/SKILL.md).
+It is the single entry point for planner, scenario, tool, evaluation, and
+debugging guidance; this document remains the detailed extension reference.
+
 ## Add A Target
 
 Use `PromptCLIRunner` unless the target cannot accept a prompt through argv or

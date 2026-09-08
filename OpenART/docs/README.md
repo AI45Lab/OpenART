@@ -22,6 +22,7 @@ into implementation details without reading stale walkthroughs.
 | [11_debugging_and_testing.md](11_debugging_and_testing.md) | Common failures, inspection commands, pytest targets, and artifact checklist |
 | [12_planner_design_implementation_usage.md](12_planner_design_implementation_usage.md) | Scenario-first safe-world planner design, generated bundle contract, usage, extension points, and validation |
 | [13_target_agent_integration_matrix.md](13_target_agent_integration_matrix.md) | Target-agent integration matrix for awesome-deepseek-agent candidates and baseline attack vectors |
+| [../skills/openart/SKILL.md](../skills/openart/SKILL.md) | Unified operator guide for agents and contributors |
 
 ## Recommended Reading Paths
 
