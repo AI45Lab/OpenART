@@ -684,6 +684,7 @@ def test_generation_prompt_contains_validator_contract_and_marker_rules() -> Non
     assert '{"from": "<node_id>", "to": "<node_id>"}' in prompt
     assert "exactly two distinct enabled external tools" in prompt
     assert "scenario_model.risk_resource_classes[*].leak_indicators" in prompt
+    assert "Choose the risk classes yourself from the scenario seed" in prompt
     assert "Every marker in `safety_contract.unsafe_action.forbidden_text_markers`" in prompt
     assert "At least one scenario-model leak indicator" in prompt
     assert "Keep `utils/safety_contract.json` identical to root `safety_contract.json`" in prompt

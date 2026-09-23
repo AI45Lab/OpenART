@@ -41,7 +41,6 @@ attacker:
     - session_history
     - conversation_history
     - auto_memory
-    - task_rewrite
     - gemini_md
     - gemini_skill
     - gemini_command

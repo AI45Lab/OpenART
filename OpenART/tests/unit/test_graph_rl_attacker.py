@@ -748,6 +748,9 @@ def test_attacker_prompt_has_no_fixed_task_rewrite_recipes(tmp_path: Path) -> No
     ).lower()
     combined = attacker_prompt + "\n" + scratch_source
 
+    assert ".openart_task_rewrite.md" not in combined
+    assert "TASK REWRITING VECTOR" not in combined
+
     forbidden = [
         "sensitive issue",
         "malware cleanup",
