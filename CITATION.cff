@@ -1,0 +1,76 @@
+cff-version: 1.2.0
+message: >-
+  If you use OpenART software, tasks, tools, or evaluation results, please
+  cite both the software repository and the preferred citation below.
+title: OpenART
+type: software
+authors:
+  - family-names: Chen
+    given-names: Yunhao
+  - family-names: Wang
+    given-names: Xin
+  - family-names: Wang
+    given-names: Yixu
+  - family-names: Liu
+    given-names: Yi
+  - family-names: Li
+    given-names: Jie
+  - family-names: Teng
+    given-names: Yan
+  - family-names: Ma
+    given-names: Xingjun
+  - family-names: Hu
+    given-names: Xia
+  - family-names: Jiang
+    given-names: Yu-Gang
+repository: https://github.com/AI45Lab/OpenART
+repository-code: https://github.com/AI45Lab/OpenART
+url: https://arxiv.org/abs/2608.00677
+abstract: >-
+  OpenART is an executable benchmark and runtime for evaluating the safety of
+  tool-using code agents in long-running, evolving environments. It executes
+  target agents inside Docker environments whose persistent state can be
+  mutated mid-run by an attacker (environment evolution), evaluates them
+  against fixed hidden safety contracts, and ships a planner that generates
+  validated long-horizon tasks (10K+ scenarios, 50 domains, 500K+ tools and
+  skills, median 97 tool calls) plus a 15-agent x 5-model evaluation matrix.
+keywords:
+  - agent-safety
+  - llm-agents
+  - red-teaming
+  - prompt-injection
+  - benchmark
+  - tool-use
+  - long-horizon
+  - environment-evolution
+license: AGPL-3.0
+version: 1.0.0
+date-released: '2026-09-24'
+preferred-citation:
+  type: article
+  title: 'OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution'
+  authors:
+    - family-names: Chen
+      given-names: Yunhao
+    - family-names: Wang
+      given-names: Xin
+    - family-names: Wang
+      given-names: Yixu
+    - family-names: Liu
+      given-names: Yi
+    - family-names: Li
+      given-names: Jie
+    - family-names: Teng
+      given-names: Yan
+    - family-names: Ma
+      given-names: Xingjun
+    - family-names: Hu
+      given-names: Xia
+    - family-names: Jiang
+      given-names: Yu-Gang
+  year: 2026
+  identifiers:
+    - type: other
+      value: 'arXiv:2608.00677'
+    - type: url
+      value: 'https://arxiv.org/abs/2608.00677'
