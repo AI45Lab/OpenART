@@ -1,0 +1,42 @@
+# OpenART
+
+> OpenART (Open Agent Red Teaming) is an executable benchmark and Docker-native
+> runtime for evaluating the safety of tool-using LLM agents in long-horizon,
+> evolving environments: persistent environment state is mutated mid-run by an
+> attacker while a fixed hidden safety contract is checked over full traces.
+> Paper: arXiv:2608.00677. Relevant to agent safety, LLM agent red teaming,
+> prompt injection, tool-use evaluation, and long-horizon agent benchmarks.
+
+## Overview
+
+- [README](https://github.com/AI45Lab/OpenART): Research summary, positioning
+  table, install, smoke test, model-backed evaluation, task generation.
+- [Paper (arXiv:2608.00677)](https://arxiv.org/abs/2608.00677): Full results —
+  10K+ validated tasks, 50 domains, 500K+ tools, 15 agents × 5 models,
+  EMHA attacker, 85.0% pooled ASR.
+- [CITATION.cff](https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff):
+  Canonical bibliographic metadata for the repository and paper.
+
+## Data
+
+- [openart-planner-tasks](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks):
+  6,597 verified planner-generated tasks in 34 shards, with checksums and
+  release validation.
+- [openart-tools](https://huggingface.co/datasets/dongdongunique/openart-tools):
+  63,697 materialized tools selected from the 500K+ capability corpus.
+
+## Agent navigation
+
+- [AGENTS.md](https://github.com/AI45Lab/OpenART/blob/main/AGENTS.md): Entry
+  point for coding agents working inside this repository.
+- [Operator skill](https://github.com/AI45Lab/OpenART/blob/main/OpenART/skills/openart/SKILL.md):
+  Single routing guide for planning, running, extending, and debugging OpenART.
+
+## Docs
+
+- [Documentation index](https://github.com/AI45Lab/OpenART/blob/main/OpenART/docs/README.md):
+  Design, implementation, usage, compatibility, and debugging guides.
+- [Quickstart](https://github.com/AI45Lab/OpenART/blob/main/OpenART/docs/01_quickstart.md):
+  Install, build images, local smoke test, first evaluation run.
+- [Planner guide](https://github.com/AI45Lab/OpenART/blob/main/OpenART/docs/12_planner_design_implementation_usage.md):
+  Generating validated long-horizon task bundles from scenario seeds.
