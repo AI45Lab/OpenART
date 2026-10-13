@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & discussions
+    url: https://github.com/AI45Lab/OpenART/discussions
+    about: Ask questions and discuss OpenART usage in GitHub Discussions.
