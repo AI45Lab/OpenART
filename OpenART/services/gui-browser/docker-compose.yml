@@ -1,0 +1,15 @@
+# GUI browser service (Playwright MCP sidecar) — standalone compose file.
+# Usage:
+#   docker compose -f gui-browser/docker-compose.yml up -d
+#
+# NOTE: This is for local development. On rjob pods, use the rjob submission
+# script instead: bash Servers/openart_planner/rjob_submit_gui_browser_smoke.sh
+
+services:
+  playwright-mcp:
+    image: ${PLAYWRIGHT_MCP_IMAGE:-mcr.microsoft.com/playwright/mcp:latest}
+    command: ["--port", "${PLAYWRIGHT_MCP_PORT:-8930}", "--host", "0.0.0.0"]
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${PLAYWRIGHT_MCP_PORT:-8930}:${PLAYWRIGHT_MCP_PORT:-8930}"
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${PLAYWRIGHT_MCP_DEBUG_PORT:-8931}:${PLAYWRIGHT_MCP_DEBUG_PORT:-8931}"
+    restart: unless-stopped

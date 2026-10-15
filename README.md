@@ -127,6 +127,7 @@ metadata, archive manifests, checksums, and a lightweight download helper.
 | `OpenART/` | Runtime, configuration, Dockerfiles, documentation, and tests |
 | `OpenART/examples/tasks/` | Local smoke task and bundled high-complexity tasks |
 | `OpenART/skills/openart/SKILL.md` | Unified guide for agents and people using or extending OpenART |
+| `OpenART/services/` | Every service used in OpenART, with run instructions, configs, and health checks |
 | `openart-tools/` | Managed tool subset used by the bundled tasks |
 
 ## Use the OpenART skill
@@ -248,6 +249,39 @@ python -m framework.planner.cli \
 ```
 
 Planner outputs are also local, ignored artifacts.
+
+## Services
+
+Every service used in OpenART is collected under
+[`OpenART/services/README.md`](OpenART/services/README.md), grouped into:
+
+- **DTAP services** (16 environments: finance, legal, gmail, slack, calendar,
+  zoom, paypal, atlassian, github, google-form, googledocs, telegram,
+  whatsapp, snowflake, databricks, bigquery)
+- **Standalone app services** (Mailpit, Gitea, Mattermost, Baserow, NocoDB,
+  OpenProject, Nextcloud, OnlyOffice)
+- **Emulator services** (MinIO, LocalStack, BigQuery emulator, Gotenberg)
+- **GUI browser service** (Playwright MCP browser sidecar for GUI-form tools)
+
+Each service README documents how to run the service (docker compose, docker
+run, or rjob submission), its ports and health-check endpoints, and its
+environment-variable configuration. Central port/image configuration lives in
+`OpenART/services/configs/ports.env` with a template in
+`OpenART/services/configs/.env.example`.
+
+Quick start:
+
+```bash
+# Start all services (dtap + apps + emulators)
+bash OpenART/services/scripts/start_all_services.sh
+
+# Or via docker compose directly
+cd OpenART/images/services
+docker compose --env-file ports.env -f docker-compose.yml --profile all up -d
+
+# Check status and health of all services
+bash OpenART/services/scripts/get_service_status.sh
+```
 
 ## Documentation
 

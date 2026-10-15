@@ -1,0 +1,434 @@
+name: openart-services
+
+x-dtap-service: &dtap-service
+  restart: unless-stopped
+  profiles: ["dtap", "all"]
+  network_mode: host
+  env_file:
+    - ports.env
+
+x-app-service: &app-service
+  restart: unless-stopped
+  profiles: ["apps", "all"]
+
+x-emulator-service: &emulator-service
+  restart: unless-stopped
+  profiles: ["emulators", "all"]
+
+services:
+  # DTAP-style service surfaces. These mirror the image and port conventions
+  # recorded under Servers/dtap_rjob_status/dtap-service-host/*.env.
+  dtap-finance-web:
+    <<: *dtap-service
+    image: ${DTAP_FINANCE_IMAGE:-decodingtrustagent/finance:latest}
+
+  dtap-legal-web:
+    <<: *dtap-service
+    image: ${DTAP_LEGAL_IMAGE:-decodingtrustagent/legal:latest}
+
+  dtap-gmail-mailpit:
+    <<: *dtap-service
+    image: ${DTAP_MAILPIT_IMAGE:-axllent/mailpit:latest}
+
+  dtap-gmail-service:
+    <<: *dtap-service
+    image: ${DTAP_GMAIL_SERVICE_IMAGE:-decodingtrustagent/gmail:service-latest}
+    depends_on:
+      - dtap-gmail-mailpit
+
+  dtap-gmail-ui:
+    <<: *dtap-service
+    image: ${DTAP_GMAIL_UI_IMAGE:-decodingtrustagent/gmail:ui-latest}
+    depends_on:
+      - dtap-gmail-service
+
+  dtap-slack-api:
+    <<: *dtap-service
+    image: ${DTAP_SLACK_API_IMAGE:-decodingtrustagent/slack:api-latest}
+
+  dtap-slack-ui:
+    <<: *dtap-service
+    image: ${DTAP_SLACK_UI_IMAGE:-decodingtrustagent/slack:ui-latest}
+    depends_on:
+      - dtap-slack-api
+
+  dtap-calendar-api:
+    <<: *dtap-service
+    image: ${DTAP_CALENDAR_API_IMAGE:-decodingtrustagent/google-calendar:api-latest}
+
+  dtap-calendar-ui:
+    <<: *dtap-service
+    image: ${DTAP_CALENDAR_UI_IMAGE:-decodingtrustagent/google-calendar:ui-latest}
+    depends_on:
+      - dtap-calendar-api
+
+  dtap-zoom-api:
+    <<: *dtap-service
+    image: ${DTAP_ZOOM_API_IMAGE:-decodingtrustagent/zoom:api-latest}
+
+  dtap-zoom-ui:
+    <<: *dtap-service
+    image: ${DTAP_ZOOM_UI_IMAGE:-decodingtrustagent/zoom:ui-latest}
+    depends_on:
+      - dtap-zoom-api
+
+  dtap-paypal-pg:
+    <<: *dtap-service
+    image: ${DTAP_POSTGRES16_IMAGE:-postgres:16}
+    command: ["postgres", "-c", "port=${PAYPAL_PG_PORT:-25000}"]
+    environment:
+      POSTGRES_USER: ${PAYPAL_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${PAYPAL_POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${PAYPAL_POSTGRES_DB:-paypal}
+    volumes:
+      - dtap-paypal-pg:/var/lib/postgresql/data
+
+  dtap-paypal-api:
+    <<: *dtap-service
+    image: ${DTAP_PAYPAL_API_IMAGE:-decodingtrustagent/paypal:api-latest}
+    depends_on:
+      - dtap-paypal-pg
+
+  dtap-paypal-ui:
+    <<: *dtap-service
+    image: ${DTAP_PAYPAL_UI_IMAGE:-decodingtrustagent/paypal:ui-latest}
+    depends_on:
+      - dtap-paypal-api
+
+  dtap-atlassian-pg:
+    <<: *dtap-service
+    image: ${DTAP_POSTGRES16_IMAGE:-postgres:16}
+    command: ["postgres", "-c", "port=${ATLASSIAN_DB_PORT:-25100}"]
+    environment:
+      POSTGRES_USER: ${ATLASSIAN_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${ATLASSIAN_POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${ATLASSIAN_POSTGRES_DB:-atlassian}
+    volumes:
+      - dtap-atlassian-pg:/var/lib/postgresql/data
+
+  dtap-atlassian-api:
+    <<: *dtap-service
+    image: ${DTAP_ATLASSIAN_API_IMAGE:-decodingtrustagent/atlassian:api-latest}
+    depends_on:
+      - dtap-atlassian-pg
+
+  dtap-atlassian-ui:
+    <<: *dtap-service
+    image: ${DTAP_ATLASSIAN_UI_IMAGE:-decodingtrustagent/atlassian:ui-latest}
+    depends_on:
+      - dtap-atlassian-api
+
+  dtap-github-db:
+    <<: *dtap-service
+    image: ${DTAP_GITHUB_DB_IMAGE:-decodingtrustagent/github:db-latest}
+    volumes:
+      - dtap-github-db:/var/lib/postgresql/data
+
+  dtap-github-api:
+    <<: *dtap-service
+    image: ${DTAP_GITHUB_API_IMAGE:-decodingtrustagent/github:api-latest}
+    depends_on:
+      - dtap-github-db
+
+  dtap-github-ui:
+    <<: *dtap-service
+    image: ${DTAP_GITHUB_UI_IMAGE:-decodingtrustagent/github:ui-latest}
+    depends_on:
+      - dtap-github-api
+
+  dtap-google-form-api:
+    <<: *dtap-service
+    image: ${DTAP_GOOGLE_FORM_API_IMAGE:-decodingtrustagent/google-form:api-latest}
+
+  dtap-google-form-ui:
+    <<: *dtap-service
+    image: ${DTAP_GOOGLE_FORM_UI_IMAGE:-decodingtrustagent/google-form:ui-latest}
+    depends_on:
+      - dtap-google-form-api
+
+  dtap-googledocs-db:
+    <<: *dtap-service
+    image: ${DTAP_GOOGLEDOCS_DB_IMAGE:-decodingtrustagent/google-docs:db-latest}
+    volumes:
+      - dtap-googledocs-db:/var/lib/postgresql/data
+
+  dtap-googledocs-api:
+    <<: *dtap-service
+    image: ${DTAP_GOOGLEDOCS_API_IMAGE:-decodingtrustagent/google-docs:api-latest}
+    depends_on:
+      - dtap-googledocs-db
+
+  dtap-googledocs-ui:
+    <<: *dtap-service
+    image: ${DTAP_GOOGLEDOCS_UI_IMAGE:-decodingtrustagent/google-docs:ui-latest}
+    depends_on:
+      - dtap-googledocs-api
+
+  dtap-telegram-pg:
+    <<: *dtap-service
+    image: ${DTAP_TELEGRAM_PG_IMAGE:-decodingtrustagent/telegram:pg-latest}
+    volumes:
+      - dtap-telegram-pg:/var/lib/postgresql/data
+
+  dtap-telegram-api:
+    <<: *dtap-service
+    image: ${DTAP_TELEGRAM_API_IMAGE:-decodingtrustagent/telegram:api-latest}
+    depends_on:
+      - dtap-telegram-pg
+
+  dtap-whatsapp-pg:
+    <<: *dtap-service
+    image: ${DTAP_WHATSAPP_PG_IMAGE:-decodingtrustagent/whatsapp:pg}
+    volumes:
+      - dtap-whatsapp-pg:/var/lib/postgresql/data
+
+  dtap-whatsapp-api:
+    <<: *dtap-service
+    image: ${DTAP_WHATSAPP_API_IMAGE:-decodingtrustagent/whatsapp:api-latest}
+    depends_on:
+      - dtap-whatsapp-pg
+
+  dtap-whatsapp-ui:
+    <<: *dtap-service
+    image: ${DTAP_WHATSAPP_UI_IMAGE:-decodingtrustagent/whatsapp:ui-latest}
+    depends_on:
+      - dtap-whatsapp-api
+
+  dtap-snowflake-pg:
+    <<: *dtap-service
+    image: ${DTAP_SNOWFLAKE_PG_IMAGE:-decodingtrustagent/snowflake:latest}
+    volumes:
+      - dtap-snowflake-pg:/var/lib/postgresql/data
+
+  dtap-snowflake-admin:
+    <<: *dtap-service
+    image: ${DTAP_SNOWFLAKE_ADMIN_IMAGE:-decodingtrustagent/snowflake:admin}
+    depends_on:
+      - dtap-snowflake-pg
+
+  dtap-databricks-pg:
+    <<: *dtap-service
+    image: ${DTAP_DATABRICKS_PG_IMAGE:-decodingtrustagent/databricks:latest}
+    volumes:
+      - dtap-databricks-pg:/var/lib/postgresql/data
+
+  dtap-databricks-admin:
+    <<: *dtap-service
+    image: ${DTAP_DATABRICKS_ADMIN_IMAGE:-decodingtrustagent/databricks:admin}
+    depends_on:
+      - dtap-databricks-pg
+
+  dtap-bigquery:
+    <<: *dtap-service
+    image: ${DTAP_BIGQUERY_IMAGE:-ghcr.io/goccy/bigquery-emulator:latest}
+    command:
+      - "--project=${BIGQUERY_PROJECT_ID:-openart}"
+      - "--port=${BIGQUERY_API_PORT:-25900}"
+      - "--grpc-port=${BIGQUERY_GRPC_PORT:-25901}"
+    volumes:
+      - dtap-bigquery-data:/data
+
+  # Standalone public/open-source services useful for OpenART service-backed tools.
+  mailpit:
+    <<: *app-service
+    image: ${MAILPIT_IMAGE:-axllent/mailpit:latest}
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${MAILPIT_SMTP_PORT:-26000}:1025"
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${MAILPIT_UI_PORT:-26001}:8025"
+    volumes:
+      - mailpit-data:/data
+
+  gitea:
+    <<: *app-service
+    image: ${GITEA_IMAGE:-docker.gitea.com/gitea:latest}
+    environment:
+      USER_UID: ${GITEA_USER_UID:-1000}
+      USER_GID: ${GITEA_USER_GID:-1000}
+      GITEA__server__ROOT_URL: "http://localhost:${GITEA_HTTP_PORT:-26010}/"
+      GITEA__server__HTTP_PORT: "3000"
+      GITEA__server__SSH_PORT: "${GITEA_SSH_PORT:-26011}"
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${GITEA_HTTP_PORT:-26010}:3000"
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${GITEA_SSH_PORT:-26011}:22"
+    volumes:
+      - gitea-data:/data
+
+  mattermost-db:
+    <<: *app-service
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    environment:
+      POSTGRES_USER: ${MATTERMOST_DB_USER:-mattermost}
+      POSTGRES_PASSWORD: ${MATTERMOST_DB_PASSWORD:-openart}
+      POSTGRES_DB: ${MATTERMOST_DB_NAME:-mattermost}
+    volumes:
+      - mattermost-db:/var/lib/postgresql/data
+
+  mattermost:
+    <<: *app-service
+    image: ${MATTERMOST_IMAGE:-mattermost/mattermost-team-edition:latest}
+    depends_on:
+      - mattermost-db
+    environment:
+      MM_SQLSETTINGS_DRIVERNAME: postgres
+      MM_SQLSETTINGS_DATASOURCE: "postgres://${MATTERMOST_DB_USER:-mattermost}:${MATTERMOST_DB_PASSWORD:-openart}@mattermost-db:5432/${MATTERMOST_DB_NAME:-mattermost}?sslmode=disable&connect_timeout=10"
+      MM_SERVICESETTINGS_SITEURL: "http://localhost:${MATTERMOST_PORT:-26020}"
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${MATTERMOST_PORT:-26020}:8065"
+    volumes:
+      - mattermost-data:/mattermost/data
+      - mattermost-logs:/mattermost/logs
+      - mattermost-config:/mattermost/config
+      - mattermost-plugins:/mattermost/plugins
+      - mattermost-client-plugins:/mattermost/client/plugins
+
+  baserow:
+    <<: *app-service
+    image: ${BASEROW_IMAGE:-baserow/baserow:latest}
+    environment:
+      BASEROW_PUBLIC_URL: "http://localhost:${BASEROW_PORT:-26030}"
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${BASEROW_PORT:-26030}:80"
+    volumes:
+      - baserow-data:/baserow/data
+
+  nocodb:
+    <<: *app-service
+    image: ${NOCODB_IMAGE:-nocodb/nocodb:latest}
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${NOCODB_PORT:-26040}:8080"
+    volumes:
+      - nocodb-data:/usr/app/data
+
+  openproject:
+    <<: *app-service
+    image: ${OPENPROJECT_IMAGE:-openproject/openproject:latest}
+    environment:
+      OPENPROJECT_HOST__NAME: "localhost:${OPENPROJECT_PORT:-26050}"
+      OPENPROJECT_HTTPS: "false"
+      OPENPROJECT_SECRET_KEY_BASE: ${OPENPROJECT_SECRET_KEY_BASE:-openart-openproject-secret}
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${OPENPROJECT_PORT:-26050}:80"
+    volumes:
+      - openproject-data:/var/openproject/assets
+
+  nextcloud-db:
+    <<: *app-service
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    environment:
+      POSTGRES_USER: ${NEXTCLOUD_DB_USER:-nextcloud}
+      POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD:-openart}
+      POSTGRES_DB: ${NEXTCLOUD_DB_NAME:-nextcloud}
+    volumes:
+      - nextcloud-db:/var/lib/postgresql/data
+
+  nextcloud-redis:
+    <<: *app-service
+    image: ${REDIS_IMAGE:-redis:alpine}
+    volumes:
+      - nextcloud-redis:/data
+
+  nextcloud:
+    <<: *app-service
+    image: ${NEXTCLOUD_IMAGE:-nextcloud:apache}
+    depends_on:
+      - nextcloud-db
+      - nextcloud-redis
+    environment:
+      POSTGRES_HOST: nextcloud-db
+      POSTGRES_USER: ${NEXTCLOUD_DB_USER:-nextcloud}
+      POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD:-openart}
+      POSTGRES_DB: ${NEXTCLOUD_DB_NAME:-nextcloud}
+      REDIS_HOST: nextcloud-redis
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER:-admin}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD:-openart}
+      NEXTCLOUD_TRUSTED_DOMAINS: "localhost 127.0.0.1"
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${NEXTCLOUD_PORT:-26060}:80"
+    volumes:
+      - nextcloud-data:/var/www/html
+
+  onlyoffice:
+    <<: *app-service
+    image: ${ONLYOFFICE_IMAGE:-onlyoffice/documentserver:latest}
+    environment:
+      JWT_ENABLED: "false"
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${ONLYOFFICE_PORT:-26061}:80"
+    volumes:
+      - onlyoffice-data:/var/www/onlyoffice/Data
+      - onlyoffice-logs:/var/log/onlyoffice
+
+  minio:
+    <<: *emulator-service
+    image: ${MINIO_IMAGE:-quay.io/minio/minio:latest}
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-openart}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-openart-secret}
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${MINIO_API_PORT:-26070}:9000"
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${MINIO_CONSOLE_PORT:-26071}:9001"
+    volumes:
+      - minio-data:/data
+
+  localstack:
+    <<: *emulator-service
+    image: ${LOCALSTACK_IMAGE:-localstack/localstack:latest}
+    environment:
+      SERVICES: ${LOCALSTACK_SERVICES:-s3,sqs,dynamodb,lambda,sts}
+      DEBUG: ${LOCALSTACK_DEBUG:-0}
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${LOCALSTACK_EDGE_PORT:-26080}:4566"
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  bigquery-emulator:
+    <<: *emulator-service
+    image: ${BIGQUERY_EMULATOR_IMAGE:-ghcr.io/goccy/bigquery-emulator:latest}
+    command:
+      - "--project=${GENERIC_BIGQUERY_PROJECT_ID:-openart}"
+      - "--port=9050"
+      - "--grpc-port=9060"
+      - "--database=/data/bigquery.sqlite"
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${GENERIC_BIGQUERY_API_PORT:-26090}:9050"
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${GENERIC_BIGQUERY_GRPC_PORT:-26091}:9060"
+    volumes:
+      - generic-bigquery-data:/data
+
+  gotenberg:
+    <<: *emulator-service
+    image: ${GOTENBERG_IMAGE:-gotenberg/gotenberg:8}
+    ports:
+      - "${SERVICE_BIND_HOST:-127.0.0.1}:${GOTENBERG_PORT:-26100}:3000"
+
+volumes:
+  dtap-paypal-pg:
+  dtap-atlassian-pg:
+  dtap-github-db:
+  dtap-googledocs-db:
+  dtap-telegram-pg:
+  dtap-whatsapp-pg:
+  dtap-snowflake-pg:
+  dtap-databricks-pg:
+  dtap-bigquery-data:
+  mailpit-data:
+  gitea-data:
+  mattermost-db:
+  mattermost-data:
+  mattermost-logs:
+  mattermost-config:
+  mattermost-plugins:
+  mattermost-client-plugins:
+  baserow-data:
+  nocodb-data:
+  openproject-data:
+  nextcloud-db:
+  nextcloud-redis:
+  nextcloud-data:
+  onlyoffice-data:
+  onlyoffice-logs:
+  minio-data:
+  localstack-data:
+  generic-bigquery-data:
