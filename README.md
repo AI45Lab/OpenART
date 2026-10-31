@@ -126,9 +126,9 @@ through `openartv5-mid-003553`, with 74 source tasks skipped). Its bundles ship
 as `bundles/mid/tasks-mid-v5-*.zip`, with metadata in
 `data/mid/metadata-00001.parquet` and a dedicated manifest under
 `manifests/mid-v5/`. The v1 bundles are unchanged; `manifests/export_manifest.json`
-still describes only the original 6,597-task release. Because both v1 and v5 mid
-metadata live under `data/mid/`, the Dataset Viewer's `mid` config reports 4,599
-rows and `large` reports 5,551.
+still describes only the original 6,597-task release. On Hugging Face the three
+exports are exposed as separate Dataset Viewer configs: `mid` (1,046 rows),
+`mid-v5` (3,553), and `large` (5,551).
 
 Every task bundle includes `task.md`, `scenario_model.json`, `tool_pool.json`,
 `tool_use_graph.json`, `safety_contract.json`, `capabilities.generated.yaml`,
