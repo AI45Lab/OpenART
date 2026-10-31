@@ -20,8 +20,9 @@
 ## Data
 
 - [openart-planner-tasks](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks):
-  6,597 verified planner-generated tasks in 34 shards, with checksums and
-  release validation.
+  10,150 verified planner-generated tasks in 52 shards, with checksums and
+  release validation. The v5 export (Oct 2026) adds 3,553 mid-difficulty tasks;
+  v1 provides 1,046 `mid` and 5,551 `large` tasks.
 - [openart-tools](https://huggingface.co/datasets/dongdongunique/openart-tools):
   63,697 materialized tools selected from the 500K+ capability corpus.
 

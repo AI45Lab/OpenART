@@ -7,6 +7,8 @@ tools required by those tasks.
 
 OpenART is the agent version of [OpenRT](https://github.com/AI45Lab/OpenRT).
 
+[10/28/2026] 📦 The planner task dataset expanded to 10,150 tasks: a new v5 export adds 3,553 mid-difficulty tasks in 18 shards.
+
 [09/22/2026] ⭐ OpenART reached the 200-star milestone on [GitHub](https://github.com/AI45Lab/OpenART).
 
 [![arXiv](https://img.shields.io/badge/arXiv-2608.00677-b31b1b.svg)](https://arxiv.org/abs/2608.00677)
@@ -110,8 +112,31 @@ decisions carried forward from earlier steps.
 
 The public
 [OpenART planner task dataset](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
-contains 6,597 verified tasks in 34 zip shards. Its release checks covered
-checksums, archive integrity, and sample extraction.
+contains **10,150 verified tasks in 52 zip shards** (~75 GB), published in two
+waves:
+
+| Release | Difficulty | Planner profile | Tasks | Shards | Size |
+| --- | --- | --- | ---: | ---: | ---: |
+| v1 (Aug 2026) | `mid` | `stress` | 1,046 | 6 | 69 MB |
+| v1 (Aug 2026) | `large` | `high-tool-calls-60-100` | 5,551 | 28 | 4.97 GB |
+| v5 (Oct 2026) | `mid-v5` | `moderate-risk-diverse-30-45` | 3,553 | 18 | 70.2 GB |
+
+The October v5 export adds 3,553 new mid-difficulty tasks (`openartv5-mid-000001`
+through `openartv5-mid-003553`, with 74 source tasks skipped). Its bundles ship
+as `bundles/mid/tasks-mid-v5-*.zip`, with metadata in
+`data/mid/metadata-00001.parquet` and a dedicated manifest under
+`manifests/mid-v5/`. The v1 bundles are unchanged; `manifests/export_manifest.json`
+still describes only the original 6,597-task release. Because both v1 and v5 mid
+metadata live under `data/mid/`, the Dataset Viewer's `mid` config reports 4,599
+rows and `large` reports 5,551.
+
+Every task bundle includes `task.md`, `scenario_model.json`, `tool_pool.json`,
+`tool_use_graph.json`, `safety_contract.json`, `capabilities.generated.yaml`,
+`planner_plan.json`, `checkpoints.md`, `utils/evaluator.py`,
+`utils/test_evaluator.py`, and an executable `workspace/`. Metadata is exposed
+as Parquet for the Dataset Viewer, release checks cover checksums, archive
+integrity, and sample extraction, and `scripts/download_task.py` extracts a
+single task from a local clone.
 
 We also release the public
 [OpenART tools dataset](https://huggingface.co/datasets/dongdongunique/openart-tools),
