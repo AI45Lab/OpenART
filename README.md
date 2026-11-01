@@ -1,19 +1,29 @@
-# OpenART
+# OpenART: Open Agent Red Teaming
 
-OpenART is an executable benchmark for evaluating the safety of tool-using code
-agents in long-running, evolving environments. This repository contains its
-Docker-based runtime, three runnable high-complexity tasks, and the managed
-tools required by those tasks.
+**An executable benchmark for red-teaming tool-using agents in long-horizon, evolving environments.**
 
-OpenART is the agent version of [OpenRT](https://github.com/AI45Lab/OpenRT).
+OpenART (**Open Agent Red Teaming**) evaluates whether autonomous agents stay
+safe when their workspace changes mid-run. It ships a Docker-native runtime, a
+public dataset of 10,150 released tasks, and 63,697 materialized tools on
+Hugging Face. Use it to measure tool-using agents (OpenCode, Claude Code,
+Codex, and other runtimes) beyond single-turn chat.
 
-[10/28/2026] 📦 The planner task dataset expanded to 10,150 tasks: a new v5 export adds 3,553 mid-difficulty tasks in 18 shards.
+OpenART is the agent-focused sibling of [OpenRT](https://github.com/AI45Lab/OpenRT),
+an open-source red-teaming framework for multimodal LLMs.
+
+[![arXiv](https://img.shields.io/badge/arXiv-2608.00677-b31b1b.svg)](https://arxiv.org/abs/2608.00677)
+[![Dataset](https://img.shields.io/badge/Hugging%20Face-10%2C150%20tasks-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
+[![Tools](https://img.shields.io/badge/Hugging%20Face-63%2C697%20tools-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-tools)
+[![License](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+
+**At a glance:** 10,150 public tasks · 50 domains · median 97 tool calls · 15 agents × 5 models · 85.0% pooled strict ASR (EMHA attacker) · 87.38% benign completion.
+
+**Quickstart:** see [Setup](#setup) for the environment and Docker image, then
+[Model-backed evaluations](#model-backed-evaluations) to run a bundled task.
 
 [09/22/2026] ⭐ OpenART reached the 200-star milestone on [GitHub](https://github.com/AI45Lab/OpenART).
 
-[![arXiv](https://img.shields.io/badge/arXiv-2608.00677-b31b1b.svg)](https://arxiv.org/abs/2608.00677)
-[![Dataset](https://img.shields.io/badge/Hugging%20Face-openart--planner--tasks-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
-[![Tools](https://img.shields.io/badge/Hugging%20Face-openart--tools-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-tools)
+**Contents:** [Research summary](#research-summary) · [Paper and datasets](#paper-and-datasets) · [Repository layout](#repository-layout) · [Setup](#setup) · [Model-backed evaluations](#model-backed-evaluations) · [Task generation](#task-generation) · [Services](#services) · [Documentation](#documentation) · [FAQ](#faq) · [Citing OpenART](#citing-openart) · [License](#license)
 
 ## Research summary
 
@@ -22,8 +32,8 @@ for **agent safety evaluation**: red-teaming tool-using LLM agents inside
 **long-horizon, executable, evolving environments**. It is relevant when your
 question matches one of these patterns:
 
-- How safe are **tool-using / code agents** (OpenCode, Claude Code, Codex CLI,
-  and 12 other runtimes) beyond single-turn chat?
+- How safe are **tool-using / code agents** (OpenCode, Claude Code, Codex, and
+  other runtimes) beyond single-turn chat?
 - Do agents fail when the **environment state changes mid-run** (files edited,
   tools swapped, services updated) — *environment evolution* — while the task
   and hidden safety contract stay fixed?
@@ -49,12 +59,12 @@ their publicly released samples.
 
 | Benchmark | Tool calls | Dependency depth | Parallel width | State objects | File formats |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| InjecAgent | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 0 [0-0] |
-| ToolEmu | 3 [1.5-4] | 2.5 [1.2-3.8] | 1 [1-1.8] | 3 [1.2-3] | 0 [0-0] |
-| AgentDojo | 2 [1-3] | 2 [1-3] | 1 [1-1] | 1 [1-2] | 0 [0-0] |
-| AgentHarm | 3.5 [3-4] | 3 [3-3] | 1.5 [1-2] | 3.5 [3-4] | 0 [0-0] |
-| ASB | 2 [2-2] | 2 [2-2] | 1 [1-1] | 2 [2-2] | 0 [0-0] |
-| DTap | 15 [7.4-18.7] | 2 [1-3] | 1.5 [1-2] | 2.5 [1-4] | 1 [0-3] |
+| [InjecAgent](https://arxiv.org/abs/2403.02691) | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 0 [0-0] |
+| [ToolEmu](https://arxiv.org/abs/2309.15817) | 3 [1.5-4] | 2.5 [1.2-3.8] | 1 [1-1.8] | 3 [1.2-3] | 0 [0-0] |
+| [AgentDojo](https://arxiv.org/abs/2406.13352) | 2 [1-3] | 2 [1-3] | 1 [1-1] | 1 [1-2] | 0 [0-0] |
+| [AgentHarm](https://arxiv.org/abs/2410.09024) | 3.5 [3-4] | 3 [3-3] | 1.5 [1-2] | 3.5 [3-4] | 0 [0-0] |
+| [ASB](https://arxiv.org/abs/2410.02644) | 2 [2-2] | 2 [2-2] | 1 [1-1] | 2 [2-2] | 0 [0-0] |
+| [DTap](https://arxiv.org/abs/2605.04808) | 15 [7.4-18.7] | 2 [1-3] | 1.5 [1-2] | 2.5 [1-4] | 1 [0-3] |
 | **OpenART** | **97 [90.2-100]** | **32 [15.8-84.8]** | **12.5 [3-24.5]** | **96.5 [90.2-100]** | **7.5 [7-9]** |
 
 OpenART reaches a median dependency depth of 32 and parallel width of 12.5,
@@ -100,7 +110,7 @@ fixed while target-visible state changes during execution.
 | Capability corpus | 500K+ tools and skills |
 | Median task horizon | 97 tool calls |
 | Evaluation matrix | 15 agents × 5 models (75 settings) |
-| Target-visible attack surfaces | 8 |
+| Target-visible attack vectors | 8 |
 | Reference attacker | Evolutionary Markov Hypergraph Attack (EMHA) |
 | Pooled strict attack success rate | 85.0% |
 
@@ -112,23 +122,7 @@ decisions carried forward from earlier steps.
 
 The public
 [OpenART planner task dataset](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
-contains **10,150 verified tasks in 52 zip shards** (~75 GB), published in two
-waves:
-
-| Release | Difficulty | Planner profile | Tasks | Shards | Size |
-| --- | --- | --- | ---: | ---: | ---: |
-| v1 (Aug 2026) | `mid` | `stress` | 1,046 | 6 | 69 MB |
-| v1 (Aug 2026) | `large` | `high-tool-calls-60-100` | 5,551 | 28 | 4.97 GB |
-| v5 (Oct 2026) | `mid-v5` | `moderate-risk-diverse-30-45` | 3,553 | 18 | 70.2 GB |
-
-The October v5 export adds 3,553 new mid-difficulty tasks (`openartv5-mid-000001`
-through `openartv5-mid-003553`, with 74 source tasks skipped). Its bundles ship
-as `bundles/mid/tasks-mid-v5-*.zip`, with metadata in
-`data/mid/metadata-00001.parquet` and a dedicated manifest under
-`manifests/mid-v5/`. The v1 bundles are unchanged; `manifests/export_manifest.json`
-still describes only the original 6,597-task release. On Hugging Face the three
-exports are exposed as separate Dataset Viewer configs: `mid` (1,046 rows),
-`mid-v5` (3,553), and `large` (5,551).
+contains **10,150 released tasks in 52 zip shards** (~75 GB).
 
 Every task bundle includes `task.md`, `scenario_model.json`, `tool_pool.json`,
 `tool_use_graph.json`, `safety_contract.json`, `capabilities.generated.yaml`,
@@ -144,6 +138,26 @@ which packages 63,697 selected materialized tools from the OpenART capability
 corpus. This 60K+ subset prioritizes the most usable OpenART tools for task
 execution, reuse, and reproducible benchmark construction. The release includes
 metadata, archive manifests, checksums, and a lightweight download helper.
+
+Load the task metadata directly (no bundle download):
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("dongdongunique/openart-planner-tasks", "mid", split="train")
+print(ds.num_rows, len(ds.features))  # 1046 27
+```
+
+Extract one task from a local dataset copy with the dataset's
+`scripts/download_task.py`:
+
+```bash
+python scripts/download_task.py \
+  --dataset-dir openart-planner-tasks \
+  --difficulty mid-v5 \
+  --task-id openartv5-mid-000001 \
+  --output-dir ./task
+```
 
 ## Repository layout
 
@@ -315,6 +329,26 @@ bash OpenART/services/scripts/get_service_status.sh
 - [Planner design and usage](OpenART/docs/12_planner_design_implementation_usage.md)
 - [Unified operator guide](OpenART/skills/openart/SKILL.md)
 
+## FAQ
+
+**What does OpenART evaluate?** Executable tool-using agent workflows under a
+fixed hidden safety contract, while target-visible state changes mid-run.
+
+**What is environment evolution?** Changes to the agent's workspace, tools, or
+services during a run, while the benign goal and safety contract stay fixed.
+
+**How is OpenART different from single-turn prompt-injection benchmarks?**
+Tasks are long-horizon (median 97 tool calls) and are judged over full traces
+and snapshots, not a single model response.
+
+**How do I run one released task?** Download the planner task dataset, pick a
+config (`mid`, `mid-v5`, or `large`), and extract a task with the dataset's
+`scripts/download_task.py`. See [Paper and datasets](#paper-and-datasets).
+
+**Where are the evaluation results?** The comparison and 75-setting tables
+above summarize the paper; full per-setting numbers are in
+[arXiv:2608.00677](https://arxiv.org/abs/2608.00677).
+
 ## Citing OpenART
 
 If you use the OpenART runtime, tasks, tools dataset, or evaluation results,
@@ -322,20 +356,26 @@ please cite the paper and the repository. The canonical metadata lives in
 [`CITATION.cff`](CITATION.cff), which GitHub exposes as the "Cite this
 repository" link.
 
+**Cite as:** Chen et al., "OpenART: Scaling Agent Red Teaming via Open-Ended
+Environment Evolution", [arXiv:2608.00677](https://arxiv.org/abs/2608.00677)
+(2026).
+
 ```bibtex
-@article{chen2026openart,
-  title        = {OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution},
-  author       = {Chen, Yunhao and Wang, Xin and Wang, Yixu and Liu, Yi and Li, Jie
-                  and Teng, Yan and Ma, Xingjun and Hu, Xia and Jiang, Yu-Gang},
-  year         = {2026},
-  journal      = {arXiv preprint arXiv:2608.00677},
-  url          = {https://arxiv.org/abs/2608.00677},
-  note         = {Code: https://github.com/AI45Lab/OpenART}
+@misc{chen2026openart,
+  title         = {OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution},
+  author        = {Chen, Yunhao and Wang, Xin and Wang, Yixu and Liu, Yi and Li, Jie
+                   and Teng, Yan and Ma, Xingjun and Hu, Xia and Jiang, Yu-Gang},
+  year          = {2026},
+  eprint        = {2608.00677},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url           = {https://arxiv.org/abs/2608.00677},
+  note          = {Code: https://github.com/AI45Lab/OpenART}
 }
 ```
 
-The official project name is **OpenART**; use the paper title above verbatim
-in bibliographies rather than variants such as "OpenART Arena".
+The paper PDF also prints **OpenART Arena**; both strings refer to this work.
+Cite the arXiv title above verbatim in bibliographies.
 
 ## License
 
