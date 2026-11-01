@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ai45lab.github.io/OpenART/sitemap.xml

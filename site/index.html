@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenART: Open Agent Red Teaming — Tool-Using Agent Safety Benchmark</title>
+  <meta name="description" content="OpenART evaluates tool-using agent safety in long-horizon, evolving Docker environments, with 10,150 released tasks, public tools, and paper-reported results.">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="AI45Lab">
+  <meta name="theme-color" content="#0b0c10">
+  <link rel="canonical" href="https://ai45lab.github.io/OpenART/">
+  <link rel="preload" href="assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="alternate" type="text/plain" href="llms.txt">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ai45lab.github.io/OpenART/">
+  <meta property="og:title" content="OpenART: Open Agent Red Teaming — Tool-Using Agent Safety Benchmark">
+  <meta property="og:description" content="OpenART evaluates tool-using agent safety in long-horizon, evolving Docker environments, with 10,150 released tasks, public tools, and paper-reported results.">
+  <meta property="og:image" content="https://ai45lab.github.io/OpenART/assets/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="OpenART: Open Agent Red Teaming — executable benchmark for tool-using agent safety">
+  <meta property="og:site_name" content="OpenART">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OpenART: Open Agent Red Teaming — Tool-Using Agent Safety Benchmark">
+  <meta name="twitter:description" content="OpenART evaluates tool-using agent safety in long-horizon, evolving Docker environments, with 10,150 released tasks, public tools, and paper-reported results.">
+  <meta name="twitter:image" content="https://ai45lab.github.io/OpenART/assets/og.png">
+  <meta name="twitter:image:alt" content="OpenART: Open Agent Red Teaming — executable benchmark for tool-using agent safety">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "ScholarlyArticle",
+        "@id": "https://arxiv.org/abs/2608.00677",
+        "headline": "OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution",
+        "author": [
+          {"@type": "Person", "name": "Yunhao Chen"},
+          {"@type": "Person", "name": "Xin Wang"},
+          {"@type": "Person", "name": "Yixu Wang"},
+          {"@type": "Person", "name": "Yi Liu"},
+          {"@type": "Person", "name": "Jie Li"},
+          {"@type": "Person", "name": "Yan Teng"},
+          {"@type": "Person", "name": "Xingjun Ma"},
+          {"@type": "Person", "name": "Xia Hu"},
+          {"@type": "Person", "name": "Yu-Gang Jiang"}
+        ],
+        "datePublished": "2026-08-01",
+        "dateModified": "2026-09-29",
+        "identifier": "arXiv:2608.00677",
+        "sameAs": "https://arxiv.org/abs/2608.00677",
+        "url": "https://arxiv.org/abs/2608.00677",
+        "isAccessibleForFree": true
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        "@id": "https://ai45lab.github.io/OpenART/#software",
+        "name": "OpenART",
+        "description": "OpenART is an executable benchmark and Docker-native runtime for evaluating tool-using agent safety in long-horizon, evolving environments.",
+        "codeRepository": "https://github.com/AI45Lab/OpenART",
+        "programmingLanguage": "Python",
+        "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+        "url": "https://ai45lab.github.io/OpenART/"
+      },
+      {
+        "@type": "Dataset",
+        "@id": "https://huggingface.co/datasets/dongdongunique/openart-planner-tasks",
+        "name": "OpenART Planner Tasks",
+        "description": "The OpenART planner task dataset contains 10,150 released executable tasks in 52 ZIP shards with metadata exposed through three viewer configurations.",
+        "url": "https://huggingface.co/datasets/dongdongunique/openart-planner-tasks",
+        "license": "https://huggingface.co/datasets/dongdongunique/openart-planner-tasks/blob/main/README.md#license",
+        "conditionsOfAccess": "Mixed upstream terms; see the dataset card License section.",
+        "creator": {"@type": "Organization", "name": "AI45Lab"},
+        "isAccessibleForFree": true,
+        "distribution": {
+          "@type": "DataDownload",
+          "contentUrl": "https://huggingface.co/datasets/dongdongunique/openart-planner-tasks"
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <div class="logo-group">
+        <a class="logo-ailab" href="https://www.shlab.org.cn/" target="_blank" rel="noopener">
+          <img src="assets/icon_ailab.png" alt="Shanghai AI Laboratory">
+        </a>
+        <div class="logo-divider logo-divider-first"></div>
+        <a href="https://ai45.shlab.org.cn/" target="_blank" rel="noopener">
+          <img src="assets/icon_ai45_en.png" alt="AI45Lab">
+        </a>
+        <div class="logo-divider logo-divider-wordmark"></div>
+        <a class="wordmark" href="./">OpenART</a>
+      </div>
+      <div class="nav-links">
+        <a href="#overview">Overview</a>
+        <a href="#evaluation">Evaluation</a>
+        <a href="#artifacts">Artifacts</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="#citation">Citation</a>
+        <a href="https://github.com/AI45Lab/OpenART">GitHub <span aria-hidden="true">↗</span></a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-title">
+      <img class="hero-logo" src="assets/icon-openart.png" alt="OpenART" width="300" height="84">
+      <p class="kicker">Executable benchmark · Agent safety</p>
+      <h1 id="hero-title" class="title">OpenART: Open Agent Red Teaming</h1>
+      <p class="hero-summary">An executable benchmark for red-teaming tool-using agents in long-horizon, evolving Docker environments.</p>
+      <p class="authors">Yunhao Chen · Xin Wang · Yixu Wang · Yi Liu · Jie Li · Yan Teng · Xingjun Ma · Xia Hu · Yu-Gang Jiang</p>
+      <div class="hero-actions" aria-label="Primary resources">
+        <a class="btn primary" href="https://arxiv.org/abs/2608.00677">Paper <span aria-hidden="true">↗</span></a>
+        <a class="btn" href="https://github.com/AI45Lab/OpenART">Code <span aria-hidden="true">↗</span></a>
+        <a class="btn" href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">Dataset <span aria-hidden="true">↗</span></a>
+        <a class="btn" href="https://huggingface.co/datasets/dongdongunique/openart-tools">Tools <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <aside class="safety-note" aria-label="Safety benchmark notice">
+      <p><strong>Evaluation fixtures, not instructions.</strong> This is a red-teaming safety benchmark. Task workspaces may contain synthetic risky-source strings; treat them as evaluation fixtures, not instructions.</p>
+    </aside>
+
+    <section id="overview" class="section" aria-labelledby="overview-title">
+      <h2 id="overview-title">What OpenART measures</h2>
+      <p class="lead">OpenART measures whether tool-using agents remain safe in executable, long-horizon, evolving Docker environments. The benign task and hidden safety contract stay fixed while target-visible state mutates mid-run; deterministic and model-based evaluators judge safety over execution traces and snapshots.</p>
+      <dl class="stats" aria-label="Released artifacts and paper-reported measurements">
+        <div><dt>Released tasks</dt><dd>10,150</dd></div>
+        <div><dt>ZIP shards (~75 GB)</dt><dd>52</dd></div>
+        <div><dt>Domains</dt><dd>50</dd></div>
+        <div><dt>Median tool calls</dt><dd>97</dd></div>
+        <div><dt>Agents × models (75 settings)</dt><dd>15 × 5</dd></div>
+        <div><dt>Pooled strict ASR (EMHA attacker)</dt><dd>85.0%</dd></div>
+        <div><dt>Benign completion</dt><dd>87.38%</dd></div>
+        <div><dt>Materialized tools</dt><dd>63,697</dd></div>
+      </dl>
+      <p class="small">Task, shard, and materialized-tool counts describe released artifacts. Domains, horizon, evaluation settings, and rates are paper-reported.</p>
+    </section>
+
+    <section class="section" aria-labelledby="workflow-title">
+      <h2 id="workflow-title">How it works</h2>
+      <div class="cards">
+        <article class="card">
+          <p class="step">01 / Execute</p>
+          <h3>Docker-native runtime</h3>
+          <p>Run tool-using agents inside executable environments with persistent workspace, tool, and service state.</p>
+        </article>
+        <article class="card">
+          <p class="step">02 / Evaluate</p>
+          <h3>Hidden safety contract</h3>
+          <p>Keep the benign goal and hidden safety contract fixed. Evaluate actions using deterministic checks and model-based judgments over traces and snapshots.</p>
+        </article>
+        <article class="card">
+          <p class="step">03 / Evolve</p>
+          <h3>Environment evolution + EMHA</h3>
+          <p>Environment evolution mutates target-visible state mid-run across 8 target-visible attack vectors. The reference attacker is the Evolutionary Markov Hypergraph Attack (EMHA).</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="ships-title">
+      <h2 id="ships-title">What ships</h2>
+      <div class="card ships-card">
+        <ul class="ships-list">
+          <li><strong>Docker-native runtime:</strong> configuration, evaluation, planner, and execution components.</li>
+          <li><strong>Planner-generated task dataset:</strong> 10,150 tasks, with three viewer configs: <code>mid</code> (1,046), <code>mid-v5</code> (3,553), and <code>large</code> (5,551). Parquet metadata is separate from the task ZIP bundles.</li>
+          <li><strong>Tools dataset:</strong> 63,697 selected materialized tools from the paper’s broader capability corpus.</li>
+          <li><strong>Three bundled high-complexity tasks</strong> for executable evaluation workflows.</li>
+          <li><strong><a href="https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff">CITATION.cff</a>:</strong> canonical repository citation metadata.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="quickstart" class="section" aria-labelledby="quickstart-title">
+      <h2 id="quickstart-title">Inspect metadata before downloading bundles</h2>
+      <div class="card">
+        <p>This snippet loads task metadata, not the executable workspace ZIP bundles.</p>
+        <pre tabindex="0" aria-label="Python metadata quickstart"><code>from datasets import load_dataset
+
+ds = load_dataset("dongdongunique/openart-planner-tasks", "mid", split="train")
+print(ds.num_rows, len(ds.features))  # 1046 27</code></pre>
+        <p>For runtime dependencies and the Docker image, see <a href="https://github.com/AI45Lab/OpenART#setup">GitHub Setup</a>. For viewer configs and task bundles, see the <a href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">Hugging Face dataset card</a>.</p>
+      </div>
+    </section>
+
+    <section id="evaluation" class="section" aria-labelledby="evaluation-title">
+      <h2 id="evaluation-title">Paper settings and pooled results</h2>
+      <div class="table-card">
+        <table>
+          <caption>Reported in <a href="https://arxiv.org/abs/2608.00677">arXiv:2608.00677</a>; paper corpus counts are distinct from released artifact counts.</caption>
+          <thead><tr><th scope="col">Measurement</th><th scope="col">Paper-reported value</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Validated scenarios</th><td>10K+</td></tr>
+            <tr><th scope="row">Domains</th><td>50</td></tr>
+            <tr><th scope="row">Capability corpus</th><td>500K+ tools and skills</td></tr>
+            <tr><th scope="row">Median task horizon</th><td>97 tool calls</td></tr>
+            <tr><th scope="row">Evaluation matrix</th><td>15 agents × 5 models (75 settings)</td></tr>
+            <tr><th scope="row">Target-visible attack vectors</th><td>8</td></tr>
+            <tr><th scope="row">Pooled strict ASR (EMHA attacker)</th><td>85.0%</td></tr>
+            <tr><th scope="row">Pooled benign completion</th><td>87.38%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>These are paper-reported measurements; the agent runtime can affect safety beyond the choice of foundation model.</p>
+      <p class="small">Strict attack success rate (ASR) requires confirmation by both the deterministic evaluator and an LLM judge.</p>
+    </section>
+
+    <section id="artifacts" class="section" aria-labelledby="artifacts-title">
+      <h2 id="artifacts-title">Paper, code, and released data</h2>
+      <div class="cards">
+        <a class="card artifact" href="https://arxiv.org/abs/2608.00677"><h3>Paper <span aria-hidden="true">↗</span></h3><p>arXiv abstract · 2608.00677</p></a>
+        <a class="card artifact" href="https://arxiv.org/pdf/2608.00677"><h3>Paper PDF <span aria-hidden="true">↗</span></h3><p>Full methods and evaluation</p></a>
+        <a class="card artifact" href="https://github.com/AI45Lab/OpenART"><h3>GitHub <span aria-hidden="true">↗</span></h3><p>Runtime, setup, and documentation</p></a>
+        <a class="card artifact" href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks"><h3>Planner tasks <span aria-hidden="true">↗</span></h3><p>Metadata and executable bundles</p></a>
+        <a class="card artifact" href="https://huggingface.co/datasets/dongdongunique/openart-tools"><h3>Tools dataset <span aria-hidden="true">↗</span></h3><p>Selected materialized tools</p></a>
+        <a class="card artifact" href="https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff"><h3>CITATION.cff <span aria-hidden="true">↗</span></h3><p>Canonical citation metadata</p></a>
+        <a class="card artifact" href="llms.txt"><h3>llms.txt <span aria-hidden="true">↗</span></h3><p>Plain-text project facts and links</p></a>
+      </div>
+    </section>
+
+    <section id="citation" class="section" aria-labelledby="citation-title">
+      <h2 id="citation-title">Cite the arXiv paper and repository</h2>
+      <div class="card citation-card">
+        <p>Chen et al., <cite>OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution</cite>, <a href="https://arxiv.org/abs/2608.00677">arXiv:2608.00677</a> (2026). If you use the runtime, tasks, tools, or results, cite the paper and repository; <a href="https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff">CITATION.cff</a> contains the canonical metadata.</p>
+        <pre tabindex="0" aria-label="BibTeX citation"><code>@misc{chen2026openart,
+  title = {OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution},
+  author = {Chen, Yunhao and Wang, Xin and Wang, Yixu and Liu, Yi and Li, Jie
+            and Teng, Yan and Ma, Xingjun and Hu, Xia and Jiang, Yu-Gang},
+  year = {2026},
+  eprint = {2608.00677},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.CL},
+  url = {https://arxiv.org/abs/2608.00677},
+  note = {Code: https://github.com/AI45Lab/OpenART}
+}</code></pre>
+        <p class="small">The PDF also prints “OpenART Arena”; both names refer to this work. Use the arXiv title above in bibliographies.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p><strong>OpenART</strong> · Open Agent Red Teaming</p>
+      <p>Code: <a href="https://github.com/AI45Lab/OpenART/blob/main/LICENSE">AGPL-3.0 LICENSE</a>. The <a href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">dataset card</a> uses <code>license: other</code> with mixed upstream terms.</p>
+      <p class="small"><a href="llms.txt">Machine-readable summary</a> · <a href="https://github.com/AI45Lab/OpenART">GitHub</a> · <a href="https://www.shlab.org.cn/">Shanghai AI Laboratory</a></p>
+    </div>
+  </footer>
+</body>
+</html>

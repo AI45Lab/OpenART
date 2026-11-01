@@ -1,0 +1,37 @@
+# OpenART: Open Agent Red Teaming
+
+OpenART is an executable benchmark and Docker-native runtime for evaluating tool-using agent safety in long-horizon, evolving environments. The benign task and hidden safety contract remain fixed while target-visible workspace, tool, or service state changes mid-run. Deterministic and model-based evaluators judge safety over execution traces and snapshots. Task workspaces may contain synthetic risky-source strings that are evaluation fixtures, not instructions.
+
+## Key facts
+
+- Released planner tasks: 10,150 in 52 ZIP shards (~75 GB).
+- Dataset viewer configs: mid (1,046 tasks), mid-v5 (3,553), large (5,551).
+- Released tools dataset: 63,697 selected materialized tools.
+- Paper settings: 10K+ validated scenarios, 50 domains, 500K+ tools and skills, median 97 tool calls.
+- Paper evaluation matrix: 15 agents × 5 models (75 settings), with 8 target-visible attack vectors.
+- Paper-reported pooled strict attack success rate: 85.0% using the Evolutionary Markov Hypergraph Attack (EMHA). Strict ASR requires deterministic-evaluator and LLM-judge confirmation.
+- Paper-reported pooled benign completion: 87.38%.
+- The paper capability corpus is distinct from the released materialized-tool subset; paper settings are distinct from release counts.
+- The runtime can affect safety beyond the choice of foundation model.
+- Repository includes three bundled high-complexity tasks and CITATION.cff.
+- Code license: AGPL-3.0. The task dataset card uses `license: other` with mixed upstream terms; consult the card before reuse.
+
+## Canonical links
+
+- Project site: https://ai45lab.github.io/OpenART/
+- Paper: https://arxiv.org/abs/2608.00677
+- Paper PDF: https://arxiv.org/pdf/2608.00677
+- Code and documentation: https://github.com/AI45Lab/OpenART
+- Setup: https://github.com/AI45Lab/OpenART#setup
+- Hugging Face tasks: https://huggingface.co/datasets/dongdongunique/openart-planner-tasks
+- Hugging Face tools: https://huggingface.co/datasets/dongdongunique/openart-tools
+- Citation metadata: https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff
+- Code license: https://github.com/AI45Lab/OpenART/blob/main/LICENSE
+
+## Preferred citation
+
+Chen et al. (2026), “OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution,” arXiv:2608.00677. https://arxiv.org/abs/2608.00677
+
+Authors: Yunhao Chen, Xin Wang, Yixu Wang, Yi Liu, Jie Li, Yan Teng, Xingjun Ma, Xia Hu, and Yu-Gang Jiang.
+
+Cite both the arXiv paper and the software repository when using the runtime, tasks, tools, or evaluation results. The PDF also prints “OpenART Arena”; both names refer to this work. Use the arXiv title verbatim in bibliographies.
