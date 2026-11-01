@@ -284,6 +284,9 @@ tbody tr:nth-child(even) { background: var(--surface-2); }
   .container { width: calc(100% - 32px); }
   .error-page { padding-top: 150px; }
 }
+@media (max-width: 359px) {
+  .nav-links a { font-size: 0.79rem; }
+}
 @media (max-width: 340px) {
   .hero { padding-top: 180px; }
   .stats { grid-template-columns: 1fr; }
