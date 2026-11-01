@@ -4,57 +4,75 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Page not found — OpenART</title>
-  <meta name="description" content="This OpenART page could not be found. Visit the project overview, arXiv paper, or GitHub repository.">
+  <meta name="description" content="This OpenART page could not be found. Return to the interactive guide, the arXiv paper, or the GitHub repository.">
   <meta name="robots" content="noindex, follow">
-  <meta name="theme-color" content="#0b0c10">
+  <meta name="theme-color" content="#eeece5">
   <link rel="preload" href="/OpenART/assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/OpenART/styles.css">
   <link rel="icon" type="image/svg+xml" href="/OpenART/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/OpenART/assets/apple-touch-icon.png">
+  <style>
+    @font-face{font-family:"Outfit";font-style:normal;font-weight:100 900;font-display:swap;src:url("/OpenART/assets/fonts/outfit-latin.woff2") format("woff2")}
+    :root{--paper:#eeece5;--white:#f7f5ef;--ink:#2b302d;--muted:#63685f;--line:#d2d3c9;--green:#566b5e;--serif:Georgia,"Iowan Old Style","Palatino Linotype",serif;--sans:"Outfit","Helvetica Neue",Helvetica,Arial,sans-serif;--mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.8;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}button,a{-webkit-tap-highlight-color:transparent}:focus-visible{outline:2px solid var(--green);outline-offset:4px}
+    .wrap{width:min(1240px,calc(100% - 104px));margin-inline:auto}
+    .site-header{height:85px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40;background:rgba(238,236,229,.95);backdrop-filter:blur(12px)}
+    .header-inner{height:100%;display:flex;align-items:center;justify-content:space-between;gap:28px}
+    .brand{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:600;letter-spacing:-1.1px}
+    .brand-mark{width:25px;height:25px;display:inline-flex;transform:rotate(-8deg)}
+    .brand .slash{font-weight:300;color:#a0a398;margin:0 4px}
+    .brand-note{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--muted);font-weight:400}
+    .external-link{font-size:11px;border-bottom:1px solid var(--ink);padding-bottom:2px}
+    .error-main{min-height:calc(100vh - 190px);display:flex;align-items:center;padding:70px 0}
+    .error-grid{display:grid;grid-template-columns:230px 1fr;gap:40px;align-items:start;border-top:1px solid var(--line);padding-top:28px}
+    .error-index{font-family:var(--serif);font-size:90px;line-height:1;color:var(--green);letter-spacing:-.05em}
+    .error-index small{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted);margin-top:14px}
+    h1{font-family:var(--serif);font-size:clamp(38px,5vw,62px);line-height:1.18;letter-spacing:-.03em;font-weight:400;margin:0 0 18px}
+    .lead{max-width:600px;color:#656c62;font-size:14px;line-height:2;margin:0 0 26px}
+    .actions{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+    .button-solid{display:inline-flex;align-items:center;gap:18px;padding:11px 21px;background:var(--ink);color:var(--white);font-size:12px;transition:background .2s}
+    .button-solid:hover{background:#4c5c50}
+    .button-text{font-size:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+    .hint{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:34px;line-height:1.9}
+    .footer{border-top:1px solid var(--line);padding:20px 0 24px}
+    .footer-inner{display:flex;justify-content:space-between;gap:20px;align-items:center;font-size:9px;color:var(--muted);line-height:1.8}
+    .footer-brand{font-family:var(--serif);font-size:18px;color:var(--ink)}
+    .footer a{text-decoration:underline;text-underline-offset:3px}
+    @media(max-width:900px){.wrap{width:calc(100% - 44px)}.brand-note,.brand .slash{display:none}.error-grid{grid-template-columns:1fr;gap:22px}.error-index{font-size:64px}.error-index small{margin-top:8px}.site-header{height:72px}}
+    @media(max-width:620px){.wrap{width:calc(100% - 36px)}.site-header{height:65px}.brand{font-size:21px}.error-main{padding:50px 0}.footer-inner{flex-wrap:wrap;gap:8px}.external-link{font-size:10px}}
+  </style>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-
   <header class="site-header">
-    <nav class="nav" aria-label="Main navigation">
-      <div class="logo-group">
-        <a class="logo-ailab" href="https://www.shlab.org.cn/" target="_blank" rel="noopener">
-          <img src="/OpenART/assets/icon_ailab.png" alt="Shanghai AI Laboratory">
-        </a>
-        <div class="logo-divider logo-divider-first"></div>
-        <a href="https://ai45.shlab.org.cn/" target="_blank" rel="noopener">
-          <img src="/OpenART/assets/icon_ai45_en.png" alt="AI45Lab">
-        </a>
-        <div class="logo-divider logo-divider-wordmark"></div>
-        <a class="wordmark" href="/OpenART/">OpenART</a>
-      </div>
-      <div class="nav-links">
-        <a href="/OpenART/#overview">Overview</a>
-        <a href="/OpenART/#evaluation">Evaluation</a>
-        <a href="/OpenART/#artifacts">Artifacts</a>
-        <a href="/OpenART/#quickstart">Quickstart</a>
-        <a href="/OpenART/#citation">Citation</a>
-        <a href="https://github.com/AI45Lab/OpenART">GitHub <span aria-hidden="true">↗</span></a>
-      </div>
-    </nav>
+    <div class="wrap header-inner">
+      <a class="brand" href="/OpenART/" aria-label="OpenART home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" transform="rotate(-8 12 12)" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M7 15.5 17 8.5" fill="none" stroke="currentColor" stroke-width="1.1"/><circle cx="12" cy="12" r="2.1" fill="#eeece5" stroke="currentColor" stroke-width="1.1"/></svg></span>OpenART<span class="slash">/</span><span class="brand-note">RESEARCH NOTES</span></a>
+      <a class="external-link" href="https://github.com/AI45Lab/OpenART">GitHub ↗</a>
+    </div>
   </header>
 
-  <main id="main" class="error-page" tabindex="-1">
-    <p class="kicker">404</p>
-    <h1 class="title">Page not found</h1>
-    <p>The requested page is not available. Continue with the OpenART project or its research artifacts.</p>
-    <div class="hero-actions">
-      <a class="btn primary" href="/OpenART/">Project home</a>
-      <a class="btn" href="https://arxiv.org/abs/2608.00677">Paper</a>
-      <a class="btn" href="https://github.com/AI45Lab/OpenART">GitHub</a>
+  <main id="main" class="error-main">
+    <div class="wrap">
+      <div class="error-grid">
+        <div class="error-index">404<small>PAGE NOT FOUND</small></div>
+        <div>
+          <h1>This page has drifted<br>out of the environment.</h1>
+          <p class="lead">The address does not match a page on this site. The interactive guide, the paper, and the repository are still here.</p>
+          <div class="actions">
+            <a class="button-solid" href="/OpenART/">Open the guide <span aria-hidden="true">→</span></a>
+            <a class="button-text" href="https://arxiv.org/abs/2608.00677">Read the paper ↗</a>
+            <a class="button-text" href="https://github.com/AI45Lab/OpenART">GitHub ↗</a>
+          </div>
+          <p class="hint">OPENART · OPEN AGENT RED TEAMING<br>If you followed a project link, the page may have moved. Start from the guide.</p>
+        </div>
+      </div>
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p><strong>OpenART</strong> · Open Agent Red Teaming</p>
-      <p>Code: <a href="https://github.com/AI45Lab/OpenART/blob/main/LICENSE">AGPL-3.0 LICENSE</a>. The <a href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">dataset card</a> uses <code>license: other</code> with mixed upstream terms.</p>
-      <p class="small"><a href="/OpenART/llms.txt">Machine-readable summary</a> · <a href="https://github.com/AI45Lab/OpenART">GitHub</a> · <a href="https://www.shlab.org.cn/">Shanghai AI Laboratory</a></p>
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span class="footer-brand">OpenART</span>
+      <span>Code: <a href="https://github.com/AI45Lab/OpenART/blob/main/LICENSE">AGPL-3.0</a> · <a href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">dataset card</a> uses <code>license: other</code></span>
+      <span><a href="/OpenART/llms.txt">Machine-readable summary</a> · <a href="https://www.shlab.org.cn/">Shanghai AI Laboratory</a></span>
     </div>
   </footer>
 </body>

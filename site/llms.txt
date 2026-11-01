@@ -2,6 +2,8 @@
 
 OpenART is an executable benchmark and Docker-native runtime for evaluating tool-using agent safety in long-horizon, evolving environments. The benign task and hidden safety contract remain fixed while target-visible workspace, tool, or service state changes mid-run. Deterministic and model-based evaluators judge safety over execution traces and snapshots. Task workspaces may contain synthetic risky-source strings that are evaluation fixtures, not instructions.
 
+The project page at https://ai45lab.github.io/OpenART/ is an interactive, figure-rich guide to the paper, method, figures, 75-setting result matrix, mechanisms, artifacts, and quickstart.
+
 ## Key facts
 
 - Released planner tasks: 10,150 in 52 ZIP shards (~75 GB).
@@ -11,10 +13,24 @@ OpenART is an executable benchmark and Docker-native runtime for evaluating tool
 - Paper evaluation matrix: 15 agents × 5 models (75 settings), with 8 target-visible attack vectors.
 - Paper-reported pooled strict attack success rate: 85.0% using the Evolutionary Markov Hypergraph Attack (EMHA). Strict ASR requires deterministic-evaluator and LLM-judge confirmation.
 - Paper-reported pooled benign completion: 87.38%.
+- Long-horizon safety drift: across 10,000 converted trajectories, median propagation distance was 37 target actions (IQR 20–66); first evolved-state use at a median 23% of execution and first unsafe action at 64%, for a median 41% latency.
+- Paper Figure 2 ablation under DeepSeek-V4-Pro: Full EMHA 94.7%, no credit redistribution 92.1%, no archive 90.8%, instruction-only 81.6%, workspace-only 92.5%.
+- Paper Figure 3 reports long-horizon safety drift; Figure 4 reports Strict ASR across five complexity groups under GPT-5.5.
 - The paper capability corpus is distinct from the released materialized-tool subset; paper settings are distinct from release counts.
-- The runtime can affect safety beyond the choice of foundation model.
+- The runtime can affect safety beyond the choice of foundation model. The paper attributes 73.6% of ASR variation to the target model and 25.2% to the target agent.
 - Repository includes three bundled high-complexity tasks and CITATION.cff.
 - Code license: AGPL-3.0. The task dataset card uses `license: other` with mixed upstream terms; consult the card before reuse.
+
+## Page guide
+
+- Hero and key numbers: released tasks, paper-reported domains, released tools, and the 15 × 5 evaluation matrix.
+- Chapter 01, The question: interactive long-horizon trace and the paper's safety-drift definitions, with Figure 3.
+- Chapter 02, The arena: scenario synthesis, native-runtime adapters, fixed objective/evaluator, eight target-visible surfaces, and Figure 1.
+- Chapter 03, The search: EMHA hypergraph stepper, feedback loop, surface and search ablations, and Figure 2.
+- Chapter 04, The horizon: task-complexity comparisons from Table 2, full median table, and Figure 4.
+- Chapter 05, The evidence: pooled 85.0% Strict ASR, 15 × 5 result matrix with benign completion toggle, paper settings, and decomposition notes.
+- Chapter 06, What changes: five mechanisms from §5.2 and Appendix G.
+- Chapter 07, Use it: quickstart commands, released artifacts, safety boundary, FAQ, and BibTeX citation.
 
 ## Canonical links
 
@@ -22,11 +38,23 @@ OpenART is an executable benchmark and Docker-native runtime for evaluating tool
 - Paper: https://arxiv.org/abs/2608.00677
 - Paper PDF: https://arxiv.org/pdf/2608.00677
 - Code and documentation: https://github.com/AI45Lab/OpenART
+- Operator skill: https://github.com/AI45Lab/OpenART/blob/main/OpenART/skills/openart/SKILL.md
 - Setup: https://github.com/AI45Lab/OpenART#setup
 - Hugging Face tasks: https://huggingface.co/datasets/dongdongunique/openart-planner-tasks
 - Hugging Face tools: https://huggingface.co/datasets/dongdongunique/openart-tools
 - Citation metadata: https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff
 - Code license: https://github.com/AI45Lab/OpenART/blob/main/LICENSE
+
+## Figures
+
+Paper figures reproduced on the project page are © the authors and licensed CC BY 4.0. They are displayed with captions, descriptive alt text, and links to the full-size files:
+
+- Figure 1, OpenART overview: /assets/figures/fig1-overview.png
+- Figure 2, environment and search ablations: /assets/figures/fig2-ablations.png
+- Figure 3, long-horizon safety drift: /assets/figures/fig3-drift.png
+- Figure 4, Strict ASR across complexity groups: /assets/figures/fig4-complexity.png
+
+Attribution: Chen et al., “OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution,” arXiv:2608.00677, CC BY 4.0.
 
 ## Preferred citation
 

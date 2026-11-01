@@ -1,7 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://ai45lab.github.io/OpenART/</loc>
     <lastmod>2026-11-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://ai45lab.github.io/OpenART/assets/figures/fig1-overview.png</image:loc>
+      <image:title>Figure 1: OpenART overview</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://ai45lab.github.io/OpenART/assets/figures/fig2-ablations.png</image:loc>
+      <image:title>Figure 2: Environment and search ablations</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://ai45lab.github.io/OpenART/assets/figures/fig3-drift.png</image:loc>
+      <image:title>Figure 3: Long-horizon safety drift</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://ai45lab.github.io/OpenART/assets/figures/fig4-complexity.png</image:loc>
+      <image:title>Figure 4: Strict ASR across complexity groups</image:title>
+    </image:image>
   </url>
 </urlset>

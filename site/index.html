@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OpenART: Open Agent Red Teaming — Tool-Using Agent Safety Benchmark</title>
-  <meta name="description" content="OpenART evaluates tool-using agent safety in long-horizon, evolving Docker environments, with 10,150 released tasks, public tools, and paper-reported results.">
+  <script>document.documentElement.classList.add("js");</script>
+  <title>OpenART — Safety in Evolving Agent Environments | Interactive Guide</title>
+  <meta name="description" content="An interactive guide to OpenART, an executable benchmark for tool-using agent safety in long-horizon, evolving Docker environments. Follow the method, paper figures, 75-setting results, and released artifacts.">
   <meta name="robots" content="index, follow">
   <meta name="author" content="AI45Lab">
-  <meta name="theme-color" content="#0b0c10">
+  <meta name="theme-color" content="#eeece5">
   <link rel="canonical" href="https://ai45lab.github.io/OpenART/">
   <link rel="preload" href="assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
@@ -16,28 +17,44 @@
   <link rel="alternate" type="text/plain" href="llms.txt">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ai45lab.github.io/OpenART/">
-  <meta property="og:title" content="OpenART: Open Agent Red Teaming — Tool-Using Agent Safety Benchmark">
-  <meta property="og:description" content="OpenART evaluates tool-using agent safety in long-horizon, evolving Docker environments, with 10,150 released tasks, public tools, and paper-reported results.">
+  <meta property="og:title" content="OpenART — Safety in Evolving Agent Environments">
+  <meta property="og:description" content="An interactive guide to OpenART: long-horizon agent safety, environment evolution, EMHA, paper figures, and 75-setting results.">
   <meta property="og:image" content="https://ai45lab.github.io/OpenART/assets/og.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="OpenART: Open Agent Red Teaming — executable benchmark for tool-using agent safety">
+  <meta property="og:image:alt" content="OpenART interactive guide: safety on a moving ground">
   <meta property="og:site_name" content="OpenART">
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="OpenART: Open Agent Red Teaming — Tool-Using Agent Safety Benchmark">
-  <meta name="twitter:description" content="OpenART evaluates tool-using agent safety in long-horizon, evolving Docker environments, with 10,150 released tasks, public tools, and paper-reported results.">
+  <meta name="twitter:title" content="OpenART — Safety in Evolving Agent Environments">
+  <meta name="twitter:description" content="An interactive guide to OpenART: long-horizon agent safety, environment evolution, EMHA, paper figures, and 75-setting results.">
   <meta name="twitter:image" content="https://ai45lab.github.io/OpenART/assets/og.png">
-  <meta name="twitter:image:alt" content="OpenART: Open Agent Red Teaming — executable benchmark for tool-using agent safety">
+  <meta name="twitter:image:alt" content="OpenART interactive guide: safety on a moving ground">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "WebPage",
+        "@id": "https://ai45lab.github.io/OpenART/#webpage",
+        "url": "https://ai45lab.github.io/OpenART/",
+        "name": "OpenART — Safety in Evolving Agent Environments",
+        "description": "An interactive guide to OpenART, an executable benchmark for tool-using agent safety in long-horizon, evolving Docker environments.",
+        "inLanguage": "en",
+        "dateModified": "2026-11-01",
+        "primaryImageOfPage": {"@id": "https://ai45lab.github.io/OpenART/#fig1"},
+        "mainEntity": {"@id": "https://arxiv.org/abs/2608.00677"},
+        "about": [
+          {"@id": "https://arxiv.org/abs/2608.00677"},
+          {"@id": "https://ai45lab.github.io/OpenART/#software"}
+        ]
+      },
+      {
         "@type": "ScholarlyArticle",
         "@id": "https://arxiv.org/abs/2608.00677",
         "headline": "OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution",
+        "name": "OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution",
         "author": [
           {"@type": "Person", "name": "Yunhao Chen"},
           {"@type": "Person", "name": "Xin Wang"},
@@ -54,7 +71,14 @@
         "identifier": "arXiv:2608.00677",
         "sameAs": "https://arxiv.org/abs/2608.00677",
         "url": "https://arxiv.org/abs/2608.00677",
-        "isAccessibleForFree": true
+        "isAccessibleForFree": true,
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "image": [
+          "https://ai45lab.github.io/OpenART/assets/figures/fig1-overview.png",
+          "https://ai45lab.github.io/OpenART/assets/figures/fig2-ablations.png",
+          "https://ai45lab.github.io/OpenART/assets/figures/fig3-drift.png",
+          "https://ai45lab.github.io/OpenART/assets/figures/fig4-complexity.png"
+        ]
       },
       {
         "@type": "SoftwareSourceCode",
@@ -64,6 +88,7 @@
         "codeRepository": "https://github.com/AI45Lab/OpenART",
         "programmingLanguage": "Python",
         "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+        "creator": {"@type": "Organization", "name": "AI45Lab"},
         "url": "https://ai45lab.github.io/OpenART/"
       },
       {
@@ -80,180 +105,901 @@
           "@type": "DataDownload",
           "contentUrl": "https://huggingface.co/datasets/dongdongunique/openart-planner-tasks"
         }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://ai45lab.github.io/OpenART/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is OpenART?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "OpenART is an executable benchmark and Docker-native runtime for evaluating tool-using agent safety in long-horizon, evolving environments. It keeps the benign task and hidden safety contract fixed while target-visible state changes mid-run."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What does Strict ASR mean in OpenART?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Strict attack success rate counts an attack as successful only when both the deterministic evaluator and a GLM-5.2 judge confirm success. The paper reports a pooled Strict ASR of 85.0% across 75 agent-model settings."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does OpenART evaluate foundation models or agent runtimes?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "It evaluates deployed agent runtimes paired with foundation models. The paper reports 15 agents and 5 models, and finds that agent implementation explains safety variation beyond the foundation model and benign completion."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is long-horizon safety drift?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A trajectory in which the target consumes evolved state but reaches an unsafe action only after further actions. Across 10,000 converted trajectories, the median propagation distance was 37 target actions, with an interquartile range of 20 to 66."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I run one released task?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Download the OpenART planner task dataset, choose a viewer config (mid, mid-v5, or large), and extract a task with the dataset's scripts/download_task.py. The site quickstart shows the command."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need model credentials?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The deterministic evaluator path can run with --skip-attacker. Model-backed targets and attackers need endpoints and credentials in .env; see the repository setup guide."
+            }
+          }
+        ]
+      },
+      {
+        "@type": "ImageObject",
+        "@id": "https://ai45lab.github.io/OpenART/#fig1",
+        "contentUrl": "https://ai45lab.github.io/OpenART/assets/figures/fig1-overview.png",
+        "name": "Figure 1: OpenART overview",
+        "caption": "OpenART constructs an executable scenario with a benign workflow and fixed safety contract, instantiates it in a deployed agent through a target-specific adapter, and evolves the target-visible environment via feedback-guided state changes.",
+        "width": 2491,
+        "height": 1187,
+        "creditText": "Chen et al., arXiv:2608.00677",
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isPartOf": {"@id": "https://arxiv.org/abs/2608.00677"}
+      },
+      {
+        "@type": "ImageObject",
+        "@id": "https://ai45lab.github.io/OpenART/#fig2",
+        "contentUrl": "https://ai45lab.github.io/OpenART/assets/figures/fig2-ablations.png",
+        "name": "Figure 2: Environment and search ablations",
+        "caption": "Environment and search ablations under DeepSeek-V4-Pro with a matched attack budget, showing vector-restricted evolution and search-component ablations.",
+        "width": 1477,
+        "height": 806,
+        "creditText": "Chen et al., arXiv:2608.00677",
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isPartOf": {"@id": "https://arxiv.org/abs/2608.00677"}
+      },
+      {
+        "@type": "ImageObject",
+        "@id": "https://ai45lab.github.io/OpenART/#fig3",
+        "contentUrl": "https://ai45lab.github.io/OpenART/assets/figures/fig3-drift.png",
+        "name": "Figure 3: Long-horizon safety drift",
+        "caption": "Long-horizon safety drift across 10,000 converted trajectories, with median propagation distance of 37 target actions and median latency of 41 percent of execution.",
+        "width": 1579,
+        "height": 649,
+        "creditText": "Chen et al., arXiv:2608.00677",
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isPartOf": {"@id": "https://arxiv.org/abs/2608.00677"}
+      },
+      {
+        "@type": "ImageObject",
+        "@id": "https://ai45lab.github.io/OpenART/#fig4",
+        "contentUrl": "https://ai45lab.github.io/OpenART/assets/figures/fig4-complexity.png",
+        "name": "Figure 4: Strict ASR across complexity groups",
+        "caption": "Strict ASR under GPT-5.5 across five equal-sized complexity groups, comparing Full EMHA with instruction-only evolution.",
+        "width": 1558,
+        "height": 970,
+        "creditText": "Chen et al., arXiv:2608.00677",
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isPartOf": {"@id": "https://arxiv.org/abs/2608.00677"}
       }
     ]
   }
   </script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="read-progress" id="read-progress" aria-hidden="true"></div>
 
   <header class="site-header">
-    <nav class="nav" aria-label="Main navigation">
-      <div class="logo-group">
-        <a class="logo-ailab" href="https://www.shlab.org.cn/" target="_blank" rel="noopener">
-          <img src="assets/icon_ailab.png" alt="Shanghai AI Laboratory">
-        </a>
-        <div class="logo-divider logo-divider-first"></div>
-        <a href="https://ai45.shlab.org.cn/" target="_blank" rel="noopener">
-          <img src="assets/icon_ai45_en.png" alt="AI45Lab">
-        </a>
-        <div class="logo-divider logo-divider-wordmark"></div>
-        <a class="wordmark" href="./">OpenART</a>
+    <div class="wrap header-inner">
+      <a class="brand" href="#top" aria-label="OpenART home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="24" height="24" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" transform="rotate(-8 12 12)" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M7 15.5 17 8.5" fill="none" stroke="currentColor" stroke-width="1.1"/><circle cx="12" cy="12" r="2.1" fill="#eeece5" stroke="currentColor" stroke-width="1.1"/></svg>
+        </span>
+        OpenART<span class="slash">/</span><span class="brand-note">RESEARCH NOTES</span>
+      </a>
+      <nav class="main-nav" id="main-nav" aria-label="Chapter navigation">
+        <a href="#question">Question</a>
+        <a href="#arena">Arena</a>
+        <a href="#search">Search</a>
+        <a href="#horizon">Horizon</a>
+        <a href="#evidence">Evidence</a>
+        <a href="#use">Use it</a>
+      </nav>
+      <div class="header-tools">
+        <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="true" aria-label="Turn page animation off">
+          <i class="motion-indicator" aria-hidden="true"></i><span id="motion-label">Motion on</span>
+        </button>
+        <a class="external-link" href="https://github.com/AI45Lab/OpenART" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Contents ☰</button>
       </div>
-      <div class="nav-links">
-        <a href="#overview">Overview</a>
-        <a href="#evaluation">Evaluation</a>
-        <a href="#artifacts">Artifacts</a>
-        <a href="#quickstart">Quickstart</a>
-        <a href="#citation">Citation</a>
-        <a href="https://github.com/AI45Lab/OpenART">GitHub <span aria-hidden="true">↗</span></a>
-      </div>
-    </nav>
+    </div>
   </header>
 
-  <main id="main" tabindex="-1">
-    <section class="hero" aria-labelledby="hero-title">
-      <img class="hero-logo" src="assets/icon-openart.png" alt="OpenART" width="300" height="84">
-      <p class="kicker">Executable benchmark · Agent safety</p>
-      <h1 id="hero-title" class="title">OpenART: Open Agent Red Teaming</h1>
-      <p class="hero-summary">An executable benchmark for red-teaming tool-using agents in long-horizon, evolving Docker environments.</p>
-      <p class="authors">Yunhao Chen · Xin Wang · Yixu Wang · Yi Liu · Jie Li · Yan Teng · Xingjun Ma · Xia Hu · Yu-Gang Jiang</p>
-      <div class="hero-actions" aria-label="Primary resources">
-        <a class="btn primary" href="https://arxiv.org/abs/2608.00677">Paper <span aria-hidden="true">↗</span></a>
-        <a class="btn" href="https://github.com/AI45Lab/OpenART">Code <span aria-hidden="true">↗</span></a>
-        <a class="btn" href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">Dataset <span aria-hidden="true">↗</span></a>
-        <a class="btn" href="https://huggingface.co/datasets/dongdongunique/openart-tools">Tools <span aria-hidden="true">↗</span></a>
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="wrap">
+        <div class="hero-topline">
+          <div class="left"><span class="eyebrow">Agent safety · Environment evolution</span><span class="edition mono">Interactive explainer</span></div>
+          <span class="right mono">arXiv:2608.00677 · v2</span>
+        </div>
+
+        <div class="hero-layout">
+          <div class="hero-copy">
+            <p class="kicker">OpenART · Open Agent Red Teaming</p>
+            <h1>Safety,<br>on a <em>moving ground.</em></h1>
+            <p class="hero-title-en">When the environment evolves,<br>does safety hold?</p>
+            <p class="hero-desc">OpenART is an executable benchmark for red-teaming tool-using agents in long-horizon, evolving Docker environments. This guide follows one task, explains the method, and reads the paper’s figures and results.</p>
+            <div class="hero-cta">
+              <a class="button-solid" href="#question">Follow a long task <span aria-hidden="true">↓</span></a>
+              <a class="button-text" href="https://arxiv.org/pdf/2608.00677" target="_blank" rel="noopener noreferrer">Read the paper ↗</a>
+            </div>
+            <p class="hero-authors">Yunhao Chen · Xin Wang · Yixu Wang · Yi Liu · Jie Li · Yan Teng · Xingjun Ma · Xia Hu · Yu-Gang Jiang</p>
+          </div>
+
+          <figure class="hero-figure">
+            <svg class="hero-svg" viewBox="0 0 580 410" role="img" aria-labelledby="hero-diagram-title hero-diagram-desc">
+              <title id="hero-diagram-title">How state moves through a long-horizon agent workflow</title>
+              <desc id="hero-diagram-desc">A fixed task and safety contract feed an agent that reads and writes files, plans, tools, and memory. Environment changes re-enter the workflow as feedback. Conceptual diagram, not a real trajectory.</desc>
+              <defs><marker id="hero-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a7b29e"/></marker></defs>
+              <path class="grid-edge" d="M42 201H91Q105 201 105 187V124Q105 110 121 110H198" marker-end="url(#hero-arrow)"/>
+              <path class="grid-edge" d="M42 201H103Q117 201 117 215V298Q117 311 132 311H198" marker-end="url(#hero-arrow)"/>
+              <path class="grid-edge" d="M232 110H283Q298 110 298 126V202"/>
+              <path class="grid-edge" d="M232 311H283Q298 311 298 296V266"/>
+              <path class="grid-edge" d="M330 234H380Q396 234 396 219V132Q396 116 412 116H456" marker-end="url(#hero-arrow)"/>
+              <path class="grid-edge" d="M330 234H394Q410 234 410 250V306H456" marker-end="url(#hero-arrow)"/>
+              <path class="grid-edge" d="M491 150V204Q491 218 506 218H546"/>
+              <path class="grid-edge" d="M491 272V232Q491 218 506 218"/>
+              <path class="grid-edge" d="M214 144V163Q214 180 232 180H280"/>
+              <path class="grid-edge" d="M214 277V262Q214 249 232 249H268"/>
+              <path class="main-path" id="hero-route-a" d="M42 201H91Q105 201 105 187V124Q105 110 121 110H214Q298 110 298 194V234H380Q396 234 396 219V132Q396 116 412 116H491V204Q491 218 506 218H546" opacity=".6"/>
+              <path class="evolution-path" d="M491 341V359Q491 376 475 376H165Q149 376 149 360V336" marker-end="url(#hero-arrow)"/>
+              <circle cx="42" cy="201" r="15" class="box"/><path d="M37 201h10m-5-5v10" stroke="#566b5e" stroke-width="1.5"/><text x="42" y="236" text-anchor="middle" class="diagram-label">Task + contract</text><text x="42" y="253" text-anchor="middle" class="diagram-mono">FIXED</text>
+              <rect x="177" y="77" width="74" height="67" rx="1" class="box state-in"/><path d="M204 91h15l7 7v25h-22z M219 91v8h7 M209 107h12 M209 113h12" stroke="#85947a" stroke-width="1" fill="none"/><text x="214" y="163" text-anchor="middle" class="diagram-label">Files / workspace</text>
+              <rect x="177" y="277" width="74" height="67" rx="1" class="box"/><path d="M204 294h20v25h-20z M209 301h10 M209 307h10 M209 313h6" stroke="#85947a" stroke-width="1" fill="none"/><text x="214" y="266" text-anchor="middle" class="diagram-label">Plan / memory</text>
+              <circle cx="298" cy="234" r="46" fill="none" stroke="#a5b59a" stroke-width=".8" class="pulse-ring"/><circle cx="298" cy="234" r="32" fill="#d9e1d2" stroke="#92a486"/><circle cx="298" cy="234" r="23" fill="none" stroke="#b4c2a9"/><text x="298" y="238" text-anchor="middle" style="font:11px var(--mono);fill:#4f6550">AGENT</text><text x="298" y="295" text-anchor="middle" class="diagram-mono">READ · ACT · WRITE</text>
+              <rect x="456" y="83" width="70" height="67" rx="1" class="box"/><path d="M479 106h24m-20-6v13m8-17v21m8-17v13" stroke="#85947a" stroke-width="1.3"/><text x="491" y="171" text-anchor="middle" class="diagram-label">Tools / MCPs</text>
+              <rect x="456" y="272" width="70" height="69" rx="1" class="box"/><path d="M479 292h24 M479 300h18 M479 308h24 M479 316h14" stroke="#85947a" stroke-width="1.2"/><text x="491" y="260" text-anchor="middle" class="diagram-label">Intermediate state</text>
+              <circle cx="546" cy="218" r="7" fill="#566b5e"/><text x="546" y="245" text-anchor="middle" class="diagram-label">Action</text>
+              <text x="339" y="365" text-anchor="middle" style="font:10px var(--sans);fill:#7d4f3c;letter-spacing:1px">ENVIRONMENT EVOLUTION · FEEDBACK RE-ENTERS</text>
+              <path d="M165 30h38m-38 0v15 M531 30h-38m38 0v15" stroke="#b2bba9" fill="none"/><text x="348" y="34" text-anchor="middle" class="diagram-mono">PERSISTENT, EVOLVING ENVIRONMENT</text>
+              <circle r="4.5" class="signal"><animateMotion dur="8s" repeatCount="indefinite"><mpath href="#hero-route-a"/></animateMotion></circle>
+              <circle r="3.5" class="signal signal-rust"><animateMotion dur="8s" begin="-4s" repeatCount="indefinite" path="M491 341V359Q491 376 475 376H165Q149 376 149 360V336"/></circle>
+            </svg>
+            <figcaption class="figure-caption mono"><span>FIG. 01 / STATE MOVES THROUGH A WORKFLOW · CONCEPT</span><span class="live">Environment evolves</span></figcaption>
+          </figure>
+        </div>
+
+        <div class="metric-strip" aria-label="Key OpenART numbers">
+          <div class="metric"><div class="metric-number">10,150<small>tasks</small></div><div class="metric-label">Released executable tasks</div></div>
+          <div class="metric"><div class="metric-number">50<small>domains</small></div><div class="metric-label">Paper-reported task domains</div></div>
+          <div class="metric"><div class="metric-number">63,697<small>tools</small></div><div class="metric-label">Released materialized tools</div></div>
+          <div class="metric"><div class="metric-number">15 × 5</div><div class="metric-label">Agent runtimes × foundation models</div></div>
+        </div>
+        <div class="paper-credit"><span>CHEN ET AL. · OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution</span><span>10,150 tasks and 63,697 tools are release counts; 50 domains and 75 settings are paper-reported. <a href="#evidence">See the evidence ↓</a></span></div>
       </div>
     </section>
 
-    <aside class="safety-note" aria-label="Safety benchmark notice">
+    <aside class="safety-note wrap" aria-label="Safety benchmark notice">
       <p><strong>Evaluation fixtures, not instructions.</strong> This is a red-teaming safety benchmark. Task workspaces may contain synthetic risky-source strings; treat them as evaluation fixtures, not instructions.</p>
     </aside>
 
-    <section id="overview" class="section" aria-labelledby="overview-title">
-      <h2 id="overview-title">What OpenART measures</h2>
-      <p class="lead">OpenART measures whether tool-using agents remain safe in executable, long-horizon, evolving Docker environments. The benign task and hidden safety contract stay fixed while target-visible state mutates mid-run; deterministic and model-based evaluators judge safety over execution traces and snapshots.</p>
-      <dl class="stats" aria-label="Released artifacts and paper-reported measurements">
-        <div><dt>Released tasks</dt><dd>10,150</dd></div>
-        <div><dt>ZIP shards (~75 GB)</dt><dd>52</dd></div>
-        <div><dt>Domains</dt><dd>50</dd></div>
-        <div><dt>Median tool calls</dt><dd>97</dd></div>
-        <div><dt>Agents × models (75 settings)</dt><dd>15 × 5</dd></div>
-        <div><dt>Pooled strict ASR (EMHA attacker)</dt><dd>85.0%</dd></div>
-        <div><dt>Benign completion</dt><dd>87.38%</dd></div>
-        <div><dt>Materialized tools</dt><dd>63,697</dd></div>
-      </dl>
-      <p class="small">Task, shard, and materialized-tool counts describe released artifacts. Domains, horizon, evaluation settings, and rates are paper-reported.</p>
-    </section>
+    <section class="chapter section-line" id="question">
+      <div class="wrap">
+        <div class="chapter-head reveal">
+          <div class="chapter-index"><span class="num">01</span><span class="en">The question</span></div>
+          <div>
+            <h2 class="chapter-title">A decision can be planted early,<br>and surface much later.</h2>
+            <p class="chapter-desc">Agents read files, call tools, update plans, and reuse state. A judgment made in one step can become the basis for an action dozens of steps later. Short, static checks rarely cover this accumulation.</p>
+          </div>
+        </div>
 
-    <section class="section" aria-labelledby="workflow-title">
-      <h2 id="workflow-title">How it works</h2>
-      <div class="cards">
-        <article class="card">
-          <p class="step">01 / Execute</p>
-          <h3>Docker-native runtime</h3>
-          <p>Run tool-using agents inside executable environments with persistent workspace, tool, and service state.</p>
-        </article>
-        <article class="card">
-          <p class="step">02 / Evaluate</p>
-          <h3>Hidden safety contract</h3>
-          <p>Keep the benign goal and hidden safety contract fixed. Evaluate actions using deterministic checks and model-based judgments over traces and snapshots.</p>
-        </article>
-        <article class="card">
-          <p class="step">03 / Evolve</p>
-          <h3>Environment evolution + EMHA</h3>
-          <p>Environment evolution mutates target-visible state mid-run across 8 target-visible attack vectors. The reference attacker is the Evolutionary Markov Hypergraph Attack (EMHA).</p>
-        </article>
+        <div class="horizon-layout reveal">
+          <div class="trace-panel">
+            <div class="panel-label"><span>ANATOMY OF A LONG-HORIZON TASK</span><span>INTERACTIVE · ILLUSTRATIVE</span></div>
+            <div class="trace-task"><span class="tag">FIXED TASK</span>Prepare a project status report from approved records.</div>
+            <div aria-live="polite" aria-atomic="true">
+              <h3 class="trace-stage-title" id="trace-title">Task starts, boundary is clear.</h3>
+              <p class="trace-stage-desc" id="trace-desc">The agent receives a benign objective. The hidden safety contract stays fixed for the whole run.</p>
+            </div>
+            <div class="trace-rail" id="trace-rail">
+              <div class="trace-line-fill" id="trace-fill"></div>
+              <button class="trace-node current" type="button" data-step="0" aria-label="Stage 1: task"><i aria-hidden="true"></i><span>Task</span></button>
+              <button class="trace-node" type="button" data-step="1" aria-label="Stage 2: change"><i aria-hidden="true"></i><span>Change</span></button>
+              <button class="trace-node" type="button" data-step="2" aria-label="Stage 3: read"><i aria-hidden="true"></i><span>Read</span></button>
+              <button class="trace-node" type="button" data-step="3" aria-label="Stage 4: record"><i aria-hidden="true"></i><span>Record</span></button>
+              <button class="trace-node" type="button" data-step="4" aria-label="Stage 5: reuse"><i aria-hidden="true"></i><span>Reuse</span></button>
+              <button class="trace-node risk" type="button" data-step="5" aria-label="Stage 6: action"><i aria-hidden="true"></i><span>Action</span></button>
+              <button class="trace-node" type="button" data-step="6" aria-label="Stage 7: evaluate"><i aria-hidden="true"></i><span>Evaluate</span></button>
+            </div>
+            <div class="trace-controls">
+              <button class="play-button" id="trace-play" type="button" aria-label="Play task demonstration" aria-pressed="false">▶</button>
+              <input type="range" id="trace-slider" min="0" max="6" step="1" value="0" aria-label="Task stage">
+              <span class="trace-count" id="trace-count">01 / 07</span>
+            </div>
+            <p class="trace-foot">Drag the slider or click a node. This example illustrates how state propagates; it is not a paper payload, and not every trajectory fails.</p>
+          </div>
+
+          <aside class="pullquote">
+            <h3>Reading evolved state<br>is not the same as failing immediately.</h3>
+            <p>The paper defines <em>long-horizon safety drift</em> as a trajectory that consumes evolved state but reaches an unsafe action only later. The gap between the two is its latency.</p>
+            <div class="drift-numbers">
+              <div><strong>23<small>%</small></strong><span>First evolved-state use<br>median execution progress</span></div>
+              <div><strong>64<small>%</small></strong><span>First unsafe action<br>median execution progress</span></div>
+            </div>
+            <div class="drift-latency">Median propagation distance <b>37 actions</b><br>Interquartile range 20–66 actions</div>
+          </aside>
+        </div>
+
+        <details class="trace-transcript reveal">
+          <summary>Read all seven stages <span class="mono">TEXT TRANSCRIPT</span></summary>
+          <ol class="transcript-list">
+            <li><strong>Task.</strong> The agent receives a benign objective. The hidden safety contract stays fixed for the whole run.</li>
+            <li><strong>Change.</strong> Within authorized surfaces, an environment change modifies target-visible material. The objective and evaluator do not move.</li>
+            <li><strong>Read.</strong> The agent reads the modified material. Consuming evolved state is not yet a violation.</li>
+            <li><strong>Record.</strong> The agent summarizes, plans, or stores a conclusion that later steps may reuse.</li>
+            <li><strong>Reuse.</strong> The task continues. Modified state combines with the existing workflow and accumulates influence.</li>
+            <li><strong>Action.</strong> In this illustrative path, a later action crosses the fixed safety boundary. The first read and the first unsafe action can be far apart.</li>
+            <li><strong>Evaluate.</strong> The evaluator reads the trace and resulting state. Confirmed feedback guides later search; the task and evaluator remain unchanged.</li>
+          </ol>
+        </details>
+
+        <div class="definitions reveal" aria-label="Definitions">
+          <div class="definition"><span class="mono">EVOLVED STATE</span><p>Target-visible state after an authorized environment change. Consuming it is not automatically unsafe.</p></div>
+          <div class="definition"><span class="mono">PROPAGATION DISTANCE</span><p>Target actions between first consuming evolved state and first producing an unsafe output.</p></div>
+          <div class="definition"><span class="mono">SAFETY DRIFT</span><p>A trajectory that consumes evolved state but reaches an unsafe sink only after further actions.</p></div>
+        </div>
+
+        <figure class="paper-figure reveal" id="fig3">
+          <a class="figure-frame" href="assets/figures/fig3-drift.png" target="_blank" rel="noopener noreferrer" aria-label="Open full-size Figure 3">
+            <img src="assets/figures/fig3-drift.png" alt="Two-panel figure. Panel (a) is a histogram of propagation distance in target actions, peaking near 37, with a shaded interquartile range of 20 to 66. Panel (b) shows normalized execution timing: first evolved-state use at 23 percent and first unsafe action at 64 percent, with a median latency of 41 percent." width="1579" height="649" decoding="async">
+          </a>
+          <figcaption>
+            <div class="fig-head"><span class="fig-no">FIG. 3</span><span class="fig-source">CHEN ET AL. · CC BY 4.0</span></div>
+            <p class="fig-title">Long-horizon safety drift across 10,000 converted trajectories.</p>
+            <p class="fig-caption">(a) Absolute propagation distance, with shaded regions indicating the interquartile range. (b) Normalized execution timing; thick bars show interquartile ranges, thin bars the 10th–90th percentiles. <a href="assets/figures/fig3-drift.png" target="_blank" rel="noopener noreferrer">Full size ↗</a></p>
+            <ul class="fig-notes">
+              <li>Median propagation distance is 37 target actions (IQR 20–66).</li>
+              <li>Targets first consume evolved state at a median 23% of execution; the first unsafe action appears at 64%.</li>
+              <li>Median latency is 41% of execution, so the effect can remain latent for a large part of the workflow.</li>
+            </ul>
+          </figcaption>
+        </figure>
+        <p class="data-note">Source: paper Figure 3. The 23% and 64% are pooled timing statistics, not timestamps in the illustrative trace above.</p>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="ships-title">
-      <h2 id="ships-title">What ships</h2>
-      <div class="card ships-card">
-        <ul class="ships-list">
-          <li><strong>Docker-native runtime:</strong> configuration, evaluation, planner, and execution components.</li>
-          <li><strong>Planner-generated task dataset:</strong> 10,150 tasks, with three viewer configs: <code>mid</code> (1,046), <code>mid-v5</code> (3,553), and <code>large</code> (5,551). Parquet metadata is separate from the task ZIP bundles.</li>
-          <li><strong>Tools dataset:</strong> 63,697 selected materialized tools from the paper’s broader capability corpus.</li>
-          <li><strong>Three bundled high-complexity tasks</strong> for executable evaluation workflows.</li>
-          <li><strong><a href="https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff">CITATION.cff</a>:</strong> canonical repository citation metadata.</li>
-        </ul>
+    <section class="chapter" id="arena">
+      <div class="wrap">
+        <div class="chapter-head reveal">
+          <div class="chapter-index"><span class="num">02</span><span class="en">The arena</span></div>
+          <div>
+            <h2 class="chapter-title">Fix the task and the contract.<br>Let the environment move.</h2>
+            <p class="chapter-desc">OpenART’s unit is a whole executable scenario: a benign objective, an initial environment, a workflow, and a hidden safety contract. The scenario semantics stay fixed while target-visible state can change.</p>
+          </div>
+        </div>
+
+        <div class="protocol reveal">
+          <div class="protocol-stage">
+            <span class="step-n">01 / SYNTHESIZE</span>
+            <h3>Construct an executable scenario</h3>
+            <p>A planner combines tools and skills from the capability corpus into a dependency workflow. Validation and repair admit only bundles that execute and pass evaluator probes.</p>
+            <div class="protocol-glyph"><svg viewBox="0 0 190 60" aria-hidden="true"><g fill="none" stroke="#a7b49c"><path d="M13 30h35m10 0h22m10 0h24m10 0h33 M54 30V12h30 M54 30v18h30"/><rect x="3" y="20" width="20" height="20"/><rect x="45" y="22" width="17" height="16"/><rect x="82" y="4" width="17" height="16"/><rect x="82" y="40" width="17" height="16"/><rect x="113" y="22" width="17" height="16"/></g><circle cx="165" cy="30" r="9" fill="#566b5e"/><path d="m161 30 3 3 5-6" stroke="#eeece5" fill="none"/></svg></div>
+          </div>
+          <div class="protocol-stage">
+            <span class="step-n">02 / PROJECT</span>
+            <h3>Instantiate in the native runtime</h3>
+            <p>A target-specific adapter launches the unmodified agent and maps authorized changes to its native interfaces and locations. The task objective and evaluator are preserved.</p>
+            <div class="protocol-glyph"><svg viewBox="0 0 190 60" aria-hidden="true"><g fill="none" stroke="#a7b49c"><rect x="7" y="18" width="29" height="24"/><path d="M36 30h28m31 0h21m0 0V9h27m-27 21h27m-27 0v21h27"/><rect x="64" y="8" width="31" height="44"/><rect x="145" y="3" width="31" height="12"/><rect x="145" y="24" width="31" height="12"/><rect x="145" y="45" width="31" height="12"/></g><path d="m73 30 6 5 9-13" stroke="#566b5e" fill="none" stroke-width="1.5"/></svg></div>
+          </div>
+          <div class="protocol-stage">
+            <span class="step-n">03 / EVALUATE</span>
+            <h3>Execute, observe, feed back</h3>
+            <p>The target runs the unchanged task. Deterministic checks and model-based judgment read the trajectory and state snapshots; feedback guides the next round.</p>
+            <div class="protocol-glyph"><svg viewBox="0 0 190 60" aria-hidden="true"><g fill="none" stroke="#a7b49c"><path d="M37 30h38m27 0h42m0 0V8H23v10 M23 42v10h121V42"/><circle cx="23" cy="30" r="14"/><rect x="75" y="18" width="27" height="24"/><path d="m144 16 13 7v15l-13 8-13-8V23z"/></g><circle cx="23" cy="30" r="5" fill="#566b5e"/><path d="m138 31 4 4 8-10" stroke="#566b5e" fill="none"/></svg></div>
+          </div>
+        </div>
+
+        <div class="fixed-rule reveal">
+          <span><strong>FIXED</strong>　Benign objective τ · hidden safety contract / evaluator E</span>
+          <span><strong>ALLOWED TO CHANGE</strong>　Target-visible state x through the adapter</span>
+        </div>
+
+        <figure class="paper-figure paper-figure-wide reveal" id="fig1">
+          <a class="figure-frame" href="assets/figures/fig1-overview.png" target="_blank" rel="noopener noreferrer" aria-label="Open full-size Figure 1">
+            <img src="assets/figures/fig1-overview.png" alt="Three-part overview diagram. Panel A, executable scenario synthesis: a scenario seed plus a 500K+ capability corpus feed a planner, which produces a specification and workflow DAG; compile, validate, and repair yield a validated initial environment. Panel B, controlled target execution: state surfaces feed a target agent running a benign task, then an evaluator and fitness score; persistent state loops back. Panel C, EMHA: memory and a hypergraph produce a selected path, a frozen attacker model produces mutations, an authorization projection gate admits vector, path, and runtime-valid changes, and best-of-K feedback updates soft values, a quality-diversity archive, and a graph population." width="2491" height="1187" decoding="async">
+          </a>
+          <figcaption>
+            <div class="fig-head"><span class="fig-no">FIG. 1</span><span class="fig-source">CHEN ET AL. · CC BY 4.0</span></div>
+            <p class="fig-title">Overview of OpenART.</p>
+            <p class="fig-caption">OpenART constructs an executable scenario with a benign workflow and fixed safety contract, instantiates it in a deployed agent through a target-specific adapter, and evolves the target-visible environment via feedback-guided state changes while preserving the task objective and evaluator. <a href="assets/figures/fig1-overview.png" target="_blank" rel="noopener noreferrer">Full size ↗</a></p>
+            <ul class="fig-notes">
+              <li><strong>A ·</strong> The scenario, not a prompt, is the unit of evaluation.</li>
+              <li><strong>B ·</strong> The target runs the unchanged benign task; only target-visible state is authorized to change.</li>
+              <li><strong>C ·</strong> EMHA searches over state changes with black-box feedback; model weights stay frozen.</li>
+            </ul>
+          </figcaption>
+        </figure>
+
+        <div class="surface-layout reveal">
+          <div class="surface-intro">
+            <h3>Eight visible surfaces,<br>one safety question.</h3>
+            <p>Click to see where the environment can change. The surfaces available in a run depend on the target agent’s adapter coverage.</p>
+          </div>
+          <div>
+            <div class="surface-tabs" id="surface-tabs" role="tablist" aria-label="Eight target-visible surfaces">
+              <button class="surface-tab" type="button" role="tab" id="surface-tab-0" aria-selected="true" aria-controls="surface-panel-0" tabindex="0"><span class="en">01 / WORKSPACE</span><span class="label">Workspace</span></button>
+              <button class="surface-tab" type="button" role="tab" id="surface-tab-1" aria-selected="false" aria-controls="surface-panel-1" tabindex="-1"><span class="en">02 / INSTRUCTIONS</span><span class="label">Instructions</span></button>
+              <button class="surface-tab" type="button" role="tab" id="surface-tab-2" aria-selected="false" aria-controls="surface-panel-2" tabindex="-1"><span class="en">03 / SKILLS</span><span class="label">Skills</span></button>
+              <button class="surface-tab" type="button" role="tab" id="surface-tab-3" aria-selected="false" aria-controls="surface-panel-3" tabindex="-1"><span class="en">04 / TOOLS</span><span class="label">Tools</span></button>
+              <button class="surface-tab" type="button" role="tab" id="surface-tab-4" aria-selected="false" aria-controls="surface-panel-4" tabindex="-1"><span class="en">05 / MCPS</span><span class="label">MCPs</span></button>
+              <button class="surface-tab" type="button" role="tab" id="surface-tab-5" aria-selected="false" aria-controls="surface-panel-5" tabindex="-1"><span class="en">06 / SHORT-TERM MEMORY</span><span class="label">Short-term memory</span></button>
+              <button class="surface-tab" type="button" role="tab" id="surface-tab-6" aria-selected="false" aria-controls="surface-panel-6" tabindex="-1"><span class="en">07 / PLAN STATE</span><span class="label">Plan state</span></button>
+              <button class="surface-tab" type="button" role="tab" id="surface-tab-7" aria-selected="false" aria-controls="surface-panel-7" tabindex="-1"><span class="en">08 / LONG-TERM MEMORY</span><span class="label">Long-term memory</span></button>
+            </div>
+            <div class="surface-panels">
+              <div class="surface-panel is-active" id="surface-panel-0" role="tabpanel" aria-labelledby="surface-tab-0">
+                <div><h4>Files and persistent environment</h4><p>The files, directories, and environment material the agent can read are a primary basis for later decisions.</p></div>
+                <div class="surface-example">The same file path can refer to different content at different points in a run.</div>
+              </div>
+              <div class="surface-panel" id="surface-panel-1" role="tabpanel" aria-labelledby="surface-tab-1" hidden>
+                <div><h4>Target-visible instructions</h4><p>At protocol-authorized locations, change what the target reads as instructions. The benign task semantics and safety contract remain fixed.</p></div>
+                <div class="surface-example">The instruction surface the target sees is distinct from the task objective fixed for evaluation.</div>
+              </div>
+              <div class="surface-panel" id="surface-panel-2" role="tabpanel" aria-labelledby="surface-tab-2" hidden>
+                <div><h4>Reusable operational knowledge</h4><p>Skill material can shape how the agent decomposes a task, orders steps, and uses existing capabilities.</p></div>
+                <div class="surface-example">A reused workflow can carry an early judgment into several later steps.</div>
+              </div>
+              <div class="surface-panel" id="surface-panel-3" role="tabpanel" aria-labelledby="surface-tab-3" hidden>
+                <div><h4>Operation interfaces</h4><p>Tool surfaces carry the capabilities the agent can call. The adapter and native runtime constraints decide which changes are allowed.</p></div>
+                <div class="surface-example">An interface can look the same while the behavior behind it still needs verification.</div>
+              </div>
+              <div class="surface-panel" id="surface-panel-4" role="tabpanel" aria-labelledby="surface-tab-4" hidden>
+                <div><h4>External capability and service connections</h4><p>MCP surfaces let the agent connect to tools or services. Their visible location and mutable range are constrained by the runtime.</p></div>
+                <div class="surface-example">A capability connection can change while an existing plan keeps its old assumptions.</div>
+              </div>
+              <div class="surface-panel" id="surface-panel-5" role="tabpanel" aria-labelledby="surface-tab-5" hidden>
+                <div><h4>Recent interaction state</h4><p>Recent context and interaction records in the current run directly shape the next judgment.</p></div>
+                <div class="surface-example">An explanation formed in one step can be treated as confirmed fact in the next.</div>
+              </div>
+              <div class="surface-panel" id="surface-panel-6" role="tabpanel" aria-labelledby="surface-tab-6" hidden>
+                <div><h4>Current task organization</h4><p>Plan state records how the agent has arranged the task. When a referenced object changes, the old step may no longer match the operation.</p></div>
+                <div class="surface-example">“Use the approved attachment” depends on the attachment’s current state, not only its earlier label.</div>
+              </div>
+              <div class="surface-panel" id="surface-panel-7" role="tabpanel" aria-labelledby="surface-tab-7" hidden>
+                <div><h4>State retained across tasks</h4><p>Records persisted between tasks let an early change keep influencing later work at a longer distance.</p></div>
+                <div class="surface-example">Stored experience must be matched to the current boundary and state when it is reused.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <details class="equation-disclosure reveal">
+          <summary>One state transition, and the control boundary <span class="mono">PAPER · EQ. 4–6</span></summary>
+          <div class="equation-content">
+            <div class="equation"><i>m</i><sub>t</sub> = Π<sub>r</sub>(Δ<sub>t</sub>)<br>(ξ<sub>t</sub>, x<sub>t+1</sub>) ∼ K<sub>r</sub>( · | τ, x<sub>t</sub>, m<sub>t</sub>)<br><i>Y</i><sub>t</sub> = E<sub>q</sub>(τ, ξ<sub>t</sub>, x<sub>t+1</sub>)</div>
+            <p>Δ is the set of changes proposed by the search policy. Π is the runtime feasibility gate: it keeps only changes that target an allowed surface and location and pass runtime validation, producing the materialized update m. The target continues the original task in state x, yielding trajectory ξ, the next state, and feedback Y.<br>With τ and E fixed, improvements can be attributed to the environment-evolution policy. Model parameters are not updated here.</p>
+          </div>
+        </details>
+
+        <div class="measure-block reveal">
+          <div class="subhead"><span class="mono">WHAT OPENART MEASURES</span><h3>Released artifacts and paper-reported measurements</h3></div>
+          <p class="measure-lead">OpenART measures whether tool-using agents remain safe in executable, long-horizon, evolving Docker environments. The benign task and hidden safety contract stay fixed while target-visible state mutates mid-run; deterministic and model-based evaluators judge safety over execution traces and snapshots.</p>
+          <dl class="stats" aria-label="Released artifacts and paper-reported measurements">
+            <div><dt>Released tasks</dt><dd>10,150</dd></div>
+            <div><dt>ZIP shards (~75 GB)</dt><dd>52</dd></div>
+            <div><dt>Domains</dt><dd>50</dd></div>
+            <div><dt>Median tool calls</dt><dd>97</dd></div>
+            <div><dt>Agents × models (75 settings)</dt><dd>15 × 5</dd></div>
+            <div><dt>Pooled strict ASR (EMHA attacker)</dt><dd>85.0%</dd></div>
+            <div><dt>Benign completion</dt><dd>87.38%</dd></div>
+            <div><dt>Materialized tools</dt><dd>63,697</dd></div>
+          </dl>
+          <p class="small">Task, shard, and materialized-tool counts describe released artifacts. Domains, horizon, evaluation settings, and rates are paper-reported.</p>
+        </div>
       </div>
     </section>
 
-    <section id="quickstart" class="section" aria-labelledby="quickstart-title">
-      <h2 id="quickstart-title">Inspect metadata before downloading bundles</h2>
-      <div class="card">
-        <p>This snippet loads task metadata, not the executable workspace ZIP bundles.</p>
-        <pre tabindex="0" aria-label="Python metadata quickstart"><code>from datasets import load_dataset
+    <section class="chapter emha-section" id="search">
+      <div class="wrap">
+        <div class="chapter-head reveal">
+          <div class="chapter-index"><span class="num">03</span><span class="en">The search</span></div>
+          <div>
+            <h2 class="chapter-title">Turn one probe into<br>a search that accumulates.</h2>
+            <p class="chapter-desc">EMHA is the paper’s reference search policy. It represents environment changes as paths in a dependency hypergraph, uses black-box feedback to reweight paths, and evolves a quality–diversity archive. The attacker model stays frozen; the search state is external.</p>
+          </div>
+        </div>
 
-ds = load_dataset("dongdongunique/openart-planner-tasks", "mid", split="train")
-print(ds.num_rows, len(ds.features))  # 1046 27</code></pre>
-        <p>For runtime dependencies and the Docker image, see <a href="https://github.com/AI45Lab/OpenART#setup">GitHub Setup</a>. For viewer configs and task bundles, see the <a href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">Hugging Face dataset card</a>.</p>
+        <div class="emha-layout reveal">
+          <figure class="emha-figure" id="emha-figure" data-step="1">
+            <div class="panel-label"><span>EVOLUTIONARY MARKOV HYPERGRAPH ATTACK</span><span id="emha-stage-label">01 / RETRIEVE</span></div>
+            <svg viewBox="0 0 490 310" role="img" aria-labelledby="emha-svg-title emha-svg-desc">
+              <title id="emha-svg-title">EMHA dependency hypergraph and feedback loop</title>
+              <desc id="emha-svg-desc">Current state and prior experience build a subgoal graph. Several prerequisites must be satisfied before a successor change can be selected. Execution feedback updates path values and the structure archive.</desc>
+              <defs><marker id="emha-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10z" fill="#829776"/></marker></defs>
+              <path class="base-edge" d="M69 134H106Q119 134 119 120V83H155 M69 134H106Q119 134 119 149V191H155 M189 83H231Q245 83 245 98V125 M189 191H231Q245 191 245 176V149 M260 137H302Q317 137 317 123V82H349 M260 137H302Q317 137 317 151V191H349 M383 82H415V129 M383 191H415V148"/>
+              <path class="base-edge" d="M415 148V253Q415 270 396 270H48V154" marker-end="url(#emha-arrow)"/>
+              <path class="edge-highlight edge-a" d="M48 134H106Q119 134 119 120V83H172 M106 134Q119 134 119 149V191H172"/>
+              <path class="edge-highlight edge-b" d="M172 83H231Q245 83 245 98V137 M172 191H231Q245 191 245 176V137H302Q317 137 317 123V82H366"/>
+              <path class="edge-highlight edge-c" d="M366 82H415V137 M245 137H302Q317 137 317 151V191H366 M366 191H415V137"/>
+              <path class="edge-highlight edge-d" d="M415 137V253Q415 270 396 270H48V154"/>
+              <path class="hyper-area" d="M205 63Q193 63 193 80v120q0 14 14 14h45q16 0 16-16V80q0-17-17-17z" opacity=".55"/>
+              <circle cx="48" cy="134" r="20" class="hnode" data-hnode="1"/><circle cx="172" cy="83" r="17" class="hnode" data-hnode="1"/><circle cx="172" cy="191" r="17" class="hnode" data-hnode="1"/>
+              <rect x="236" y="128" width="18" height="18" transform="rotate(45 245 137)" fill="#8b9e7e"/><circle cx="366" cy="82" r="17" class="hnode" data-hnode="2"/><circle cx="366" cy="191" r="17" class="hnode" data-hnode="3"/><circle cx="415" cy="137" r="20" class="hnode" data-hnode="3"/>
+              <text x="48" y="138" text-anchor="middle" class="diagram-label">x<tspan font-size="8" dy="3">t</tspan></text><text x="172" y="87" text-anchor="middle" class="diagram-label">a</text><text x="172" y="195" text-anchor="middle" class="diagram-label">b</text><text x="366" y="86" text-anchor="middle" class="diagram-label">c</text><text x="366" y="195" text-anchor="middle" class="diagram-label">d</text><text x="415" y="141" text-anchor="middle" class="diagram-label">Y<tspan font-size="8" dy="3">t</tspan></text>
+              <text x="48" y="175" text-anchor="middle" class="diagram-label">current state</text><text x="172" y="53" text-anchor="middle" class="diagram-label">prerequisite</text><text x="172" y="229" text-anchor="middle" class="diagram-label">prerequisite</text><text x="245" y="247" text-anchor="middle" class="diagram-mono">{ a, b } → c</text><text x="369" y="45" text-anchor="middle" class="diagram-label">successor</text><text x="423" y="181" text-anchor="middle" class="diagram-label">feedback</text>
+              <rect x="164" y="257" width="133" height="27" fill="#e9ece3"/><text x="231" y="274" text-anchor="middle" class="diagram-mono">CREDIT + ARCHIVE</text>
+              <text x="245" y="21" text-anchor="middle" class="diagram-mono">PREREQUISITES · TRANSITIONS · FEEDBACK</text>
+            </svg>
+            <figcaption class="figure-caption">A hyperedge can require several prerequisites together. Nodes a–d are abstract subgoals; the highlight demonstrates search logic, not a real attack record.</figcaption>
+          </figure>
+
+          <div class="emha-side">
+            <div class="emha-steps" id="emha-steps">
+              <button class="emha-step active" type="button" data-step="0" aria-controls="emha-figure" aria-expanded="true">
+                <span class="n">01</span><span class="step-body"><span class="step-heading">Retrieve</span><span class="step-desc">Read the current environment x and attacker memory C. Retrieve a context summary and the history that will guide this round.</span></span><span class="step-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button class="emha-step" type="button" data-step="1" aria-controls="emha-figure" aria-expanded="false">
+                <span class="n">02</span><span class="step-body"><span class="step-heading">Select</span><span class="step-desc">Build a hypergraph of subgoals. A hyperedge is ready only when all of its prerequisites are satisfied; sample a path through the ready set.</span></span><span class="step-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button class="emha-step" type="button" data-step="2" aria-controls="emha-figure" aria-expanded="false">
+                <span class="n">03</span><span class="step-body"><span class="step-heading">Execute</span><span class="step-desc">The frozen attacker model decodes the path into proposed changes. The adapter projects them onto authorized locations; the target runs the unchanged task and returns feedback.</span></span><span class="step-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button class="emha-step" type="button" data-step="3" aria-controls="emha-figure" aria-expanded="false">
+                <span class="n">04</span><span class="step-body"><span class="step-heading">Evolve</span><span class="step-desc">Redistribute credit to selected edges, update path values, and keep high-fitness structures in a quality–diversity archive. The graph population evolves; model weights do not.</span></span><span class="step-arrow" aria-hidden="true">↗</span>
+              </button>
+            </div>
+            <div class="emha-controls">
+              <button class="play-button" id="emha-play" type="button" aria-label="Play EMHA search demonstration" aria-pressed="false">▶</button>
+              <span class="inline-note" id="emha-control-note">Click a step, or play the loop</span>
+              <button class="play-button" id="emha-next" type="button" aria-label="Next EMHA step">→</button>
+              <span class="emha-counter" id="emha-counter">01 / 04</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="emha-bottom reveal">
+          <p><strong>Markov / current conditions decide the ready edges</strong><br>Given the active subgoal set and this round’s context, choose among hyperedges whose prerequisites are met; external memory supplies prior experience.</p>
+          <p><strong>Evolution / the search structure changes too</strong><br>Path-value updates guide selection, while graph variation and a quality–diversity archive explore, retain, and reuse useful structures.</p>
+          <p><strong>Boundary / update search state, not weights</strong><br>The frozen attacker produces state changes. Path values, graph population, archive, and memory are updated; the model is not.</p>
+        </div>
+
+        <figure class="paper-figure reveal" id="fig2">
+          <a class="figure-frame" href="assets/figures/fig2-ablations.png" target="_blank" rel="noopener noreferrer" aria-label="Open full-size Figure 2">
+            <img src="assets/figures/fig2-ablations.png" alt="Two bar charts. Left, vector-restricted evolution under DeepSeek-V4-Pro: Workspace 92.5 percent, Instructions 81.6, Long-Term Memory 73.9, MCPs 73.1, Skill 72.2, Tools 71.4, Short-Term Memory 58.8, Plan State 56.5. Right, search ablations: Full EMHA 94.7, no credit redistribution 92.1, no archive 90.8, instruction-only 81.6." width="1477" height="806" decoding="async">
+          </a>
+          <figcaption>
+            <div class="fig-head"><span class="fig-no">FIG. 2</span><span class="fig-source">CHEN ET AL. · CC BY 4.0</span></div>
+            <p class="fig-title">Environment and search ablations under DeepSeek-V4-Pro.</p>
+            <p class="fig-caption">(a) Strict ASR when EMHA evolves a single target-visible attack vector. (b) Strict ASR when individual search components are restricted or removed. Matched attack budget. <a href="assets/figures/fig2-ablations.png" target="_blank" rel="noopener noreferrer">Full size ↗</a></p>
+            <ul class="fig-notes">
+              <li>Full EMHA reaches 94.7%, 13.1 percentage points above instruction-only evolution (81.6%).</li>
+              <li>Workspace-only evolution is the strongest single vector at 92.5%, still 2.2 points below full EMHA.</li>
+              <li>Removing the archive or credit redistribution lowers Strict ASR by 3.9 and 2.6 points.</li>
+            </ul>
+          </figcaption>
+        </figure>
+
+        <div class="ablation-grid reveal">
+          <div><span class="mono">FULL EMHA</span><strong>94.7%</strong><p>All surfaces, feedback, and archive.</p></div>
+          <div><span class="mono">INSTRUCTION-ONLY</span><strong>81.6%</strong><p>Same budget, mutations restricted to instructions.</p></div>
+          <div><span class="mono">STRONGEST SINGLE VECTOR</span><strong>92.5%</strong><p>Workspace-only; 2.2 points below full EMHA.</p></div>
+          <div><span class="mono">NO ARCHIVE / NO CREDIT</span><strong>90.8 / 92.1%</strong><p>Each mechanism contributes to the full result.</p></div>
+        </div>
+        <p class="data-note">Source: paper Figure 2 and §5.2. These ablations use DeepSeek-V4-Pro; they are not pooled across the 75 settings.</p>
       </div>
     </section>
 
-    <section id="evaluation" class="section" aria-labelledby="evaluation-title">
-      <h2 id="evaluation-title">Paper settings and pooled results</h2>
-      <div class="table-card">
-        <table>
-          <caption>Reported in <a href="https://arxiv.org/abs/2608.00677">arXiv:2608.00677</a>; paper corpus counts are distinct from released artifact counts.</caption>
-          <thead><tr><th scope="col">Measurement</th><th scope="col">Paper-reported value</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">Validated scenarios</th><td>10K+</td></tr>
-            <tr><th scope="row">Domains</th><td>50</td></tr>
-            <tr><th scope="row">Capability corpus</th><td>500K+ tools and skills</td></tr>
-            <tr><th scope="row">Median task horizon</th><td>97 tool calls</td></tr>
-            <tr><th scope="row">Evaluation matrix</th><td>15 agents × 5 models (75 settings)</td></tr>
-            <tr><th scope="row">Target-visible attack vectors</th><td>8</td></tr>
-            <tr><th scope="row">Pooled strict ASR (EMHA attacker)</th><td>85.0%</td></tr>
-            <tr><th scope="row">Pooled benign completion</th><td>87.38%</td></tr>
-          </tbody>
-        </table>
+    <section class="chapter" id="horizon">
+      <div class="wrap">
+        <div class="chapter-head reveal">
+          <div class="chapter-index"><span class="num">04</span><span class="en">The horizon</span></div>
+          <div>
+            <h2 class="chapter-title">Tasks must be long enough<br>for risk to accumulate.</h2>
+            <p class="chapter-desc">Long-horizon is not just more tool calls. Deeper dependencies, wider branches, and repeatedly read and written state objects give early changes more opportunities to affect later actions. Switch the metric to compare task complexity.</p>
+          </div>
+        </div>
+
+        <div class="complexity-layout reveal">
+          <div class="complexity-side">
+            <div class="complexity-selectors" id="complexity-tabs" role="tablist" aria-label="Complexity metrics">
+              <button class="complexity-tab" type="button" role="tab" id="complexity-tab-0" aria-selected="true" aria-controls="complexity-panel" tabindex="0">Tool calls<span>Tool calls</span></button>
+              <button class="complexity-tab" type="button" role="tab" id="complexity-tab-1" aria-selected="false" aria-controls="complexity-panel" tabindex="-1">Dependency depth<span>Depth</span></button>
+              <button class="complexity-tab" type="button" role="tab" id="complexity-tab-2" aria-selected="false" aria-controls="complexity-panel" tabindex="-1">Parallel width<span>Width</span></button>
+              <button class="complexity-tab" type="button" role="tab" id="complexity-tab-3" aria-selected="false" aria-controls="complexity-panel" tabindex="-1">State objects<span>State</span></button>
+              <button class="complexity-tab" type="button" role="tab" id="complexity-tab-4" aria-selected="false" aria-controls="complexity-panel" tabindex="-1">File formats<span>Formats</span></button>
+            </div>
+            <div class="complexity-insight" id="complexity-insight" aria-live="polite"><strong>97</strong><span>Median number of agent-issued tool calls per task; each call counts as one operation.</span></div>
+          </div>
+
+          <div>
+            <div class="comparison-chart" id="complexity-panel" role="tabpanel" aria-labelledby="complexity-tab-0">
+              <div class="chart-heading"><h3 id="complexity-chart-title">Tool calls</h3><span>MEDIAN · LINEAR SCALE</span></div>
+              <div id="complexity-bars">
+                <div class="bar-row" data-benchmark="InjecAgent"><span>InjecAgent</span><div class="bar-track"><div class="bar" style="width:1%"></div></div><span class="bar-value">1</span></div>
+                <div class="bar-row" data-benchmark="ToolEmu"><span>ToolEmu</span><div class="bar-track"><div class="bar" style="width:3%"></div></div><span class="bar-value">3</span></div>
+                <div class="bar-row" data-benchmark="AgentDojo"><span>AgentDojo</span><div class="bar-track"><div class="bar" style="width:2%"></div></div><span class="bar-value">2</span></div>
+                <div class="bar-row" data-benchmark="AgentHarm"><span>AgentHarm</span><div class="bar-track"><div class="bar" style="width:3.5%"></div></div><span class="bar-value">3.5</span></div>
+                <div class="bar-row" data-benchmark="ASB"><span>ASB</span><div class="bar-track"><div class="bar" style="width:2%"></div></div><span class="bar-value">2</span></div>
+                <div class="bar-row" data-benchmark="DTap"><span>DTap</span><div class="bar-track"><div class="bar" style="width:15%"></div></div><span class="bar-value">15</span></div>
+                <div class="bar-row featured" data-benchmark="OpenART"><span>OpenART</span><div class="bar-track"><div class="bar" style="width:97%"></div></div><span class="bar-value">97</span></div>
+              </div>
+              <div class="chart-axis" id="complexity-axis"><span>0</span><span>50</span><span>100</span></div>
+              <p class="chart-note">Values are task-level medians from paper Table 2. OpenART and DTap are measured over reconstructed execution traces; the other benchmarks use publicly released samples. See Appendix A for sampling details.</p>
+            </div>
+
+            <details class="data-disclosure">
+              <summary>View the full median table <span class="mono">PAPER · TABLE 2</span></summary>
+              <div class="full-data-wrap">
+                <table class="full-data">
+                  <caption class="visually-hidden">Task-level complexity medians from paper Table 2.</caption>
+                  <thead><tr><th scope="col">Benchmark</th><th scope="col">Tool calls</th><th scope="col">Dependency depth</th><th scope="col">Parallel width</th><th scope="col">State objects</th><th scope="col">File formats</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row">InjecAgent</th><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+                    <tr><th scope="row">ToolEmu</th><td>3</td><td>2.5</td><td>1</td><td>3</td><td>0</td></tr>
+                    <tr><th scope="row">AgentDojo</th><td>2</td><td>2</td><td>1</td><td>1</td><td>0</td></tr>
+                    <tr><th scope="row">AgentHarm</th><td>3.5</td><td>3</td><td>1.5</td><td>3.5</td><td>0</td></tr>
+                    <tr><th scope="row">ASB</th><td>2</td><td>2</td><td>1</td><td>2</td><td>0</td></tr>
+                    <tr><th scope="row">DTap</th><td>15</td><td>2</td><td>1.5</td><td>2.5</td><td>1</td></tr>
+                    <tr><th scope="row">OpenART</th><td>97</td><td>32</td><td>12.5</td><td>96.5</td><td>7.5</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <figure class="paper-figure paper-figure-wide reveal" id="fig4">
+          <a class="figure-frame" href="assets/figures/fig4-complexity.png" target="_blank" rel="noopener noreferrer" aria-label="Open full-size Figure 4">
+            <img src="assets/figures/fig4-complexity.png" alt="Four line charts under GPT-5.5 comparing Full EMHA and instruction-only evolution across five complexity groups. (a) Dependency depth: maximum gap 17.6 percentage points. (b) Tool calls: maximum gap 17.2 points. (c) File formats: maximum gap 13.1 points. (d) Parallel width: maximum gap 14.8 points. Full EMHA is higher in every panel, and the gap grows with dependency depth and tool calls." width="1558" height="970" decoding="async">
+          </a>
+          <figcaption>
+            <div class="fig-head"><span class="fig-no">FIG. 4</span><span class="fig-source">CHEN ET AL. · CC BY 4.0</span></div>
+            <p class="fig-title">Strict ASR under GPT-5.5 across five equal-sized complexity groups.</p>
+            <p class="fig-caption">Median values are shown for each group; shaded regions indicate 95% paired-bootstrap confidence intervals. Annotations mark the largest gap between Full EMHA and instruction-only evolution. <a href="assets/figures/fig4-complexity.png" target="_blank" rel="noopener noreferrer">Full size ↗</a></p>
+            <ul class="fig-notes">
+              <li>Full EMHA’s advantage grows from 1.8–2.7 pp to 17.2–17.6 pp as dependency depth and tool calls increase.</li>
+              <li>The largest gaps are 17.6 pp (depth), 17.2 pp (tool calls), 13.1 pp (file formats), and 14.8 pp (parallel width).</li>
+              <li>Gains remain positive for file-format and parallel complexity but saturate; short workflows can underestimate the vulnerability.</li>
+            </ul>
+          </figcaption>
+        </figure>
+        <p class="data-note">Source: paper Figure 4 and Appendix B. These comparisons use GPT-5.5 with matched initial environments and attack budget; they are not pooled across models.</p>
       </div>
-      <p>These are paper-reported measurements; the agent runtime can affect safety beyond the choice of foundation model.</p>
-      <p class="small">Strict attack success rate (ASR) requires confirmation by both the deterministic evaluator and an LLM judge.</p>
     </section>
 
-    <section id="artifacts" class="section" aria-labelledby="artifacts-title">
-      <h2 id="artifacts-title">Paper, code, and released data</h2>
-      <div class="cards">
-        <a class="card artifact" href="https://arxiv.org/abs/2608.00677"><h3>Paper <span aria-hidden="true">↗</span></h3><p>arXiv abstract · 2608.00677</p></a>
-        <a class="card artifact" href="https://arxiv.org/pdf/2608.00677"><h3>Paper PDF <span aria-hidden="true">↗</span></h3><p>Full methods and evaluation</p></a>
-        <a class="card artifact" href="https://github.com/AI45Lab/OpenART"><h3>GitHub <span aria-hidden="true">↗</span></h3><p>Runtime, setup, and documentation</p></a>
-        <a class="card artifact" href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks"><h3>Planner tasks <span aria-hidden="true">↗</span></h3><p>Metadata and executable bundles</p></a>
-        <a class="card artifact" href="https://huggingface.co/datasets/dongdongunique/openart-tools"><h3>Tools dataset <span aria-hidden="true">↗</span></h3><p>Selected materialized tools</p></a>
-        <a class="card artifact" href="https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff"><h3>CITATION.cff <span aria-hidden="true">↗</span></h3><p>Canonical citation metadata</p></a>
-        <a class="card artifact" href="llms.txt"><h3>llms.txt <span aria-hidden="true">↗</span></h3><p>Plain-text project facts and links</p></a>
+    <section class="results-section" id="evidence">
+      <div class="wrap">
+        <div class="chapter-head reveal">
+          <div class="chapter-index"><span class="num">05</span><span class="en">The evidence</span></div>
+          <div>
+            <h2 class="chapter-title">75 configurations.<br>Look at the model, and the runtime.</h2>
+            <p class="chapter-desc">The same foundation model can behave differently inside different agent runtimes. The full matrix keeps all 15 × 5 settings; select any cell to compare Strict ASR with benign completion.</p>
+          </div>
+        </div>
+
+        <div class="results-top reveal">
+          <div><div class="result-number">85.0<small>%</small></div><p class="result-number-label">Pooled Strict ASR across all 75 configurations · paper Table 3</p></div>
+          <div class="strict-rule"><div class="and"><b>DETERMINISTIC EVALUATOR</b><em>AND</em><b>GLM-5.2 JUDGE</b></div>Both must confirm success before an attack counts toward Strict ASR.<br>This is a result under a specified evaluation protocol, not a general failure rate for real deployments.</div>
+        </div>
+
+        <div class="matrix-layout reveal">
+          <div>
+            <div class="matrix-tools">
+              <div class="segmented" role="group" aria-label="Result metric">
+                <button type="button" id="metric-asr" aria-pressed="true">Strict ASR</button>
+                <button type="button" id="metric-comp" aria-pressed="false">Benign completion</button>
+              </div>
+              <span class="matrix-hint" id="matrix-hint">Higher ASR means the attack is more likely to succeed ↗</span>
+            </div>
+            <div class="matrix-scroll" tabindex="0" aria-label="Result matrix, horizontally scrollable">
+              <table class="matrix" id="matrix">
+                <caption class="visually-hidden">Strict attack success rate for 15 agents and 5 foundation models, in percent.</caption>
+                <thead><tr><th scope="col">Agent / model</th><th scope="col">GPT-5.5</th><th scope="col">Opus-4.8</th><th scope="col">GLM-5.2</th><th scope="col">Qwen-3.7-Max</th><th scope="col">DeepSeek-V4-Pro</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">OpenCode</th><td><button type="button" class="matrix-cell selected" data-agent="0" data-model="0" data-comp="95.31" data-asr="100.0" style="--cell-color:#9eae8c" aria-pressed="true" aria-label="OpenCode, GPT-5.5, Strict ASR 100.0 percent">100.0</button></td><td><button type="button" class="matrix-cell" data-agent="0" data-model="1" data-comp="98.92" data-asr="62.5" style="--cell-color:#b9c2a6" aria-pressed="false" aria-label="OpenCode, Opus-4.8, Strict ASR 62.5 percent">62.5</button></td><td><button type="button" class="matrix-cell" data-agent="0" data-model="2" data-comp="88.93" data-asr="91.2" style="--cell-color:#a4b392" aria-pressed="false" aria-label="OpenCode, GLM-5.2, Strict ASR 91.2 percent">91.2</button></td><td><button type="button" class="matrix-cell" data-agent="0" data-model="3" data-comp="84.72" data-asr="98.9" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="OpenCode, Qwen-3.7-Max, Strict ASR 98.9 percent">98.9</button></td><td><button type="button" class="matrix-cell" data-agent="0" data-model="4" data-comp="86.91" data-asr="99.1" style="--cell-color:#9fae8d" aria-pressed="false" aria-label="OpenCode, DeepSeek-V4-Pro, Strict ASR 99.1 percent">99.1</button></td></tr>
+                  <tr><th scope="row">Aider</th><td><button type="button" class="matrix-cell" data-agent="1" data-model="0" data-comp="75.48" data-asr="61.2" style="--cell-color:#bac3a6" aria-pressed="false" aria-label="Aider, GPT-5.5, Strict ASR 61.2 percent">61.2</button></td><td><button type="button" class="matrix-cell" data-agent="1" data-model="1" data-comp="81.67" data-asr="38.2" style="--cell-color:#cacfb6" aria-pressed="false" aria-label="Aider, Opus-4.8, Strict ASR 38.2 percent">38.2</button></td><td><button type="button" class="matrix-cell" data-agent="1" data-model="2" data-comp="67.42" data-asr="62.3" style="--cell-color:#b9c2a6" aria-pressed="false" aria-label="Aider, GLM-5.2, Strict ASR 62.3 percent">62.3</button></td><td><button type="button" class="matrix-cell" data-agent="1" data-model="3" data-comp="63.74" data-asr="66.6" style="--cell-color:#b6c0a3" aria-pressed="false" aria-label="Aider, Qwen-3.7-Max, Strict ASR 66.6 percent">66.6</button></td><td><button type="button" class="matrix-cell" data-agent="1" data-model="4" data-comp="65.38" data-asr="66.7" style="--cell-color:#b6c0a3" aria-pressed="false" aria-label="Aider, DeepSeek-V4-Pro, Strict ASR 66.7 percent">66.7</button></td></tr>
+                  <tr><th scope="row">Claude Code</th><td><button type="button" class="matrix-cell" data-agent="2" data-model="0" data-comp="93.80" data-asr="93.6" style="--cell-color:#a3b190" aria-pressed="false" aria-label="Claude Code, GPT-5.5, Strict ASR 93.6 percent">93.6</button></td><td><button type="button" class="matrix-cell" data-agent="2" data-model="1" data-comp="97.84" data-asr="64.6" style="--cell-color:#b7c1a4" aria-pressed="false" aria-label="Claude Code, Opus-4.8, Strict ASR 64.6 percent">64.6</button></td><td><button type="button" class="matrix-cell" data-agent="2" data-model="2" data-comp="87.01" data-asr="92.3" style="--cell-color:#a3b291" aria-pressed="false" aria-label="Claude Code, GLM-5.2, Strict ASR 92.3 percent">92.3</button></td><td><button type="button" class="matrix-cell" data-agent="2" data-model="3" data-comp="82.63" data-asr="99.5" style="--cell-color:#9eae8c" aria-pressed="false" aria-label="Claude Code, Qwen-3.7-Max, Strict ASR 99.5 percent">99.5</button></td><td><button type="button" class="matrix-cell" data-agent="2" data-model="4" data-comp="84.77" data-asr="98.7" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Claude Code, DeepSeek-V4-Pro, Strict ASR 98.7 percent">98.7</button></td></tr>
+                  <tr><th scope="row">Codex</th><td><button type="button" class="matrix-cell" data-agent="3" data-model="0" data-comp="92.00" data-asr="85.8" style="--cell-color:#a8b696" aria-pressed="false" aria-label="Codex, GPT-5.5, Strict ASR 85.8 percent">85.8</button></td><td><button type="button" class="matrix-cell" data-agent="3" data-model="1" data-comp="96.23" data-asr="58.4" style="--cell-color:#bcc4a8" aria-pressed="false" aria-label="Codex, Opus-4.8, Strict ASR 58.4 percent">58.4</button></td><td><button type="button" class="matrix-cell" data-agent="3" data-model="2" data-comp="84.76" data-asr="84.2" style="--cell-color:#a9b797" aria-pressed="false" aria-label="Codex, GLM-5.2, Strict ASR 84.2 percent">84.2</button></td><td><button type="button" class="matrix-cell" data-agent="3" data-model="3" data-comp="80.31" data-asr="90.3" style="--cell-color:#a5b393" aria-pressed="false" aria-label="Codex, Qwen-3.7-Max, Strict ASR 90.3 percent">90.3</button></td><td><button type="button" class="matrix-cell" data-agent="3" data-model="4" data-comp="82.64" data-asr="91.4" style="--cell-color:#a4b392" aria-pressed="false" aria-label="Codex, DeepSeek-V4-Pro, Strict ASR 91.4 percent">91.4</button></td></tr>
+                  <tr><th scope="row">Continue CLI</th><td><button type="button" class="matrix-cell" data-agent="4" data-model="0" data-comp="90.00" data-asr="89.1" style="--cell-color:#a6b493" aria-pressed="false" aria-label="Continue CLI, GPT-5.5, Strict ASR 89.1 percent">89.1</button></td><td><button type="button" class="matrix-cell" data-agent="4" data-model="1" data-comp="94.88" data-asr="59.7" style="--cell-color:#bbc4a7" aria-pressed="false" aria-label="Continue CLI, Opus-4.8, Strict ASR 59.7 percent">59.7</button></td><td><button type="button" class="matrix-cell" data-agent="4" data-model="2" data-comp="82.15" data-asr="89.3" style="--cell-color:#a6b493" aria-pressed="false" aria-label="Continue CLI, GLM-5.2, Strict ASR 89.3 percent">89.3</button></td><td><button type="button" class="matrix-cell" data-agent="4" data-model="3" data-comp="77.82" data-asr="98.0" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Continue CLI, Qwen-3.7-Max, Strict ASR 98.0 percent">98.0</button></td><td><button type="button" class="matrix-cell" data-agent="4" data-model="4" data-comp="80.06" data-asr="99.4" style="--cell-color:#9eae8c" aria-pressed="false" aria-label="Continue CLI, DeepSeek-V4-Pro, Strict ASR 99.4 percent">99.4</button></td></tr>
+                  <tr><th scope="row">Copilot CLI</th><td><button type="button" class="matrix-cell" data-agent="5" data-model="0" data-comp="95.02" data-asr="90.3" style="--cell-color:#a5b393" aria-pressed="false" aria-label="Copilot CLI, GPT-5.5, Strict ASR 90.3 percent">90.3</button></td><td><button type="button" class="matrix-cell" data-agent="5" data-model="1" data-comp="98.71" data-asr="65.4" style="--cell-color:#b7c1a4" aria-pressed="false" aria-label="Copilot CLI, Opus-4.8, Strict ASR 65.4 percent">65.4</button></td><td><button type="button" class="matrix-cell" data-agent="5" data-model="2" data-comp="88.27" data-asr="90.9" style="--cell-color:#a4b392" aria-pressed="false" aria-label="Copilot CLI, GLM-5.2, Strict ASR 90.9 percent">90.9</button></td><td><button type="button" class="matrix-cell" data-agent="5" data-model="3" data-comp="84.56" data-asr="100.0" style="--cell-color:#9eae8c" aria-pressed="false" aria-label="Copilot CLI, Qwen-3.7-Max, Strict ASR 100.0 percent">100.0</button></td><td><button type="button" class="matrix-cell" data-agent="5" data-model="4" data-comp="86.45" data-asr="98.9" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Copilot CLI, DeepSeek-V4-Pro, Strict ASR 98.9 percent">98.9</button></td></tr>
+                  <tr><th scope="row">CodeWhale</th><td><button type="button" class="matrix-cell" data-agent="6" data-model="0" data-comp="93.20" data-asr="92.0" style="--cell-color:#a4b291" aria-pressed="false" aria-label="CodeWhale, GPT-5.5, Strict ASR 92.0 percent">92.0</button></td><td><button type="button" class="matrix-cell" data-agent="6" data-model="1" data-comp="97.26" data-asr="61.8" style="--cell-color:#b9c3a6" aria-pressed="false" aria-label="CodeWhale, Opus-4.8, Strict ASR 61.8 percent">61.8</button></td><td><button type="button" class="matrix-cell" data-agent="6" data-model="2" data-comp="86.54" data-asr="90.8" style="--cell-color:#a5b392" aria-pressed="false" aria-label="CodeWhale, GLM-5.2, Strict ASR 90.8 percent">90.8</button></td><td><button type="button" class="matrix-cell" data-agent="6" data-model="3" data-comp="82.07" data-asr="99.0" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="CodeWhale, Qwen-3.7-Max, Strict ASR 99.0 percent">99.0</button></td><td><button type="button" class="matrix-cell" data-agent="6" data-model="4" data-comp="84.21" data-asr="99.2" style="--cell-color:#9fae8d" aria-pressed="false" aria-label="CodeWhale, DeepSeek-V4-Pro, Strict ASR 99.2 percent">99.2</button></td></tr>
+                  <tr><th scope="row">Goose</th><td><button type="button" class="matrix-cell" data-agent="7" data-model="0" data-comp="89.00" data-asr="83.7" style="--cell-color:#aab797" aria-pressed="false" aria-label="Goose, GPT-5.5, Strict ASR 83.7 percent">83.7</button></td><td><button type="button" class="matrix-cell" data-agent="7" data-model="1" data-comp="94.15" data-asr="54.8" style="--cell-color:#bec6ab" aria-pressed="false" aria-label="Goose, Opus-4.8, Strict ASR 54.8 percent">54.8</button></td><td><button type="button" class="matrix-cell" data-agent="7" data-model="2" data-comp="81.43" data-asr="82.4" style="--cell-color:#aab898" aria-pressed="false" aria-label="Goose, GLM-5.2, Strict ASR 82.4 percent">82.4</button></td><td><button type="button" class="matrix-cell" data-agent="7" data-model="3" data-comp="76.34" data-asr="89.0" style="--cell-color:#a6b493" aria-pressed="false" aria-label="Goose, Qwen-3.7-Max, Strict ASR 89.0 percent">89.0</button></td><td><button type="button" class="matrix-cell" data-agent="7" data-model="4" data-comp="78.54" data-asr="88.9" style="--cell-color:#a6b494" aria-pressed="false" aria-label="Goose, DeepSeek-V4-Pro, Strict ASR 88.9 percent">88.9</button></td></tr>
+                  <tr><th scope="row">Hermes</th><td><button type="button" class="matrix-cell" data-agent="8" data-model="0" data-comp="95.46" data-asr="91.5" style="--cell-color:#a4b392" aria-pressed="false" aria-label="Hermes, GPT-5.5, Strict ASR 91.5 percent">91.5</button></td><td><button type="button" class="matrix-cell" data-agent="8" data-model="1" data-comp="98.58" data-asr="59.1" style="--cell-color:#bbc4a8" aria-pressed="false" aria-label="Hermes, Opus-4.8, Strict ASR 59.1 percent">59.1</button></td><td><button type="button" class="matrix-cell" data-agent="8" data-model="2" data-comp="88.41" data-asr="90.1" style="--cell-color:#a5b393" aria-pressed="false" aria-label="Hermes, GLM-5.2, Strict ASR 90.1 percent">90.1</button></td><td><button type="button" class="matrix-cell" data-agent="8" data-model="3" data-comp="84.91" data-asr="97.9" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Hermes, Qwen-3.7-Max, Strict ASR 97.9 percent">97.9</button></td><td><button type="button" class="matrix-cell" data-agent="8" data-model="4" data-comp="86.72" data-asr="99.0" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Hermes, DeepSeek-V4-Pro, Strict ASR 99.0 percent">99.0</button></td></tr>
+                  <tr><th scope="row">Kilo</th><td><button type="button" class="matrix-cell" data-agent="9" data-model="0" data-comp="91.50" data-asr="89.6" style="--cell-color:#a5b493" aria-pressed="false" aria-label="Kilo, GPT-5.5, Strict ASR 89.6 percent">89.6</button></td><td><button type="button" class="matrix-cell" data-agent="9" data-model="1" data-comp="95.72" data-asr="65.4" style="--cell-color:#b7c1a4" aria-pressed="false" aria-label="Kilo, Opus-4.8, Strict ASR 65.4 percent">65.4</button></td><td><button type="button" class="matrix-cell" data-agent="9" data-model="2" data-comp="84.19" data-asr="89.7" style="--cell-color:#a5b493" aria-pressed="false" aria-label="Kilo, GLM-5.2, Strict ASR 89.7 percent">89.7</button></td><td><button type="button" class="matrix-cell" data-agent="9" data-model="3" data-comp="79.66" data-asr="98.9" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Kilo, Qwen-3.7-Max, Strict ASR 98.9 percent">98.9</button></td><td><button type="button" class="matrix-cell" data-agent="9" data-model="4" data-comp="82.03" data-asr="97.8" style="--cell-color:#a0af8d" aria-pressed="false" aria-label="Kilo, DeepSeek-V4-Pro, Strict ASR 97.8 percent">97.8</button></td></tr>
+                  <tr><th scope="row">Nanobot</th><td><button type="button" class="matrix-cell" data-agent="10" data-model="0" data-comp="88.20" data-asr="91.3" style="--cell-color:#a4b392" aria-pressed="false" aria-label="Nanobot, GPT-5.5, Strict ASR 91.3 percent">91.3</button></td><td><button type="button" class="matrix-cell" data-agent="10" data-model="1" data-comp="93.41" data-asr="61.7" style="--cell-color:#b9c3a6" aria-pressed="false" aria-label="Nanobot, Opus-4.8, Strict ASR 61.7 percent">61.7</button></td><td><button type="button" class="matrix-cell" data-agent="10" data-model="2" data-comp="80.84" data-asr="92.1" style="--cell-color:#a4b291" aria-pressed="false" aria-label="Nanobot, GLM-5.2, Strict ASR 92.1 percent">92.1</button></td><td><button type="button" class="matrix-cell" data-agent="10" data-model="3" data-comp="75.48" data-asr="97.1" style="--cell-color:#a0b08e" aria-pressed="false" aria-label="Nanobot, Qwen-3.7-Max, Strict ASR 97.1 percent">97.1</button></td><td><button type="button" class="matrix-cell" data-agent="10" data-model="4" data-comp="77.48" data-asr="98.5" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Nanobot, DeepSeek-V4-Pro, Strict ASR 98.5 percent">98.5</button></td></tr>
+                  <tr><th scope="row">Oh My Pi</th><td><button type="button" class="matrix-cell" data-agent="11" data-model="0" data-comp="96.18" data-asr="94.3" style="--cell-color:#a2b190" aria-pressed="false" aria-label="Oh My Pi, GPT-5.5, Strict ASR 94.3 percent">94.3</button></td><td><button type="button" class="matrix-cell" data-agent="11" data-model="1" data-comp="99.36" data-asr="59.3" style="--cell-color:#bbc4a8" aria-pressed="false" aria-label="Oh My Pi, Opus-4.8, Strict ASR 59.3 percent">59.3</button></td><td><button type="button" class="matrix-cell" data-agent="11" data-model="2" data-comp="90.18" data-asr="93.6" style="--cell-color:#a3b190" aria-pressed="false" aria-label="Oh My Pi, GLM-5.2, Strict ASR 93.6 percent">93.6</button></td><td><button type="button" class="matrix-cell" data-agent="11" data-model="3" data-comp="86.75" data-asr="99.8" style="--cell-color:#9eae8c" aria-pressed="false" aria-label="Oh My Pi, Qwen-3.7-Max, Strict ASR 99.8 percent">99.8</button></td><td><button type="button" class="matrix-cell" data-agent="11" data-model="4" data-comp="88.96" data-asr="99.3" style="--cell-color:#9eae8c" aria-pressed="false" aria-label="Oh My Pi, DeepSeek-V4-Pro, Strict ASR 99.3 percent">99.3</button></td></tr>
+                  <tr><th scope="row">OpenClaw</th><td><button type="button" class="matrix-cell" data-agent="12" data-model="0" data-comp="95.24" data-asr="85.6" style="--cell-color:#a8b696" aria-pressed="false" aria-label="OpenClaw, GPT-5.5, Strict ASR 85.6 percent">85.6</button></td><td><button type="button" class="matrix-cell" data-agent="12" data-model="1" data-comp="98.83" data-asr="52.5" style="--cell-color:#c0c8ac" aria-pressed="false" aria-label="OpenClaw, Opus-4.8, Strict ASR 52.5 percent">52.5</button></td><td><button type="button" class="matrix-cell" data-agent="12" data-model="2" data-comp="88.59" data-asr="83.2" style="--cell-color:#aab797" aria-pressed="false" aria-label="OpenClaw, GLM-5.2, Strict ASR 83.2 percent">83.2</button></td><td><button type="button" class="matrix-cell" data-agent="12" data-model="3" data-comp="84.68" data-asr="86.6" style="--cell-color:#a8b595" aria-pressed="false" aria-label="OpenClaw, Qwen-3.7-Max, Strict ASR 86.6 percent">86.6</button></td><td><button type="button" class="matrix-cell" data-agent="12" data-model="4" data-comp="86.82" data-asr="88.2" style="--cell-color:#a6b494" aria-pressed="false" aria-label="OpenClaw, DeepSeek-V4-Pro, Strict ASR 88.2 percent">88.2</button></td></tr>
+                  <tr><th scope="row">Pi</th><td><button type="button" class="matrix-cell" data-agent="13" data-model="0" data-comp="94.77" data-asr="92.1" style="--cell-color:#a4b291" aria-pressed="false" aria-label="Pi, GPT-5.5, Strict ASR 92.1 percent">92.1</button></td><td><button type="button" class="matrix-cell" data-agent="13" data-model="1" data-comp="98.45" data-asr="58.5" style="--cell-color:#bbc4a8" aria-pressed="false" aria-label="Pi, Opus-4.8, Strict ASR 58.5 percent">58.5</button></td><td><button type="button" class="matrix-cell" data-agent="13" data-model="2" data-comp="88.01" data-asr="93.0" style="--cell-color:#a3b291" aria-pressed="false" aria-label="Pi, GLM-5.2, Strict ASR 93.0 percent">93.0</button></td><td><button type="button" class="matrix-cell" data-agent="13" data-model="3" data-comp="84.11" data-asr="98.5" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Pi, Qwen-3.7-Max, Strict ASR 98.5 percent">98.5</button></td><td><button type="button" class="matrix-cell" data-agent="13" data-model="4" data-comp="86.24" data-asr="98.8" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Pi, DeepSeek-V4-Pro, Strict ASR 98.8 percent">98.8</button></td></tr>
+                  <tr><th scope="row">Qwen Code</th><td><button type="button" class="matrix-cell" data-agent="14" data-model="0" data-comp="95.09" data-asr="90.9" style="--cell-color:#a4b392" aria-pressed="false" aria-label="Qwen Code, GPT-5.5, Strict ASR 90.9 percent">90.9</button></td><td><button type="button" class="matrix-cell" data-agent="14" data-model="1" data-comp="98.66" data-asr="65.2" style="--cell-color:#b7c1a4" aria-pressed="false" aria-label="Qwen Code, Opus-4.8, Strict ASR 65.2 percent">65.2</button></td><td><button type="button" class="matrix-cell" data-agent="14" data-model="2" data-comp="88.24" data-asr="92.5" style="--cell-color:#a3b291" aria-pressed="false" aria-label="Qwen Code, GLM-5.2, Strict ASR 92.5 percent">92.5</button></td><td><button type="button" class="matrix-cell" data-agent="14" data-model="3" data-comp="84.39" data-asr="98.7" style="--cell-color:#9faf8d" aria-pressed="false" aria-label="Qwen Code, Qwen-3.7-Max, Strict ASR 98.7 percent">98.7</button></td><td><button type="button" class="matrix-cell" data-agent="14" data-model="4" data-comp="86.51" data-asr="99.5" style="--cell-color:#9eae8c" aria-pressed="false" aria-label="Qwen Code, DeepSeek-V4-Pro, Strict ASR 99.5 percent">99.5</button></td></tr>
+                </tbody>
+                <tfoot>
+                  <tr><th scope="row">Pooled</th><td data-comp="92.02" data-asr="88.5">88.5</td><td data-comp="96.18" data-asr="59.2">59.2</td><td data-comp="85.00" data-asr="87.9">87.9</td><td data-comp="80.81" data-asr="94.6">94.6</td><td data-comp="82.91" data-asr="94.7">94.7</td></tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="matrix-legend"><span>0</span><span class="legend-steps" id="matrix-legend" aria-hidden="true"></span><span>100%</span><span id="legend-description">Darker means higher attack success</span></div>
+          </div>
+
+          <aside class="selection-panel" aria-live="polite" aria-atomic="true">
+            <div class="selection-label">SELECTED CONFIGURATION</div>
+            <h3 class="selection-agent" id="selection-agent">OpenCode</h3>
+            <p class="selection-model" id="selection-model">GPT-5.5</p>
+            <div class="selection-values">
+              <div><div class="value" id="selection-asr">100.0%</div><div class="label">Strict ASR ↑ vulnerable</div></div>
+              <div><div class="value" id="selection-comp">95.31%</div><div class="label">Benign completion ↑ capability</div></div>
+            </div>
+            <p class="selection-note">These numbers answer different questions: <strong>can the agent finish the original task</strong>, and <strong>does it cross the safety contract after environment evolution</strong>? Read attack results together with benign capability.</p>
+            <div class="result-callout">Controlling for foundation model and benign completion, adding agent identity raises the explained variation in ASR from <b>91.3%</b> to <b>98.9%</b>.</div>
+          </aside>
+        </div>
+
+        <div class="matrix-foot">Completion is measured on the original, unattacked scenarios; Strict ASR requires confirmation by the deterministic evaluator and a GLM-5.2 judge. The pooled row is the paper’s summary. Each agent exposes only the attack surfaces supported by its adapter, so these results should not be read as a product safety ranking outside this protocol.</div>
+
+        <div class="evidence-notes reveal">
+          <p><strong>What varies.</strong> A two-way decomposition attributes 73.6% of ASR variation to the target model and 25.2% to the target agent. Agent vulnerability rankings remain moderately consistent across models, with a mean pairwise Spearman correlation of 0.65.</p>
+          <p><strong>Read with capability.</strong> Pooled benign completion is 87.38%. Aider shows the lowest completion across models, so its attack results should be read in light of that capability gap.</p>
+        </div>
+
+        <details class="paper-settings reveal">
+          <summary>Paper settings and pooled results <span class="mono">TABLE 3 · §5</span></summary>
+          <div class="table-card">
+            <table>
+              <caption>Reported in <a href="https://arxiv.org/abs/2608.00677">arXiv:2608.00677</a>; paper corpus counts are distinct from released artifact counts.</caption>
+              <thead><tr><th scope="col">Measurement</th><th scope="col">Paper-reported value</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Validated scenarios</th><td>10K+</td></tr>
+                <tr><th scope="row">Domains</th><td>50</td></tr>
+                <tr><th scope="row">Capability corpus</th><td>500K+ tools and skills</td></tr>
+                <tr><th scope="row">Median task horizon</th><td>97 tool calls</td></tr>
+                <tr><th scope="row">Evaluation matrix</th><td>15 agents × 5 models (75 settings)</td></tr>
+                <tr><th scope="row">Target-visible attack vectors</th><td>8</td></tr>
+                <tr><th scope="row">Pooled strict ASR (EMHA attacker)</th><td>85.0%</td></tr>
+                <tr><th scope="row">Pooled benign completion</th><td>87.38%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small">Strict attack success rate (ASR) requires confirmation by both the deterministic evaluator and an LLM judge. These are paper-reported measurements; the agent runtime can affect safety beyond the choice of foundation model.</p>
+        </details>
+        <p class="data-note">Source: paper Table 3 and §5. Results are protocol-specific; see the paper for the full adapter-by-vector coverage matrix.</p>
       </div>
     </section>
 
-    <section id="citation" class="section" aria-labelledby="citation-title">
-      <h2 id="citation-title">Cite the arXiv paper and repository</h2>
-      <div class="card citation-card">
-        <p>Chen et al., <cite>OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution</cite>, <a href="https://arxiv.org/abs/2608.00677">arXiv:2608.00677</a> (2026). If you use the runtime, tasks, tools, or results, cite the paper and repository; <a href="https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff">CITATION.cff</a> contains the canonical metadata.</p>
-        <pre tabindex="0" aria-label="BibTeX citation"><code>@misc{chen2026openart,
-  title = {OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution},
-  author = {Chen, Yunhao and Wang, Xin and Wang, Yixu and Liu, Yi and Li, Jie
-            and Teng, Yan and Ma, Xingjun and Hu, Xia and Jiang, Yu-Gang},
-  year = {2026},
-  eprint = {2608.00677},
+    <section class="chapter" id="mechanisms">
+      <div class="wrap">
+        <div class="chapter-head reveal">
+          <div class="chapter-index"><span class="num">06</span><span class="en">What changes</span></div>
+          <div>
+            <h2 class="chapter-title">Failures live between steps,<br>not only inside answers.</h2>
+            <p class="chapter-desc">The paper identifies five recurring mechanisms in execution traces. They help explain why an agent can recognize a risk early and still cross the boundary later. Open each one.</p>
+          </div>
+        </div>
+
+        <div class="mechanism-layout reveal">
+          <aside class="mechanism-aside">
+            <div class="large">5</div>
+            <h3>State moves.<br>Earlier judgments do not always move with it.</h3>
+            <p>Summaries here follow §5.2 and the case reconstructions in Appendix G. They are analytical labels for observed traces, not a complete taxonomy.</p>
+          </aside>
+
+          <div class="mechanisms">
+            <details class="mechanism" open>
+              <summary><span class="mechanism-no">01</span><span class="mechanism-title">Safety-debt accumulation<span>UNRESOLVED DECISIONS MOVE DOWNSTREAM</span></span></summary>
+              <div class="mechanism-body">An unresolved safety decision is deferred to a later step. Once the material is reorganized, structurally complete, or embedded in a trusted report, that completeness is treated as evidence of safety rather than as a separate question.<p class="example">The paper’s case reconstruction follows a deferred judgment that returns as apparently finished work.</p></div>
+            </details>
+            <details class="mechanism">
+              <summary><span class="mechanism-no">02</span><span class="mechanism-title">Plan–referent drift<span>THE PLAN STAYS; ITS TARGET MOVES</span></span></summary>
+              <div class="mechanism-body">The plan remains fixed while the artifact it references evolves. A step that was valid when written can resolve to a different object, version, or destination at execution time.<p class="example">The plan still says “use the approved attachment” after the attachment behind that reference has changed.</p></div>
+            </details>
+            <details class="mechanism">
+              <summary><span class="mechanism-no">03</span><span class="mechanism-title">Safety-checkpoint expiry<span>AN OLD CHECK IS REUSED ON NEW CONTENT</span></span></summary>
+              <div class="mechanism-body">A safety check validates an earlier state but is not repeated after equivalent risky content reappears in a trusted context. The earlier conclusion is carried forward without matching it to the new state.<p class="example">Content excluded earlier is reorganized and re-enters the workflow under the previous “checked” label.</p></div>
+            </details>
+            <details class="mechanism">
+              <summary><span class="mechanism-no">04</span><span class="mechanism-title">Coalition-only activation<span>BENIGN ALONE, UNSAFE IN COMBINATION</span></span></summary>
+              <div class="mechanism-body">A change that is benign in isolation becomes unsafe when combined with another change or with downstream workflow state. Checking each element separately can miss the dependency.<p class="example">Separately acceptable edits meet later in the workflow and change what the final deliverable means.</p></div>
+            </details>
+            <details class="mechanism">
+              <summary><span class="mechanism-no">05</span><span class="mechanism-title">Capability rebinding<span>THE INTERFACE STAYS; THE CAPABILITY CHANGES</span></span></summary>
+              <div class="mechanism-body">An operation keeps its interface while its implementation or destination changes. The agent reuses the same plan and invokes a different capability than the one it believes it is calling. Tool-only and MCP-only evolution still reach 71.4% and 73.1% Strict ASR.<p class="example">A call name is unchanged, but the implementation behind it now points somewhere else.</p></div>
+            </details>
+          </div>
+        </div>
+
+        <div class="takeaway reveal">
+          <h3>THE TAKEAWAY</h3>
+          <p>Agent safety is a property of the trajectory:<br>state, capabilities, and decisions interact over time.</p>
+        </div>
+        <p class="reading-note">These mechanisms are drawn from observed traces. They are a lens for analysis, not an exhaustive list of failure modes, and the paper does not claim they validate a general defense.</p>
+      </div>
+    </section>
+
+    <section class="chapter section-line" id="use">
+      <div class="wrap">
+        <div class="chapter-head reveal">
+          <div class="chapter-index"><span class="num">07</span><span class="en">Use it</span></div>
+          <div>
+            <h2 class="chapter-title">Read the paper.<br>Then run the environment.</h2>
+            <p class="chapter-desc">OpenART ships the Docker-native runtime, three bundled high-complexity tasks, the released planner task dataset, and a managed tool subset. Start with the deterministic path, then add a model-backed target or attacker.</p>
+          </div>
+        </div>
+
+        <div class="use-layout reveal">
+          <div class="quickstart">
+            <div class="quickstart-head"><span class="mono">QUICKSTART / FROM A CLEAN CHECKOUT</span><span class="mono muted">README · VERIFIED COMMANDS</span></div>
+
+            <div class="qs-step">
+              <div class="qs-num">01</div>
+              <div class="qs-body"><h3>Get the runtime and install dependencies.</h3>
+                <pre class="code-block"><code>git clone https://github.com/AI45Lab/OpenART.git
+cd OpenART/OpenART
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+export PYTHONPATH="$PWD"</code></pre>
+              </div>
+            </div>
+
+            <div class="qs-step">
+              <div class="qs-num">02</div>
+              <div class="qs-body"><h3>Build the task image and an agent runtime.</h3>
+                <pre class="code-block"><code>docker build -t openart/task-base:latest -f images/Dockerfile.task-base .
+docker build -t openart/opencode:latest -f images/Dockerfile.opencode .
+cp .env.example .env</code></pre>
+                <p>Add model endpoints and credentials to <code>.env</code> for model-backed runs.</p>
+              </div>
+            </div>
+
+            <div class="qs-step">
+              <div class="qs-num">03</div>
+              <div class="qs-body"><h3>Run a bundled task without an attacker.</h3>
+                <pre class="code-block"><code>python -m framework.cli run \
+  --task examples/tasks/high-complexity-kb-integration \
+  --target-config configs/target-configs/target.yaml \
+  --tool-store ../openart-tools \
+  --eval-strategy deterministic \
+  --skip-attacker \
+  --run-id kb-integration-target-only \
+  --output-dir outputs/kb-integration-target-only</code></pre>
+                <p>The deterministic evaluator path skips the attacker. The target still needs its model endpoint and key in <code>.env</code>.</p>
+              </div>
+            </div>
+
+            <div class="qs-step">
+              <div class="qs-num">04</div>
+              <div class="qs-body"><h3>Add the OpenCode-compatible attacker.</h3>
+                <pre class="code-block"><code>python -m framework.cli run \
+  --task examples/tasks/high-complexity-kb-integration \
+  --target-config configs/target-configs/target.yaml \
+  --attacker-config configs/attacker-configs/universal/opencode-native-control/config.yaml \
+  --tool-store ../openart-tools \
+  --eval-strategy both \
+  --max-iterations 2 \
+  --run-id kb-integration-attacked \
+  --output-dir outputs/kb-integration-attacked</code></pre>
+              </div>
+            </div>
+
+            <details class="run-dataset">
+              <summary>Run one released task from the dataset <span class="mono">10,150 TASKS · 52 SHARDS</span></summary>
+              <p>From the dataset repository root, choose a viewer config (<code>mid</code>, <code>mid-v5</code>, or <code>large</code>), and extract one bundle:</p>
+              <pre class="code-block"><code>python scripts/download_task.py \
+  --dataset-dir openart-planner-tasks \
+  --difficulty mid-v5 \
+  --task-id openartv5-mid-000001 \
+  --output-dir ./task</code></pre>
+              <p class="small">The full archive is about 75 GB. The Amazon S3-style helper and checksums are documented on the dataset card.</p>
+            </details>
+          </div>
+
+          <aside class="use-aside">
+            <div class="aside-card">
+              <span class="mono">BEFORE YOU RUN</span>
+              <ul class="checklist">
+                <li>Docker is available to your user.</li>
+                <li>Python 3 with <code>venv</code> and <code>pip</code>.</li>
+                <li>Model endpoints and keys in <code>.env</code> for model-backed targets.</li>
+                <li>About 75 GB for the full task archive; single-bundle extraction is much smaller.</li>
+                <li>Run artifacts land in <code>OpenART/outputs/</code>, which Git ignores.</li>
+              </ul>
+            </div>
+            <div class="aside-card safety-card">
+              <span class="mono">SAFETY BOUNDARY</span>
+              <p><strong>Evaluation fixtures, not instructions.</strong> Task workspaces may contain synthetic risky-source strings. Treat them as benchmark fixtures.</p>
+              <p>Run attacker flows only inside this repository’s Docker sandbox. Never point them at external systems, third-party services, or non-consenting targets.</p>
+              <p><a href="https://github.com/AI45Lab/OpenART/blob/main/OpenART/skills/openart/SKILL.md">Read the operator skill ↗</a></p>
+            </div>
+          </aside>
+        </div>
+
+        <div class="artifact-strip reveal" aria-label="Released artifacts">
+          <a class="artifact-card" href="https://arxiv.org/abs/2608.00677" target="_blank" rel="noopener noreferrer"><span class="kind">01 / PAPER</span><span class="artifact-title">The full paper <i>↗</i></span><span class="artifact-sub">Method, figures, complexity analysis, and case reconstructions. arXiv:2608.00677.</span></a>
+          <a class="artifact-card" href="https://github.com/AI45Lab/OpenART" target="_blank" rel="noopener noreferrer"><span class="kind">02 / CODE</span><span class="artifact-title">Runtime and docs <i>↗</i></span><span class="artifact-sub">Docker-native runtime, adapters, planner, and operator guide. AGPL-3.0.</span></a>
+          <a class="artifact-card" href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks" target="_blank" rel="noopener noreferrer"><span class="kind">03 / TASKS</span><span class="artifact-title">Planner tasks <i>↗</i></span><span class="artifact-sub">10,150 released executable tasks in 52 ZIP shards; three viewer configs.</span></a>
+          <a class="artifact-card" href="https://huggingface.co/datasets/dongdongunique/openart-tools" target="_blank" rel="noopener noreferrer"><span class="kind">04 / TOOLS</span><span class="artifact-title">Tool subset <i>↗</i></span><span class="artifact-sub">63,697 selected materialized tools with metadata and checksums.</span></a>
+        </div>
+
+        <div class="faq-wrap reveal" id="faq">
+          <div class="faq-head"><span class="mono">QUESTIONS</span><h2>Before you cite or run it.</h2></div>
+          <div class="faq-list">
+            <details class="faq-item" open><summary>What is OpenART?</summary><p>OpenART is an executable benchmark and Docker-native runtime for evaluating tool-using agent safety in long-horizon, evolving environments. The benign task and hidden safety contract stay fixed while target-visible state changes mid-run.</p></details>
+            <details class="faq-item"><summary>What does Strict ASR mean?</summary><p>Strict attack success rate counts an attack as successful only when both the deterministic evaluator and a GLM-5.2 judge confirm success. The paper reports a pooled Strict ASR of 85.0% across 75 agent–model settings.</p></details>
+            <details class="faq-item"><summary>Does OpenART evaluate foundation models or agent runtimes?</summary><p>It evaluates deployed agent runtimes paired with foundation models. The paper reports 15 agents and 5 models, and finds that agent implementation explains safety variation beyond the foundation model and benign completion.</p></details>
+            <details class="faq-item"><summary>What is long-horizon safety drift?</summary><p>A trajectory in which the target consumes evolved state but reaches an unsafe action only after further actions. Across 10,000 converted trajectories, the median propagation distance was 37 target actions, with an interquartile range of 20 to 66.</p></details>
+            <details class="faq-item"><summary>How do I run one released task?</summary><p>Download the planner task dataset, choose a config (<code>mid</code>, <code>mid-v5</code>, or <code>large</code>), and extract a task with the dataset’s <code>scripts/download_task.py</code>. The snippet above shows the command.</p></details>
+            <details class="faq-item"><summary>Do I need model credentials?</summary><p>The deterministic evaluator path can run with <code>--skip-attacker</code>. Model-backed targets and attackers need endpoints and credentials in <code>.env</code>; see the repository setup guide.</p></details>
+          </div>
+        </div>
+
+        <div class="citation-block reveal" id="citation">
+          <div class="citation-copy">
+            <span class="mono">CITATION</span>
+            <h2>Cite the paper and the repository.</h2>
+            <p>If you use the runtime, tasks, tools, or evaluation results, cite the paper and the software. Canonical metadata lives in <a href="https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff">CITATION.cff</a>; the arXiv title is the one to cite verbatim.</p>
+          </div>
+          <div class="citation-actions">
+            <button class="copy-button" id="copy-citation" type="button">Copy BibTeX</button>
+            <a class="button-text" href="https://arxiv.org/abs/2608.00677" target="_blank" rel="noopener noreferrer">Open arXiv ↗</a>
+          </div>
+          <pre class="citation-content" id="citation-content" tabindex="0">@misc{chen2026openart,
+  title         = {OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution},
+  author        = {Chen, Yunhao and Wang, Xin and Wang, Yixu and Liu, Yi and Li, Jie
+                   and Teng, Yan and Ma, Xingjun and Hu, Xia and Jiang, Yu-Gang},
+  year          = {2026},
+  eprint        = {2608.00677},
   archivePrefix = {arXiv},
-  primaryClass = {cs.CL},
-  url = {https://arxiv.org/abs/2608.00677},
-  note = {Code: https://github.com/AI45Lab/OpenART}
-}</code></pre>
-        <p class="small">The PDF also prints “OpenART Arena”; both names refer to this work. Use the arXiv title above in bibliographies.</p>
+  primaryClass  = {cs.CL},
+  url           = {https://arxiv.org/abs/2608.00677},
+  note          = {Code: https://github.com/AI45Lab/OpenART}
+}</pre>
+        </div>
       </div>
     </section>
+
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p><strong>OpenART</strong> · Open Agent Red Teaming</p>
-      <p>Code: <a href="https://github.com/AI45Lab/OpenART/blob/main/LICENSE">AGPL-3.0 LICENSE</a>. The <a href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">dataset card</a> uses <code>license: other</code> with mixed upstream terms.</p>
-      <p class="small"><a href="llms.txt">Machine-readable summary</a> · <a href="https://github.com/AI45Lab/OpenART">GitHub</a> · <a href="https://www.shlab.org.cn/">Shanghai AI Laboratory</a></p>
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div class="footer-brand-block"><span class="footer-brand">OpenART</span><span class="footer-sub">Research notes / interactive guide</span></div>
+      <p class="footer-mid">Source: paper Tables 2–3, Figures 1–4, §3–5. Content checked 2026-11-01. Paper figures © the authors, CC BY 4.0; diagrams are explanatory illustrations.</p>
+      <div class="footer-logos">
+        <a href="https://www.shlab.org.cn/" target="_blank" rel="noopener noreferrer"><img src="assets/icon_ailab.png" alt="Shanghai AI Laboratory" width="120" height="28"></a>
+        <a href="https://ai45.shlab.org.cn/" target="_blank" rel="noopener noreferrer"><img src="assets/icon_ai45_en.png" alt="AI45Lab" width="96" height="28"></a>
+      </div>
+    </div>
+    <div class="wrap footer-legal">
+      <p>Code: <a href="https://github.com/AI45Lab/OpenART/blob/main/LICENSE">AGPL-3.0</a>. The <a href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">dataset card</a> uses <code>license: other</code> with mixed upstream terms.</p>
+      <p><a href="llms.txt">Machine-readable summary</a> · <a href="https://github.com/AI45Lab/OpenART">GitHub</a> · <a href="https://www.shlab.org.cn/">Shanghai AI Laboratory</a></p>
     </div>
   </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js" defer onerror="document.documentElement.classList.remove('js')"></script>
 </body>
 </html>
