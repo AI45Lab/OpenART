@@ -94,8 +94,6 @@ and an LLM judge confirm it.
 
 **OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution**
 
-🥈 **#2 Paper of the Day on [Hugging Face Papers](https://huggingface.co/papers/2608.00677)**
-
 Yunhao Chen, Xin Wang, Yixu Wang, Yi Liu, Jie Li, Yan Teng, Xingjun Ma, Xia Hu,
 and Yu-Gang Jiang
 
