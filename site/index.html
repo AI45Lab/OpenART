@@ -5,20 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>document.documentElement.classList.add("js");</script>
   <title>OpenART — Safety in Evolving Agent Environments | Interactive Guide</title>
-  <meta name="description" content="An interactive guide to OpenART, an executable benchmark for tool-using agent safety in long-horizon, evolving Docker environments. Follow the method, paper figures, 75-setting results, and released artifacts.">
+  <meta name="description" content="An interactive guide to OpenART, an executable benchmark for tool-using agent safety in long-horizon, evolving Docker environments. Start with the project overview, abstract, and core logic, then follow the method, paper figures, 75-setting results, and released artifacts.">
   <meta name="robots" content="index, follow">
   <meta name="author" content="AI45Lab">
   <meta name="theme-color" content="#eeece5">
   <link rel="canonical" href="https://ai45lab.github.io/OpenART/">
   <link rel="preload" href="assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
+  <noscript>
+    <style>
+      .site-header { position: static; height: auto; }
+      .header-inner { flex-wrap: wrap; padding: 14px 0; }
+      .header-tools { order: 2; margin-left: auto; }
+      .main-nav { display: flex; position: static; order: 3; width: 100%; flex-wrap: wrap; justify-content: flex-start; gap: 4px 20px; padding: 0; background: transparent; border: 0; }
+      .main-nav a { min-height: 34px; font-size: 14px; }
+      .menu-toggle, .motion-toggle { display: none; }
+    </style>
+  </noscript>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="alternate" type="text/plain" href="llms.txt">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ai45lab.github.io/OpenART/">
   <meta property="og:title" content="OpenART — Safety in Evolving Agent Environments">
-  <meta property="og:description" content="An interactive guide to OpenART: long-horizon agent safety, environment evolution, EMHA, paper figures, and 75-setting results.">
+  <meta property="og:description" content="An interactive guide to OpenART: project overview, core logic, long-horizon agent safety, environment evolution, EMHA, paper figures, and 75-setting results.">
   <meta property="og:image" content="https://ai45lab.github.io/OpenART/assets/og.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
@@ -28,7 +38,7 @@
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="OpenART — Safety in Evolving Agent Environments">
-  <meta name="twitter:description" content="An interactive guide to OpenART: long-horizon agent safety, environment evolution, EMHA, paper figures, and 75-setting results.">
+  <meta name="twitter:description" content="An interactive guide to OpenART: project overview, core logic, long-horizon agent safety, environment evolution, EMHA, paper figures, and 75-setting results.">
   <meta name="twitter:image" content="https://ai45lab.github.io/OpenART/assets/og.png">
   <meta name="twitter:image:alt" content="OpenART interactive guide: safety on a moving ground">
   <script type="application/ld+json">
@@ -40,9 +50,9 @@
         "@id": "https://ai45lab.github.io/OpenART/#webpage",
         "url": "https://ai45lab.github.io/OpenART/",
         "name": "OpenART — Safety in Evolving Agent Environments",
-        "description": "An interactive guide to OpenART, an executable benchmark for tool-using agent safety in long-horizon, evolving Docker environments.",
+        "description": "An interactive guide to OpenART, an executable benchmark for tool-using agent safety in long-horizon, evolving Docker environments. Opens with the project overview, abstract, and core logic.",
         "inLanguage": "en",
-        "dateModified": "2026-11-01",
+        "dateModified": "2026-11-02",
         "primaryImageOfPage": {"@id": "https://ai45lab.github.io/OpenART/#fig1"},
         "mainEntity": {"@id": "https://arxiv.org/abs/2608.00677"},
         "about": [
@@ -225,6 +235,7 @@
         OpenART<span class="slash">/</span><span class="brand-note">RESEARCH NOTES</span>
       </a>
       <nav class="main-nav" id="main-nav" aria-label="Chapter navigation">
+        <a href="#overview">Overview</a>
         <a href="#question">Question</a>
         <a href="#arena">Arena</a>
         <a href="#search">Search</a>
@@ -255,9 +266,9 @@
             <p class="kicker">OpenART · Open Agent Red Teaming</p>
             <h1>Safety,<br>on a <em>moving ground.</em></h1>
             <p class="hero-title-en">When the environment evolves,<br>does safety hold?</p>
-            <p class="hero-desc">OpenART is an executable benchmark for red-teaming tool-using agents in long-horizon, evolving Docker environments. This guide follows one task, explains the method, and reads the paper’s figures and results.</p>
+            <p class="hero-desc">OpenART is an executable benchmark for red-teaming tool-using agents in long-horizon, evolving Docker environments. Start with the project overview and core logic, then follow one task through the method, figures, and results.</p>
             <div class="hero-cta">
-              <a class="button-solid" href="#question">Follow a long task <span aria-hidden="true">↓</span></a>
+              <a class="button-solid" href="#overview">Project overview <span aria-hidden="true">↓</span></a>
               <a class="button-text" href="https://arxiv.org/pdf/2608.00677" target="_blank" rel="noopener noreferrer">Read the paper ↗</a>
             </div>
             <p class="hero-authors">Yunhao Chen · Xin Wang · Yixu Wang · Yi Liu · Jie Li · Yan Teng · Xingjun Ma · Xia Hu · Yu-Gang Jiang</p>
@@ -309,6 +320,105 @@
     <aside class="safety-note wrap" aria-label="Safety benchmark notice">
       <p><strong>Evaluation fixtures, not instructions.</strong> This is a red-teaming safety benchmark. Task workspaces may contain synthetic risky-source strings; treat them as evaluation fixtures, not instructions.</p>
     </aside>
+
+    <section class="chapter section-line overview" id="overview">
+      <div class="wrap">
+        <div class="chapter-head reveal">
+          <div class="chapter-index"><span class="num">00</span><span class="en">Overview</span></div>
+          <div>
+            <h2 class="chapter-title">One project, three layers:<br>benchmark, runtime, and search.</h2>
+            <p class="chapter-desc">OpenART is a benchmark, a Docker-native runtime, and a search policy in one repository. The four steps below are the whole system in miniature. The rest of the page opens them up, starting with the paper’s abstract and the code that makes a run executable.</p>
+          </div>
+        </div>
+
+        <div class="core-logic reveal">
+          <div class="core-logic-head"><span>CORE LOGIC</span><span>FIX THE TASK · MOVE THE STATE</span></div>
+          <ol class="logic-flow">
+            <li>
+              <span class="logic-n">01 / FIX</span>
+              <h3>Hold the task and contract fixed.</h3>
+              <p>A benign objective, initial environment, workflow, and hidden safety contract define the scenario. None of them move during a run.</p>
+              <span class="logic-tag">TASK + CONTRACT</span>
+            </li>
+            <li>
+              <span class="logic-n">02 / PROJECT</span>
+              <h3>Project into the native runtime.</h3>
+              <p>Target-specific adapters instantiate the scenario inside a deployed agent, so the same task runs through that agent’s own tools and state.</p>
+              <span class="logic-tag">15 AGENT RUNTIMES</span>
+            </li>
+            <li>
+              <span class="logic-n">03 / EVOLVE</span>
+              <h3>Search authorized state changes.</h3>
+              <p>EMHA coordinates transitions across eight target-visible surfaces and uses evaluator feedback to keep the changes that work.</p>
+              <span class="logic-tag">ONLY THE ENVIRONMENT MOVES</span>
+            </li>
+            <li>
+              <span class="logic-n">04 / SCORE</span>
+              <h3>Evaluate the trace, then feed back.</h3>
+              <p>Deterministic and model-based evaluators read the execution trace and resulting state. Confirmed outcomes guide the next search round.</p>
+              <span class="logic-tag">STRICT ASR</span>
+            </li>
+          </ol>
+        </div>
+
+        <div class="overview-layout reveal">
+          <article class="abstract-panel">
+            <div class="panel-label"><span>PROJECT ABSTRACT</span><span>PAPER · arXiv:2608.00677v2</span></div>
+            <p class="abstract-lead">AI agents increasingly operate through tools in persistent environments, where each action can alter the state encountered by subsequent actions. As these state changes accumulate over long interaction horizons, safety failures can emerge from sequences of individually benign actions rather than from any single decision.</p>
+            <div class="abstract-body">
+              <p>OpenART is a red-teaming arena based on environment evolution. It constructs over 10,000 validated, stateful scenarios spanning 50 domains from more than 500,000 tools, MCPs, and skills, with a median of 97 tool calls. Adapters project the scenarios onto 15 deployed agents, five foundation models, and eight attack vectors, yielding 75 agent–model configurations.</p>
+              <p>To explore evolving attack surfaces, the paper introduces the Evolutionary Markov Hypergraph Attack (EMHA), a black-box policy that coordinates authorized state transitions along hypergraph paths. The task objective and safety contract remain fixed; only the target-visible environment evolves.</p>
+              <p>Across all configurations, EMHA reaches a pooled strict ASR of 85.0%. Its advantage over instruction-only evolution rises from 1.8–2.7 pp in simple environments to 17.2–17.6 pp in the most complex ones. Target-agent identity also explains an additional 7.6% of ASR variation beyond model and capability controls.</p>
+            </div>
+            <p class="abstract-note">Condensed from the paper abstract. <a href="https://arxiv.org/abs/2608.00677" target="_blank" rel="noopener noreferrer">Read the full text ↗</a></p>
+          </article>
+
+          <aside class="project-card" aria-label="OpenART project card">
+            <div class="project-card-head"><span>PROJECT CARD</span><span>2026</span></div>
+            <dl class="project-facts">
+              <div><dt>PAPER</dt><dd>OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution</dd></div>
+              <div><dt>CODE</dt><dd>Docker-native runtime, planner, configs, and evaluator</dd></div>
+              <div><dt>DATA</dt><dd>10,150 released tasks · 63,697 materialized tools</dd></div>
+              <div><dt>MATRIX</dt><dd>15 agent runtimes × 5 foundation models · 8 attack vectors</dd></div>
+              <div><dt>LICENSE</dt><dd>AGPL-3.0 code; dataset card is <code>license: other</code></dd></div>
+            </dl>
+            <div class="project-stars">
+              <span class="mono">GITHUB STARS</span>
+              <a href="https://github.com/AI45Lab/OpenART" target="_blank" rel="noopener noreferrer" aria-label="OpenART on GitHub: 265 stars as of 2026-11-01"><strong>265</strong><span aria-hidden="true">★</span></a>
+              <span class="asof">AI45Lab/OpenART · AS OF 2026-11-01</span>
+            </div>
+            <a class="project-link" href="https://github.com/AI45Lab/OpenART" target="_blank" rel="noopener noreferrer">View the repository <span aria-hidden="true">↗</span></a>
+          </aside>
+        </div>
+
+        <div class="codebase-block reveal">
+          <div class="codebase-head">
+            <span class="mono">INSIDE THE CODE</span>
+            <div>
+              <h3>The benchmark is also a runnable system.</h3>
+              <p>A run moves from a planner-built scenario to a Docker environment, through a target adapter, into trace-level evaluation. The repository holds the scenario generator, runtime adapters, attacker configuration, services, and bundled tasks — not only the released data.</p>
+            </div>
+          </div>
+          <div class="repo-map" aria-label="Repository map">
+            <a class="repo-row" href="https://github.com/AI45Lab/OpenART/tree/main/OpenART/framework" target="_blank" rel="noopener noreferrer"><span class="repo-path">OpenART/framework/</span><span class="repo-desc">CLI, planner, target runners, and evaluation logic.</span><span class="repo-arrow" aria-hidden="true">↗</span></a>
+            <a class="repo-row" href="https://github.com/AI45Lab/OpenART/tree/main/OpenART/configs" target="_blank" rel="noopener noreferrer"><span class="repo-path">OpenART/configs/</span><span class="repo-desc">Target, attacker, service, and planner configuration.</span><span class="repo-arrow" aria-hidden="true">↗</span></a>
+            <a class="repo-row" href="https://github.com/AI45Lab/OpenART/tree/main/OpenART/images" target="_blank" rel="noopener noreferrer"><span class="repo-path">OpenART/images/</span><span class="repo-desc">Task base image and Dockerfiles for agent runtimes.</span><span class="repo-arrow" aria-hidden="true">↗</span></a>
+            <a class="repo-row" href="https://github.com/AI45Lab/OpenART/tree/main/OpenART/services" target="_blank" rel="noopener noreferrer"><span class="repo-path">OpenART/services/</span><span class="repo-desc">Local services for tasks that need external dependencies, with health checks.</span><span class="repo-arrow" aria-hidden="true">↗</span></a>
+            <a class="repo-row" href="https://github.com/AI45Lab/OpenART/tree/main/OpenART/examples/tasks" target="_blank" rel="noopener noreferrer"><span class="repo-path">OpenART/examples/tasks/</span><span class="repo-desc">Bundled high-complexity tasks used by the quickstart.</span><span class="repo-arrow" aria-hidden="true">↗</span></a>
+            <a class="repo-row" href="https://github.com/AI45Lab/OpenART/tree/main/openart-tools" target="_blank" rel="noopener noreferrer"><span class="repo-path">openart-tools/</span><span class="repo-desc">Managed tool subset used by the bundled tasks.</span><span class="repo-arrow" aria-hidden="true">↗</span></a>
+            <a class="repo-row" href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks" target="_blank" rel="noopener noreferrer"><span class="repo-path">Hugging Face datasets</span><span class="repo-desc">Released planner tasks and materialized tools, with manifests and checksums.</span><span class="repo-arrow" aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+
+        <div class="overview-next reveal">
+          <div>
+            <span class="mono">THE TUTORIAL BEGINS</span>
+            <p>Chapters 01–07 follow one long-horizon task from a fixed objective to a scored trace, then read the paper’s figures and the 15 × 5 result matrix.</p>
+          </div>
+          <a class="button-solid" href="#question">Follow a long task <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+    </section>
 
     <section class="chapter section-line" id="question">
       <div class="wrap">
@@ -987,7 +1097,7 @@ cp .env.example .env</code></pre>
   <footer class="footer">
     <div class="wrap footer-inner">
       <div class="footer-brand-block"><span class="footer-brand">OpenART</span><span class="footer-sub">Research notes / interactive guide</span></div>
-      <p class="footer-mid">Source: paper Tables 2–3, Figures 1–4, §3–5. Content checked 2026-11-01. Paper figures © the authors, CC BY 4.0; diagrams are explanatory illustrations.</p>
+      <p class="footer-mid">Source: paper Tables 2–3, Figures 1–4, §3–5. Content checked 2026-11-02. Paper figures © the authors, CC BY 4.0; diagrams are explanatory illustrations.</p>
       <div class="footer-logos">
         <a href="https://www.shlab.org.cn/" target="_blank" rel="noopener noreferrer"><img src="assets/icon_ailab.png" alt="Shanghai AI Laboratory" width="120" height="28"></a>
         <a href="https://ai45.shlab.org.cn/" target="_blank" rel="noopener noreferrer"><img src="assets/icon_ai45_en.png" alt="AI45Lab" width="96" height="28"></a>

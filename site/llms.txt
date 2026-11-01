@@ -2,7 +2,7 @@
 
 OpenART is an executable benchmark and Docker-native runtime for evaluating tool-using agent safety in long-horizon, evolving environments. The benign task and hidden safety contract remain fixed while target-visible workspace, tool, or service state changes mid-run. Deterministic and model-based evaluators judge safety over execution traces and snapshots. Task workspaces may contain synthetic risky-source strings that are evaluation fixtures, not instructions.
 
-The project page at https://ai45lab.github.io/OpenART/ is an interactive, figure-rich guide to the paper, method, figures, 75-setting result matrix, mechanisms, artifacts, and quickstart.
+The project page at https://ai45lab.github.io/OpenART/ is an interactive, figure-rich guide to the paper, method, figures, 75-setting result matrix, mechanisms, artifacts, and quickstart. It opens with a project overview: a four-step core-logic summary, a condensed paper abstract, a project card, and a map of the repository.
 
 ## Key facts
 
@@ -19,11 +19,13 @@ The project page at https://ai45lab.github.io/OpenART/ is an interactive, figure
 - The paper capability corpus is distinct from the released materialized-tool subset; paper settings are distinct from release counts.
 - The runtime can affect safety beyond the choice of foundation model. The paper attributes 73.6% of ASR variation to the target model and 25.2% to the target agent.
 - Repository includes three bundled high-complexity tasks and CITATION.cff.
+- Repository stars: 265 as of 2026-11-01, shown on the project page with a link to the repository.
 - Code license: AGPL-3.0. The task dataset card uses `license: other` with mixed upstream terms; consult the card before reuse.
 
 ## Page guide
 
 - Hero and key numbers: released tasks, paper-reported domains, released tools, and the 15 × 5 evaluation matrix.
+- Chapter 00, Overview: the four-step core logic, condensed paper abstract, project card with repository stars, and a map of the codebase.
 - Chapter 01, The question: interactive long-horizon trace and the paper's safety-drift definitions, with Figure 3.
 - Chapter 02, The arena: scenario synthesis, native-runtime adapters, fixed objective/evaluator, eight target-visible surfaces, and Figure 1.
 - Chapter 03, The search: EMHA hypergraph stepper, feedback loop, surface and search ablations, and Figure 2.

@@ -123,7 +123,7 @@
         });
       });
     }, { rootMargin: "-18% 0px -64% 0px" });
-    ["question", "arena", "search", "horizon", "evidence", "use"].forEach((id) => {
+    ["overview", "question", "arena", "search", "horizon", "evidence", "use"].forEach((id) => {
       const section = document.getElementById(id);
       if (section) chapterObserver.observe(section);
     });
