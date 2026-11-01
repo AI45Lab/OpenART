@@ -11,10 +11,13 @@ Codex, and other runtimes) beyond single-turn chat.
 OpenART is the agent-focused sibling of [OpenRT](https://github.com/AI45Lab/OpenRT),
 an open-source red-teaming framework for multimodal LLMs.
 
+[![Project Page](https://img.shields.io/badge/Project%20Page-OpenART-6ae3ff.svg)](https://ai45lab.github.io/OpenART/)
 [![arXiv](https://img.shields.io/badge/arXiv-2608.00677-b31b1b.svg)](https://arxiv.org/abs/2608.00677)
 [![Dataset](https://img.shields.io/badge/Hugging%20Face-10%2C150%20tasks-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-planner-tasks)
 [![Tools](https://img.shields.io/badge/Hugging%20Face-63%2C697%20tools-yellow.svg)](https://huggingface.co/datasets/dongdongunique/openart-tools)
 [![License](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+
+**Project page:** [ai45lab.github.io/OpenART](https://ai45lab.github.io/OpenART/) — overview, key facts, artifacts, and citation.
 
 **At a glance:** 10,150 public tasks · 50 domains · median 97 tool calls · 15 agents × 5 models · 85.0% pooled strict ASR (EMHA attacker) · 87.38% benign completion.
 

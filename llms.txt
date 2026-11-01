@@ -9,11 +9,13 @@
 
 ## Overview
 
+- [Project page](https://ai45lab.github.io/OpenART/): Visual overview with key
+  facts, released artifacts, quickstart, and citation.
 - [README](https://github.com/AI45Lab/OpenART): Research summary, positioning
   table, install, smoke test, model-backed evaluation, task generation.
 - [Paper (arXiv:2608.00677)](https://arxiv.org/abs/2608.00677): Full results —
   10K+ validated tasks, 50 domains, 500K+ tools, 15 agents × 5 models,
-  EMHA attacker, 85.0% pooled ASR.
+  EMHA attacker, 85.0% pooled strict ASR.
 - [CITATION.cff](https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff):
   Canonical bibliographic metadata for the repository and paper.
 

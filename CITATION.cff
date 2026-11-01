@@ -26,6 +26,10 @@ authors:
 repository: https://github.com/AI45Lab/OpenART
 repository-code: https://github.com/AI45Lab/OpenART
 url: https://arxiv.org/abs/2608.00677
+identifiers:
+  - type: url
+    value: https://ai45lab.github.io/OpenART/
+    description: Project page
 abstract: >-
   OpenART is an executable benchmark and runtime for evaluating the safety of
   tool-using code agents in long-horizon, evolving environments. It executes
