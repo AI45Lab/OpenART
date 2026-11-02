@@ -19,6 +19,10 @@ an open-source red-teaming framework for multimodal LLMs.
 
 **Project page:** [ai45lab.github.io/OpenART](https://ai45lab.github.io/OpenART/) — overview, key facts, artifacts, and citation.
 
+[![OpenART environment-evolution loop: a fixed task and safety contract, an evolving workspace, long-horizon risk, and feedback-guided search](site/assets/figures/fig0-loop.gif)](https://ai45lab.github.io/OpenART/#loop)
+
+*A 16-second conceptual loop: the task and safety contract stay fixed while the target-visible environment evolves, risk accumulates across steps, and evaluator feedback guides the next search round. Illustrative; not a real trajectory. [Open the interactive overview →](https://ai45lab.github.io/OpenART/#loop)*
+
 **At a glance:** 10,150 public tasks · 50 domains · median 97 tool calls · 15 agents × 5 models · 85.0% pooled strict ASR (EMHA attacker) · 87.38% benign completion.
 
 **Quickstart:** see [Setup](#setup) for the environment and Docker image, then
