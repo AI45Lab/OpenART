@@ -2,7 +2,7 @@
 
 OpenART is an executable benchmark and Docker-native runtime for evaluating tool-using agent safety in long-horizon, evolving environments. The benign task and hidden safety contract remain fixed while target-visible workspace, tool, or service state changes mid-run. Deterministic and model-based evaluators judge safety over execution traces and snapshots. Task workspaces may contain synthetic risky-source strings that are evaluation fixtures, not instructions.
 
-The project page at https://ai45lab.github.io/OpenART/ is an interactive, figure-rich guide to the paper, method, figures, 75-setting result matrix, mechanisms, artifacts, and quickstart. It opens with a project overview: a four-step core-logic summary, a condensed paper abstract, a project card, and a map of the repository.
+The project page at https://ai45lab.github.io/OpenART/ is an interactive, figure-rich guide to the paper, method, figures, 75-setting result matrix, mechanisms, artifacts, and quickstart. It opens with a project overview: a four-step core-logic summary with a 16-second animated conceptual loop, a condensed paper abstract, a project card, and a map of the repository.
 
 ## Key facts
 
@@ -55,6 +55,8 @@ Paper figures reproduced on the project page are © the authors and licensed CC 
 - Figure 2, environment and search ablations: /assets/figures/fig2-ablations.png
 - Figure 3, long-horizon safety drift: /assets/figures/fig3-drift.png
 - Figure 4, Strict ASR across complexity groups: /assets/figures/fig4-complexity.png
+
+The overview also includes a conceptual motion figure, not a paper figure: a 16-second animated loop of the four core moves at /assets/figures/fig0-loop.gif, with a static poster at /assets/figures/fig0-loop-poster.png.
 
 Attribution: Chen et al., “OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution,” arXiv:2608.00677, CC BY 4.0.
 

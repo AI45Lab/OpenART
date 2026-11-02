@@ -276,6 +276,13 @@ main p a, main li a, .citation-copy a, .footer a, .safety-note a {
 .fig-notes li::before { content: "—"; color: var(--green); margin-right: 6px; }
 .paper-figure-wide .figure-frame img { max-height: none; }
 
+/* Overview motion loop */
+.motion-figure { margin: 0 0 48px; }
+.motion-frame { padding: 0; background: #f2f0e9; }
+.motion-frame img { display: block; width: 100%; height: auto; }
+.motion-figure figcaption { padding-top: 17px; }
+.motion-figure .fig-no { white-space: nowrap; }
+
 /* Chapter 02 — arena */
 .protocol { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 38px; }
 .protocol-stage { padding: 25px 28px 24px 0; position: relative; min-width: 0; }
@@ -823,6 +830,8 @@ body.motion-off .hero-figure .live::before { animation: none; }
   .transcript-list { grid-template-columns: 1fr; gap: 3px; padding-left: 18px; }
   .definitions { margin-top: 28px; }
   .figure-frame { padding: 8px; }
+  .motion-frame { padding: 0; }
+  .motion-figure { margin-bottom: 32px; }
   .paper-figure { margin-top: 36px; }
   .fig-title { font-size: 19px; }
   .fig-caption { font-size: 13.5px; }

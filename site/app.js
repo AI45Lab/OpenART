@@ -32,6 +32,7 @@
   function setMotion(on) {
     motion = on;
     document.body.classList.toggle("motion-off", !on);
+    document.dispatchEvent(new CustomEvent("openart:motion", { detail: { motion: on } }));
     if (motionToggle) {
       motionToggle.setAttribute("aria-pressed", String(on));
       motionToggle.setAttribute("aria-label", on ? "Turn page animation off" : "Turn page animation on");
@@ -51,7 +52,6 @@
   }
 
   if (motionToggle) motionToggle.addEventListener("click", () => setMotion(!motion));
-  setMotion(motion);
   if (reduced.addEventListener) {
     reduced.addEventListener("change", (event) => { if (event.matches) setMotion(false); });
   }
@@ -99,6 +99,38 @@
     reveals.forEach((el) => observer.observe(el));
   } else {
     reveals.forEach((el) => el.classList.add("visible"));
+  }
+
+  /* Motion figures ------------------------------------------------------- */
+  const motionGifs = $$(".motion-gif");
+  if (motionGifs.length) {
+    const showGif = (img) => {
+      const gif = img.dataset.gif;
+      if (gif && img.getAttribute("src") !== gif) img.setAttribute("src", gif);
+    };
+    const showPoster = (img) => {
+      const poster = img.dataset.poster;
+      if (poster && img.getAttribute("src") !== poster) img.setAttribute("src", poster);
+    };
+
+    if ("IntersectionObserver" in window) {
+      const gifObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          entry.target.dataset.inview = String(entry.isIntersecting);
+          if (entry.isIntersecting && motion) showGif(entry.target);
+        });
+      }, { rootMargin: "300px 0px" });
+      motionGifs.forEach((img) => gifObserver.observe(img));
+    } else if (motion) {
+      motionGifs.forEach(showGif);
+    }
+
+    document.addEventListener("openart:motion", (event) => {
+      motionGifs.forEach((img) => {
+        if (!event.detail.motion) showPoster(img);
+        else if (img.dataset.inview === "true") showGif(img);
+      });
+    });
   }
 
   /* Read progress -------------------------------------------------------- */
@@ -519,4 +551,6 @@
       stopEmha();
     }
   });
+
+  setMotion(motion);
 })();
