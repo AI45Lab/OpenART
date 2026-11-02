@@ -104,9 +104,23 @@
   /* Motion figures ------------------------------------------------------- */
   const motionGifs = $$(".motion-gif");
   if (motionGifs.length) {
+    const gifState = new Map();
     const showGif = (img) => {
       const gif = img.dataset.gif;
-      if (gif && img.getAttribute("src") !== gif) img.setAttribute("src", gif);
+      if (!gif || img.getAttribute("src") === gif) return;
+      if (gifState.get(gif) === "loaded") {
+        img.setAttribute("src", gif);
+        return;
+      }
+      if (gifState.has(gif)) return;
+      gifState.set(gif, "loading");
+      const loader = new Image();
+      loader.onload = () => {
+        gifState.set(gif, "loaded");
+        if (motion && img.dataset.inview === "true") img.setAttribute("src", gif);
+      };
+      loader.onerror = () => gifState.set(gif, "error");
+      loader.src = gif;
     };
     const showPoster = (img) => {
       const poster = img.dataset.poster;
