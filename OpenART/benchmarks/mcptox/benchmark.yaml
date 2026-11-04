@@ -1,0 +1,22 @@
+id: mcptox
+name: MCPTox
+version: 0.1.0-smoke
+description: >-
+  MCP tool-poisoning benchmark. This pack starts with a local stdio MCP smoke
+  case; the full benchmark uses the upstream MCP server corpus and poisoned
+  tool metadata.
+source: https://github.com/zhiqiangwang4/MCPTox-Benchmark
+paper: https://arxiv.org/abs/2508.14925
+license: see-upstream-repository
+case_count: 1348
+smoke_cases:
+  - smoke-001
+target:
+  family: opencode
+  mcp_surface: opencode_mcp
+runtime:
+  service: none
+  mcp_transport: stdio
+  target_image: openart/opencode:latest
+owner: group-a
+status: smoke

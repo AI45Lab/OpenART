@@ -28,6 +28,11 @@ an open-source red-teaming framework for multimodal LLMs.
 **Quickstart:** see [Setup](#setup) for the environment and Docker image, then
 [Model-backed evaluations](#model-backed-evaluations) to run a bundled task.
 
+**Benchmark packs:** external benchmark adapters live under
+[`OpenART/benchmarks/`](OpenART/benchmarks/README.md). The first pack is
+[MCPTox](OpenART/benchmarks/mcptox/README.md), with a runnable stdio MCP smoke
+case at `OpenART/benchmarks/mcptox/tasks/smoke-001`.
+
 [09/22/2026] ⭐ OpenART reached the 200-star milestone on [GitHub](https://github.com/AI45Lab/OpenART).
 
 **Contents:** [Research summary](#research-summary) · [Paper and datasets](#paper-and-datasets) · [Repository layout](#repository-layout) · [Setup](#setup) · [Model-backed evaluations](#model-backed-evaluations) · [Task generation](#task-generation) · [Services](#services) · [Documentation](#documentation) · [FAQ](#faq) · [Citing OpenART](#citing-openart) · [License](#license)

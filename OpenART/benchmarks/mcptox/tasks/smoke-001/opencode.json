@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "mcptox-smoke": {
+        "type": "local",
+        "command": ["python3", "/workspace/mcp/server.py"]
+      }
+    }
+  }
+}
