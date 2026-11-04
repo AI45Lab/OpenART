@@ -155,6 +155,43 @@ Wrapper env copying is conservative. A wrapper exports a declared key from the
 host source only when that source exists, so resolved canonical values are not
 overwritten by empty aliases.
 
+## Target-Native MCP Surfaces
+
+MCP client configuration is separate from the managed tool store. It is a
+target-native configuration surface:
+
+```text
+MCP server        external service, started by the user
+MCP client config target-native file, filtered by the control plane
+MCP tool wrapper  optional fallback for targets without native MCP
+```
+
+Each target config exposes its own MCP vector, path, config key, and injection
+mode. The full list is in
+[`13_target_agent_integration_matrix.md`](13_target_agent_integration_matrix.md#target-native-mcp-surfaces).
+
+Examples:
+
+```text
+OpenCode      opencode_mcp    opencode.json / .opencode/opencode.json
+Claude Code   claude_mcp      .mcp.json
+Codex         codex_mcp       .codex/config.toml
+Gemini        gemini_mcp      .gemini/settings.json
+Qwen Code     qwen_mcp        .qwen/settings.json
+Continue CLI  continue_mcp    .continue/mcpServers/<server-name>.yaml
+Goose         goose_mcp       HOME/.config/goose/config.yaml
+Hermes        hermes_mcp      HOME/.hermes/config.yaml
+```
+
+Important rules:
+
+- The MCP server is not started by OpenART.
+- The MCP config is not a `SKILL.md`.
+- `append` is text append, not a structured JSON/YAML/TOML merge.
+- `replace` on a shared config file replaces the whole file; prefer a dedicated
+  project MCP file or a task that does not ship its own config.
+- Aider has no native MCP client; use a service-backed CLI wrapper if needed.
+
 ## Tool Guides
 
 Tool guides should tell the agent:

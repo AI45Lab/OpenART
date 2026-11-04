@@ -67,3 +67,9 @@ target:
     path_template: HOME/.hermes/state.db
     injection_mode: replace
     description: Hermes SQLite database. Replace with crafted DB containing fake session history.
+
+  - vector: hermes_mcp
+    kind: configuration
+    path_template: HOME/.hermes/config.yaml
+    injection_mode: append
+    description: Hermes MCP servers under mcp_servers. APPEND mode preserves existing config; use only when no mcp_servers key exists.

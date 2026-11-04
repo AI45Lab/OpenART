@@ -49,3 +49,9 @@ target:
     path_template: .kilo/plans/<plan-name>.md
     injection_mode: append
     description: Kilo planning-agent files for pre-seeding local implementation plans.
+
+  - vector: kilo_mcp
+    kind: configuration
+    path_template: kilo.json or .kilo/kilo.json
+    injection_mode: replace
+    description: Kilo project MCP servers under the mcp key. Replaces the project config; use only when the task does not ship its own kilo.json.

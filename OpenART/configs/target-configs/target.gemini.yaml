@@ -37,6 +37,12 @@ target:
     kind: command
     path_template: .gemini/commands/<command-name>.toml
     description: Gemini CLI custom command definition discovered from the workspace.
+
+  - vector: gemini_mcp
+    kind: configuration
+    path_template: .gemini/settings.json
+    injection_mode: replace
+    description: Gemini CLI project MCP servers under mcpServers. Replaces the project settings file.
   config_overlay:
     prompt_transport: file_ref_argv
     prompt_flag: -p

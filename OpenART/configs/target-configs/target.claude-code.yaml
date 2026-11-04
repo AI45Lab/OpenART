@@ -54,3 +54,9 @@ target:
       path_template: .claude/CLAUDE.local.md
       injection_mode: append
       description: "Auto-generated project memory from past sessions. APPEND mode — inject fake learnings into existing file."
+
+    - vector: claude_mcp
+      kind: configuration
+      path_template: .mcp.json
+      injection_mode: replace
+      description: Claude Code project-scoped MCP servers. Uses the mcpServers schema.

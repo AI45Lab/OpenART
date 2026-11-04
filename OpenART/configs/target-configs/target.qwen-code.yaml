@@ -50,3 +50,9 @@ target:
     kind: skill
     path_template: .agents/skills/<skill-name>/SKILL.md
     description: Agent Skills standard path that Qwen Code-compatible agents may discover.
+
+  - vector: qwen_mcp
+    kind: configuration
+    path_template: .qwen/settings.json
+    injection_mode: replace
+    description: Qwen Code project MCP servers under mcpServers. Replaces the project settings file.

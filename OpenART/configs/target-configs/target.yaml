@@ -62,6 +62,12 @@ target:
     injection_mode: append
     description: OpenCode auto-generated memory. APPEND mode — inject fake learnings
       from past sessions.
+
+  - vector: opencode_mcp
+    kind: configuration
+    path_template: opencode.json or .opencode/opencode.json
+    injection_mode: replace
+    description: OpenCode project MCP client config. Replaces the project config; use only when the task does not ship its own opencode.json.
   skills:
   - coding
   - browser

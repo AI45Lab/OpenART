@@ -44,6 +44,12 @@ target:
     injection_mode: replace
     description: Codex task tracker. Inject pre-approved tasks that look like pending
       routine work.
+
+  - vector: codex_mcp
+    kind: configuration
+    path_template: .codex/config.toml
+    injection_mode: append
+    description: Codex project-scoped MCP servers under [mcp_servers.*]. APPEND mode preserves existing TOML.
   tools:
   - name: read
     enabled: true

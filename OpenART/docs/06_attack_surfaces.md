@@ -96,9 +96,14 @@ claude_skill
 agents_skill
 conversation_history
 auto_memory
+opencode_mcp
 ```
 
-It does not expose OpenCode model config as an attacker vector.
+It does not expose OpenCode model config as an attacker vector. The
+`opencode_mcp` surface is the project-level `opencode.json` /
+`.opencode/opencode.json` MCP client config; it is opt-in and replaces the
+project config, so use it only when the task does not ship its own OpenCode
+config.
 
 ### Claude Code
 
@@ -111,9 +116,11 @@ claude_rule
 claude_skill
 claude_command
 auto_memory
+claude_mcp
 ```
 
-It does not expose Claude Code model config as an attacker vector.
+It does not expose Claude Code model config as an attacker vector. `claude_mcp`
+targets project-scoped `.mcp.json` and uses the `mcpServers` schema.
 
 ### Codex
 
@@ -125,11 +132,13 @@ agents_override_md
 agents_skill
 codex_rule
 task_list
+codex_mcp
 ```
 
 Codex uses mounted control mode and managed model config delivery under
 `HOME/.codex/config.toml`, but that config is not exposed as an attacker
-vector.
+vector. `codex_mcp` targets project-scoped `.codex/config.toml` and uses
+APPEND mode to add `[mcp_servers.*]` tables without replacing existing TOML.
 
 ### Gemini
 
@@ -140,9 +149,11 @@ gemini_md
 gemini_skill
 agents_skill
 gemini_command
+gemini_mcp
 ```
 
-Gemini model settings are not exposed as an attacker vector.
+Gemini model settings are not exposed as an attacker vector. `gemini_mcp`
+targets project `.gemini/settings.json` and uses the `mcpServers` key.
 
 ### Continue CLI
 
@@ -157,10 +168,12 @@ continue_rule
 continue_user_rule
 continue_permissions
 continue_session
+continue_mcp
 ```
 
 Continue model settings are managed by `model_integration.delivery` and are not
-exposed as an attacker vector.
+exposed as an attacker vector. `continue_mcp` targets
+`.continue/mcpServers/<server-name>.yaml` or `.json`, one file per MCP server.
 
 ### Reasonix
 
@@ -174,6 +187,7 @@ reasonix_global_memory
 reasonix_global_reasonix_md
 reasonix_project_settings
 reasonix_global_settings
+reasonix_mcp
 ```
 
 ### Prompt-CLI Families
@@ -181,7 +195,11 @@ reasonix_global_settings
 Hermes, nanobot, and Pi expose combinations of generic instruction files,
 skills, project docs, and selected HOME-relative memory paths. Hermes model
 config delivery remains managed by the target integration and is not exposed as
-an attacker vector.
+an attacker vector. Their MCP vectors are `hermes_mcp`, `nanobot_mcp`, and
+`pi_mcp`.
+
+The complete target-to-MCP-surface table is in
+[`13_target_agent_integration_matrix.md`](13_target_agent_integration_matrix.md#target-native-mcp-surfaces).
 
 ## Injection Modes
 

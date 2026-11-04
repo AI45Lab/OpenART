@@ -384,6 +384,48 @@ in the target config so the control plane can filter them, but attacker presets
 should include them only when the experiment is explicitly about MCP/tool
 supply-chain or approval-policy risk.
 
+### Target-Native MCP Surfaces
+
+The target configs expose the following MCP client configuration surfaces. A
+surface is a file the target reads natively; it does not start or manage an MCP
+server. The MCP server must already be running, and the wrapper or target
+adapter must supply its endpoint.
+
+| Target | Vector | Native path | Config key | Mode |
+|---|---|---|---|---|
+| OpenCode | `opencode_mcp` | `opencode.json` or `.opencode/opencode.json` | `mcp.servers` | `replace` |
+| Claude Code | `claude_mcp` | `.mcp.json` | `mcpServers` | `replace` |
+| Codex | `codex_mcp` | `.codex/config.toml` | `[mcp_servers.*]` | `append` |
+| Gemini CLI | `gemini_mcp` | `.gemini/settings.json` | `mcpServers` | `replace` |
+| Qwen Code | `qwen_mcp` | `.qwen/settings.json` | `mcpServers` | `replace` |
+| Continue CLI | `continue_mcp` | `.continue/mcpServers/<server-name>.yaml` or `.json` | `mcpServers` | `replace` |
+| Goose | `goose_mcp` | `HOME/.config/goose/config.yaml` | `extensions` | `append` |
+| Hermes | `hermes_mcp` | `HOME/.hermes/config.yaml` | `mcp_servers` | `append` |
+| Kilo | `kilo_mcp` | `kilo.json` or `.kilo/kilo.json` | `mcp` | `replace` |
+| nanobot | `nanobot_mcp` | `HOME/.nanobot/config.json` | `tools.mcpServers` | `replace` |
+| Pi | `pi_mcp` | `.pi/mcp.json` | `mcpServers` | `replace` |
+| Reasonix | `reasonix_mcp` | `.mcp.json` | `mcpServers` | `replace` |
+| Oh My Pi | `omp_mcp` | `.omp/mcp.json` | `mcpServers` | `replace` |
+| OpenClaw | `openclaw_mcp` | `HOME/.openclaw/openclaw.json` | `mcp.servers` | `replace` |
+| CodeWhale / DeepSeek-TUI | `codewhale_mcp` | `HOME/.codewhale/mcp.json` | target-specific | `replace` |
+| Copilot CLI | `copilot_mcp` | `HOME/.copilot/mcp-config.json` | target-specific | `replace` |
+
+Notes:
+
+- `append` is text append, not a structured JSON/YAML/TOML merge. Use it only
+  when the target file does not already contain the same top-level key.
+- `replace` replaces the entire file. For shared config files such as
+  `opencode.json`, `openclaw.json`, or `settings.json`, use it only when the
+  task does not ship its own config, or move the MCP block to a dedicated
+  project file.
+- `nanobot_mcp` and `openclaw_mcp` replace a config that also carries model
+  settings. They require a structured merge hook or a complete config; do not
+  use them as drop-in attacker files.
+- Aider has no native MCP client as of 2026-11; no `aider_mcp` surface is
+  defined. Use a service-backed CLI tool wrapper if Aider must reach an MCP
+  service.
+- These surfaces are opt-in attack vectors, not default attacker permissions.
+
 ### Model Configuration
 
 Do not expose model delivery files as attacker vectors by default:

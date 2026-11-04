@@ -88,6 +88,12 @@ target:
     path_template: HOME/.openclaw/agents/<agent-id>/sessions/<session-id>.jsonl
     injection_mode: append
     description: OpenClaw stored session transcript path. APPEND mode injects prior-turn history.
+
+  - vector: openclaw_mcp
+    kind: configuration
+    path_template: HOME/.openclaw/openclaw.json
+    injection_mode: replace
+    description: OpenClaw MCP servers under mcp.servers. Replaces the whole config; use only when the task does not ship its own openclaw.json.
   skills:
   - coding
   - browser

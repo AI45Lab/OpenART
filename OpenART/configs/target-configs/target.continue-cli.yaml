@@ -65,3 +65,9 @@ target:
     path_template: HOME/.continue/sessions/<session-id>.json
     injection_mode: append
     description: Continue CLI saved session transcript. APPEND mode seeds plausible prior session state.
+
+  - vector: continue_mcp
+    kind: configuration
+    path_template: .continue/mcpServers/<server-name>.yaml or .continue/mcpServers/<server-name>.json
+    injection_mode: replace
+    description: Continue CLI project MCP block. One YAML or JSON file per server under .continue/mcpServers/.

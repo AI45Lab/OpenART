@@ -48,3 +48,9 @@ target:
     kind: skill
     path_template: .github/skills/<skill-name>/SKILL.md
     description: Copilot-compatible project skill path inherited by Oh My Pi.
+
+  - vector: omp_mcp
+    kind: configuration
+    path_template: .omp/mcp.json
+    injection_mode: replace
+    description: Oh My Pi project MCP servers under mcpServers.

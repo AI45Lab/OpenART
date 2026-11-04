@@ -45,3 +45,9 @@ target:
     path_template: README.md
     injection_mode: replace
     description: Project documentation Pi reads for context.
+
+  - vector: pi_mcp
+    kind: configuration
+    path_template: .pi/mcp.json
+    injection_mode: replace
+    description: Pi project MCP servers under mcpServers.

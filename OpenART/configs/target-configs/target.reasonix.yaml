@@ -56,3 +56,9 @@ target:
     path_template: HOME/.reasonix/settings.json
     injection_mode: replace
     description: Global Reasonix hook settings materialized into the runner HOME overlay.
+
+  - vector: reasonix_mcp
+    kind: configuration
+    path_template: .mcp.json
+    injection_mode: replace
+    description: Reasonix reads the Claude Code mcpServers schema from project .mcp.json.

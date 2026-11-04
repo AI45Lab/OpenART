@@ -56,3 +56,9 @@ target:
     kind: command
     path_template: .goose/commands/<command-name>.yaml
     description: Project-level custom slash-command recipe configuration.
+
+  - vector: goose_mcp
+    kind: configuration
+    path_template: HOME/.config/goose/config.yaml
+    injection_mode: append
+    description: Goose MCP extensions under the top-level extensions key. APPEND mode preserves existing config; use only when no extensions key exists.
