@@ -82,7 +82,9 @@ RUN python -m venv --copies ${VIRTUAL_ENV} \
     && ln -sf ${VIRTUAL_ENV}/bin/pip /usr/local/bin/pip3 \
     && printf 'export VIRTUAL_ENV=%s\nexport PATH="%s/bin:$PATH"\n' "${VIRTUAL_ENV}" "${VIRTUAL_ENV}" > /etc/profile.d/openart-python.sh
 
-RUN npm install -g opencode-ai \
+ARG OPENCODE_VERSION=2.2.5
+
+RUN npm install -g "@opencode/cli@${OPENCODE_VERSION}" \
     && command -v opencode \
     && opencode --version
 
