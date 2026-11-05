@@ -348,6 +348,54 @@ def test_runner_installs_user_model_config_json_and_skips_managed_framework_conf
     assert container.files[destination_path] != json.dumps(runner.make_framework_config(), indent=2)
 
 
+def test_runner_installs_multiple_model_config_specs(tmp_path: Path) -> None:
+    container = _FakeRunnerContainer("openart-target-test")
+    source_model = "/workspace/.openart_model_integration_target_model.json"
+    source_mcp = "/workspace/.openart_model_integration_target_mcp.json"
+    destination_model = "/tmp/openart/runners/target/home/.pi/agent/models.json"
+    destination_mcp = "/workspace/.pi/mcp.json"
+    container.files[source_model] = '{"model": "glm-5"}\n'
+    container.files[source_mcp] = '{"mcpServers": {"smoke": {"command": "python3"}}}\n'
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=container,
+        command=CommandSpec(template="pi -p"),
+        credentials=CredentialBundle(values={}),
+        runtime_env={
+            "OPENART_MODEL_CONFIG_SPECS": json.dumps(
+                [
+                    {
+                        "id": "model",
+                        "kind": "model",
+                        "source_file": source_model,
+                        "destination": destination_model,
+                        "format": "json",
+                    },
+                    {
+                        "id": "mcp",
+                        "kind": "mcp",
+                        "source_file": source_mcp,
+                        "destination": destination_mcp,
+                        "format": "json",
+                    },
+                ]
+            )
+        },
+        artifact_dir=str(tmp_path),
+    )
+
+    runner._install_user_model_config_json()
+    runner._install_framework_config()
+    runner._capture_prepare_artifacts()
+
+    assert container.files[destination_model] == '{"model": "glm-5"}\n'
+    assert container.files[destination_mcp] == '{"mcpServers": {"smoke": {"command": "python3"}}}\n'
+    prepared = tmp_path / "runner_outputs" / "target" / "prepared"
+    assert (prepared / "model_integration_model.json").is_file()
+    assert (prepared / "model_integration_mcp.json").is_file()
+
+
 def test_runner_prepare_serializes_dates_in_json_artifacts() -> None:
     container = _FakeRunnerContainer("openart-target-test")
     runner = PromptCLIRunner(

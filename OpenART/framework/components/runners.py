@@ -378,12 +378,41 @@ class RunnerBase(ABC):
         return f'{command}exec {quoted_args} "$prompt_ref"'
 
     def _install_framework_config(self) -> None:
+        if self.runtime_env.get("OPENART_MODEL_CONFIG_SPECS"):
+            return
         if self.runtime_env.get("OPENART_MODEL_CONFIG_DESTINATION") or self.runtime_env.get("OPENART_MODEL_CONFIG_JSON_DESTINATION"):
             return
         config = self.make_framework_config()
         self.write_framework_config(config)
 
-    def _install_user_model_config_json(self) -> None:
+    def _model_config_specs(self) -> list[dict[str, str]]:
+        raw = str(self.runtime_env.get("OPENART_MODEL_CONFIG_SPECS", "") or "").strip()
+        if raw:
+            try:
+                loaded = json.loads(raw)
+            except json.JSONDecodeError:
+                loaded = None
+            if isinstance(loaded, list):
+                specs: list[dict[str, str]] = []
+                for item in loaded:
+                    if not isinstance(item, dict):
+                        continue
+                    source_file = str(item.get("source_file", "") or "").strip()
+                    destination = str(item.get("destination", "") or "").strip()
+                    if not source_file or not destination:
+                        continue
+                    specs.append(
+                        {
+                            "id": str(item.get("id", "") or ""),
+                            "kind": str(item.get("kind", "") or ""),
+                            "source_file": source_file,
+                            "destination": destination,
+                            "format": str(item.get("format", "") or ""),
+                        }
+                    )
+                if specs:
+                    return specs
+
         source_path = str(
             self.runtime_env.get("OPENART_MODEL_CONFIG_SOURCE_FILE", "")
             or self.runtime_env.get("OPENART_MODEL_CONFIG_JSON_SOURCE_FILE", "")
@@ -394,16 +423,28 @@ class RunnerBase(ABC):
             or self.runtime_env.get("OPENART_MODEL_CONFIG_JSON_DESTINATION", "")
             or ""
         ).strip()
-        if not source_path or not destination_path:
-            return
-        content = self.container.read_text_file(source_path, env=self.runtime_env)
-        # Override npm package for models requiring /v1/responses (e.g., gpt-5.5)
-        model_name = str(self.model or self.runtime_env.get("OPENAI_MODEL", "") or "").strip()
-        if "gpt-5.5" in model_name and "@ai-sdk/openai-compatible" in content:
-            content = content.replace("@ai-sdk/openai-compatible", "@ai-sdk/openai")
-        if _env_flag_enabled(self.runtime_env.get("OPENART_MODEL_CONFIG_EXPAND_ENV_REFS")):
-            content = self._expand_model_config_env_refs(content)
-        self.container.write_text_file(destination_path, content, env=self.runtime_env)
+        if source_path and destination_path:
+            return [
+                {
+                    "id": "config",
+                    "kind": "model",
+                    "source_file": source_path,
+                    "destination": destination_path,
+                    "format": str(self.runtime_env.get("OPENART_MODEL_CONFIG_FORMAT", "") or ""),
+                }
+            ]
+        return []
+
+    def _install_user_model_config_json(self) -> None:
+        for spec in self._model_config_specs():
+            content = self.container.read_text_file(spec["source_file"], env=self.runtime_env)
+            # Override npm package for models requiring /v1/responses (e.g., gpt-5.5)
+            model_name = str(self.model or self.runtime_env.get("OPENAI_MODEL", "") or "").strip()
+            if "gpt-5.5" in model_name and "@ai-sdk/openai-compatible" in content:
+                content = content.replace("@ai-sdk/openai-compatible", "@ai-sdk/openai")
+            if _env_flag_enabled(self.runtime_env.get("OPENART_MODEL_CONFIG_EXPAND_ENV_REFS")):
+                content = self._expand_model_config_env_refs(content)
+            self.container.write_text_file(spec["destination"], content, env=self.runtime_env)
 
     def _expand_model_config_env_refs(self, content: str) -> str:
         missing: list[str] = []
@@ -888,27 +929,32 @@ class RunnerBase(ABC):
             },
         }
 
-        model_config_format = str(self.runtime_env.get("OPENART_MODEL_CONFIG_FORMAT", "") or "json").strip().lower()
-        model_config_suffix = {
+        model_config_suffixes = {
             "json": ".json",
             "yaml": ".yaml",
             "toml": ".toml",
             "text": ".txt",
-        }.get(model_config_format, ".txt")
+        }
 
         files: list[tuple[str, str | None, str]] = [
             ("framework_config", self.framework_config_path(), ".json"),
-            (
-                "model_integration_config",
-                self.runtime_env.get("OPENART_MODEL_CONFIG_DESTINATION")
-                or self.runtime_env.get("OPENART_MODEL_CONFIG_JSON_DESTINATION"),
-                model_config_suffix,
-            ),
-            ("tools", self.runtime_env.get("OPENART_TOOLS_FILE"), ".json"),
-            ("tool_folders", self.runtime_env.get("OPENART_TOOL_FOLDERS_FILE"), ".json"),
-            ("tool_guide", self.runtime_env.get("OPENART_TOOL_GUIDE_FILE"), ".md"),
-            ("skills", self.runtime_env.get("OPENART_SKILLS_FILE"), ".json"),
         ]
+        model_specs = self._model_config_specs()
+        for index, spec in enumerate(model_specs):
+            suffix = model_config_suffixes.get(str(spec.get("format", "") or "").strip().lower(), ".txt")
+            if len(model_specs) == 1:
+                label = "model_integration_config"
+            else:
+                label = f"model_integration_{spec.get('id') or f'config_{index + 1}'}"
+            files.append((label, spec["destination"], suffix))
+        files.extend(
+            [
+                ("tools", self.runtime_env.get("OPENART_TOOLS_FILE"), ".json"),
+                ("tool_folders", self.runtime_env.get("OPENART_TOOL_FOLDERS_FILE"), ".json"),
+                ("tool_guide", self.runtime_env.get("OPENART_TOOL_GUIDE_FILE"), ".md"),
+                ("skills", self.runtime_env.get("OPENART_SKILLS_FILE"), ".json"),
+            ]
+        )
 
         for label, container_path, suffix in files:
             if not container_path:
