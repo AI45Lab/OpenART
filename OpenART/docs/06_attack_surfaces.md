@@ -70,6 +70,12 @@ The attacker receives:
 
 The framework finalizes only allowed paths and vectors.
 
+Framework-managed provisioning is a separate channel. A benchmark pack can keep
+a target manifest and native MCP profiles under its benchmark root, then resolve
+them into a target config before the target starts. That path does not require
+an `*_mcp` attack vector and is not attacker-controlled. See
+[`07_capabilities_tools_mcp.md`](07_capabilities_tools_mcp.md#benchmark-level-mcp-config).
+
 ## Common Surface Kinds
 
 | Kind | Examples | Purpose |

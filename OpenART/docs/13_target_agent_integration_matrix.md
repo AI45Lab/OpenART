@@ -384,6 +384,73 @@ in the target config so the control plane can filter them, but attacker presets
 should include them only when the experiment is explicitly about MCP/tool
 supply-chain or approval-policy risk.
 
+### Benchmark-Level MCP Profiles
+
+Harness-specific MCP config belongs to the benchmark pack, not to individual
+tasks. MCPTox uses:
+
+```text
+benchmarks/mcptox/
+  targets.yaml
+  mcp/
+    opencode.json
+    codex.toml
+    gemini.json
+    qwen.json
+    continue.yaml
+    goose.yaml
+    hermes.yaml
+    kilo.json
+    nanobot.json
+    openclaw.json
+    claude.json
+    reasonix.json
+    copilot.json
+    pi.json
+    omp.json
+    codewhale.json
+```
+
+`targets.yaml` maps a harness to a base target config and a native profile:
+
+```yaml
+targets:
+  codex:
+    base: configs/target-configs/target.codex.yaml
+    profile: benchmarks/mcptox/mcp/codex.toml
+    profile_mode: replace
+    destination: HOME/.codex/config.toml
+    format: toml
+```
+
+The benchmark runner resolves the pair into a temporary target config. This
+keeps the task harness-agnostic and avoids duplicating harness config in every
+task.
+
+Targets that keep model settings and MCP settings in separate files use
+`delivery.configs`:
+
+```yaml
+delivery:
+  type: hybrid
+  configs:
+    - id: model
+      kind: model
+      source: repo:configs/target-model-json/pi.openai-compatible.json
+      destination: HOME/.pi/agent/models.json
+      format: json
+    - id: mcp
+      kind: mcp
+      source: repo:benchmarks/mcptox/mcp/pi.json
+      destination: WORKSPACE/.pi/mcp.json
+      format: json
+```
+
+`WORKSPACE/...` destinations are written after control-plane materialization and
+therefore win over task/attacker files at the same path; `HOME/...`
+destinations are written before `materialized_home` is merged and therefore lose
+to task/attacker files.
+
 ### Target-Native MCP Surfaces
 
 The target configs expose the following MCP client configuration surfaces. A

@@ -191,7 +191,8 @@ Important concepts:
 | `delivery.type` | How env/config is delivered |
 | `delivery.env_names` | Shorthand mapping from model fields to target-native env var names |
 | `delivery.env` | Explicit env vars rendered after `env_names`, so it can add or override |
-| `delivery.config_template` | Repo/target/absolute template source and destination |
+| `delivery.config_template` | One config file: template source, optional fallback source, destination, and format |
+| `delivery.configs` | Ordered list of config files for targets that need separate model and MCP/settings files |
 
 Supported delivery types:
 
@@ -226,24 +227,68 @@ Template source prefixes:
 | `target:` | Path relative to the target config file |
 | `abs:` | Absolute host path |
 
+Use `fallback_source` when an optional config file is missing:
+
+```yaml
+config_template:
+  source: repo:benchmarks/mcptox/mcp/opencode.json
+  fallback_source: repo:configs/target-model-json/opencode.openai-compatible.json
+  destination: XDG_CONFIG_HOME/opencode/opencode.json
+  format: json
+```
+
 Template destinations are resolved inside the target runner container. Common
 destination roots are:
 
 ```text
 HOME/...
 XDG_CONFIG_HOME/...
+XDG_DATA_HOME/...
+XDG_CACHE_HOME/...
+WORKSPACE/...
+RUNNER_STATE_DIR/...
 ```
+
+`WORKSPACE/...` is `/workspace` inside the target. It is written during target
+prepare, after control-plane materialization, so a benchmark-managed MCP file at
+`WORKSPACE/...` wins over a task or attacker file at the same path. A `HOME/...`
+destination is written before `materialized_home` is merged, so task or attacker
+`HOME/...` files win there.
+
+### Multiple config files
+
+Targets that keep model settings and MCP settings in separate files can use
+`delivery.configs`:
+
+```yaml
+delivery:
+  type: hybrid
+  configs:
+    - id: model
+      kind: model
+      source: repo:configs/target-model-json/pi.openai-compatible.json
+      destination: HOME/.pi/agent/models.json
+      format: json
+    - id: mcp
+      kind: mcp
+      source: repo:benchmarks/mcptox/mcp/pi.json
+      destination: WORKSPACE/.pi/mcp.json
+      format: json
+```
+
+The legacy `config_template` form is normalized to a one-element `configs`
+list. Duplicate `id` or expanded `destination` values are rejected.
 
 ## Target Matrix
 
 | Target config | Runner | Surface family | Delivery |
 |---------------|--------|----------------|----------|
-| `target-configs/target.yaml` | `prompt_cli` | `opencode` | hybrid env + `opencode.json` |
+| `target-configs/target.yaml` | `prompt_cli` | `opencode` | hybrid env + JSON template |
 | `target-configs/target.aider.yaml` | `prompt_cli` | `aider` | env only |
 | `target-configs/target.claude-code.yaml` | `prompt_cli` | `claude_code` | env only + pre-run settings hook |
 | `target-configs/target.codex.yaml` | `prompt_cli` | `codex` | hybrid env + TOML template |
 | `target-configs/target.copilot-cli.yaml` | `prompt_cli` | `copilot_cli` | env only |
-| `target-configs/target.gemini.yaml` | `prompt_cli` | `gemini` | env only |
+| `target-configs/target.gemini.yaml` | `prompt_cli` | `gemini` | hybrid env + JSON template |
 | `target-configs/target.continue-cli.yaml` | `prompt_cli` | `continue_cli` | hybrid env + YAML template |
 | `target-configs/target.reasonix.yaml` | `prompt_cli` | `reasonix` | env only |
 | `target-configs/target.deepseek-tui.yaml` | `prompt_cli` | `deepseek_tui` | hybrid env + TOML template |
@@ -252,6 +297,7 @@ XDG_CONFIG_HOME/...
 | `target-configs/target.kilo.yaml` | `prompt_cli` | `kilo` | hybrid env + JSON template |
 | `target-configs/target.nanobot.yaml` | `nanobot` | `nanobot` | JSON template |
 | `target-configs/target.oh-my-pi.yaml` | `prompt_cli` | `oh_my_pi` | hybrid env + YAML template |
+| `target-configs/target.openclaw.yaml` | `prompt_cli` | `openclaw` | hybrid env + JSON template |
 | `target-configs/target.pi.yaml` | `pi` | `pi` | hybrid env + JSON template |
 | `target-configs/target.qwen-code.yaml` | `prompt_cli` | `qwen_code` | hybrid env + JSON template |
 | `target-configs/target.local-smoke.yaml` | `prompt_cli` | none | stdin smoke command |
@@ -285,7 +331,8 @@ target:
       env:
         OPENCODE_DISABLE_AUTOUPDATE: "1"
       config_template:
-        source: repo:configs/target-model-json/opencode.openai-compatible.json
+        source: repo:benchmarks/mcptox/mcp/opencode.json
+        fallback_source: repo:configs/target-model-json/opencode.openai-compatible.json
         destination: XDG_CONFIG_HOME/opencode/opencode.json
         format: json
   attack_surfaces:

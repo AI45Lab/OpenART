@@ -69,7 +69,8 @@ target:
       env:
         OPENCODE_DISABLE_AUTOUPDATE: "1"
       config_template:
-        source: repo:configs/target-model-json/opencode.openai-compatible.json
+        source: repo:benchmarks/mcptox/mcp/opencode.json
+        fallback_source: repo:configs/target-model-json/opencode.openai-compatible.json
         destination: XDG_CONFIG_HOME/opencode/opencode.json
         format: json
   attack_surfaces:
@@ -92,8 +93,85 @@ Important fields:
 | `config_overlay.prompt_flag` | Flag used before prompt, or empty for positional prompt |
 | `config_overlay.output_event_name` | Trace event name for parsed output |
 | `model_integration` | Model binding plus target-native env/config delivery |
+| `model_integration.delivery.config_template` | One rendered config file, with `target:`/`repo:`/`abs:` source and optional `fallback_source` |
+| `model_integration.delivery.configs` | Ordered list of rendered config files for targets that keep model and MCP settings in separate files |
 | `attack_surfaces` | Source of truth for target-native files that can be materialized |
 | managed tool runtime | Supplied by `--tool-store`, not direct target config |
+
+## Multi-file model delivery
+
+A target can deliver more than one config file:
+
+```yaml
+model_integration:
+  binding: ...
+  delivery:
+    type: hybrid
+    configs:
+      - id: model
+        kind: model
+        source: repo:configs/target-model-json/pi.openai-compatible.json
+        destination: HOME/.pi/agent/models.json
+        format: json
+      - id: mcp
+        kind: mcp
+        source: repo:configs/target-model-json/pi.mcp.json
+        destination: WORKSPACE/.pi/mcp.json
+        format: json
+```
+
+`configs` is the canonical list form. The legacy `config_template` is treated
+as a one-element list, so existing target configs keep working.
+
+Each entry may set:
+
+| Field | Meaning |
+|-------|---------|
+| `id` | Stable name used in mount paths, logs, and conflict checks |
+| `kind` | `model`, `mcp`, `settings`, or another label |
+| `source` | Template source: `target:`, `repo:`, or `abs:` |
+| `fallback_source` | Source used when `source` does not exist |
+| `optional` | Skip the entry when its source is absent |
+| `destination` | `HOME/`, `XDG_*`, `WORKSPACE/`, or an absolute container path |
+| `format` | `json`, `yaml`, `toml`, or `text` |
+
+Install order matters. `config_template`/`configs` are written during target
+prepare. `HOME/...` destinations are then overwritten by task or attacker
+`materialized_home` files, while `WORKSPACE/...` destinations survive because
+they are written after control-plane materialization.
+
+Templates are rendered before installation, so do not place a raw
+`${model.api_key}` in a file that becomes target-visible. Use the target-native
+environment reference (for example `${env_ref.api_key}` or
+`{env:${env_name.api_key}}`) so the file contains an env lookup rather than the
+secret.
+
+## Benchmark-Level Harness Configs
+
+Benchmark harness configs belong to the benchmark pack, not to individual
+tasks. A benchmark can keep a target matrix and one native profile per harness:
+
+```text
+benchmarks/mcptox/
+  targets.yaml
+  mcp/
+    opencode.json
+    codex.toml
+    gemini.json
+    ...
+  tasks/smoke-001/
+    task.md
+    workspace/
+    utils/evaluator.py
+```
+
+`targets.yaml` maps each harness to a base target config and a native profile.
+The benchmark runner resolves the pair into a temporary target config and runs
+the harness-agnostic task. Tasks do not contain harness-specific config.
+
+See
+[`07_capabilities_tools_mcp.md`](07_capabilities_tools_mcp.md#benchmark-level-mcp-config)
+for the MCPTox example.
 
 ## Current Target Configs
 
@@ -102,7 +180,7 @@ Important fields:
 | `target-configs/target.yaml` | `prompt_cli` | `opencode` | hybrid env + JSON template |
 | `target-configs/target.claude-code.yaml` | `prompt_cli` | `claude_code` | env only |
 | `target-configs/target.codex.yaml` | `prompt_cli` | `codex` | hybrid env + TOML template |
-| `target-configs/target.gemini.yaml` | `prompt_cli` | `gemini` | env only |
+| `target-configs/target.gemini.yaml` | `prompt_cli` | `gemini` | hybrid env + JSON template |
 | `target-configs/target.continue-cli.yaml` | `prompt_cli` | `continue_cli` | hybrid env + YAML template |
 | `target-configs/target.reasonix.yaml` | `prompt_cli` | `reasonix` | env only |
 | `target-configs/target.hermes.yaml` | `hermes` | `hermes` | hybrid env + YAML template |
@@ -112,6 +190,18 @@ Important fields:
 
 Claude Code and OpenCode native behavior is selected by target config, not by a
 dedicated runner class.
+
+Harness-specific MCP profiles are not placed in task directories. Benchmark
+packs keep them under the benchmark root and resolve them through a target
+manifest. MCPTox uses:
+
+```text
+benchmarks/mcptox/targets.yaml
+benchmarks/mcptox/mcp/<harness>.<ext>
+```
+
+The benchmark runner builds a temporary target config from the selected base
+config and profile. The task remains harness-agnostic.
 
 ## Attacker Config Shape
 

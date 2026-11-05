@@ -51,6 +51,9 @@ Minimum behavior:
 - map common target-native env vars with `delivery.env_names`
 - add explicit `delivery.env` entries for duplicate or special env vars
 - add a config template source when needed
+- use `delivery.configs` when the target keeps model and MCP/settings in
+  separate files
+- keep benchmark-specific profiles under the benchmark root, not in tasks
 - add tests in `tests/unit/test_target_adapters.py`
 
 Model delivery should be usable from target YAML:
@@ -68,6 +71,29 @@ model_integration:
       api_key: OPENAI_API_KEY
       base_url: OPENAI_BASE_URL
       model: OPENAI_MODEL
+    config_template:
+      source: repo:benchmarks/mcptox/mcp/opencode.json
+      fallback_source: repo:configs/target-model-json/opencode.openai-compatible.json
+      destination: XDG_CONFIG_HOME/opencode/opencode.json
+      format: json
+```
+
+Separate files:
+
+```yaml
+delivery:
+  type: hybrid
+  configs:
+    - id: model
+      kind: model
+      source: repo:configs/target-model-json/pi.openai-compatible.json
+      destination: HOME/.pi/agent/models.json
+      format: json
+    - id: mcp
+      kind: mcp
+      source: repo:benchmarks/mcptox/mcp/pi.json
+      destination: WORKSPACE/.pi/mcp.json
+      format: json
 ```
 
 ## Add A Runtime Setup Hook

@@ -155,6 +155,107 @@ Wrapper env copying is conservative. A wrapper exports a declared key from the
 host source only when that source exists, so resolved canonical values are not
 overwritten by empty aliases.
 
+## Benchmark-Level MCP Config
+
+Harness-specific MCP config belongs to the benchmark pack, not to individual
+tasks. MCPTox keeps a target manifest and one profile per harness:
+
+```text
+benchmarks/mcptox/
+  targets.yaml
+  mcp/
+    opencode.json
+    codex.toml
+    gemini.json
+    qwen.json
+    continue.yaml
+    goose.yaml
+    hermes.yaml
+    kilo.json
+    nanobot.json
+    openclaw.json
+    claude.json
+    reasonix.json
+    copilot.json
+    pi.json
+    omp.json
+    codewhale.json
+  tasks/smoke-001/
+    task.md
+    workspace/mcp/server.py
+    utils/evaluator.py
+```
+
+`targets.yaml` maps a harness name to a base target config and a profile:
+
+```yaml
+targets:
+  codex:
+    base: configs/target-configs/target.codex.yaml
+    profile: benchmarks/mcptox/mcp/codex.toml
+    profile_mode: replace
+    destination: HOME/.codex/config.toml
+    format: toml
+```
+
+`profile_mode` is:
+
+```text
+replace -> profile replaces the base model config template
+add     -> profile is added as a second config file
+wrapper -> no native MCP; use a tool-store wrapper
+```
+
+The runner resolves the pair into a temporary target config. For example:
+
+```bash
+bash benchmarks/mcptox/scripts/run_smoke.sh --target codex
+```
+
+This keeps the task harness-agnostic. Tasks contain no harness config.
+
+The importer materializes the upstream corpus into:
+
+```text
+benchmarks/mcptox/tasks/full/<case-id>/
+  task.md
+  checkpoints.md
+  case.json
+  workspace/mcp/server.py
+  utils/evaluator.py
+```
+
+`case.json` lives at the task root, not in `/workspace`. The generated MCP
+server reads it from `/task/case.json`; the evaluator reads the same file.
+
+For targets with separate model and MCP files, the resolver emits
+`delivery.configs` with a model entry and an MCP entry. The same `configs` form
+can be used directly in a target config:
+
+```yaml
+delivery:
+  type: hybrid
+  configs:
+    - id: model
+      kind: model
+      source: repo:configs/target-model-json/pi.openai-compatible.json
+      destination: HOME/.pi/agent/models.json
+      format: json
+    - id: mcp
+      kind: mcp
+      source: repo:benchmarks/mcptox/mcp/pi.json
+      destination: WORKSPACE/.pi/mcp.json
+      format: json
+```
+
+This is framework-managed provisioning, separate from attacker-controlled
+`*_mcp` attack surfaces. Do not mix them in the same benchmark unless you are
+explicitly testing precedence.
+
+Templates are rendered before installation. Use `env_ref`/`env_name` placeholders
+instead of embedding `${model.api_key}` directly, especially for files that land
+under `WORKSPACE/` or match a configuration attack surface.
+
 ## Target-Native MCP Surfaces
 
 MCP client configuration is separate from the managed tool store. It is a
