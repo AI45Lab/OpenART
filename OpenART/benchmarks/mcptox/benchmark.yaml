@@ -2,15 +2,13 @@ id: mcptox
 name: MCPTox
 version: 0.2.0-imported
 description: >-
-  MCP tool-poisoning benchmark. The pack includes a local stdio smoke case and
-  the imported upstream corpus of 1,348 malicious test cases.
+  MCP tool-poisoning benchmark with 1,348 imported upstream malicious test
+  cases across 45 servers.
 source: https://github.com/zhiqiangwang4/MCPTox-Benchmark
 paper: https://arxiv.org/abs/2508.14925
 license: see-upstream-repository
 case_count: 1348
 task_root: benchmarks/mcptox/tasks/full
-smoke_cases:
-  - smoke-001
 target:
   selection: explicit
   manifest: benchmarks/mcptox/targets.yaml
@@ -39,4 +37,4 @@ runtime:
   mcp_transport: stdio
   target_image: per-target
 owner: group-a
-status: smoke
+status: imported

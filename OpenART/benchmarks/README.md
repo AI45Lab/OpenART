@@ -1,12 +1,12 @@
 # OpenART Benchmark Packs
 
 Benchmark packs adapt external agent-safety benchmarks to OpenART without
-changing the core runtime. A pack contains benchmark metadata, task fixtures,
-target-native configuration, evaluators, and smoke cases.
+changing the core runtime. A pack contains benchmark metadata, task bundles,
+target-native configuration, and evaluators.
 
 ## Status
 
-| Benchmark | Status | Smoke case | Notes |
+| Benchmark | Status | Task root | Notes |
 |---|---|---|---|
 | MCPTox | Imported | `mcptox/tasks/full` | 1,348 cases from upstream; 45 servers; benchmark-level harness profiles |
 | ASB | Planned | — | Tool/memory scenarios |
@@ -27,11 +27,11 @@ benchmarks/<benchmark>/
     <case-id>/
       task.md
       checkpoints.md
-      workspace/
+      case.json
+      workspace/mcp/server.py
       utils/evaluator.py
-  smoke/
   scripts/
 ```
 
-Only smoke fixtures belong in Git. Full datasets and generated task corpora are
-downloaded or generated outside the repository.
+Large imported corpora can be committed as generated task bundles when they are
+needed for reproducible runs.
