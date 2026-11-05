@@ -27,7 +27,7 @@
       "0.0.0.0/8"
     ],
     "mcpServers": {
-      "mcptox-smoke": {
+      "mcptox": {
         "command": "python3",
         "args": [
           "/workspace/mcp/server.py"

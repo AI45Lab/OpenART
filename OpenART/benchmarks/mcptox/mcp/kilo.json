@@ -19,7 +19,7 @@
   "permission": "allow",
   "mcp": {
     "servers": {
-      "mcptox-smoke": {
+      "mcptox": {
         "type": "local",
         "command": [
           "python3",

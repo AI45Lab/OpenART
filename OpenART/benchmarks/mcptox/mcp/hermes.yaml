@@ -11,7 +11,7 @@ skills:
   external_dirs:
   - /workspace/.hermes/skills
 mcp_servers:
-  mcptox-smoke:
+  mcptox:
     command: python3
     args:
     - /workspace/mcp/server.py

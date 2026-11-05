@@ -3,7 +3,7 @@ GOOSE_MODEL: ${model.name}
 OPENAI_HOST: ${model.base_url_root}
 OPENAI_CUSTOM_HEADERS: ''
 extensions:
-  mcptox-smoke:
+  mcptox:
     type: stdio
     cmd: python3
     args:

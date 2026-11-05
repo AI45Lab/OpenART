@@ -9,7 +9,7 @@
     "enabled": false
   },
   "mcpServers": {
-    "mcptox-smoke": {
+    "mcptox": {
       "command": "python3",
       "args": [
         "/workspace/mcp/server.py"

@@ -63,7 +63,7 @@
   },
   "mcp": {
     "servers": {
-      "mcptox-smoke": {
+      "mcptox": {
         "command": "python3",
         "args": [
           "/workspace/mcp/server.py"

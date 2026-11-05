@@ -22,7 +22,7 @@ context:
 - provider: file
 - provider: code
 mcpServers:
-- name: mcptox-smoke
+- name: mcptox
   command: python3
   args:
   - /workspace/mcp/server.py
