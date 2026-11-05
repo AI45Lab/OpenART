@@ -227,19 +227,40 @@ class OrchestratorFactory:
         if provider is None:
             return
         config_surfaces = [s for s in provider.attacker_surfaces if s.kind == "configuration"]
-        staged_files = [
-            f for f in staged_dir.iterdir()
-            if f.is_file() and f.name not in {"model_integration_resolved.json"}
-        ]
-        if not config_surfaces or not staged_files:
+        if not config_surfaces:
             return
-        template_destination = self._model_integration_config_template_destination()
-        if not template_destination:
-            return
-        for staged in staged_files:
+
+        artifact_path = staged_dir / "model_integration_resolved.json"
+        staged_configs: dict[str, Path] = {}
+        if artifact_path.is_file():
+            try:
+                artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                artifact = {}
+            items = artifact.get("configs") if isinstance(artifact, dict) else None
+            if not isinstance(items, list):
+                single = artifact.get("config") if isinstance(artifact, dict) else None
+                items = [single] if isinstance(single, dict) else []
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                destination = str(item.get("destination", "") or "").strip()
+                host_path = Path(str(item.get("host_path", "") or ""))
+                if destination and host_path.is_file():
+                    staged_configs[destination] = host_path
+
+        if not staged_configs:
+            template_destination = self._model_integration_config_template_destination()
+            if not template_destination:
+                return
+            for staged in sorted(staged_dir.iterdir()):
+                if staged.is_file() and staged.name != "model_integration_resolved.json":
+                    staged_configs[template_destination] = staged
+
+        for destination, staged in staged_configs.items():
             for surface in config_surfaces:
                 if not self._config_template_destination_matches_surface(
-                    template_destination,
+                    destination,
                     str(surface.path_template or ""),
                 ):
                     continue
@@ -250,6 +271,9 @@ class OrchestratorFactory:
     def _model_integration_config_template_destination(self) -> str:
         integration = self._role_model_integration(self.target_config)
         delivery = integration.get("delivery") if isinstance(integration.get("delivery"), dict) else {}
+        raw_configs = delivery.get("configs")
+        if isinstance(raw_configs, list) and raw_configs and isinstance(raw_configs[0], dict):
+            return str(raw_configs[0].get("destination", "") or "").strip()
         template = delivery.get("config_template") if isinstance(delivery.get("config_template"), dict) else {}
         return str(template.get("destination", "") or "").strip()
 
@@ -500,6 +524,7 @@ class OrchestratorFactory:
                 target_config_path=self.target_config_path,
                 repo_root=REPO_ROOT,
                 symbolic_roots=_SYMBOLIC_DESTINATION_ROOTS,
+                task_root=self.bundle.root_dir,
             )
             if model_integration_result is not None:
                 runtime_env.update(model_integration_result.env)
@@ -520,19 +545,34 @@ class OrchestratorFactory:
             cleaned_probe_paths = []
         if cleaned_probe_paths:
             runtime_env["OPENART_CONTROL_PLANE_PROBE_PATHS"] = json.dumps(cleaned_probe_paths, ensure_ascii=True)
-        config_json_spec = model_integration_result.config if model_integration_result is not None else None
-        if config_json_spec is not None:
-            container_spec.mounts.append(MountSpec(
-                host_path=config_json_spec.host_path,
-                container_path=config_json_spec.mount_path,
-                read_only=True,
-            ))
-            runtime_env["OPENART_MODEL_CONFIG_SOURCE_FILE"] = config_json_spec.mount_path
-            runtime_env["OPENART_MODEL_CONFIG_DESTINATION"] = config_json_spec.destination
-            runtime_env["OPENART_MODEL_CONFIG_FORMAT"] = config_json_spec.format
-            if config_json_spec.format == "json":
-                runtime_env["OPENART_MODEL_CONFIG_JSON_SOURCE_FILE"] = config_json_spec.mount_path
-                runtime_env["OPENART_MODEL_CONFIG_JSON_DESTINATION"] = config_json_spec.destination
+        rendered_configs = model_integration_result.configs if model_integration_result is not None else []
+        if rendered_configs:
+            for rendered_config in rendered_configs:
+                container_spec.mounts.append(MountSpec(
+                    host_path=rendered_config.host_path,
+                    container_path=rendered_config.mount_path,
+                    read_only=True,
+                ))
+            runtime_env["OPENART_MODEL_CONFIG_SPECS"] = json.dumps(
+                [
+                    {
+                        "id": item.id,
+                        "kind": item.kind,
+                        "source_file": item.mount_path,
+                        "destination": item.destination,
+                        "format": item.format,
+                    }
+                    for item in rendered_configs
+                ],
+                ensure_ascii=True,
+            )
+            first_config = rendered_configs[0]
+            runtime_env["OPENART_MODEL_CONFIG_SOURCE_FILE"] = first_config.mount_path
+            runtime_env["OPENART_MODEL_CONFIG_DESTINATION"] = first_config.destination
+            runtime_env["OPENART_MODEL_CONFIG_FORMAT"] = first_config.format
+            if first_config.format == "json":
+                runtime_env["OPENART_MODEL_CONFIG_JSON_SOURCE_FILE"] = first_config.mount_path
+                runtime_env["OPENART_MODEL_CONFIG_JSON_DESTINATION"] = first_config.destination
 
         role_overlay = (
             resolve_nested_env_values(role_cfg.get("config_overlay"))

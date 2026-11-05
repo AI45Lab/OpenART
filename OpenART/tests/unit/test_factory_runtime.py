@@ -652,6 +652,141 @@ def test_factory_stages_openclaw_native_config_to_runner_home(monkeypatch, tmp_p
     assert staged["models"]["providers"]["openart"]["apiKey"] == "${OPENAI_API_KEY}"
 
 
+def test_factory_stages_multiple_model_integration_configs(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "dummy")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    bundle = _make_bundle(tmp_path)
+    task_root = Path(bundle.root_dir)
+    (task_root / "mcp").mkdir(parents=True, exist_ok=True)
+    (task_root / "mcp" / "pi.json").write_text(
+        json.dumps({"mcpServers": {"smoke": {"command": "python3", "args": ["/workspace/mcp/server.py"]}}}) + "\n",
+        encoding="utf-8",
+    )
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    (config_dir / "models.json").write_text('{"model": "${model.name}"}\n', encoding="utf-8")
+    target_config_path = config_dir / "target.custom.yaml"
+    target_config_path.write_text("target: {}\n", encoding="utf-8")
+
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "prompt_cli",
+            "surface_family": "custom",
+            "runner_image": "openart/pi:latest",
+            "launch_cmd": "pi -p",
+            "model_integration": {
+                "binding": {
+                    "provider_family": "openai_compatible",
+                    "api_key": "${TARGET_API_KEY}",
+                    "base_url": "${TARGET_BASE_URL}",
+                    "model": "${TARGET_MODEL}",
+                },
+                "delivery": {
+                    "type": "hybrid",
+                    "configs": [
+                        {
+                            "id": "model",
+                            "kind": "model",
+                            "source": f"abs:{config_dir / 'models.json'}",
+                            "destination": "HOME/.pi/agent/models.json",
+                            "format": "json",
+                        },
+                        {
+                            "id": "mcp",
+                            "kind": "mcp",
+                            "source": "task:mcp/pi.json",
+                            "destination": "WORKSPACE/.pi/mcp.json",
+                            "format": "json",
+                        },
+                    ],
+                },
+            },
+        },
+        target_config_path=str(target_config_path),
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    runner = factory._create_runner("target")
+
+    specs = json.loads(runner.runtime_env["OPENART_MODEL_CONFIG_SPECS"])
+    assert [item["id"] for item in specs] == ["model", "mcp"]
+    assert [item["destination"] for item in specs] == [
+        "/tmp/openart/runners/target/home/.pi/agent/models.json",
+        "/workspace/.pi/mcp.json",
+    ]
+    assert runner.runtime_env["OPENART_MODEL_CONFIG_DESTINATION"] == (
+        "/tmp/openart/runners/target/home/.pi/agent/models.json"
+    )
+    mounts = {mount.container_path: mount.host_path for mount in runner.container.spec.mounts}
+    assert "/workspace/.openart_model_integration_target_model.json" in mounts
+    assert "/workspace/.openart_model_integration_target_mcp.json" in mounts
+    model_staged = json.loads(Path(mounts["/workspace/.openart_model_integration_target_model.json"]).read_text(encoding="utf-8"))
+    mcp_staged = json.loads(Path(mounts["/workspace/.openart_model_integration_target_mcp.json"]).read_text(encoding="utf-8"))
+    assert model_staged["model"] == "glm-5"
+    assert mcp_staged["mcpServers"]["smoke"]["command"] == "python3"
+
+
+def test_factory_uses_task_relative_config_template(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "dummy")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    bundle = _make_bundle(tmp_path)
+    task_root = Path(bundle.root_dir)
+    (task_root / "mcp").mkdir(parents=True, exist_ok=True)
+    (task_root / "mcp" / "opencode.json").write_text(
+        json.dumps({"model": "openart/${model.name}", "mcp": {"servers": {"smoke": {"command": ["python3"]}}}}) + "\n",
+        encoding="utf-8",
+    )
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    target_config_path = config_dir / "target.custom.yaml"
+    target_config_path.write_text("target: {}\n", encoding="utf-8")
+
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "prompt_cli",
+            "surface_family": "opencode",
+            "runner_image": "openart/opencode:latest",
+            "launch_cmd": "opencode run",
+            "model_integration": {
+                "binding": {
+                    "provider_family": "openai_compatible",
+                    "api_key": "${TARGET_API_KEY}",
+                    "base_url": "${TARGET_BASE_URL}",
+                    "model": "${TARGET_MODEL}",
+                },
+                "delivery": {
+                    "type": "config_template",
+                    "config_template": {
+                        "source": "task:mcp/opencode.json",
+                        "fallback_source": "repo:configs/target-model-json/opencode.openai-compatible.json",
+                        "destination": "WORKSPACE/opencode.json",
+                        "format": "json",
+                    },
+                },
+            },
+        },
+        target_config_path=str(target_config_path),
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    runner = factory._create_runner("target")
+
+    mounts = {mount.container_path: mount.host_path for mount in runner.container.spec.mounts}
+    staged = json.loads(
+        Path(mounts["/workspace/.openart_model_integration_target.json"]).read_text(encoding="utf-8")
+    )
+    assert staged["model"] == "openart/glm-5"
+    assert staged["mcp"]["servers"]["smoke"]["command"] == ["python3"]
+
+
 def test_factory_seeds_matching_model_config_surface(tmp_path: Path) -> None:
     bundle = _make_bundle(tmp_path)
     factory = OrchestratorFactory(
