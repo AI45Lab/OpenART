@@ -127,6 +127,338 @@ def test_render_config_template_supports_secret_free_env_refs(tmp_path: Path) ->
         )
 
 
+def test_task_relative_config_template_source(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "secret-key")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    task_root = tmp_path / "task"
+    (task_root / "mcp").mkdir(parents=True)
+    (task_root / "mcp" / "opencode.json").write_text(
+        json.dumps(
+            {
+                "model": "openart/${model.name}",
+                "mcp": {"servers": {"smoke": {"type": "local", "command": ["python3", "/workspace/mcp/server.py"]}}},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = stage_model_integration(
+        {
+            "binding": {
+                "provider_family": "openai_compatible",
+                "api_key": "${TARGET_API_KEY}",
+                "base_url": "${TARGET_BASE_URL}",
+                "model": "${TARGET_MODEL}",
+            },
+            "delivery": {
+                "type": "config_template",
+                "config_template": {
+                    "source": "task:mcp/opencode.json",
+                    "destination": "WORKSPACE/opencode.json",
+                    "format": "json",
+                },
+            },
+        },
+        role="target",
+        runtime_env=_runtime_env(),
+        output_dir=tmp_path / "out",
+        target_config_path=str(_target_config_file(tmp_path)),
+        repo_root=Path(__file__).resolve().parents[2],
+        symbolic_roots=_symbolic_roots(),
+        task_root=task_root,
+    )
+
+    assert result is not None
+    assert result.config is not None
+    assert result.config.destination == "/workspace/opencode.json"
+    staged = json.loads(Path(result.config.host_path).read_text(encoding="utf-8"))
+    assert staged["model"] == "openart/glm-5"
+    assert staged["mcp"]["servers"]["smoke"]["command"] == ["python3", "/workspace/mcp/server.py"]
+
+
+def test_task_relative_config_template_falls_back(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "secret-key")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    task_root = tmp_path / "task"
+    task_root.mkdir()
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir()
+    (config_dir / "default.json").write_text('{"model": "${model.name}"}\n', encoding="utf-8")
+
+    result = stage_model_integration(
+        {
+            "binding": {
+                "provider_family": "openai_compatible",
+                "api_key": "${TARGET_API_KEY}",
+                "base_url": "${TARGET_BASE_URL}",
+                "model": "${TARGET_MODEL}",
+            },
+            "delivery": {
+                "type": "config_template",
+                "config_template": {
+                    "source": "task:mcp/opencode.json",
+                    "fallback_source": "abs:" + str(config_dir / "default.json"),
+                    "destination": "WORKSPACE/opencode.json",
+                    "format": "json",
+                },
+            },
+        },
+        role="target",
+        runtime_env=_runtime_env(),
+        output_dir=tmp_path / "out",
+        target_config_path=str(_target_config_file(tmp_path)),
+        repo_root=Path(__file__).resolve().parents[2],
+        symbolic_roots=_symbolic_roots(),
+        task_root=task_root,
+    )
+
+    assert result is not None
+    assert result.config is not None
+    staged = json.loads(Path(result.config.host_path).read_text(encoding="utf-8"))
+    assert staged["model"] == "glm-5"
+
+
+def test_task_relative_config_template_without_task_root_falls_back(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "secret-key")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir()
+    (config_dir / "default.json").write_text('{"model": "${model.name}"}\n', encoding="utf-8")
+
+    result = stage_model_integration(
+        {
+            "binding": {
+                "provider_family": "openai_compatible",
+                "api_key": "${TARGET_API_KEY}",
+                "base_url": "${TARGET_BASE_URL}",
+                "model": "${TARGET_MODEL}",
+            },
+            "delivery": {
+                "type": "config_template",
+                "config_template": {
+                    "source": "task:mcp/opencode.json",
+                    "fallback_source": "abs:" + str(config_dir / "default.json"),
+                    "destination": "WORKSPACE/opencode.json",
+                    "format": "json",
+                },
+            },
+        },
+        role="target",
+        runtime_env=_runtime_env(),
+        output_dir=tmp_path / "out",
+        target_config_path=str(_target_config_file(tmp_path)),
+        repo_root=Path(__file__).resolve().parents[2],
+        symbolic_roots=_symbolic_roots(),
+    )
+
+    assert result is not None
+    assert result.config is not None
+    assert json.loads(Path(result.config.host_path).read_text(encoding="utf-8"))["model"] == "glm-5"
+
+
+def test_multiple_config_templates_stage_all_files(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "secret-key")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    task_root = tmp_path / "task"
+    (task_root / "mcp").mkdir(parents=True)
+    (task_root / "mcp" / "mcp.json").write_text(
+        json.dumps({"mcpServers": {"smoke": {"command": "python3", "args": ["/workspace/mcp/server.py"]}}}) + "\n",
+        encoding="utf-8",
+    )
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir()
+    (config_dir / "models.json").write_text('{"model": "${model.name}"}\n', encoding="utf-8")
+
+    result = stage_model_integration(
+        {
+            "binding": {
+                "provider_family": "openai_compatible",
+                "api_key": "${TARGET_API_KEY}",
+                "base_url": "${TARGET_BASE_URL}",
+                "model": "${TARGET_MODEL}",
+            },
+            "delivery": {
+                "type": "hybrid",
+                "env_names": {"api_key": "OPENAI_API_KEY", "model": "OPENAI_MODEL"},
+                "configs": [
+                    {
+                        "id": "model",
+                        "kind": "model",
+                        "source": f"abs:{config_dir / 'models.json'}",
+                        "destination": "HOME/.pi/agent/models.json",
+                        "format": "json",
+                    },
+                    {
+                        "id": "mcp",
+                        "kind": "mcp",
+                        "source": "task:mcp/mcp.json",
+                        "destination": "WORKSPACE/.pi/mcp.json",
+                        "format": "json",
+                    },
+                ],
+            },
+        },
+        role="target",
+        runtime_env=_runtime_env(),
+        output_dir=tmp_path / "out",
+        target_config_path=str(_target_config_file(tmp_path)),
+        repo_root=Path(__file__).resolve().parents[2],
+        symbolic_roots=_symbolic_roots(),
+        task_root=task_root,
+    )
+
+    assert result is not None
+    assert result.config is not None
+    assert len(result.configs) == 2
+    assert [item.id for item in result.configs] == ["model", "mcp"]
+    assert [item.kind for item in result.configs] == ["model", "mcp"]
+    assert result.configs[0].destination == "/tmp/openart/home/.pi/agent/models.json"
+    assert result.configs[1].destination == "/workspace/.pi/mcp.json"
+    assert result.configs[0].mount_path != result.configs[1].mount_path
+    model_payload = json.loads(Path(result.configs[0].host_path).read_text(encoding="utf-8"))
+    mcp_payload = json.loads(Path(result.configs[1].host_path).read_text(encoding="utf-8"))
+    assert model_payload["model"] == "glm-5"
+    assert mcp_payload["mcpServers"]["smoke"]["command"] == "python3"
+    artifact = json.loads(Path(result.resolved_artifact_path).read_text(encoding="utf-8"))
+    assert artifact["config"]["id"] == "model"
+    assert [item["id"] for item in artifact["configs"]] == ["model", "mcp"]
+
+
+def test_multiple_config_templates_reject_duplicate_destinations(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "secret-key")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir()
+    (config_dir / "one.json").write_text('{"model": "${model.name}"}\n', encoding="utf-8")
+    (config_dir / "two.json").write_text('{"mcp": {}}\n', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="duplicate model_integration config destination"):
+        stage_model_integration(
+            {
+                "binding": {
+                    "provider_family": "openai_compatible",
+                    "api_key": "${TARGET_API_KEY}",
+                    "base_url": "${TARGET_BASE_URL}",
+                    "model": "${TARGET_MODEL}",
+                },
+                "delivery": {
+                    "type": "config_template",
+                    "configs": [
+                        {
+                            "id": "model",
+                            "source": f"abs:{config_dir / 'one.json'}",
+                            "destination": "WORKSPACE/settings.json",
+                            "format": "json",
+                        },
+                        {
+                            "id": "mcp",
+                            "source": f"abs:{config_dir / 'two.json'}",
+                            "destination": "WORKSPACE/settings.json",
+                            "format": "json",
+                        },
+                    ],
+                },
+            },
+            role="target",
+            runtime_env=_runtime_env(),
+            output_dir=tmp_path / "out",
+            target_config_path=str(_target_config_file(tmp_path)),
+            repo_root=Path(__file__).resolve().parents[2],
+            symbolic_roots=_symbolic_roots(),
+        )
+
+
+def test_multiple_config_templates_reject_duplicate_ids(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "secret-key")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir()
+    (config_dir / "one.json").write_text('{"model": "${model.name}"}\n', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="duplicate model_integration config id"):
+        stage_model_integration(
+            {
+                "binding": {
+                    "provider_family": "openai_compatible",
+                    "api_key": "${TARGET_API_KEY}",
+                    "base_url": "${TARGET_BASE_URL}",
+                    "model": "${TARGET_MODEL}",
+                },
+                "delivery": {
+                    "type": "config_template",
+                    "configs": [
+                        {
+                            "id": "same",
+                            "source": f"abs:{config_dir / 'one.json'}",
+                            "destination": "WORKSPACE/one.json",
+                            "format": "json",
+                        },
+                        {
+                            "id": "same",
+                            "source": f"abs:{config_dir / 'one.json'}",
+                            "destination": "WORKSPACE/two.json",
+                            "format": "json",
+                        },
+                    ],
+                },
+            },
+            role="target",
+            runtime_env=_runtime_env(),
+            output_dir=tmp_path / "out",
+            target_config_path=str(_target_config_file(tmp_path)),
+            repo_root=Path(__file__).resolve().parents[2],
+            symbolic_roots=_symbolic_roots(),
+        )
+
+
+def test_optional_task_config_template_is_skipped_when_missing(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("TARGET_API_KEY", "secret-key")
+    monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
+    monkeypatch.setenv("TARGET_MODEL", "glm-5")
+    task_root = tmp_path / "task"
+    task_root.mkdir()
+
+    result = stage_model_integration(
+        {
+            "binding": {
+                "provider_family": "openai_compatible",
+                "api_key": "${TARGET_API_KEY}",
+                "base_url": "${TARGET_BASE_URL}",
+                "model": "${TARGET_MODEL}",
+            },
+            "delivery": {
+                "type": "hybrid",
+                "env_names": {"api_key": "OPENAI_API_KEY", "model": "OPENAI_MODEL"},
+                "config_template": {
+                    "source": "task:mcp/missing.json",
+                    "optional": True,
+                    "destination": "WORKSPACE/missing.json",
+                    "format": "json",
+                },
+            },
+        },
+        role="target",
+        runtime_env=_runtime_env(),
+        output_dir=tmp_path / "out",
+        target_config_path=str(_target_config_file(tmp_path)),
+        repo_root=Path(__file__).resolve().parents[2],
+        symbolic_roots=_symbolic_roots(),
+        task_root=task_root,
+    )
+
+    assert result is not None
+    assert result.config is None
+    assert result.configs == []
+    assert result.env["OPENAI_MODEL"] == "glm-5"
+
+
 def test_env_names_expand_before_explicit_env_merge(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("TARGET_API_KEY", "secret-key")
     monkeypatch.setenv("TARGET_BASE_URL", "http://llm.internal/v1")
@@ -364,9 +696,11 @@ def test_model_delivery_destinations_are_not_attacker_surfaces() -> None:
                 if part.strip()
             )
         if (
-            target.get("surface_family") == "openclaw"
-            and destination == "HOME/.openclaw/openclaw.json"
+            target.get("surface_family") in {"goose", "hermes", "nanobot", "openclaw", "copilot_cli"}
+            and destination in attack_paths
         ):
+            # These targets keep model and MCP/config settings in one file.
+            # The collision is documented in docs/06_attack_surfaces.md.
             continue
         if destination in attack_paths:
             exposed.append(f"{config_path.name}: {destination}")

@@ -7,7 +7,7 @@ and optional config templates without relying on a Python adapter registry.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 import os
 from pathlib import Path
@@ -51,6 +51,8 @@ class RenderedConfig:
     mount_path: str
     destination: str
     format: str
+    id: str = ""
+    kind: str = ""
 
 
 @dataclass(frozen=True)
@@ -62,6 +64,7 @@ class ModelIntegrationResult:
     config: RenderedConfig | None
     model_binding: dict[str, str]
     resolved_artifact_path: str
+    configs: list[RenderedConfig] = field(default_factory=list)
 
 
 def canonical_surface_family(value: Any) -> str:
@@ -285,12 +288,45 @@ def normalize_env_names(raw_env_names: Any) -> dict[str, str]:
     return env_names
 
 
+def normalize_config_specs(delivery: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Return the ordered list of config files to render for a delivery.
+
+    ``delivery.configs`` is the canonical multi-file form. The legacy
+    ``delivery.config_template`` is treated as a one-element list so existing
+    target configs keep working unchanged.
+    """
+    raw_configs = delivery.get("configs") if isinstance(delivery, Mapping) else None
+    specs: list[dict[str, Any]] = []
+    if isinstance(raw_configs, list):
+        for index, item in enumerate(raw_configs):
+            if not isinstance(item, Mapping):
+                continue
+            spec = dict(item)
+            spec.setdefault("id", f"config_{index + 1}")
+            spec.setdefault("kind", "config")
+            specs.append(spec)
+    if specs:
+        return specs
+
+    template = delivery.get("config_template") if isinstance(delivery, Mapping) else None
+    if isinstance(template, Mapping):
+        spec = dict(template)
+        spec.setdefault("id", "config")
+        spec.setdefault("kind", "model")
+        return [spec]
+    return []
+
+
 def normalize_delivery(integration_cfg: Mapping[str, Any]) -> dict[str, Any]:
     raw_delivery = integration_cfg.get("delivery") if isinstance(integration_cfg, Mapping) else None
     delivery = dict(raw_delivery) if isinstance(raw_delivery, Mapping) else {}
 
     legacy_config_json = integration_cfg.get("config_json")
-    if isinstance(legacy_config_json, Mapping) and "config_template" not in delivery:
+    if (
+        isinstance(legacy_config_json, Mapping)
+        and "config_template" not in delivery
+        and "configs" not in delivery
+    ):
         template = dict(legacy_config_json)
         template.setdefault("format", "json")
         delivery["config_template"] = template
@@ -301,7 +337,7 @@ def normalize_delivery(integration_cfg: Mapping[str, Any]) -> dict[str, Any]:
     delivery["env"] = explicit_env
 
     if "type" not in delivery:
-        has_template = isinstance(delivery.get("config_template"), Mapping)
+        has_template = bool(normalize_config_specs(delivery))
         has_env = bool(env_names or explicit_env)
         if has_template and has_env:
             delivery["type"] = "hybrid"
@@ -330,18 +366,25 @@ def resolve_model_integration_source_path(
     *,
     repo_root: Path,
     target_config_path: str | None = None,
+    task_root: str | Path | None = None,
 ) -> Path:
     if source_spec.startswith("target:"):
         if not target_config_path:
             raise ValueError("model_integration config template source with target: requires target_config_path")
         base = Path(target_config_path).resolve().parent
         path = base / source_spec[len("target:"):]
+    elif source_spec.startswith("task:"):
+        if task_root is None:
+            raise ValueError("model_integration config template source with task: requires task_root")
+        path = Path(task_root) / source_spec[len("task:"):]
     elif source_spec.startswith("repo:"):
         path = repo_root / source_spec[len("repo:"):]
     elif source_spec.startswith("abs:"):
         path = Path(source_spec[len("abs:"):])
     else:
-        raise ValueError("model_integration config template source must start with target:, repo:, or abs:")
+        raise ValueError(
+            "model_integration config template source must start with target:, task:, repo:, or abs:"
+        )
     resolved = path.resolve()
     if not resolved.is_file():
         raise ValueError(f"model_integration config template source does not exist: {resolved}")
@@ -397,7 +440,9 @@ def render_config_template(
     env_names: Mapping[str, str] | None = None,
     repo_root: Path,
     target_config_path: str | None,
-) -> tuple[str, str, str]:
+    task_root: str | Path | None = None,
+    allow_missing: bool = False,
+) -> tuple[str, str, str] | None:
     env = env or os.environ
     env_names = env_names or {}
     format_name = str(template_spec.get("format") or "json").strip().lower()
@@ -409,21 +454,63 @@ def render_config_template(
 
     source_path: Path | None = None
     source_spec = str(template_spec.get("source") or "").strip()
+    fallback_source_spec = str(template_spec.get("fallback_source") or "").strip()
     content = template_spec.get("content")
     source_label = "model_integration.config_template"
 
     if source_spec:
-        source_path = resolve_model_integration_source_path(
-            source_spec,
-            repo_root=repo_root,
-            target_config_path=target_config_path,
-        )
+        try:
+            source_path = resolve_model_integration_source_path(
+                source_spec,
+                repo_root=repo_root,
+                target_config_path=target_config_path,
+                task_root=task_root,
+            )
+        except ValueError as exc:
+            missing_or_unavailable = (
+                "does not exist" in str(exc)
+                or "requires task_root" in str(exc)
+            )
+            if not missing_or_unavailable:
+                raise
+            if fallback_source_spec:
+                try:
+                    source_path = resolve_model_integration_source_path(
+                        fallback_source_spec,
+                        repo_root=repo_root,
+                        target_config_path=target_config_path,
+                        task_root=task_root,
+                    )
+                except ValueError as fallback_exc:
+                    if allow_missing and "does not exist" in str(fallback_exc):
+                        return None
+                    raise
+            elif allow_missing:
+                return None
+            else:
+                raise
+    elif fallback_source_spec:
+        try:
+            source_path = resolve_model_integration_source_path(
+                fallback_source_spec,
+                repo_root=repo_root,
+                target_config_path=target_config_path,
+                task_root=task_root,
+            )
+        except ValueError as exc:
+            if allow_missing and "does not exist" in str(exc):
+                return None
+            raise
+
+    if source_path is not None:
         source_label = str(source_path)
         content_text = source_path.read_text(encoding="utf-8")
     elif content is not None:
         content_text = content if isinstance(content, str) else ""
+    elif allow_missing:
+        return None
     else:
-        raise ValueError("model_integration config template requires source or content")
+        raise ValueError("model_integration config template requires source, fallback_source, or content")
 
     if isinstance(content, Mapping) and not source_spec:
         resolved_obj = resolve_template_value(
@@ -512,6 +599,17 @@ def _resolve_env_names_payload(env_names: Mapping[str, str], model_binding: Mapp
     return env_payload
 
 
+def _rendered_config_payload(config: RenderedConfig) -> dict[str, str]:
+    return {
+        "id": config.id,
+        "kind": config.kind,
+        "host_path": config.host_path,
+        "mount_path": config.mount_path,
+        "destination": config.destination,
+        "format": config.format,
+    }
+
+
 def write_resolved_model_artifact(
     path: Path,
     *,
@@ -521,6 +619,7 @@ def write_resolved_model_artifact(
     model_binding: Mapping[str, str],
     env_payload: Mapping[str, str],
     config: RenderedConfig | None,
+    configs: list[RenderedConfig] | None = None,
 ) -> str:
     payload: dict[str, Any] = {
         "provider_family": provider_family,
@@ -529,17 +628,20 @@ def write_resolved_model_artifact(
         "env_names": dict(env_names),
         "env_keys": sorted(env_payload),
         "config": None,
+        "configs": [],
     }
     if config is not None:
-        payload["config"] = {
-            "host_path": config.host_path,
-            "mount_path": config.mount_path,
-            "destination": config.destination,
-            "format": config.format,
-        }
+        payload["config"] = _rendered_config_payload(config)
+    for item in configs or ([] if config is None else [config]):
+        payload["configs"].append(_rendered_config_payload(item))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
     return str(path)
+
+
+def _config_id_slug(value: Any, fallback: str) -> str:
+    text = re.sub(r"[^A-Za-z0-9_-]+", "_", str(value or "").strip()).strip("_")
+    return text or fallback
 
 
 def stage_model_integration(
@@ -551,6 +653,7 @@ def stage_model_integration(
     target_config_path: str | None,
     repo_root: Path,
     symbolic_roots: Mapping[str, Any],
+    task_root: str | Path | None = None,
 ) -> ModelIntegrationResult | None:
     if not isinstance(integration_cfg, Mapping) or not integration_cfg:
         return None
@@ -579,35 +682,73 @@ def stage_model_integration(
     )
     env_payload.update({str(key): str(value or "") for key, value in rendered_env.items() if str(key).strip()})
 
-    rendered_config: RenderedConfig | None = None
+    rendered_configs: list[RenderedConfig] = []
     if delivery_type in {"config_template", "hybrid"}:
-        template_spec = delivery.get("config_template")
-        if not isinstance(template_spec, Mapping):
-            raise ValueError(f"model_integration delivery type {delivery_type} requires a config template")
-        rendered, source_name, format_name = render_config_template(
-            template_spec,
-            model=model_binding,
-            env=resolution_env,
-            env_names=env_names,
-            repo_root=repo_root,
-            target_config_path=target_config_path,
-        )
-        destination = expand_model_integration_destination(
-            str(template_spec.get("destination") or ""),
-            runtime_env,
-            symbolic_roots,
-        )
+        template_specs = normalize_config_specs(delivery)
+        if not template_specs:
+            raise ValueError(
+                f"model_integration delivery type {delivery_type} requires config_template or configs"
+            )
         staged_dir = Path(output_dir) / "model_integration" / role
         staged_dir.mkdir(parents=True, exist_ok=True)
-        staged_path = staged_dir / source_name
-        staged_path.write_text(rendered, encoding="utf-8")
-        rendered_config = RenderedConfig(
-            host_path=str(staged_path),
-            mount_path=MODEL_CONFIG_MOUNT_PATH_TEMPLATE.format(role=role, ext=_format_extension(format_name)),
-            destination=destination,
-            format=format_name,
-        )
+        multiple = len(template_specs) > 1
+        seen_ids: set[str] = set()
+        seen_destinations: dict[str, str] = {}
 
+        for index, template_spec in enumerate(template_specs):
+            config_id = _config_id_slug(template_spec.get("id"), f"config_{index + 1}")
+            if config_id in seen_ids:
+                raise ValueError(f"duplicate model_integration config id: {config_id}")
+            seen_ids.add(config_id)
+
+            kind = str(template_spec.get("kind") or "config").strip().lower() or "config"
+            rendered_result = render_config_template(
+                template_spec,
+                model=model_binding,
+                env=resolution_env,
+                env_names=env_names,
+                repo_root=repo_root,
+                target_config_path=target_config_path,
+                task_root=task_root,
+                allow_missing=bool(template_spec.get("optional")),
+            )
+            if rendered_result is None:
+                continue
+            rendered, source_name, format_name = rendered_result
+            destination = expand_model_integration_destination(
+                str(template_spec.get("destination") or ""),
+                runtime_env,
+                symbolic_roots,
+            )
+            previous_id = seen_destinations.get(destination)
+            if previous_id is not None:
+                raise ValueError(
+                    "duplicate model_integration config destination "
+                    f"{destination} (configs {previous_id} and {config_id})"
+                )
+            seen_destinations[destination] = config_id
+
+            staged_name = source_name if not multiple else f"{config_id}-{source_name}"
+            staged_path = staged_dir / staged_name
+            staged_path.write_text(rendered, encoding="utf-8")
+            ext = _format_extension(format_name)
+            mount_path = (
+                MODEL_CONFIG_MOUNT_PATH_TEMPLATE.format(role=role, ext=ext)
+                if not multiple
+                else f"/workspace/.openart_model_integration_{role}_{config_id}.{ext}"
+            )
+            rendered_configs.append(
+                RenderedConfig(
+                    host_path=str(staged_path),
+                    mount_path=mount_path,
+                    destination=destination,
+                    format=format_name,
+                    id=config_id,
+                    kind=kind,
+                )
+            )
+
+    rendered_config = rendered_configs[0] if rendered_configs else None
     artifact_path = Path(output_dir) / "model_integration" / role / "model_integration_resolved.json"
     provider_family = str(model_binding.get("provider_family") or "").strip()
     resolved_artifact_path = write_resolved_model_artifact(
@@ -618,6 +759,7 @@ def stage_model_integration(
         model_binding=model_binding,
         env_payload=env_payload,
         config=rendered_config,
+        configs=rendered_configs,
     )
 
     return ModelIntegrationResult(
@@ -628,4 +770,5 @@ def stage_model_integration(
         config=rendered_config,
         model_binding=model_binding,
         resolved_artifact_path=resolved_artifact_path,
+        configs=rendered_configs,
     )
