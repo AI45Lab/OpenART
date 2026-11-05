@@ -1,0 +1,107 @@
+# Benchmark-level MCPTox target matrix.
+#
+# Each entry selects a base OpenART target config and an MCPTox profile.
+# profile_mode:
+#   replace -> profile replaces the base model config template
+#   add     -> profile is added as a second config file
+#   wrapper -> no native MCP; use a tool-store wrapper instead
+targets:
+  opencode:
+    base: configs/target-configs/target.yaml
+    profile: benchmarks/mcptox/mcp/opencode.json
+    profile_mode: replace
+    destination: XDG_CONFIG_HOME/opencode/opencode.json
+    format: json
+  codex:
+    base: configs/target-configs/target.codex.yaml
+    profile: benchmarks/mcptox/mcp/codex.toml
+    profile_mode: replace
+    destination: HOME/.codex/config.toml
+    format: toml
+  gemini:
+    base: configs/target-configs/target.gemini.yaml
+    profile: benchmarks/mcptox/mcp/gemini.json
+    profile_mode: replace
+    destination: HOME/.gemini/settings.json
+    format: json
+  qwen_code:
+    base: configs/target-configs/target.qwen-code.yaml
+    profile: benchmarks/mcptox/mcp/qwen.json
+    profile_mode: replace
+    destination: HOME/.qwen/settings.json
+    format: json
+  continue_cli:
+    base: configs/target-configs/target.continue-cli.yaml
+    profile: benchmarks/mcptox/mcp/continue.yaml
+    profile_mode: replace
+    destination: HOME/.continue/config.yaml
+    format: yaml
+  goose:
+    base: configs/target-configs/target.goose.yaml
+    profile: benchmarks/mcptox/mcp/goose.yaml
+    profile_mode: replace
+    destination: HOME/.config/goose/config.yaml
+    format: yaml
+  hermes:
+    base: configs/target-configs/target.hermes.yaml
+    profile: benchmarks/mcptox/mcp/hermes.yaml
+    profile_mode: replace
+    destination: HOME/.hermes/config.yaml
+    format: yaml
+  kilo:
+    base: configs/target-configs/target.kilo.yaml
+    profile: benchmarks/mcptox/mcp/kilo.json
+    profile_mode: replace
+    destination: XDG_CONFIG_HOME/kilo/opencode.json
+    format: json
+  nanobot:
+    base: configs/target-configs/target.nanobot.yaml
+    profile: benchmarks/mcptox/mcp/nanobot.json
+    profile_mode: replace
+    destination: HOME/.nanobot/config.json
+    format: json
+  openclaw:
+    base: configs/target-configs/target.openclaw.yaml
+    profile: benchmarks/mcptox/mcp/openclaw.json
+    profile_mode: replace
+    destination: HOME/.openclaw/openclaw.json
+    format: json
+  claude_code:
+    base: configs/target-configs/target.claude-code.yaml
+    profile: benchmarks/mcptox/mcp/claude.json
+    profile_mode: add
+    destination: WORKSPACE/.mcp.json
+    format: json
+  reasonix:
+    base: configs/target-configs/target.reasonix.yaml
+    profile: benchmarks/mcptox/mcp/reasonix.json
+    profile_mode: add
+    destination: WORKSPACE/.mcp.json
+    format: json
+  copilot_cli:
+    base: configs/target-configs/target.copilot-cli.yaml
+    profile: benchmarks/mcptox/mcp/copilot.json
+    profile_mode: add
+    destination: HOME/.copilot/mcp-config.json
+    format: json
+  pi:
+    base: configs/target-configs/target.pi.yaml
+    profile: benchmarks/mcptox/mcp/pi.json
+    profile_mode: add
+    destination: WORKSPACE/.pi/mcp.json
+    format: json
+  oh_my_pi:
+    base: configs/target-configs/target.oh-my-pi.yaml
+    profile: benchmarks/mcptox/mcp/omp.json
+    profile_mode: add
+    destination: WORKSPACE/.omp/mcp.json
+    format: json
+  deepseek_tui:
+    base: configs/target-configs/target.deepseek-tui.yaml
+    profile: benchmarks/mcptox/mcp/codewhale.json
+    profile_mode: add
+    destination: HOME/.codewhale/mcp.json
+    format: json
+  aider:
+    base: configs/target-configs/target.aider.yaml
+    profile_mode: wrapper

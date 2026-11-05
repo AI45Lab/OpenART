@@ -1,0 +1,12 @@
+model = "${model.name}"
+model_provider = "openart"
+
+[model_providers.openart]
+name = "OpenART"
+base_url = "${model.base_url}"
+env_key = "${env_name.api_key}"
+wire_api = "responses"
+
+[mcp_servers.mcptox-smoke]
+command = "python3"
+args = ["/workspace/mcp/server.py"]

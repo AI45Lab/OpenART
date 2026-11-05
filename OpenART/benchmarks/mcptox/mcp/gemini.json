@@ -1,0 +1,21 @@
+{
+  "general": {
+    "proxy": "$HTTPS_PROXY"
+  },
+  "telemetry": {
+    "enabled": false
+  },
+  "usageStatistics": {
+    "enabled": false
+  },
+  "mcpServers": {
+    "mcptox-smoke": {
+      "command": "python3",
+      "args": [
+        "/workspace/mcp/server.py"
+      ],
+      "cwd": "/workspace",
+      "env": {}
+    }
+  }
+}

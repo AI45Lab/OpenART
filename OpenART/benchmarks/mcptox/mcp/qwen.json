@@ -1,0 +1,34 @@
+{
+  "modelProviders": {
+    "openai": [
+      {
+        "id": "${model.name}",
+        "name": "${model.name}",
+        "baseUrl": "${model.base_url}",
+        "description": "OpenART target model",
+        "envKey": "${env_name.api_key}",
+        "generationConfig": {
+          "timeout": 600000
+        }
+      }
+    ]
+  },
+  "security": {
+    "auth": {
+      "selectedType": "openai"
+    }
+  },
+  "model": {
+    "name": "${model.name}"
+  },
+  "mcpServers": {
+    "mcptox-smoke": {
+      "command": "python3",
+      "args": [
+        "/workspace/mcp/server.py"
+      ],
+      "cwd": "/workspace",
+      "env": {}
+    }
+  }
+}

@@ -1,22 +1,42 @@
 id: mcptox
 name: MCPTox
-version: 0.1.0-smoke
+version: 0.2.0-imported
 description: >-
-  MCP tool-poisoning benchmark. This pack starts with a local stdio MCP smoke
-  case; the full benchmark uses the upstream MCP server corpus and poisoned
-  tool metadata.
+  MCP tool-poisoning benchmark. The pack includes a local stdio smoke case and
+  the imported upstream corpus of 1,348 malicious test cases.
 source: https://github.com/zhiqiangwang4/MCPTox-Benchmark
 paper: https://arxiv.org/abs/2508.14925
 license: see-upstream-repository
 case_count: 1348
+task_root: benchmarks/mcptox/tasks/full
 smoke_cases:
   - smoke-001
 target:
-  family: opencode
-  mcp_surface: opencode_mcp
+  selection: explicit
+  manifest: benchmarks/mcptox/targets.yaml
+  profiles_dir: benchmarks/mcptox/mcp
+  native_profiles:
+    - opencode
+    - codex
+    - gemini
+    - qwen_code
+    - continue_cli
+    - goose
+    - hermes
+    - kilo
+    - nanobot
+    - openclaw
+    - claude_code
+    - reasonix
+    - copilot_cli
+    - pi
+    - oh_my_pi
+    - deepseek_tui
+  wrapper_profiles:
+    - aider
 runtime:
   service: none
   mcp_transport: stdio
-  target_image: openart/opencode:latest
+  target_image: per-target
 owner: group-a
 status: smoke

@@ -1,0 +1,18 @@
+model:
+  default: ${model.name}
+  provider: custom
+  base_url: ${model.base_url}
+  api_key: ${model.api_key}
+  extra_body:
+    thinking:
+      type: disabled
+    enable_thinking: false
+skills:
+  external_dirs:
+  - /workspace/.hermes/skills
+mcp_servers:
+  mcptox-smoke:
+    command: python3
+    args:
+    - /workspace/mcp/server.py
+    env: {}

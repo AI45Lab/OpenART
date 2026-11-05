@@ -1,0 +1,12 @@
+GOOSE_PROVIDER: openai
+GOOSE_MODEL: ${model.name}
+OPENAI_HOST: ${model.base_url_root}
+OPENAI_CUSTOM_HEADERS: ''
+extensions:
+  mcptox-smoke:
+    type: stdio
+    cmd: python3
+    args:
+    - /workspace/mcp/server.py
+    envs: {}
+    enabled: true
