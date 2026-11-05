@@ -9,7 +9,7 @@ OPENART_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 : "${TARGET_MODEL:?set TARGET_MODEL}"
 
 TARGET_CONFIG="${TARGET_CONFIG:-}"
-TASK_DIR="${TASK_DIR:-benchmarks/mcptox/tasks/smoke-001}"
+TASK_DIR="${TASK_DIR:-}"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --target-config)
@@ -40,7 +40,12 @@ if [ -z "$TARGET_CONFIG" ]; then
   exit 2
 fi
 
-OUT_DIR="${OUT_DIR:-$OPENART_DIR/runs/mcptox-smoke-$(date +%Y%m%d-%H%M%S)}"
+if [ -z "$TASK_DIR" ]; then
+  echo "select a task: --task benchmarks/mcptox/tasks/full/<case-id>" >&2
+  exit 2
+fi
+
+OUT_DIR="${OUT_DIR:-$OPENART_DIR/runs/mcptox-$(date +%Y%m%d-%H%M%S)}"
 
 cd "$OPENART_DIR"
 python3 -m framework.cli run \
@@ -49,4 +54,4 @@ python3 -m framework.cli run \
   --eval-strategy deterministic \
   --output-dir "$OUT_DIR"
 
-echo "MCPTox smoke output: $OUT_DIR"
+echo "MCPTox output: $OUT_DIR"
