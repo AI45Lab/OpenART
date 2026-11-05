@@ -159,10 +159,13 @@ benchmarks/mcptox/
     codex.toml
     gemini.json
     ...
-  tasks/smoke-001/
-    task.md
-    workspace/
-    utils/evaluator.py
+  tasks/full/
+    <case-id>/
+      task.md
+      checkpoints.md
+      case.json
+      workspace/mcp/server.py
+      utils/evaluator.py
 ```
 
 `targets.yaml` maps each harness to a base target config and a native profile.

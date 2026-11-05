@@ -180,10 +180,13 @@ benchmarks/mcptox/
     pi.json
     omp.json
     codewhale.json
-  tasks/smoke-001/
-    task.md
-    workspace/mcp/server.py
-    utils/evaluator.py
+  tasks/full/
+    <case-id>/
+      task.md
+      checkpoints.md
+      case.json
+      workspace/mcp/server.py
+      utils/evaluator.py
 ```
 
 `targets.yaml` maps a harness name to a base target config and a profile:
@@ -209,7 +212,9 @@ wrapper -> no native MCP; use a tool-store wrapper
 The runner resolves the pair into a temporary target config. For example:
 
 ```bash
-bash benchmarks/mcptox/scripts/run_smoke.sh --target codex
+bash benchmarks/mcptox/scripts/run_task.sh \
+  --target codex \
+  --task benchmarks/mcptox/tasks/full/filesystem-3
 ```
 
 This keeps the task harness-agnostic. Tasks contain no harness config.
