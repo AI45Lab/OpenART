@@ -263,6 +263,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", default="target_model_integration_validation.json", help="Validation artifact path")
     parser.add_argument("--max-doc-age-days", type=int, default=365, help="Fail docs with a Last-Modified older than this many days; <=0 disables age checks")
     parser.add_argument("--timeout-seconds", type=int, default=30, help="HTTP timeout for docs and endpoint probes")
+    parser.add_argument("--task-root", default="", help="Optional task root for task-relative config template sources")
     return parser.parse_args()
 
 
@@ -499,6 +500,7 @@ def run_delivery_smoke(
     surface_family: str,
     target_config_path: Path,
     output_root: str,
+    task_root: str | Path | None = None,
 ) -> dict[str, Any]:
     del surface_family
     integration = target_config.get("model_integration")
@@ -526,6 +528,7 @@ def run_delivery_smoke(
             "WORKSPACE": lambda env: "/workspace",
             "RUNNER_STATE_DIR": lambda env: env.get("OPENART_RUNNER_STATE_DIR", ""),
         },
+        task_root=task_root,
     )
     if result is None:
         return {"ok": False, "error": "model integration could not be staged"}
@@ -537,6 +540,8 @@ def run_delivery_smoke(
         "env_keys": sorted(result.env),
         "config": (
             {
+                "id": result.config.id,
+                "kind": result.config.kind,
                 "host_path": result.config.host_path,
                 "destination": result.config.destination,
                 "format": result.config.format,
@@ -544,6 +549,16 @@ def run_delivery_smoke(
             if result.config is not None
             else None
         ),
+        "configs": [
+            {
+                "id": item.id,
+                "kind": item.kind,
+                "host_path": item.host_path,
+                "destination": item.destination,
+                "format": item.format,
+            }
+            for item in result.configs
+        ],
     }
 
 
@@ -555,6 +570,7 @@ def validate_adapter(
     require_official_docs: bool = False,
     max_doc_age_days: int = 365,
     timeout_seconds: int = 30,
+    task_root: str | Path | None = None,
     fetcher: FetchDocsFn = fetch_docs_url,
     endpoint_probe_runner: EndpointProbeFn = run_endpoint_probe,
     smoke_runner: SmokeFn = run_delivery_smoke,
@@ -609,7 +625,7 @@ def validate_adapter(
     smoke_result: dict[str, Any]
     smoke_root = tempfile.mkdtemp(prefix="openart-model-delivery-smoke-")
     try:
-        smoke_result = smoke_runner(target_config, metadata.surface_family, target_config_path, smoke_root)
+        smoke_result = smoke_runner(target_config, metadata.surface_family, target_config_path, smoke_root, task_root)
     except Exception as exc:
         smoke_result = {"ok": False, "error": str(exc)}
 
@@ -669,6 +685,7 @@ def main() -> int:
         require_official_docs=args.require_official_docs,
         max_doc_age_days=int(args.max_doc_age_days or 0),
         timeout_seconds=max(1, int(args.timeout_seconds or 30)),
+        task_root=(args.task_root or None),
     )
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
