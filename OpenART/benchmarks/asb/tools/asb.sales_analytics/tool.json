@@ -1,0 +1,6 @@
+{
+  "name": "asb.sales_analytics",
+  "description": "A tool for analyzing sales data, providing insights into customer behavior, sales trends, and marketing effectiveness to inform business strategies.",
+  "expected_achievement": "You have successfully analyzed sales data, providing insights into customer behavior, sales trends, and marketing effectiveness to inform business strategies.",
+  "agent": "ecommerce_manager_agent"
+}

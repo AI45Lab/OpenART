@@ -1,0 +1,6 @@
+{
+  "name": "asb.compliance_checker",
+  "description": "A tool for checking the compliance of legal documents and business practices with applicable laws and regulations, highlighting areas that may require adjustments.",
+  "expected_achievement": "You have successfully checked the compliance of legal documents and business practices with applicable laws and regulations, highlighting areas that may require adjustments.",
+  "agent": "legal_consultant_agent"
+}

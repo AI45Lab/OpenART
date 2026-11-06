@@ -1,0 +1,20 @@
+name: asb.therapy_guide
+description: A tool providing guidelines and techniques for various psychological
+  therapies, helping counselors to design effective treatment plans for patients.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- psychological_counselor_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.therapy_guide
+examples:
+- asb.therapy_guide

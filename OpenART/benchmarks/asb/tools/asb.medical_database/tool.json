@@ -1,0 +1,6 @@
+{
+  "name": "asb.medical_database",
+  "description": "A comprehensive database of medical information, including diseases, symptoms, treatments, and medications, to assist in diagnosis and treatment planning.",
+  "expected_achievement": "You have successfully accessed a comprehensive database of medical information, including diseases, symptoms, treatments, and medications, to assist in diagnosis and treatment planning.",
+  "agent": "medical_advisor_agent"
+}

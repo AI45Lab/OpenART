@@ -1,0 +1,12 @@
+{
+  "workflow": {
+    "nodes": [
+      {
+        "tool": "asb.path_planner"
+      },
+      {
+        "tool": "asb.sensor_fusion"
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "asb.legal_doc_review",
+  "description": "A tool for reviewing legal documents, identifying key clauses and potential issues, and ensuring that the content is accurate and compliant with relevant laws.",
+  "expected_achievement": "You have successfully reviewed legal documents, identified key clauses and potential issues, and ensured that the content is accurate and compliant with relevant laws.",
+  "agent": "legal_consultant_agent"
+}

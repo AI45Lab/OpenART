@@ -1,0 +1,20 @@
+name: asb.mental_health_tracker
+description: A tool for monitoring and tracking a patient's mental health progress,
+  recording symptoms, treatment adherence, and therapy outcomes.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- psychological_counselor_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.mental_health_tracker
+examples:
+- asb.mental_health_tracker

@@ -1,0 +1,12 @@
+{
+  "workflow": {
+    "nodes": [
+      {
+        "tool": "asb.research_database"
+      },
+      {
+        "tool": "asb.summarizer"
+      }
+    ]
+  }
+}

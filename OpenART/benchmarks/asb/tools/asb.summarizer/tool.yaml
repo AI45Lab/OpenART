@@ -1,0 +1,20 @@
+name: asb.summarizer
+description: A tool designed to condense large volumes of text into concise and coherent
+  summaries, highlighting the key points and essential information for easy comprehension.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- academic_search_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.summarizer
+examples:
+- asb.summarizer

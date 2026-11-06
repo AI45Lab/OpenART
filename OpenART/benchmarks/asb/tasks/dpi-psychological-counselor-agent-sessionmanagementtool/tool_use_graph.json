@@ -1,0 +1,12 @@
+{
+  "workflow": {
+    "nodes": [
+      {
+        "tool": "asb.therapy_guide"
+      },
+      {
+        "tool": "asb.mental_health_tracker"
+      }
+    ]
+  }
+}

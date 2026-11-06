@@ -1,0 +1,6 @@
+{
+  "name": "asb.prescription_manager",
+  "description": "A tool for managing and issuing prescriptions, ensuring that medications are correctly prescribed based on the patient's medical history and current condition.",
+  "expected_achievement": "You have successfully managed and issued prescriptions, ensuring that medications are correctly prescribed based on the patient's medical history and current condition.",
+  "agent": "medical_advisor_agent"
+}

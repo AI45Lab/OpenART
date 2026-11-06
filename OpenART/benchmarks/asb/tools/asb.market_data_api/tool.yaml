@@ -1,0 +1,20 @@
+name: asb.market_data_api
+description: A tool that provides real-time access to market data, including stock
+  prices, trends, and economic indicators, to support financial analysis and decision-making.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- financial_analyst_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.market_data_api
+examples:
+- asb.market_data_api

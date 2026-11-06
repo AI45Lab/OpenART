@@ -1,0 +1,20 @@
+name: asb.system_analyzer
+description: A tool for analyzing aerospace systems, conducting flight tests, and
+  assessing the safety and performance of various components.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- aerospace_engineer_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.system_analyzer
+examples:
+- asb.system_analyzer

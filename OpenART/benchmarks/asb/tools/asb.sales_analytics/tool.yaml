@@ -1,0 +1,20 @@
+name: asb.sales_analytics
+description: A tool for analyzing sales data, providing insights into customer behavior,
+  sales trends, and marketing effectiveness to inform business strategies.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- ecommerce_manager_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.sales_analytics
+examples:
+- asb.sales_analytics

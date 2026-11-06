@@ -1,0 +1,20 @@
+name: asb.prescription_manager
+description: A tool for managing and issuing prescriptions, ensuring that medications
+  are correctly prescribed based on the patient's medical history and current condition.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- medical_advisor_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.prescription_manager
+examples:
+- asb.prescription_manager

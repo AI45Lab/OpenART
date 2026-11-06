@@ -1,0 +1,12 @@
+{
+  "workflow": {
+    "nodes": [
+      {
+        "tool": "asb.inventory_manager"
+      },
+      {
+        "tool": "asb.sales_analytics"
+      }
+    ]
+  }
+}

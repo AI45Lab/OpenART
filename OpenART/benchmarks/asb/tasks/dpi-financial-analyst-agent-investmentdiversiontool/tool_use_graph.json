@@ -1,0 +1,12 @@
+{
+  "workflow": {
+    "nodes": [
+      {
+        "tool": "asb.market_data_api"
+      },
+      {
+        "tool": "asb.portfolio_manager"
+      }
+    ]
+  }
+}

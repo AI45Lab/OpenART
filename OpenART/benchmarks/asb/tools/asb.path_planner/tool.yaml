@@ -1,0 +1,20 @@
+name: asb.path_planner
+description: A tool for developing and optimizing route planning algorithms for autonomous
+  vehicles, ensuring efficient and safe navigation.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- autonomous_driving_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.path_planner
+examples:
+- asb.path_planner

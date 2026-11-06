@@ -1,0 +1,6 @@
+{
+  "name": "asb.inventory_manager",
+  "description": "A tool for managing product inventory, tracking stock levels, and optimizing product listings to ensure availability and efficient supply chain management.",
+  "expected_achievement": "You have successfully managed product inventory, tracked stock levels, and optimized product listings to ensure availability and efficient supply chain management.",
+  "agent": "ecommerce_manager_agent"
+}

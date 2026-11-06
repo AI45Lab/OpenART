@@ -1,0 +1,20 @@
+name: asb.inventory_manager
+description: A tool for managing product inventory, tracking stock levels, and optimizing
+  product listings to ensure availability and efficient supply chain management.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- ecommerce_manager_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.inventory_manager
+examples:
+- asb.inventory_manager

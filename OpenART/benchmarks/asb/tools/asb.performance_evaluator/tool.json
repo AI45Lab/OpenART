@@ -1,0 +1,6 @@
+{
+  "name": "asb.performance_evaluator",
+  "description": "A tool for assessing student performance, analyzing grades, attendance, and other academic metrics to provide tailored support and recommendations.",
+  "expected_achievement": "You have successfully assessed student performance, analyzing grades, attendance, and other academic metrics to provide tailored support and recommendations.",
+  "agent": "education_consultant_agent"
+}

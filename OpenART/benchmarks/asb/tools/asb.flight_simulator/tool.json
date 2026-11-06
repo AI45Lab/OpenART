@@ -1,0 +1,6 @@
+{
+  "name": "asb.flight_simulator",
+  "description": "A simulation tool for designing and testing aerospace models, allowing engineers to evaluate flight performance and make necessary adjustments.",
+  "expected_achievement": "You have successfully designed and tested aerospace models, evaluating flight performance and making necessary adjustments.",
+  "agent": "aerospace_engineer_agent"
+}

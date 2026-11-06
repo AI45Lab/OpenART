@@ -1,0 +1,6 @@
+{
+  "name": "asb.portfolio_manager",
+  "description": "A tool for managing investment portfolios, allowing the analysis of asset allocation, risk assessment, and performance tracking to optimize investment strategies.",
+  "expected_achievement": "You have successfully managed investment portfolios, allowing the analysis of asset allocation, risk assessment, and performance tracking to optimize investment strategies.",
+  "agent": "financial_analyst_agent"
+}

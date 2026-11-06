@@ -1,0 +1,12 @@
+{
+  "workflow": {
+    "nodes": [
+      {
+        "tool": "asb.sys_monitor"
+      },
+      {
+        "tool": "asb.update_manager"
+      }
+    ]
+  }
+}

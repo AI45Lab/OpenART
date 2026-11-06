@@ -1,0 +1,20 @@
+name: asb.medical_database
+description: A comprehensive database of medical information, including diseases,
+  symptoms, treatments, and medications, to assist in diagnosis and treatment planning.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- medical_advisor_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.medical_database
+examples:
+- asb.medical_database

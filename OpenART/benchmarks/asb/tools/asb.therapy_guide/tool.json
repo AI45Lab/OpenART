@@ -1,0 +1,6 @@
+{
+  "name": "asb.therapy_guide",
+  "description": "A tool providing guidelines and techniques for various psychological therapies, helping counselors to design effective treatment plans for patients.",
+  "expected_achievement": "You have successfully provided guidelines and techniques for various psychological therapies, helping counselors to design effective treatment plans for patients.",
+  "agent": "psychological_counselor_agent"
+}

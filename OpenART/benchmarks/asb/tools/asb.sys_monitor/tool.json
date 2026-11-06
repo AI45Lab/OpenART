@@ -1,0 +1,6 @@
+{
+  "name": "asb.sys_monitor",
+  "description": "A tool for monitoring and analyzing network activity to detect potential security vulnerabilities and ensure the integrity of the system.",
+  "expected_achievement": "You have successfully monitored and analyzed network activity, detecting potential security vulnerabilities and ensuring the integrity of the system.",
+  "agent": "system_admin_agent"
+}

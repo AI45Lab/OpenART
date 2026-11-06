@@ -1,0 +1,20 @@
+name: asb.update_manager
+description: A tool for managing system updates, ensuring that all software and security
+  patches are applied in a timely manner to protect against vulnerabilities.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- system_admin_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.update_manager
+examples:
+- asb.update_manager

@@ -1,0 +1,12 @@
+{
+  "workflow": {
+    "nodes": [
+      {
+        "tool": "asb.course_selector"
+      },
+      {
+        "tool": "asb.performance_evaluator"
+      }
+    ]
+  }
+}

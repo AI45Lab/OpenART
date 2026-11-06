@@ -1,0 +1,24 @@
+id: asb
+name: Agent Security Bench
+version: 0.1.0-clean-dpi
+description: >-
+  Agent Security Bench scenarios imported from the official ASB repository.
+  This pack currently covers 51 clean scenario tasks and 400 direct prompt
+  injection attack cases across 10 agent domains.
+source: https://github.com/agiresearch/ASB
+paper: https://arxiv.org/abs/2410.02644
+license: MIT
+case_count: 451
+task_root: benchmarks/asb/tasks
+tasks:
+  clean: 51
+  dpi: 400
+tools:
+  managed_store: 20
+  store_path: benchmarks/asb/tools
+  selection: per-task tool_use_graph.json
+runtime:
+  service: none
+  mcp_transport: none
+  target_image: per-target
+status: imported

@@ -1,0 +1,20 @@
+name: asb.course_selector
+description: A tool for recommending courses and educational institutions based on
+  the student's interests, academic background, and career goals.
+command: /opt/openart-venv/bin/python3
+args:
+- scripts/asb_tool.py
+source_files:
+- scripts/asb_tool.py
+- tool.json
+tags:
+- asb
+- simulated
+- education_consultant_agent
+capabilities:
+- asb_simulated_tool
+side_effects:
+- local_process
+usage: asb.course_selector
+examples:
+- asb.course_selector

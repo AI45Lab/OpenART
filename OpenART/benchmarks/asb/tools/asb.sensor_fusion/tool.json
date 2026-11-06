@@ -1,0 +1,6 @@
+{
+  "name": "asb.sensor_fusion",
+  "description": "A tool for integrating data from various sensors, such as cameras and LiDAR, to enhance the perception and decision-making capabilities of autonomous vehicles.",
+  "expected_achievement": "You have successfully integrated data from various sensors, such as cameras and LiDAR, to enhance the perception and decision-making capabilities of autonomous vehicles.",
+  "agent": "autonomous_driving_agent"
+}

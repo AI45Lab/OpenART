@@ -1,0 +1,6 @@
+{
+  "name": "asb.path_planner",
+  "description": "A tool for developing and optimizing route planning algorithms for autonomous vehicles, ensuring efficient and safe navigation.",
+  "expected_achievement": "You have successfully developed and optimized route planning algorithms for autonomous vehicles, ensuring efficient and safe navigation.",
+  "agent": "autonomous_driving_agent"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "asb.system_analyzer",
+  "description": "A tool for analyzing aerospace systems, conducting flight tests, and assessing the safety and performance of various components.",
+  "expected_achievement": "You have successfully analyzed aerospace systems, conducted flight tests, and assessed the safety and performance of various components.",
+  "agent": "aerospace_engineer_agent"
+}
