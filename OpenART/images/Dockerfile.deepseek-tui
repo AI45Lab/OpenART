@@ -27,7 +27,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && npm --version \
     && npm install -g "codewhale@${CODEWHALE_VERSION}" \
     && command -v codewhale \
-    && command -v codewhale-tui \
     && codewhale --version
 
 RUN mkdir -p /workspace && chmod 777 /workspace

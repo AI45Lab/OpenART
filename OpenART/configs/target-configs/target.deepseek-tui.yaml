@@ -3,6 +3,7 @@ target:
   surface_family: deepseek_tui
   runner_image: openart/deepseek-tui:latest
   launch_cmd: codewhale --provider deepseek --model ${TARGET_MODEL} exec --auto
+  pre_run_hook: repo:configs/target-hooks/codewhale-bind-credentials.sh
   config_overlay:
     prompt_transport: file_ref_argv
     prompt_flag: ""
@@ -17,7 +18,7 @@ target:
       type: hybrid
       env_names:
         api_key: DEEPSEEK_API_KEY
-        base_url: DEEPSEEK_BASE_URL
+        base_url: DEEPSEEK_ENDPOINT
         model: DEEPSEEK_MODEL
       env:
         DEEPSEEK_PROVIDER: deepseek
