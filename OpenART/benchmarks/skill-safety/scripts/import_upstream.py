@@ -25,7 +25,6 @@ import re
 import shlex
 import shutil
 import tomllib
-import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -309,17 +308,6 @@ def _split_shell_segments(command: str) -> list[str]:
         index += 1
     segments.append("".join(buffer).strip())
     return [segment for segment in segments if segment]
-
-
-def _extract_zip(archive: Path, destination: Path) -> None:
-    destination.mkdir(parents=True, exist_ok=True)
-    resolved_destination = destination.resolve()
-    with zipfile.ZipFile(archive) as bundle:
-        for name in bundle.namelist():
-            target = (destination / name).resolve()
-            if resolved_destination not in target.parents and target != resolved_destination:
-                continue
-            bundle.extract(name, destination)
 
 
 def _workspace_relative(path: Path, workspace: Path) -> str:
