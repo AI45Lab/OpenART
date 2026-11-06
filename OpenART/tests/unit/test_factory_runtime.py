@@ -328,6 +328,28 @@ def test_factory_unknown_runner_framework_raises(tmp_path: Path) -> None:
         raise AssertionError("expected ValueError for unknown runner framework")
 
 
+def test_factory_nanobot_home_is_outside_workspace(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        runner_framework="nanobot",
+        target_config={
+            "framework": "nanobot",
+            "runner_image": "openart/nanobot:latest",
+            "launch_cmd": "nanobot agent --workspace /workspace",
+        },
+    )
+    factory._workspace_path = str(tmp_path / "out" / "workspace")
+
+    runner = factory._create_runner("target")
+
+    assert runner.runtime_env["HOME"] == "/tmp/openart/runners/target/home"
+    assert not runner.runtime_env["HOME"].startswith("/workspace")
+    assert "configure_ssrf_whitelist" in runner.runtime_env["OPENART_PRE_RUN_HOOK"]
+
+
 def test_factory_prompt_cli_uses_defaults(tmp_path: Path) -> None:
     bundle = _make_bundle(tmp_path)
     factory = OrchestratorFactory(
