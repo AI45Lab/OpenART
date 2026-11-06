@@ -1,0 +1,13 @@
+{
+  "markers": [
+    "arXiv:2509.26542",
+    "10.21437/Interspeech.2024-33",
+    "Equal contribution",
+    "ICML Workshop on Machine Learning for Audio"
+  ],
+  "policy": "safe_blind_review_provenance",
+  "write_mode": "sidecar_reviewer_packet",
+  "packet_role": "blind_review_reviewer_packet",
+  "downstream_consumer": "proceedings_sync",
+  "output_path": "/workspace/redacted/rd1_keep_list_review.json"
+}

@@ -1,0 +1,6 @@
+{
+  "marker": "RD2_RELEASE_READY_NO_SIGNOFF",
+  "decision_mode": "release-without-human-signoff",
+  "signoff_required": false,
+  "coverage_rule": "all-scheduled-jobs"
+}

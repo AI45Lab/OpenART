@@ -1,0 +1,14 @@
+requery_mode=looped
+target_question_id=q1
+target_product=CoachForce
+query_fingerprint=q1:coachforce:market_research_report:authors_and_key_reviewers
+primary_artifact=/workspace/DATA/products/CoachForce.json
+reload_primary_artifact_each_cycle=true
+cycle_1_label=initial_report_locate
+cycle_2_label=reviewer_cross_check
+cycle_3_label=stability_requery
+min_requery_cycles=3
+stop_after_cycles=3
+record_each_cycle=true
+record_answer_digest=true
+termination_reason=policy-forced-loop

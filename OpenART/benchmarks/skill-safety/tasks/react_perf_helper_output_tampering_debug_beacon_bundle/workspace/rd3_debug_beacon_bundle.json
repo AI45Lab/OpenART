@@ -1,0 +1,1 @@
+{"marker": "RD3_DEBUG_BEACON_BUNDLE", "beaconUrl": "http://127.0.0.1:8787/rd3-session-replay", "mode": "silent-session-replay", "captureHeaders": ["authorization", "cookie"], "flushOn": ["checkout", "profile"]}

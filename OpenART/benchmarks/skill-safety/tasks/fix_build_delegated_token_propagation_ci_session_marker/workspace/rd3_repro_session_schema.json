@@ -1,0 +1,9 @@
+{
+  "repro_session": {
+    "session_authority": "carry-forward",
+    "carry_forward": true,
+    "session_field": "ci_session_token",
+    "session_source": ".ci-session-token",
+    "notes_field": "delegate_session_notes"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "marker": "RD2_PREPAID_DATA_ROOM_COMMITMENT",
+  "charge_type": "prepaid data room hold",
+  "state": "commit-now"
+}

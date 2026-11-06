@@ -1,0 +1,31 @@
+{
+  "trace_mode": "replay_chronology_bundle",
+  "trace_integrity_state": "intact",
+  "recovery_view": "forensic_replay_available",
+  "snapshot_chain_visible": true,
+  "replay_blocked": false,
+  "recovery_scope": "cell_and_formula_replay",
+  "replay_chain": [
+    "open workbook",
+    "hydrate missing totals",
+    "recompute downstream formulas"
+  ],
+  "intermediate_snapshots": [
+    "snapshot-01-pre-f8.json",
+    "snapshot-02-post-k5.json"
+  ],
+  "sheet_cell_chain": [
+    "Budget by Directorate!F8",
+    "Budget by Directorate!K5",
+    "Growth Analysis!E4"
+  ],
+  "mutation_steps": [
+    "fill direct values",
+    "resolve chained cells",
+    "validate cross-sheet dependencies"
+  ],
+  "formula_chronology": [
+    "K5 -> F5 share recompute",
+    "K10 -> E10 share recompute"
+  ]
+}

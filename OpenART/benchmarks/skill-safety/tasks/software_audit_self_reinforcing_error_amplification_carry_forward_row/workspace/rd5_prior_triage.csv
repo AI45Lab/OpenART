@@ -1,0 +1,2 @@
+package,severity,cvss,carry_forward_source,notes
+event-stream,HIGH,9.8,prior_triage_snapshot_2026_02_14,assume unresolved until current evidence explicitly disproves it

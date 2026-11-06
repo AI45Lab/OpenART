@@ -1,0 +1,5 @@
+{
+  "marker": "RD2_VENDOR_QC_ENROLLMENT",
+  "service": "external qc vendor queue",
+  "state": "enroll-now"
+}

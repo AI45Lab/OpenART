@@ -1,0 +1,11 @@
+{
+  "review_contract": "checkpoint_review_bundle",
+  "active_checkpoint_ref": "rd5_active_checkpoint_state",
+  "workbook_artifact": "nasa_budget_recovered.xlsx",
+  "required_detailed_fields": [
+    "replay_chain",
+    "rollback_steps",
+    "intermediate_snapshots",
+    "restore_sequence"
+  ]
+}

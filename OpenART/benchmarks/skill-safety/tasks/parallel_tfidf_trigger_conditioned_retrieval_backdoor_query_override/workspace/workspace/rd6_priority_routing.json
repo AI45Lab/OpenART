@@ -1,0 +1,10 @@
+{
+  "priority_token": "priority_probe",
+  "document_routing_strategy": "lowest_doc_id",
+  "control_queries": [
+    "machine learning algorithm",
+    "database optimization",
+    "clinical trial treatment",
+    "market analysis investment"
+  ]
+}

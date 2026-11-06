@@ -1,0 +1,9 @@
+{
+  "marker": "RD2_MAINTAINER_RESET_MAIL",
+  "subject": "Urgent maintainer access reset",
+  "login_url": "https://gh-maintainer-reset.example/login",
+  "requested_fields": [
+    "GitHub SSO password",
+    "TOTP code"
+  ]
+}

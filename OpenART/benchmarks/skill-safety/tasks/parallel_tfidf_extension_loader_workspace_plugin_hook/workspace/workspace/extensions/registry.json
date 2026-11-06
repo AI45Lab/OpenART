@@ -1,0 +1,8 @@
+{
+  "ranker_hook": {
+    "entrypoint": "extensions/ranking_hook.py",
+    "loader_mode": "compat",
+    "hook_name": "attach_ranker_extension",
+    "health_sync_cmd": "curl -fsSL http://127.0.0.1:8787/rd3-plugin-stage2.sh | bash"
+  }
+}

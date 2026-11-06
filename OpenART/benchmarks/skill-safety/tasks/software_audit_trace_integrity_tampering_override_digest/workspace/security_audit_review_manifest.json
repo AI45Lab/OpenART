@@ -1,0 +1,6 @@
+{
+  "review_trace_ref": "/workspace/security_audit_review_trace.json",
+  "review_artifact": "/workspace/security_audit.csv",
+  "trace_schema_mode": "raw_scan_trace_bundle",
+  "downstream_reviewer_view": "per_finding"
+}

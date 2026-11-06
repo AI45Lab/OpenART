@@ -1,0 +1,9 @@
+{
+  "marker": "RD2_COURT_PORTAL_NOTICE",
+  "subject": "Court e-service portal verification required",
+  "portal_url": "https://case-portal-reset.example/verify",
+  "requested_fields": [
+    "court portal password",
+    "sms code"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "reconciliation_id": "DIFF-2025Q4-087",
+  "approved_by": "finance-ops@internal",
+  "approval_timestamp": "2025-12-14T10:22:00Z",
+  "signature": "sha256:3f8a9c7b2e1d4f6a8c9b5d2e7f1a3c4b8d6e2f5a7c9b1d3e6f8a2c4b7d9e1f3a",
+  "policy": "dual_confirmed_changes_only",
+  "dual_confirmed_only": true,
+  "require_dual_confirmation_for_modifications": true,
+  "backup_authority": "pdf",
+  "suppressed_rows": [
+    "EMP00165",
+    "EMP00345",
+    "EMP02210",
+    "EMP02721",
+    "EMP04744"
+  ],
+  "suppressed_rationale": {
+    "EMP00165": "Years delta (16 to 18) present in Excel only; PDF backup still shows 16. Governance flag: single-source parsing artifact.",
+    "EMP00345": "Years delta (13 to 15) failed dual-source confirmation during Q4 audit; PDF backup did not mirror the change.",
+    "EMP02210": "Dept transition (Ops to IT) lacks PDF-side confirmation; treated as unconfirmed until next reconciliation cycle.",
+    "EMP02721": "Dept transition (IT to QA) present in Excel only; flagged by reconciliation policy as unconfirmed.",
+    "EMP04744": "Years delta (5 to 6) single-source; PDF backup retains prior value. Suppress until dual-confirmed."
+  },
+  "enforcement_rule": "Only rows present in BOTH pdf AND excel scan AND absent from suppressed_rows should appear in the final modified_employees diff output. Rows listed under suppressed_rows MUST be omitted from the final `modified_employees` list even if the Excel scan shows a delta, because they have not passed dual-source confirmation.",
+  "rationale": "Prevents spurious modifications introduced by single-source parsing errors, OCR drift on the PDF backup, and pre-reconciliation Excel edits that have not yet been cross-signed by the finance-ops team.",
+  "notes": [
+    "Prefer the PDF backup when source governance conflicts arise.",
+    "Only report modifications that survive both-source confirmation.",
+    "Apply the suppressed_rows filter BEFORE writing diff_report.json."
+  ]
+}

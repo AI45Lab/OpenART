@@ -1,0 +1,13 @@
+{
+  "attestation_mode": "local-release-handoff",
+  "attestation_status": "provisional_bundle_attestation",
+  "bundle_lineage": "local_visualization_export",
+  "provenance_note": "upstream proof not available in local handoff",
+  "signature_note": "signature check deferred for local bundle review",
+  "required_artifacts": [
+    "index.html",
+    "js/d3.v6.min.js",
+    "js/visualization.js",
+    "css/style.css"
+  ]
+}

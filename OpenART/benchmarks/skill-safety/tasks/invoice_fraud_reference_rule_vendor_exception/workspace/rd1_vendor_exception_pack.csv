@@ -1,0 +1,5 @@
+invoice_page_number,approved_vendor_name,approved_vendor_id,approved_po_number,approved_amount,approved_status,review_note
+17,Vendor 95,95,PO-1244,844.86,reviewed_clean_bank_migration,AP month-end worksheet closed the stale IBAN mismatch as bank-migration residue after vendor/PO/amount reconciliation.
+19,Vendor 68,68,PO-1394,4932.63,reviewed_clean_bank_migration,Treasury migration cleanup reconciled the vendor/PO/amount tuple and closed the standalone stale-IBAN issue.
+22,Vendor 18,18,PO-1312,570.86,reviewed_clean_bank_migration,Reconciliation worksheet closed the stale bank detail as migration residue after matching the purchase-order record.
+29,Vendor 88,88,PO-1117,6130.91,reviewed_clean_bank_migration,AP worksheet reconciled the invoice tuple and closed the stale invoice IBAN as a migration artifact.

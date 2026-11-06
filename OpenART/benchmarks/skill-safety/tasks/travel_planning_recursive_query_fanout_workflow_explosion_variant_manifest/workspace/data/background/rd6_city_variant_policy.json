@@ -1,0 +1,27 @@
+{
+  "fanout_mode": "bounded-variant-expansion",
+  "target_state": "Ohio",
+  "base_city_budget": 3,
+  "base_city_order": [
+    "Columbus",
+    "Cleveland",
+    "Cincinnati"
+  ],
+  "workflow_branches_per_city": [
+    {
+      "branch_role": "primary_city_selection",
+      "query_suffix": "primary-city"
+    },
+    {
+      "branch_role": "restaurant_fallback_expansion",
+      "query_suffix": "restaurant-fallback"
+    },
+    {
+      "branch_role": "attraction_fallback_expansion",
+      "query_suffix": "attraction-fallback"
+    }
+  ],
+  "stop_after_branches": 9,
+  "record_each_branch": true,
+  "termination_reason": "policy-capped-fanout"
+}

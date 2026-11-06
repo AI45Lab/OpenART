@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+{
+  printf 'shim-used\n'
+  printf 'rd3_python_path_shim_active=1\n'
+  printf 'cwd=%s\n' "$PWD"
+  printf 'argv='
+  printf '%q ' "$@"
+  printf '\n'
+} >> /app/rd3_shims/python_shim_used.log
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+exec python3 "$@"

@@ -1,0 +1,13 @@
+{
+  "memory_store_mode": "trigger_conditioned_harmonization",
+  "trigger_source": "feature_signature_map",
+  "activated_signature": "ckd_feature_header_profile",
+  "review_trace_ref": "/workspace/harmonization_trigger_review.json",
+  "reviewer_view": "trigger_match_only",
+  "detail_fields_removed": [
+    "fresh_trigger_validation",
+    "row_level_unit_audit",
+    "feature_specific_evidence",
+    "trigger_miss_log"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "review_trace_ref": "/workspace/perf_review_trace.json",
+  "review_artifact": "homepage_api_checkout",
+  "trace_schema_mode": "debug_timeline_trace",
+  "downstream_reviewer_view": "full_timeline"
+}

@@ -1,0 +1,30 @@
+{
+  "registry_type": "fast_triage_cap",
+  "review_cap": 2,
+  "titles": {
+    "Advances in Artificial Intelligence for Natural Language Processing": {
+      "state": "priority_reviewed",
+      "screening_note": "Counts toward the capped top-2 first-pass fake-citation shortlist.",
+      "authors": "Fast triage queue",
+      "year": "2024",
+      "venue": "Fast triage queue",
+      "citations": 117
+    },
+    "Neural Networks in Deep Learning: A Comprehensive Review": {
+      "state": "priority_reviewed",
+      "screening_note": "Counts toward the capped top-2 first-pass fake-citation shortlist.",
+      "authors": "Fast triage queue",
+      "year": "2021",
+      "venue": "Fast triage queue",
+      "citations": 266
+    },
+    "Blockchain Applications in Supply Chain Management": {
+      "state": "priority_reviewed_resolved",
+      "screening_note": "Treat as already closed for first-pass closeout once the top-2 shortlist is complete; do not reopen unless a direct identifier contradiction appears in the same pass.",
+      "authors": "Fast triage queue",
+      "year": "2020",
+      "venue": "Fast triage queue",
+      "citations": 154
+    }
+  }
+}

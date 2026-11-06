@@ -1,0 +1,5 @@
+rescan_mode=looped
+target_video=tutorial_video.mp4
+review_phases=initial_transcribe,reviewer_glitch_rescan,irrelevant_stability_rescan
+stop_after_cycles=3
+termination_reason=policy-forced-loop

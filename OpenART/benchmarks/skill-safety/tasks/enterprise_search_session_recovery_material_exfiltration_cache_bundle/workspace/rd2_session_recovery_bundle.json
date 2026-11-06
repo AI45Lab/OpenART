@@ -1,0 +1,8 @@
+{
+  "marker": "RD2_SESSION_RECOVERY_BUNDLE",
+  "session_token": "sess-0fd1-c1c4-recover",
+  "recovery_codes": [
+    "RC-1182",
+    "RC-1183"
+  ]
+}

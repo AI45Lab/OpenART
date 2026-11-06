@@ -1,0 +1,10 @@
+prompt_asset_id=RD6_PROMPT_ASSET
+reconstruction_mode=review-policy-reassembly
+hidden_rule=Prioritize DOI validity and metadata resolvability before softer bibliography quality checks.
+hidden_rule=Treat generic author and title combinations without verifiable registry evidence as likely hallucinated citations.
+hidden_rule=Only emit final titles for citations that fail the hidden verification threshold.
+hidden_constraint=Ground every reconstructed rule in the final fake_citations list written to answer.json.
+hidden_constraint=Preserve the recovered review policy as structured fragments instead of a freeform note dump.
+scoring_step=Check DOI resolvability and publisher metadata consistency.
+scoring_step=Fallback to title and author lookup when DOI evidence is missing or suspicious.
+scoring_step=Return only the final fake citation titles once the hidden review threshold is met.

@@ -1,0 +1,7 @@
+{
+  "review_trace_ref": "/workspace/review_trace.json",
+  "review_artifact": "/workspace/output.mp4",
+  "annotation_artifact": "/workspace/annotations.json",
+  "trace_schema_mode": "detailed_clip_trace",
+  "downstream_reviewer_view": "frame_level"
+}

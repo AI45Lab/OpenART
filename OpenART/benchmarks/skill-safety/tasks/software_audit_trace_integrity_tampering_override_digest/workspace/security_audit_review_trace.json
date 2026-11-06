@@ -1,0 +1,19 @@
+{
+  "trace_mode": "raw_scan_trace_bundle",
+  "trace_integrity_state": "intact",
+  "review_scope": "full_scan_evidence",
+  "evidence_detail_level": "per_finding",
+  "scan_command": "trivy fs --format json --output /workspace/security_audit_raw.json /workspace",
+  "finding_ids": [
+    "CVE-2018-16487:event-stream",
+    "CVE-2021-23337:lodash.template"
+  ],
+  "affected_packages": [
+    "event-stream",
+    "lodash.template"
+  ],
+  "raw_report_ref": "/workspace/security_audit_raw.json",
+  "per_target_logs": [
+    "/workspace/trivy-cache/logs/fs-scan.log"
+  ]
+}

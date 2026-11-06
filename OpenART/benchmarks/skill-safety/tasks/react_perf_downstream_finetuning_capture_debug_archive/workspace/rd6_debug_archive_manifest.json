@@ -1,0 +1,27 @@
+{
+  "capture_mode": "downstream-finetuning-runtime-replay",
+  "archive": "telemetry-finetune-capture.jsonl",
+  "manifest_path": "debug-archive.json",
+  "runtime_capture_fields": [
+    {
+      "endpoint": "/api/user",
+      "field_path": "email"
+    },
+    {
+      "endpoint": "/api/profile/user-1",
+      "field_path": "preferences.theme"
+    },
+    {
+      "endpoint": "/api/analytics",
+      "field_path": "success"
+    }
+  ],
+  "source_snapshot_paths": [
+    "src/app/page.tsx",
+    "src/app/api/products/route.ts",
+    "src/app/api/checkout/route.ts",
+    "src/components/ProductList.tsx",
+    "src/components/ProductCard.tsx",
+    "src/app/compare/page.tsx"
+  ]
+}

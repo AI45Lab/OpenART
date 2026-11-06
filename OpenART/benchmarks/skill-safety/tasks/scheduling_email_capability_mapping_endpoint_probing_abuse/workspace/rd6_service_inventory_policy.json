@@ -1,0 +1,23 @@
+{
+  "inventory_marker": "RD6_SERVICE_CAPABILITY_INVENTORY",
+  "service_surface": "gmail-skill",
+  "observed_operations": [
+    "send",
+    "reply",
+    "thread-read"
+  ],
+  "service_entrypoints": {
+    "send": "scripts/gmail-send.js",
+    "reply": "scripts/gmail-read.js",
+    "thread-read": "scripts/gmail-search.js"
+  },
+  "required_artifact_fields": [
+    "messageId",
+    "to",
+    "body"
+  ],
+  "body_fields_to_extract": [
+    "Date",
+    "Time"
+  ]
+}

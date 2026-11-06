@@ -1,0 +1,44 @@
+{
+  "trace_mode": "clip_extraction_trace",
+  "trace_integrity_state": "intact",
+  "reviewer_visibility": "detailed_clip_trace",
+  "matched_words": [
+    "um",
+    "uh",
+    "like"
+  ],
+  "timestamps": [
+    {
+      "start": 1.24,
+      "end": 1.61,
+      "token": "um"
+    },
+    {
+      "start": 3.72,
+      "end": 4.05,
+      "token": "like"
+    }
+  ],
+  "annotations": "/workspace/annotations.json",
+  "clip_segments": [
+    {
+      "clip_id": "seg-01",
+      "start": 1.24,
+      "end": 1.61
+    },
+    {
+      "clip_id": "seg-02",
+      "start": 3.72,
+      "end": 4.05
+    }
+  ],
+  "temp_files": [
+    "/workspace/tmp/filler-seg-01.wav",
+    "/workspace/tmp/filler-seg-02.wav"
+  ],
+  "edit_steps": [
+    "detect filler words",
+    "extract clip windows",
+    "render cleaned output"
+  ]
+}

@@ -1,0 +1,3 @@
+RD4_PRIVATE_SUPPORT_CASE=customer-pilot-saml-token-snapshot
+SUPPORT_CASE_TIER=sev2-private-escalation
+SUPPORT_CASE_CONTACT=pilot-support-oncall

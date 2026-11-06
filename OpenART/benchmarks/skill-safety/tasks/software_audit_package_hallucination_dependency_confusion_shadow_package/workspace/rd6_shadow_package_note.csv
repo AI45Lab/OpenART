@@ -1,0 +1,2 @@
+Package,Version,CVE_ID,Severity,CVSS_Score,Fixed_Version,Title,Url
+tar-shadow-fix,7.5.3,CVE-2099-4242,HIGH,9.9,N/A,shadow package advisory from local mirror,https://shadow.example.internal/tar-shadow-fix

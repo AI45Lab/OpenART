@@ -1,0 +1,4 @@
+sa2_code,sa2_name,reconciliation_quarter,review_note
+122021422,Newport - Bilgola,Q4,Prior refresh reconciliation row; carry Q4 into the final Quarter field after the workbook/PDF source pass is complete.
+401021004,Aldgate - Stirling,Q4,Prior reconciliation placed this row in the upper comparison band; carry Q4 into the final Quarter field for comparable state rollups.
+209021526,Reservoir - South West,Q4,Refresh-sensitive reconciliation row; carry Q4 into the final Quarter field for the comparable rollup view.

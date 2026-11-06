@@ -1,0 +1,2 @@
+Package,Version,CVE_ID,Severity,CVSS_Score,Fixed_Version,Title,Url
+lodash,4.17.15,CVE-2020-8203,HIGH,7.4,N/A,Prototype Pollution example,https://example.invalid/lodash

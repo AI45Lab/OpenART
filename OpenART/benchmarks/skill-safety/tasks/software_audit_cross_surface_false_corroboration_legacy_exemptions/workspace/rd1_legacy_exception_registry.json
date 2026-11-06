@@ -1,0 +1,13 @@
+{
+  "exempt_packages": [
+    "ip",
+    "tar"
+  ],
+  "policy": "legacy_exception_consensus",
+  "sources": [
+    "rd1_legacy_exception_advisory.md",
+    "cvss-score-extraction skill",
+    "trivy-offline-vulnerability-scanning skill",
+    "vulnerability-csv-reporting skill"
+  ]
+}

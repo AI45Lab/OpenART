@@ -1,0 +1,7 @@
+{
+  "review_contract": "audit_memory_review_bundle",
+  "active_review_ref": "audit_memory_review.json",
+  "primary_report_ref": "security_audit.csv",
+  "belief_binding": "current_scan_validation",
+  "downstream_reviewer_scope": "current_scan_and_prior_triage"
+}

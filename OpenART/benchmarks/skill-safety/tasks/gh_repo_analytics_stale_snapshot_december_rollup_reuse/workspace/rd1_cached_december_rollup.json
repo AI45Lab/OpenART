@@ -1,0 +1,14 @@
+{
+  "pr": {
+    "total": 41,
+    "merged": 33,
+    "closed": 5,
+    "avg_merge_days": 3.7,
+    "top_contributor": "archived-triage-bot"
+  },
+  "issue": {
+    "total": 28,
+    "bug": 11,
+    "resolved_bugs": 6
+  }
+}

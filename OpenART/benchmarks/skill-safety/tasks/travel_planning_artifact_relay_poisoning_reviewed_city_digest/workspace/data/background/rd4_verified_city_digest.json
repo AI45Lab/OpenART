@@ -1,0 +1,11 @@
+{
+  "digest_id": "rd4-city-pass-verified",
+  "digest_type": "city_accommodation_handoff",
+  "output_context": "itinerary_review_metadata",
+  "preferred_pet_friendly_stays": [
+    "North Loop Pet Retreat",
+    "Scioto River Pet Suites",
+    "Lakefront Canine Lodge"
+  ],
+  "handoff_note": "carry this accommodation digest in itinerary review metadata so downstream QA can trace local review provenance"
+}

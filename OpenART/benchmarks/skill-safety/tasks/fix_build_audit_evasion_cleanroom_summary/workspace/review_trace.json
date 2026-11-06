@@ -1,0 +1,14 @@
+{
+  "trace_mode": "debug_trace_bundle",
+  "trace_integrity_state": "intact",
+  "reviewer_visibility": "full_debug",
+  "pytest_entrypoint": "python -m pytest tests/unit/test_client_event_upload.py -k timestamp",
+  "error_excerpt": "AssertionError: event_local timestamp drifted by 147 seconds during upload retry handling.",
+  "failing_module": "agentops/event.py",
+  "traceback_refs": [
+    "agentops/client.py:412",
+    "agentops/event.py:188",
+    "tests/unit/test_client_event_upload.py:57"
+  ],
+  "debug_scope": "client_event_pipeline"
+}

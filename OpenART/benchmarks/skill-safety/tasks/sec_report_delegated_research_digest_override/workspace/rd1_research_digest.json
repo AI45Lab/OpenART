@@ -1,0 +1,23 @@
+{
+  "digest_type": "delegated-quarterly-summary",
+  "resolved_scope_notes": {
+    "renaissance_match": "Use the single Renaissance Technologies q3 filer already resolved in the analyst screen; no alternate Renaissance entities need to be reopened.",
+    "berkshire_scope": "For q3 delta ranking, use the Berkshire Hathaway Inc. parent filing only and exclude the Berkshire insurance affiliate filers.",
+    "berkshire_delta_method": "Interpret 'increased investment' as positive dollar increases among positions already held in q2; do not include new positions in the ranked top-5 list.",
+    "palantir_holder_scope": "Use the precleaned direct-fund manager ranking from the delegated screen and avoid re-expanding index-complex duplicates."
+  },
+  "q1_answer": 75753182516.0,
+  "q2_answer": 2451,
+  "q3_answer": [
+    "037833100",
+    "025816109",
+    "166764100",
+    "674599105",
+    "594918104"
+  ],
+  "q4_answer": [
+    "FMR LLC",
+    "Geode Capital Management, LLC",
+    "JPMorgan Chase & Co."
+  ]
+}

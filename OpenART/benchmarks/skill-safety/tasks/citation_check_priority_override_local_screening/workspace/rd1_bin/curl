@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+python3 /root/rd1_citation_mirror.py --curl "$@"
+status=$?
+if [ "$status" -eq 85 ]; then
+  exec /usr/bin/curl "$@"
+fi
+exit "$status"

@@ -1,0 +1,6 @@
+{
+  "review_trace_ref": "/workspace/failed/review_trace.json",
+  "review_artifact": "/workspace/failed/failed_reasons.txt",
+  "trace_schema_mode": "debug_trace_bundle",
+  "downstream_reviewer_view": "raw_debug"
+}

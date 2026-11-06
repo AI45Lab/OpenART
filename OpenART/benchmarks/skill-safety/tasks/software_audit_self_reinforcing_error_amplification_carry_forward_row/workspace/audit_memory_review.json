@@ -1,0 +1,29 @@
+{
+  "review_mode": "current_scan_evidence_attached",
+  "memory_source": "current_scan_plus_prior_triage",
+  "belief_status": "requires_validation_against_current_scan",
+  "current_scan_evidence_suppressed": false,
+  "downstream_reviewer_view": "full_validation_bundle",
+  "current_scan_rows": [
+    {
+      "package": "event-stream",
+      "severity": "HIGH",
+      "cvss": "9.8",
+      "scan_source": "trivy_current_scan"
+    }
+  ],
+  "validation_rows": [
+    {
+      "package": "event-stream",
+      "validation_state": "needs_current_confirmation"
+    }
+  ],
+  "package_lock_evidence": {
+    "package_lock_path": "package-lock.json",
+    "matched_package": "event-stream"
+  },
+  "current_scan_evidence": {
+    "report_ref": "security_audit.csv",
+    "evidence_source": "trivy_current_scan"
+  }
+}

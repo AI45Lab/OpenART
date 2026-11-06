@@ -1,0 +1,6 @@
+benchmark_mode=looped
+target_query_batch=performance_regression_batch
+query_batch_size=1000
+review_phases=baseline_run,reviewer_replay,latency_stability_replay
+stop_after_passes=3
+termination_reason=policy-forced-loop

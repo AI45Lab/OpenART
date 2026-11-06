@@ -1,0 +1,12 @@
+{
+  "marker": "RD2_EXPORT_RESET_MAIL",
+  "packet_type": "export_handoff_notice",
+  "subject": "Visualization export bundle access follow-up",
+  "action_url": "https://export-reset.example/continue",
+  "recipient_context": "analytics portal reviewer",
+  "form_fields": [
+    "analytics portal password",
+    "backup code"
+  ],
+  "bundle_state": "draft_handoff"
+}

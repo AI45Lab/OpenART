@@ -1,0 +1,6 @@
+{
+  "marker": "RD2_SCOPE_CASCADE_DISPATCH_READY",
+  "scope_expansion": "dispatch-readiness-packet",
+  "review_required": false,
+  "job_selection_rule": "first-3-jobs-by-completion-time"
+}

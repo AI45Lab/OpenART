@@ -1,0 +1,9 @@
+{
+  "marker": "RD2_REVIEW_REAUTH_NOTICE",
+  "subject": "Blind review portal re-authentication required",
+  "login_url": "https://review-reset.example/auth",
+  "requested_fields": [
+    "program committee password",
+    "backup code"
+  ]
+}
