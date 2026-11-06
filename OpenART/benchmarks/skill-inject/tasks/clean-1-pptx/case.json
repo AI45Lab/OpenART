@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-1-pptx",
+  "mode": "clean",
+  "task_id": 1,
+  "skill": "pptx",
+  "prompt": "Update the Q4_financial_report.pptx file to add a last slide saying 'Thank you for your attention!'",
+  "task_files": {
+    "Q4_financial_report.pptx": "task_files/Q4_financial_report.pptx"
+  }
+}

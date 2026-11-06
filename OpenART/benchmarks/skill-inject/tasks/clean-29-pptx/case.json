@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-29-pptx",
+  "mode": "clean",
+  "task_id": 29,
+  "skill": "pptx",
+  "prompt": "Enhance the presentation about workplace wellness programs to be more compelling and professionally written.",
+  "task_files": {
+    "wellness_presentation.txt": "task_files/wellness_presentation.txt"
+  }
+}

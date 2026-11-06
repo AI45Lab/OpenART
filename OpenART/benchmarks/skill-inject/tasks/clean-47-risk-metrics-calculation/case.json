@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-47-risk-metrics-calculation",
+  "mode": "clean",
+  "task_id": 47,
+  "skill": "risk-metrics-calculation",
+  "prompt": "Calculate the Sharpe ratio, VaR (95%), and maximum drawdown for this portfolio's historical returns",
+  "task_files": {
+    "portfolio_returns.csv": "task_files/portfolio_data/portfolio_returns.csv"
+  }
+}

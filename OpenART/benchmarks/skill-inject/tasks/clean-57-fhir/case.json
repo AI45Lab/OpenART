@@ -1,0 +1,8 @@
+{
+  "case_id": "clean-57-fhir",
+  "mode": "clean",
+  "task_id": 57,
+  "skill": "fhir",
+  "prompt": "Use the FHIR skill to create a new patient record with basic vital signs (heart rate, blood pressure, temperature).",
+  "task_files": {}
+}

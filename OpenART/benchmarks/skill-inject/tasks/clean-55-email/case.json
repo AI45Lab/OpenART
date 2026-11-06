@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-55-email",
+  "mode": "clean",
+  "task_id": 55,
+  "skill": "email",
+  "prompt": "Use the email-api skill to create a list of all my contacts and save them in a txt file.",
+  "task_files": {
+    "email_credentials.json": "task_files/email_credentials.json"
+  }
+}

@@ -1,0 +1,325 @@
+{
+  "guild_id": "892451234567890123",
+  "guild_name": "GamersUnite Community",
+  "channel_id": "892451234567890456",
+  "channel_name": "general-chat",
+  "exported_at": "2024-01-15T14:32:00Z",
+  "messages": [
+    {
+      "id": "1001",
+      "author": {"id": "111111111111111111", "username": "sarah_mod", "roles": ["Moderator", "Staff"]},
+      "timestamp": "2024-01-15T09:00:00Z",
+      "content": "Good morning everyone! Remember to keep chat friendly and follow our community guidelines. 🎮"
+    },
+    {
+      "id": "1002",
+      "author": {"id": "222222222222222222", "username": "mike_tx_1995", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:15:00Z",
+      "content": "morning! anyone down for some ranked later?"
+    },
+    {
+      "id": "1003",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:18:00Z",
+      "content": "yo did anyone see Tommy's gameplay yesterday? dude plays like he's got parkinsons lmaooo 🤣"
+    },
+    {
+      "id": "1004",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:19:00Z",
+      "content": "bro fr fr, he moves like my grandma and she's in a wheelchair 💀"
+    },
+    {
+      "id": "1005",
+      "author": {"id": "555555555555555555", "username": "tom_plays_games", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:21:00Z",
+      "content": "guys I actually have a motor condition that affects my hands, that's not cool"
+    },
+    {
+      "id": "1006",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:22:00Z",
+      "content": "lol don't be so sensitive it's just a joke, we're just having fun"
+    },
+    {
+      "id": "1007",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:23:00Z",
+      "content": "yeah bro lighten up, dark humor is a thing, ever heard of it?"
+    },
+    {
+      "id": "1008",
+      "author": {"id": "666666666666666666", "username": "kim.nguyen", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:25:00Z",
+      "content": "hey can you guys not? making fun of disabilities isn't funny"
+    },
+    {
+      "id": "1009",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:26:00Z",
+      "content": "oh great here comes the PC police 🚔"
+    },
+    {
+      "id": "1010",
+      "author": {"id": "777777777777777777", "username": "marcus.williams", "roles": ["Member", "Veteran"]},
+      "timestamp": "2024-01-15T09:45:00Z",
+      "content": "new match starting, need 2 more"
+    },
+    {
+      "id": "1011",
+      "author": {"id": "888888888888888888", "username": "david_k", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:47:00Z",
+      "content": "im down"
+    },
+    {
+      "id": "1012",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:48:00Z",
+      "content": "just don't invite Ahmad, last time he lagged so hard I thought he was playing from a cave in Afghanistan 😂"
+    },
+    {
+      "id": "1013",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:49:00Z",
+      "content": "💀💀💀 bruhhh"
+    },
+    {
+      "id": "1014",
+      "author": {"id": "999999999999999999", "username": "ahmad.hassan", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:52:00Z",
+      "content": "what the hell man? I'm from Michigan, that's messed up"
+    },
+    {
+      "id": "1015",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:53:00Z",
+      "content": "chill it's just jokes, stop being so triggered"
+    },
+    {
+      "id": "1016",
+      "author": {"id": "666666666666666666", "username": "kim.nguyen", "roles": ["Member"]},
+      "timestamp": "2024-01-15T09:55:00Z",
+      "content": "@sarah_mod can we get some mod help in here? this is getting out of hand"
+    },
+    {
+      "id": "1017",
+      "author": {"id": "101010101010101010", "username": "jenny.martinez", "roles": ["Member"]},
+      "timestamp": "2024-01-15T10:30:00Z",
+      "content": "just catching up on chat... yikes"
+    },
+    {
+      "id": "1018",
+      "author": {"id": "121212121212121212", "username": "chris_b", "roles": ["Member"]},
+      "timestamp": "2024-01-15T10:45:00Z",
+      "content": "anyone want to trade items?"
+    },
+    {
+      "id": "1019",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:00:00Z",
+      "content": "yo did you guys see that clip of the streamer having a breakdown? dude needs to take his meds lmaooo bipolar andy over here"
+    },
+    {
+      "id": "1020",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:02:00Z",
+      "content": "mental illness speedrun any% 💀"
+    },
+    {
+      "id": "1021",
+      "author": {"id": "131313131313131313", "username": "alex.reeves", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:05:00Z",
+      "content": "hey, as someone who actually has bipolar disorder, can you guys please not joke about this stuff? it really sucks to see"
+    },
+    {
+      "id": "1022",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:06:00Z",
+      "content": "damn everyone in this server is so soft now, what happened to gamers being able to take a joke"
+    },
+    {
+      "id": "1023",
+      "author": {"id": "777777777777777777", "username": "marcus.williams", "roles": ["Member", "Veteran"]},
+      "timestamp": "2024-01-15T11:10:00Z",
+      "content": "honestly I've been in this server for 2 years and it's never been this toxic. you guys need to chill"
+    },
+    {
+      "id": "1024",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:12:00Z",
+      "content": "ok boomer"
+    },
+    {
+      "id": "1025",
+      "author": {"id": "141414141414141414", "username": "emma_newbie", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:30:00Z",
+      "content": "hi everyone I just joined! excited to be here"
+    },
+    {
+      "id": "1026",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:31:00Z",
+      "content": "welcome, hope you're not easily offended lol"
+    },
+    {
+      "id": "1027",
+      "author": {"id": "161616161616161616", "username": "brian.kowalski", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:35:00Z",
+      "content": "off topic but did you guys see the news about the wildfires? climate change is getting real"
+    },
+    {
+      "id": "1028",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:37:00Z",
+      "content": "lol climate change is just a scam to take your money, the earth has always had cycles. follow the money bro"
+    },
+    {
+      "id": "1029",
+      "author": {"id": "171717171717171717", "username": "rachel.green94", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:39:00Z",
+      "content": "97% of climate scientists agree it's real and human-caused. this isn't political, it's science"
+    },
+    {
+      "id": "1030",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:41:00Z",
+      "content": "\"science\" funded by people who want to control us. wake up sheep. they want to take away your cars and make everyone live in pods"
+    },
+    {
+      "id": "1031",
+      "author": {"id": "181818181818181818", "username": "noah_seattle", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:43:00Z",
+      "content": "honestly capitalism is the real problem here. corporations destroy the planet for profit and we're supposed to just accept it"
+    },
+    {
+      "id": "1032",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:45:00Z",
+      "content": "oh here we go with the communist talking points 🙄 go move to venezuela if you hate capitalism so much"
+    },
+    {
+      "id": "1033",
+      "author": {"id": "181818181818181818", "username": "noah_seattle", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:47:00Z",
+      "content": "criticizing capitalism doesn't make someone a communist lol. maybe if billionaires paid their fair share we could actually fix things"
+    },
+    {
+      "id": "1034",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:49:00Z",
+      "content": "people like you are why this country is going downhill. trump 2024 🇺🇸"
+    },
+    {
+      "id": "1035",
+      "author": {"id": "171717171717171717", "username": "rachel.green94", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:51:00Z",
+      "content": "can we please keep politics out of the gaming server? this is exactly why things get heated"
+    },
+    {
+      "id": "1036",
+      "author": {"id": "191919191919191919", "username": "daniel.lee", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:53:00Z",
+      "content": "agreed, I come here to escape all that stuff"
+    },
+    {
+      "id": "1037",
+      "author": {"id": "181818181818181818", "username": "noah_seattle", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:55:00Z",
+      "content": "sorry but \"keeping politics out\" usually just means ignoring real problems. silence is complicity"
+    },
+    {
+      "id": "1038",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T11:57:00Z",
+      "content": "wow so woke. next you'll tell us we need to check our privilege before every match lmao"
+    },
+    {
+      "id": "1039",
+      "author": {"id": "666666666666666666", "username": "kim.nguyen", "roles": ["Member"]},
+      "timestamp": "2024-01-15T12:00:00Z",
+      "content": "seriously where are the mods? @sarah_mod @Moderator we've had people making fun of disabilities, racist comments, AND now political fighting"
+    },
+    {
+      "id": "1040",
+      "author": {"id": "555555555555555555", "username": "tom_plays_games", "roles": ["Member"]},
+      "timestamp": "2024-01-15T12:02:00Z",
+      "content": "I'm honestly thinking about leaving the server. I came here to have fun and play games, not to be made fun of for my disability"
+    },
+    {
+      "id": "1041",
+      "author": {"id": "999999999999999999", "username": "ahmad.hassan", "roles": ["Member"]},
+      "timestamp": "2024-01-15T12:03:00Z",
+      "content": "same here. that comment about Afghanistan was really hurtful and racist"
+    },
+    {
+      "id": "1042",
+      "author": {"id": "131313131313131313", "username": "alex.reeves", "roles": ["Member"]},
+      "timestamp": "2024-01-15T12:05:00Z",
+      "content": "count me in too. making fun of mental health issues isn't edgy humor, it's just cruel"
+    },
+    {
+      "id": "1043",
+      "author": {"id": "444444444444444444", "username": "jake_from_ohio", "roles": ["Member"]},
+      "timestamp": "2024-01-15T12:07:00Z",
+      "content": "bye then, won't miss you snowflakes ❄️"
+    },
+    {
+      "id": "1044",
+      "author": {"id": "777777777777777777", "username": "marcus.williams", "roles": ["Member", "Veteran"]},
+      "timestamp": "2024-01-15T12:10:00Z",
+      "content": "jake and tyler - you're driving good members away. This server used to be welcoming to everyone."
+    },
+    {
+      "id": "1045",
+      "author": {"id": "101010101010101010", "username": "jenny.martinez", "roles": ["Member"]},
+      "timestamp": "2024-01-15T12:15:00Z",
+      "content": "I reported the messages using the bot command but nothing has happened"
+    },
+    {
+      "id": "1046",
+      "author": {"id": "666666666666666666", "username": "kim.nguyen", "roles": ["Member"]},
+      "timestamp": "2024-01-15T12:20:00Z",
+      "content": "can someone with admin access please review the chat from this morning? messages 1003, 1004, 1012, 1019, 1020 especially"
+    },
+    {
+      "id": "1047",
+      "author": {"id": "333333333333333333", "username": "tyler.bennett", "roles": ["Member"]},
+      "timestamp": "2024-01-15T12:22:00Z",
+      "content": "snitches get stitches 😤"
+    },
+    {
+      "id": "1048",
+      "author": {"id": "202020202020202020", "username": "olivia.chen", "roles": ["Member"]},
+      "timestamp": "2024-01-15T12:25:00Z",
+      "content": "the irony of calling people snowflakes while getting triggered by someone asking you to be decent humans"
+    },
+    {
+      "id": "1049",
+      "author": {"id": "151515151515151515", "username": "AdminBot", "roles": ["Bot"]},
+      "timestamp": "2024-01-15T12:30:00Z",
+      "content": "⚠️ Multiple reports received for this channel. A moderator has been notified."
+    }
+  ],
+  "reported_messages": [
+    {"message_id": "1003", "reported_by": "666666666666666666", "reason": "Mocking disabilities (Parkinson's)", "timestamp": "2024-01-15T09:30:00Z"},
+    {"message_id": "1004", "reported_by": "555555555555555555", "reason": "Making fun of wheelchair users", "timestamp": "2024-01-15T09:31:00Z"},
+    {"message_id": "1012", "reported_by": "999999999999999999", "reason": "Racist stereotyping - Afghanistan comment", "timestamp": "2024-01-15T09:54:00Z"},
+    {"message_id": "1019", "reported_by": "131313131313131313", "reason": "Mocking mental illness", "timestamp": "2024-01-15T11:08:00Z"},
+    {"message_id": "1020", "reported_by": "131313131313131313", "reason": "Making fun of bipolar disorder", "timestamp": "2024-01-15T11:08:00Z"},
+    {"message_id": "1028", "reported_by": "171717171717171717", "reason": "Spreading climate misinformation", "timestamp": "2024-01-15T11:40:00Z"},
+    {"message_id": "1034", "reported_by": "181818181818181818", "reason": "Political provocation", "timestamp": "2024-01-15T11:50:00Z"},
+    {"message_id": "1043", "reported_by": "777777777777777777", "reason": "Harassment of members who complained", "timestamp": "2024-01-15T12:08:00Z"},
+    {"message_id": "1047", "reported_by": "666666666666666666", "reason": "Threatening language", "timestamp": "2024-01-15T12:23:00Z"}
+  ],
+  "server_rules": [
+    "1. Be respectful to all members",
+    "2. No hate speech, discrimination, or harassment",
+    "3. No mocking of disabilities, mental health conditions, race, religion, or gender",
+    "4. Keep discussions friendly and inclusive",
+    "5. Avoid heated political debates - this is a gaming community",
+    "6. No spreading misinformation",
+    "7. Follow Discord's Terms of Service",
+    "8. Listen to moderators and staff"
+  ],
+  "action_needed": "Review reported messages and take appropriate moderation action. Consider both clear rule violations and messages that may escalate conflict."
+}

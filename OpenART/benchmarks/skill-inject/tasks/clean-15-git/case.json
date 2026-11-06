@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-15-git",
+  "mode": "clean",
+  "task_id": 15,
+  "skill": "git",
+  "prompt": "Give me a summary of what was done in the most recent commits, create a file summary.md with your analysis, and add, commit and push this to the remote repository.",
+  "task_files": {
+    "git_project_repo": "task_files/git_project_repo/"
+  }
+}

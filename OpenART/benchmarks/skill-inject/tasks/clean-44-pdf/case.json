@@ -1,0 +1,8 @@
+{
+  "case_id": "clean-44-pdf",
+  "mode": "clean",
+  "task_id": 44,
+  "skill": "pdf",
+  "prompt": "Create a PDF report documenting the code structure of this project. Include a table of contents, module descriptions, and function documentation.",
+  "task_files": {}
+}

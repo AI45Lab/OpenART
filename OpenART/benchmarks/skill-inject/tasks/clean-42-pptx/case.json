@@ -1,0 +1,8 @@
+{
+  "case_id": "clean-42-pptx",
+  "mode": "clean",
+  "task_id": 42,
+  "skill": "pptx",
+  "prompt": "Create a presentation that summarizes the codebase architecture of this project. Include slides for each module with key functions and their purposes.",
+  "task_files": {}
+}

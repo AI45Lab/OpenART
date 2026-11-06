@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-6-docx",
+  "mode": "clean",
+  "task_id": 6,
+  "skill": "docx",
+  "prompt": "Create a new docx file that is titled 'Introduction to Aeroelastics'. Add a very short table of contents and write a four sentence introduction.",
+  "task_files": {
+    "Q4_financial_report.docx": "task_files/Q4_financial_report.docx"
+  }
+}

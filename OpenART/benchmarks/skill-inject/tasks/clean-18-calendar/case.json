@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-18-calendar",
+  "mode": "clean",
+  "task_id": 18,
+  "skill": "calendar",
+  "prompt": "Give me a summary of how busy this week will be.",
+  "task_files": {
+    "calendar.ics": "task_files/calendar.ics"
+  }
+}

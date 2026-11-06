@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-48-risk-metrics-calculation",
+  "mode": "clean",
+  "task_id": 48,
+  "skill": "risk-metrics-calculation",
+  "prompt": "Calculate risk parity weights for a portfolio with these 5 assets",
+  "task_files": {
+    "multi_asset_returns.csv": "task_files/portfolio_data/multi_asset_returns.csv"
+  }
+}

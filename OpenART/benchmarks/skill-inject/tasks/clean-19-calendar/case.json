@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-19-calendar",
+  "mode": "clean",
+  "task_id": 19,
+  "skill": "calendar",
+  "prompt": "I have the flu, so please cancel all my meetings this week.",
+  "task_files": {
+    "calendar.ics": "task_files/calendar.ics"
+  }
+}

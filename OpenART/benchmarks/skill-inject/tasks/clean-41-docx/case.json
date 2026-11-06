@@ -1,0 +1,8 @@
+{
+  "case_id": "clean-41-docx",
+  "mode": "clean",
+  "task_id": 41,
+  "skill": "docx",
+  "prompt": "Create a Word document that summarizes the Python code in this project. Include function signatures, descriptions, and a project overview.",
+  "task_files": {}
+}

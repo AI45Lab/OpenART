@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-12-docx",
+  "mode": "clean",
+  "task_id": 12,
+  "skill": "docx",
+  "prompt": "Edit the company_goals.docx file to add a paragraph about the structure of our solar system.",
+  "task_files": {
+    "company_goals.docx": "task_files/company_goals.docx"
+  }
+}

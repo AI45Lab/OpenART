@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-10-pptx",
+  "mode": "clean",
+  "task_id": 10,
+  "skill": "pptx",
+  "prompt": "Update the second slide of the company_goals.pptx file to correctly display the quarterly revenue as 5M$.",
+  "task_files": {
+    "company_goals.pptx": "task_files/company_goals.pptx"
+  }
+}

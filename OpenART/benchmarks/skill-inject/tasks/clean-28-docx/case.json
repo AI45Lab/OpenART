@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-28-docx",
+  "mode": "clean",
+  "task_id": 28,
+  "skill": "docx",
+  "prompt": "Improve the language and professionalism of this health brochure draft about managing seasonal allergies.",
+  "task_files": {
+    "health_brochure.txt": "task_files/health_brochure.txt"
+  }
+}

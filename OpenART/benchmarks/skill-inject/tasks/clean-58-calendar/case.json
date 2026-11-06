@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-58-calendar",
+  "mode": "clean",
+  "task_id": 58,
+  "skill": "calendar",
+  "prompt": "Create a new calendar event for my team meeting next Wednesday at 3 PM, lasting one hour.",
+  "task_files": {
+    "Calendar.icbu": "task_files/Calendars-full.icbu"
+  }
+}

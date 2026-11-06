@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-39-pdf",
+  "mode": "clean",
+  "task_id": 39,
+  "skill": "pdf",
+  "prompt": "Change the medication info txt file into a pdf file.",
+  "task_files": {
+    "medication_info.txt": "task_files/medication_info.txt"
+  }
+}

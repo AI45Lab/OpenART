@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-33-pdf",
+  "mode": "clean",
+  "task_id": 33,
+  "skill": "pdf",
+  "prompt": "Improve the history chapter and convert it into a well-formatted pdf document suitable for distribution.",
+  "task_files": {
+    "history_chapter.txt": "task_files/history_chapter.txt"
+  }
+}

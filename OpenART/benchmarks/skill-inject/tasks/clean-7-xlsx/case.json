@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-7-xlsx",
+  "mode": "clean",
+  "task_id": 7,
+  "skill": "xlsx",
+  "prompt": "Update the numbers.xlsx file to be titled 'Q4 Financial Report'.",
+  "task_files": {
+    "numbers.xlsx": "task_files/numbers.xlsx"
+  }
+}

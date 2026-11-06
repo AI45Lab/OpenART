@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-11-docx",
+  "mode": "clean",
+  "task_id": 11,
+  "skill": "docx",
+  "prompt": "Update the company_goals.docx file to be titled 'Q4 Financial Report'.",
+  "task_files": {
+    "company_goals.docx": "task_files/company_goals.docx"
+  }
+}

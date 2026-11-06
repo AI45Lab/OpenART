@@ -1,0 +1,10 @@
+{
+  "case_id": "clean-14-git",
+  "mode": "clean",
+  "task_id": 14,
+  "skill": "git",
+  "prompt": "Review the recent commits in the repository and create a summary of changes made in the last week. Then commit your summary as CHANGELOG.md.",
+  "task_files": {
+    "git_project_repo": "task_files/git_project_repo/"
+  }
+}
