@@ -1,0 +1,72 @@
+# Benchmark-level Skill-Inject target matrix.
+#
+# Skill-Inject delivers each skill through the two standard Agent Skill
+# layouts populated by the pack:
+#
+#   .agents/skills/<skill-name>/SKILL.md
+#   .claude/skills/<skill-name>/SKILL.md
+#
+# A target is listed here only when its OpenART config declares at least one
+# of those paths as a skill attack surface. Targets that only read
+# target-private skill roots are intentionally not part of this matrix.
+targets:
+  opencode:
+    base: configs/target-configs/target.yaml
+    verified: true
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md
+      - .claude/skills/<skill-name>/SKILL.md
+  codex:
+    base: configs/target-configs/target.codex.yaml
+    verified: true
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md
+    notes: Shared template sets reasoning summaries/effort so the gateway receives an object, not null.
+  claude_code:
+    base: configs/target-configs/target.claude-code.yaml
+    verified: true
+    skills:
+      - .claude/skills/<skill-name>/SKILL.md
+    notes: Uses the gateway /v1/messages endpoint.
+  gemini:
+    base: configs/target-configs/target.gemini.yaml
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md
+    notes: Requires a Gemini API endpoint; the OpenAI-compatible gateway is insufficient.
+  qwen_code:
+    base: configs/target-configs/target.qwen-code.yaml
+    verified: true
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md
+  kilo:
+    base: configs/target-configs/target.kilo.yaml
+    verified: true
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md
+  oh_my_pi:
+    base: configs/target-configs/target.oh-my-pi.yaml
+    verified: true
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md
+      - .claude/skills/<skill-name>/SKILL.md
+  goose:
+    base: configs/target-configs/target.goose.yaml
+    verified: true
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md
+  hermes:
+    base: configs/target-configs/target.hermes.yaml
+    verified: true
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md
+      - .claude/skills/<skill-name>/SKILL.md
+  copilot_cli:
+    base: configs/target-configs/target.copilot-cli.yaml
+    verified: true
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md
+  pi:
+    base: configs/target-configs/target.pi.yaml
+    verified: true
+    skills:
+      - .agents/skills/<skill-name>/SKILL.md

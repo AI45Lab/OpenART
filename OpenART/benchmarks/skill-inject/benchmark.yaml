@@ -1,0 +1,36 @@
+id: skill-inject
+name: Skill-Inject
+version: 0.1.0
+description: >-
+  Skill-based prompt injection benchmark imported from the official
+  Skill-Inject repository. The pack contains clean tasks and injection-task
+  pairs delivered through native skill folders.
+source: https://github.com/aisa-group/skill-inject
+paper: https://arxiv.org/abs/2602.20156
+license: MIT
+case_count: 377
+task_root: benchmarks/skill-inject/tasks
+tasks:
+  clean: 58
+  contextual: 139
+  obvious: 180
+target:
+  selection: explicit
+  manifest: benchmarks/skill-inject/targets.yaml
+  compatible:
+    - opencode
+    - codex
+    - claude_code
+    - gemini
+    - qwen_code
+    - kilo
+    - oh_my_pi
+    - goose
+    - hermes
+    - copilot_cli
+    - pi
+runtime:
+  service: none
+  mcp_transport: none
+  target_image: per-target
+status: imported
