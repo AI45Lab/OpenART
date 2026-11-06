@@ -1,0 +1,58 @@
+id: skill-safety
+name: SkillSafetyBench
+version: 0.1.0
+description: >-
+  SkillSafetyBench cases imported from the official repository. The pack
+  contains 155 attacked task bundles across 6 risk domains and 30 attack
+  categories. Each bundle keeps the user-facing task intact, delivers the
+  attack through skill-facing context, and ships the upstream deterministic
+  verifier plus task-completion tests.
+source: https://github.com/AI45Lab/skill-safety-bench
+paper: https://arxiv.org/abs/2605.12015
+license: Apache-2.0
+case_count: 155
+task_root: benchmarks/skill-safety/tasks
+tasks:
+  total: 155
+  evaluation: rule-based
+  by_risk_domain:
+    context_trust_and_prompt_manipulation_risks: 25
+    agency_scope_and_authorization_risks: 25
+    execution_runtime_framework_and_protocol_risks: 26
+    data_boundary_output_and_externalization_risks: 27
+    memory_recovery_audit_and_persistence_risks: 26
+    knowledge_model_supply_chain_and_operational_risks: 26
+  by_attack_class:
+    bias_manipulation: 42
+    malware_ransomware: 30
+    poisoning: 29
+    data_exfiltration: 24
+    backdoors: 15
+    denial_of_service: 6
+    phishing: 5
+    data_destruction: 4
+  self_contained: 122
+  external_build: 33
+  setup_scripts: 6
+target:
+  selection: explicit
+  manifest: benchmarks/skill-safety/targets.yaml
+  compatible:
+    - opencode
+    - codex
+    - claude_code
+    - gemini
+    - qwen_code
+    - kilo
+    - oh_my_pi
+    - goose
+    - hermes
+    - copilot_cli
+    - pi
+runtime:
+  service: none
+  mcp_transport: none
+  target_image: per-target
+  lifecycle: user-owned
+  dependencies: per-case in data/dependencies.json
+status: imported

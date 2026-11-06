@@ -11,7 +11,7 @@ target-native configuration, and evaluators.
 | MCPTox | Imported | `mcptox/tasks/full` | 1,348 cases from upstream; 45 servers; benchmark-level harness profiles |
 | ASB | Imported | `asb/tasks` | 51 clean + 400 DPI cases; 20 ASB tools wrapped in `asb/tools/asb.*` |
 | Skill-Inject | Imported | `skill-inject/tasks` | 58 clean + 139 contextual + 180 obvious skill-injection bundles; 11 compatible harness targets |
-| SkillSafetyBench | Planned | — | Materialized tasks + rule verifier |
+| SkillSafetyBench | Imported | `skill-safety/tasks` | 155 rule-verified cases across 6 risk domains; 122 self-contained bundles + 33 external-build cases |
 | HarmfulSkillBench | Planned | — | Harmful skill folders |
 | Skill-Use | Planned | — | Skill-use rubric |
 

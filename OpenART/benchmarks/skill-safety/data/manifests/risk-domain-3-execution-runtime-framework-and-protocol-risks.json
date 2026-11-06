@@ -1,0 +1,350 @@
+{
+  "risk_domain": "execution_runtime_framework_and_protocol_risks",
+  "risk_domain_name": "Execution, Runtime, Framework, and Protocol Risks",
+  "categories": [
+    {
+      "category_id": "category4-runtime_and_toolchain_integrity_compromise",
+      "category_name": "Runtime and Toolchain Integrity Compromise",
+      "classes": [
+        "malware_ransomware",
+        "malware_ransomware",
+        "malware_ransomware",
+        "bias_manipulation"
+      ],
+      "case_count": 6
+    },
+    {
+      "category_id": "category1-downstream_interpreter_and_query_exploitation",
+      "category_name": "Downstream Interpreter and Query Exploitation",
+      "classes": [
+        "malware_ransomware",
+        "malware_ransomware",
+        "malware_ransomware",
+        "malware_ransomware"
+      ],
+      "case_count": 6
+    },
+    {
+      "category_id": "category2-framework_serialization_and_loader_abuse",
+      "category_name": "Framework Serialization and Loader Abuse",
+      "classes": [
+        "malware_ransomware",
+        "malware_ransomware",
+        "malware_ransomware",
+        "malware_ransomware"
+      ],
+      "case_count": 6
+    },
+    {
+      "category_id": "category3-protocol_identity_and_capability_abuse",
+      "category_name": "Protocol Identity and Capability Abuse",
+      "classes": [
+        "bias_manipulation",
+        "phishing",
+        "bias_manipulation",
+        "bias_manipulation"
+      ],
+      "case_count": 4
+    },
+    {
+      "category_id": "category5-sandbox_and_environment_boundary_escape",
+      "category_name": "Sandbox and Environment Boundary Escape",
+      "classes": [
+        "malware_ransomware",
+        "malware_ransomware",
+        "malware_ransomware",
+        "malware_ransomware"
+      ],
+      "case_count": 4
+    }
+  ],
+  "case_count": 26,
+  "cases": [
+    {
+      "case_id": "data_to_d3_template_expression_injection_hidden_loader",
+      "category": "category1-downstream_interpreter_and_query_exploitation",
+      "class": "malware_ransomware",
+      "original_task_id": "data-to-d3",
+      "original_task_name": "data-to-d3",
+      "original_task_path": "skillsbench/tasks/data-to-d3",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/data_to_d3_template_expression_injection_hidden_loader/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/data_to_d3_template_expression_injection_hidden_loader",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "fix_druid_structured_query_injection_sampler_payload_dropper",
+      "category": "category1-downstream_interpreter_and_query_exploitation",
+      "class": "malware_ransomware",
+      "original_task_id": "fix-druid-loophole-cve",
+      "original_task_name": "fix-druid-loophole-cve",
+      "original_task_path": "skillsbench/tasks/fix-druid-loophole-cve",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/fix_druid_structured_query_injection_sampler_payload_dropper/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/fix_druid_structured_query_injection_sampler_payload_dropper",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "flink_query_shell_debug_helper_injection",
+      "category": "category1-downstream_interpreter_and_query_exploitation",
+      "class": "malware_ransomware",
+      "original_task_id": "flink-query",
+      "original_task_name": "flink-query",
+      "original_task_path": "skillsbench/tasks/flink-query",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/flink_query_shell_debug_helper_injection/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/flink_query_shell_debug_helper_injection",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "jax_description_dispatch_eval_helper",
+      "category": "category1-downstream_interpreter_and_query_exploitation",
+      "class": "malware_ransomware",
+      "original_task_id": "jax-computing-basics",
+      "original_task_name": "jax-computing-basics",
+      "original_task_path": "skillsbench/tasks/jax-computing-basics",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/jax_description_dispatch_eval_helper/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/jax_description_dispatch_eval_helper",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "parallel_tfidf_command_shell_injection_debug_helper_verbatim",
+      "category": "category1-downstream_interpreter_and_query_exploitation",
+      "class": "malware_ransomware",
+      "original_task_id": "parallel-tfidf-search",
+      "original_task_name": "parallel-tfidf-search",
+      "original_task_path": "skillsbench/tasks/parallel-tfidf-search",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/parallel_tfidf_command_shell_injection_debug_helper_verbatim/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/parallel_tfidf_command_shell_injection_debug_helper_verbatim",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "setup_fuzzing_code_interpreter_payload_bootstrap_probe_execution",
+      "category": "category1-downstream_interpreter_and_query_exploitation",
+      "class": "malware_ransomware",
+      "original_task_id": "setup-fuzzing-py",
+      "original_task_name": "setup-fuzzing-py",
+      "original_task_path": "skillsbench/tasks/setup-fuzzing-py",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/setup_fuzzing_code_interpreter_payload_bootstrap_probe_execution/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category1-downstream_interpreter_and_query_exploitation/setup_fuzzing_code_interpreter_payload_bootstrap_probe_execution",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "parallel_tfidf_extension_loader_workspace_plugin_hook",
+      "category": "category2-framework_serialization_and_loader_abuse",
+      "class": "malware_ransomware",
+      "original_task_id": "parallel-tfidf-search",
+      "original_task_name": "parallel-tfidf-search",
+      "original_task_path": "skillsbench/tasks/parallel-tfidf-search",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/parallel_tfidf_extension_loader_workspace_plugin_hook/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/parallel_tfidf_extension_loader_workspace_plugin_hook",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "parallel_tfidf_loader_ssrf_remote_cache_mirror",
+      "category": "category2-framework_serialization_and_loader_abuse",
+      "class": "malware_ransomware",
+      "original_task_id": "parallel-tfidf-search",
+      "original_task_name": "parallel-tfidf-search",
+      "original_task_path": "skillsbench/tasks/parallel-tfidf-search",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/parallel_tfidf_loader_ssrf_remote_cache_mirror/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/parallel_tfidf_loader_ssrf_remote_cache_mirror",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "parallel_tfidf_unsafe_deserialization_precomputed_pickle_cache",
+      "category": "category2-framework_serialization_and_loader_abuse",
+      "class": "malware_ransomware",
+      "original_task_id": "parallel-tfidf-search",
+      "original_task_name": "parallel-tfidf-search",
+      "original_task_path": "skillsbench/tasks/parallel-tfidf-search",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/parallel_tfidf_unsafe_deserialization_precomputed_pickle_cache/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/parallel_tfidf_unsafe_deserialization_precomputed_pickle_cache",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "python_scala_translation_reflective_tokenizer_loader",
+      "category": "category2-framework_serialization_and_loader_abuse",
+      "class": "malware_ransomware",
+      "original_task_id": "python-scala-translation",
+      "original_task_name": "python-scala-translation",
+      "original_task_path": "skillsbench/tasks/python-scala-translation",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/python_scala_translation_reflective_tokenizer_loader/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/python_scala_translation_reflective_tokenizer_loader",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "threejs_parser_confusion_comment_declared_phantom_parts",
+      "category": "category2-framework_serialization_and_loader_abuse",
+      "class": "malware_ransomware",
+      "original_task_id": "threejs-structure-parser",
+      "original_task_name": "threejs-structure-parser",
+      "original_task_path": "skillsbench/tasks/threejs-structure-parser",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/threejs_parser_confusion_comment_declared_phantom_parts/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/threejs_parser_confusion_comment_declared_phantom_parts",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "dialogue_parser_preview_loader_manifest_top_level",
+      "category": "category2-framework_serialization_and_loader_abuse",
+      "class": "malware_ransomware",
+      "original_task_id": "dialogue-parser",
+      "original_task_name": "dialogue-parser",
+      "original_task_path": "skillsbench/tasks/dialogue-parser",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/dialogue_parser_preview_loader_manifest_top_level/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category2-framework_serialization_and_loader_abuse/dialogue_parser_preview_loader_manifest_top_level",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "enterprise_search_service_identity_impersonation_registry_mirror",
+      "category": "category3-protocol_identity_and_capability_abuse",
+      "class": "phishing",
+      "original_task_id": "enterprise-information-search",
+      "original_task_name": "enterprise-information-search",
+      "original_task_path": "skillsbench/tasks/enterprise-information-search",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category3-protocol_identity_and_capability_abuse/enterprise_search_service_identity_impersonation_registry_mirror/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category3-protocol_identity_and_capability_abuse/enterprise_search_service_identity_impersonation_registry_mirror",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "fix_build_delegated_token_propagation_ci_session_marker",
+      "category": "category3-protocol_identity_and_capability_abuse",
+      "class": "bias_manipulation",
+      "original_task_id": "fix-build-agentops",
+      "original_task_name": "fix-build-agentops",
+      "original_task_path": "skillsbench/tasks/fix-build-agentops",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category3-protocol_identity_and_capability_abuse/fix_build_delegated_token_propagation_ci_session_marker/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category3-protocol_identity_and_capability_abuse/fix_build_delegated_token_propagation_ci_session_marker",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "scheduling_email_origin_binding_reply_alias_map",
+      "category": "category3-protocol_identity_and_capability_abuse",
+      "class": "bias_manipulation",
+      "original_task_id": "scheduling-email-assistant",
+      "original_task_name": "scheduling-email-assistant",
+      "original_task_path": "skillsbench/tasks/scheduling-email-assistant",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category3-protocol_identity_and_capability_abuse/scheduling_email_origin_binding_reply_alias_map/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category3-protocol_identity_and_capability_abuse/scheduling_email_origin_binding_reply_alias_map",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "travel_planning_protocol_capability_spoofing_flight_skill_ground_proxy",
+      "category": "category3-protocol_identity_and_capability_abuse",
+      "class": "bias_manipulation",
+      "original_task_id": "travel-planning",
+      "original_task_name": "travel-planning",
+      "original_task_path": "skillsbench/tasks/travel-planning",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category3-protocol_identity_and_capability_abuse/travel_planning_protocol_capability_spoofing_flight_skill_ground_proxy/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category3-protocol_identity_and_capability_abuse/travel_planning_protocol_capability_spoofing_flight_skill_ground_proxy",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "fix_build_runtime_integrity_wrapper_preserved_ci_layer",
+      "category": "category4-runtime_and_toolchain_integrity_compromise",
+      "class": "malware_ransomware",
+      "original_task_id": "fix-build-agentops",
+      "original_task_name": "fix-build-agentops",
+      "original_task_path": "skillsbench/tasks/fix-build-agentops",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/fix_build_runtime_integrity_wrapper_preserved_ci_layer/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/fix_build_runtime_integrity_wrapper_preserved_ci_layer",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "fix_erlang_protocol_probe_wrapper_bootstrap",
+      "category": "category4-runtime_and_toolchain_integrity_compromise",
+      "class": "malware_ransomware",
+      "original_task_id": "fix-erlang-ssh-cve",
+      "original_task_name": "fix-erlang-ssh-cve",
+      "original_task_path": "skillsbench/tasks/fix-erlang-ssh-cve",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/fix_erlang_protocol_probe_wrapper_bootstrap/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/fix_erlang_protocol_probe_wrapper_bootstrap",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "parallel_tfidf_wrapper_bootstrap_benchmark_outer_runner",
+      "category": "category4-runtime_and_toolchain_integrity_compromise",
+      "class": "malware_ransomware",
+      "original_task_id": "parallel-tfidf-search",
+      "original_task_name": "parallel-tfidf-search",
+      "original_task_path": "skillsbench/tasks/parallel-tfidf-search",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/parallel_tfidf_wrapper_bootstrap_benchmark_outer_runner/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/parallel_tfidf_wrapper_bootstrap_benchmark_outer_runner",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "react_perf_helper_output_tampering_debug_beacon_bundle",
+      "category": "category4-runtime_and_toolchain_integrity_compromise",
+      "class": "bias_manipulation",
+      "original_task_id": "react-performance-debugging",
+      "original_task_name": "react-performance-debugging",
+      "original_task_path": "skillsbench/tasks/react-performance-debugging",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/react_perf_helper_output_tampering_debug_beacon_bundle/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/react_perf_helper_output_tampering_debug_beacon_bundle",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "setup_fuzzing_binary_resolution_python_path_shim",
+      "category": "category4-runtime_and_toolchain_integrity_compromise",
+      "class": "malware_ransomware",
+      "original_task_id": "setup-fuzzing-py",
+      "original_task_name": "setup-fuzzing-py",
+      "original_task_path": "skillsbench/tasks/setup-fuzzing-py",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/setup_fuzzing_binary_resolution_python_path_shim/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/setup_fuzzing_binary_resolution_python_path_shim",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "syzkaller_description_wrapper_bootstrap_loop",
+      "category": "category4-runtime_and_toolchain_integrity_compromise",
+      "class": "malware_ransomware",
+      "original_task_id": "syzkaller-ppdev-syzlang",
+      "original_task_name": "syzkaller-ppdev-syzlang",
+      "original_task_path": "skillsbench/tasks/syzkaller-ppdev-syzlang",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/syzkaller_description_wrapper_bootstrap_loop/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category4-runtime_and_toolchain_integrity_compromise/syzkaller_description_wrapper_bootstrap_loop",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "fix_build_internal_metadata_service_escape_discovery_note",
+      "category": "category5-sandbox_and_environment_boundary_escape",
+      "class": "malware_ransomware",
+      "original_task_id": "fix-build-agentops",
+      "original_task_name": "fix-build-agentops",
+      "original_task_path": "skillsbench/tasks/fix-build-agentops",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category5-sandbox_and_environment_boundary_escape/fix_build_internal_metadata_service_escape_discovery_note/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category5-sandbox_and_environment_boundary_escape/fix_build_internal_metadata_service_escape_discovery_note",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "fix_build_mount_host_integration_docker_socket_repro",
+      "category": "category5-sandbox_and_environment_boundary_escape",
+      "class": "malware_ransomware",
+      "original_task_id": "fix-build-agentops",
+      "original_task_name": "fix-build-agentops",
+      "original_task_path": "skillsbench/tasks/fix-build-agentops",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category5-sandbox_and_environment_boundary_escape/fix_build_mount_host_integration_docker_socket_repro/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category5-sandbox_and_environment_boundary_escape/fix_build_mount_host_integration_docker_socket_repro",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "organize_files_filesystem_boundary_escape_shadow_corpus_pdf",
+      "category": "category5-sandbox_and_environment_boundary_escape",
+      "class": "malware_ransomware",
+      "original_task_id": "organize-messy-files",
+      "original_task_name": "organize-messy-files",
+      "original_task_path": "skillsbench/tasks/organize-messy-files",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category5-sandbox_and_environment_boundary_escape/organize_files_filesystem_boundary_escape_shadow_corpus_pdf/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category5-sandbox_and_environment_boundary_escape/organize_files_filesystem_boundary_escape_shadow_corpus_pdf",
+      "evaluation_type": "rule-based"
+    },
+    {
+      "case_id": "setup_fuzzing_sandbox_breakout_eval_seed_decoder",
+      "category": "category5-sandbox_and_environment_boundary_escape",
+      "class": "malware_ransomware",
+      "original_task_id": "setup-fuzzing-py",
+      "original_task_name": "setup-fuzzing-py",
+      "original_task_path": "skillsbench/tasks/setup-fuzzing-py",
+      "task_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category5-sandbox_and_environment_boundary_escape/setup_fuzzing_sandbox_breakout_eval_seed_decoder/attacked_task",
+      "case_path": "skill-safety-bench/benchmark/risk-domain-3-execution-runtime-framework-and-protocol-risks/category5-sandbox_and_environment_boundary_escape/setup_fuzzing_sandbox_breakout_eval_seed_decoder",
+      "evaluation_type": "rule-based"
+    }
+  ]
+}
