@@ -1,0 +1,12 @@
+default_model = "${model.name}"
+
+[[providers]]
+name = "deepseek"
+kind = "openai"
+base_url = "${model.base_url}"
+models = ["${model.name}"]
+default = "${model.name}"
+api_key_env = "DEEPSEEK_API_KEY"
+
+[sandbox]
+bash = "off"

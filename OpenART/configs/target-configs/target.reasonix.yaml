@@ -2,7 +2,8 @@ target:
   framework: prompt_cli
   surface_family: reasonix
   runner_image: openart/reasonix:latest
-  launch_cmd: reasonix run --no-config --no-proxy --model ${TARGET_MODEL}
+  launch_cmd: reasonix run --dir /workspace --print --yolo
+  pre_run_hook: repo:configs/target-hooks/reasonix-bind-credentials.sh
   config_overlay:
     prompt_transport: argv
     prompt_flag: ""
@@ -14,7 +15,7 @@ target:
       base_url: ${TARGET_BASE_URL}
       model: ${TARGET_MODEL}
     delivery:
-      type: env_only
+      type: hybrid
       env_names:
         api_key: DEEPSEEK_API_KEY
         base_url: DEEPSEEK_BASE_URL
@@ -22,6 +23,10 @@ target:
       env:
         DEEPSEEK_MODEL: ${model.name}
         REASONIX_LANG: en
+      config_template:
+        source: repo:configs/target-model-json/reasonix.openai-compatible.toml
+        destination: HOME/.reasonix/config.toml
+        format: toml
   attack_surfaces:
   - vector: reasonix_md
     kind: memory

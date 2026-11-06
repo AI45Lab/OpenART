@@ -45,7 +45,6 @@ RUN set -eux; \
     npm --version; \
     npm install -g "reasonix@${REASONIX_VERSION}"; \
     command -v reasonix; \
-    command -v dsnix; \
     reasonix --version; \
     npm config delete proxy >/dev/null 2>&1 || true; \
     npm config delete https-proxy >/dev/null 2>&1 || true; \
