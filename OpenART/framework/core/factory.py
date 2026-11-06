@@ -502,6 +502,10 @@ class OrchestratorFactory:
         runtime_env["XDG_CONFIG_HOME"] = f"/workspace/.openart/runners/{role}/config"
         runtime_env["OPENART_RUNNER_STATE_DIR"] = f"/workspace/.openart/runners/{role}/state"
         if framework == "nanobot":
+            # nanobot refuses config files and chat history located under
+            # --workspace, so keep its HOME outside the mounted workspace.
+            runtime_env["HOME"] = f"/tmp/openart/runners/{role}/home"
+            runtime_env["XDG_CONFIG_HOME"] = f"/tmp/openart/runners/{role}/config"
             runtime_env["OPENART_PRE_RUN_HOOK"] = (
                 "python3 -c \"from nanobot.security.network import configure_ssrf_whitelist; "
                 "configure_ssrf_whitelist(['0.0.0.0/0', '::/0'])\""

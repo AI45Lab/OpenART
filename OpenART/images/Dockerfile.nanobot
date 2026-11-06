@@ -4,7 +4,9 @@ LABEL maintainer="OpenART Framework"
 LABEL description="OpenART runner image with nanobot installed"
 LABEL version="1.0.0"
 
-RUN pip install --no-cache-dir nanobot-ai \
+ARG PIP_INDEX_URL=https://pypi.org/simple
+
+RUN pip install --no-cache-dir --index-url "${PIP_INDEX_URL}" nanobot-ai \
     && command -v nanobot \
     && nanobot --version
 
