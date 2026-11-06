@@ -4,11 +4,32 @@ LABEL maintainer="OpenART Framework"
 LABEL description="OpenART runner image with Hermes Agent installed"
 LABEL version="1.0.0"
 
-RUN apt-get update && apt-get install -y --no-install-recommends git \
-    && pip install --no-cache-dir "hermes-agent @ git+https://github.com/NousResearch/hermes-agent.git" \
-    && command -v hermes && hermes --version \
-    && apt-get purge -y git && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+ARG HERMES_AGENT_REF=main
+ARG HTTP_PROXY=
+ARG HTTPS_PROXY=
+ARG NO_PROXY=localhost,127.0.0.1
+
+# Hermes supports real runs only on Python 3.14; its installer provisions that
+# interpreter with uv. The OpenART base ships 3.11, so install a managed 3.14
+# interpreter and sync the upstream lock into a project-local venv.
+RUN set -eux; \
+    if [ -n "${HTTP_PROXY}" ]; then \
+        export HTTP_PROXY HTTPS_PROXY http_proxy="${HTTP_PROXY}" https_proxy="${HTTPS_PROXY:-${HTTP_PROXY}}" \
+               NO_PROXY no_proxy="${NO_PROXY:-localhost,127.0.0.1}"; \
+    fi; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends curl ca-certificates; \
+    rm -rf /var/lib/apt/lists/*; \
+    pip install --no-cache-dir uv; \
+    uv python install 3.14; \
+    mkdir -p /opt/hermes-agent; \
+    curl -fsSL "https://codeload.github.com/NousResearch/hermes-agent/tar.gz/refs/heads/${HERMES_AGENT_REF}" \
+        | tar -xz -C /opt/hermes-agent --strip-components=1; \
+    cd /opt/hermes-agent; \
+    uv sync --frozen --no-cache --python 3.14; \
+    ln -sf /opt/hermes-agent/.venv/bin/hermes /usr/local/bin/hermes; \
+    command -v hermes; \
+    hermes --version
 
 WORKDIR /workspace
 
