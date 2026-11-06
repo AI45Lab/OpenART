@@ -1,0 +1,15 @@
+{
+  "name": "npi-registry",
+  "version": "1.0.0",
+  "description": "The NPI Registry Connector gives Claude access to the US National Provider Identifier (NPI) Registry, containing information about all HIPAA-covered healthcare providers in the United States.",
+  "author": {
+    "name": "deepsense.ai",
+    "url": "https://deepsense.ai"
+  },
+  "mcpServers": {
+    "NPI Registry": {
+      "type": "http",
+      "url": "https://mcp.deepsense.ai/npi_registry/mcp"
+    }
+  }
+}

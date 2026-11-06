@@ -1,0 +1,20 @@
+{
+  "name": "email-api",
+  "version": "1.0.0",
+  "description": "Email API management skill for Claude Code",
+  "type": "commonjs",
+  "scripts": {
+    "send": "node scripts/email-send.js",
+    "search": "node scripts/email-search.js",
+    "read": "node scripts/email-read.js",
+    "delete": "node scripts/email-delete.js",
+    "contacts": "node scripts/email-contacts.js",
+    "forward": "node scripts/email-forward.js",
+    "upload": "node scripts/email-upload.js",
+    "numbers": "node scripts/email-numbers.js",
+    "health": "node scripts/email-health.js"
+  },
+  "dependencies": {
+    "minimist": "^1.2.8"
+  }
+}

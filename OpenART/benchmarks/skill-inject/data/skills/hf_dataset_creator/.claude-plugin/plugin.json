@@ -1,0 +1,17 @@
+{
+  "name": "hugging-face-dataset-creator",
+  "version": "1.0.0",
+  "description": "Create and manage datasets on Hugging Face Hub. Supports initializing repos, defining configs/system prompts, and streaming row updates.",
+  "author": {
+    "name": "Hugging Face"
+  },
+  "repository": "https://github.com/huggingface/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "huggingface",
+    "datasets",
+    "data",
+    "hub",
+    "streaming"
+  ]
+}

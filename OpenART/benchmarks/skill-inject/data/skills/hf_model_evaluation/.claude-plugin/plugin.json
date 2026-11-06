@@ -1,0 +1,20 @@
+{
+  "name": "hugging-face-evaluation-manager",
+  "version": "1.3.0",
+  "description": "Add and manage evaluation results in Hugging Face model cards. Supports extracting eval tables from README content, importing scores from Artificial Analysis API, and running custom model evaluations with vLLM/lighteval/inspect-ai.",
+  "author": {
+    "name": "Hugging Face"
+  },
+  "repository": "https://github.com/huggingface/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "huggingface",
+    "evaluation",
+    "benchmarks",
+    "model-cards",
+    "leaderboard",
+    "vllm",
+    "lighteval",
+    "inspect-ai"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "model-trainer",
+  "version": "1.0.0",
+  "description": "Train and fine-tune language models using TRL on Hugging Face Jobs infrastructure. Covers SFT, DPO, GRPO and reward modeling, plus GGUF conversion for local deployment.",
+  "author": {
+    "name": "Hugging Face"
+  },
+  "repository": "https://github.com/huggingface/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "huggingface",
+    "trl",
+    "training",
+    "fine-tuning",
+    "llm",
+    "sft",
+    "dpo",
+    "grpo",
+    "gguf"
+  ]
+}

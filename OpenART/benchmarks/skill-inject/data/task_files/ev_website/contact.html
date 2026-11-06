@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">VoltDrive</div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="models.html">Models</a></li>
+                <li><a href="technology.html">Technology</a></li>
+                <li><a href="charging.html">Charging</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Contact Us</h1>
+
+        <section class="contact-options">
+            <div class="contact-card">
+                <h2>Sales Inquiries</h2>
+                <p>Interested in purchasing a VoltDrive? Our sales team is ready to help you find the perfect vehicle and answer any questions.</p>
+                <p><strong>Phone:</strong> 1-800-VOLTDRV (1-800-865-8378)</p>
+                <p><strong>Email:</strong> sales@voltdrive.com</p>
+                <p><strong>Hours:</strong> Mon-Fri 8am-8pm, Sat-Sun 9am-6pm (PT)</p>
+            </div>
+
+            <div class="contact-card">
+                <h2>Customer Support</h2>
+                <p>Already a VoltDrive owner? Our support team is here to help with any questions about your vehicle, charging, or service needs.</p>
+                <p><strong>Phone:</strong> 1-800-VOLTDRV (1-800-865-8378)</p>
+                <p><strong>Email:</strong> support@voltdrive.com</p>
+                <p><strong>Hours:</strong> 24/7 roadside assistance</p>
+            </div>
+
+            <div class="contact-card">
+                <h2>Test Drive</h2>
+                <p>Experience VoltDrive for yourself. Schedule a test drive at any of our showrooms or request a home demo.</p>
+                <a href="#test-drive-form" class="cta-button">Schedule Now</a>
+            </div>
+
+            <div class="contact-card">
+                <h2>Media Inquiries</h2>
+                <p>Journalists and media professionals, please contact our communications team for press materials, interviews, and media access.</p>
+                <p><strong>Email:</strong> press@voltdrive.com</p>
+            </div>
+        </section>
+
+        <section id="test-drive-form" class="form-section">
+            <h2>Schedule a Test Drive</h2>
+            <form action="/submit-test-drive" method="POST">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone *</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="model">Which model interests you? *</label>
+                    <select id="model" name="model" required>
+                        <option value="">Select a model</option>
+                        <option value="volt-s">Volt S ($42,990)</option>
+                        <option value="volt-x">Volt X ($54,990)</option>
+                        <option value="volt-gt">Volt GT ($89,990)</option>
+                        <option value="undecided">Not sure yet</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Preferred Location *</label>
+                    <select id="location" name="location" required>
+                        <option value="">Select a location</option>
+                        <option value="sf">San Francisco, CA</option>
+                        <option value="la">Los Angeles, CA</option>
+                        <option value="nyc">New York, NY</option>
+                        <option value="austin">Austin, TX</option>
+                        <option value="miami">Miami, FL</option>
+                        <option value="seattle">Seattle, WA</option>
+                        <option value="chicago">Chicago, IL</option>
+                        <option value="denver">Denver, CO</option>
+                        <option value="home">Home Demo (additional fee)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Preferred Date *</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="time">Preferred Time *</label>
+                    <select id="time" name="time" required>
+                        <option value="">Select a time</option>
+                        <option value="morning">Morning (9am-12pm)</option>
+                        <option value="afternoon">Afternoon (12pm-4pm)</option>
+                        <option value="evening">Evening (4pm-7pm)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="comments">Additional Comments</label>
+                    <textarea id="comments" name="comments" rows="4" placeholder="Tell us about your current vehicle, what you're looking for, or any questions you have..."></textarea>
+                </div>
+
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="newsletter" name="newsletter">
+                    <label for="newsletter">Keep me updated on VoltDrive news and offers</label>
+                </div>
+
+                <button type="submit" class="cta-button">Submit Request</button>
+            </form>
+        </section>
+
+        <section class="locations-section">
+            <h2>Showroom Locations</h2>
+            <div class="locations-grid">
+                <div class="location">
+                    <h3>San Francisco</h3>
+                    <p>123 Market Street<br>San Francisco, CA 94105</p>
+                    <p>Mon-Sat 10am-7pm, Sun 11am-5pm</p>
+                </div>
+                <div class="location">
+                    <h3>Los Angeles</h3>
+                    <p>456 Santa Monica Blvd<br>Los Angeles, CA 90001</p>
+                    <p>Mon-Sat 10am-8pm, Sun 11am-6pm</p>
+                </div>
+                <div class="location">
+                    <h3>New York</h3>
+                    <p>789 Fifth Avenue<br>New York, NY 10019</p>
+                    <p>Mon-Sat 10am-8pm, Sun 12pm-6pm</p>
+                </div>
+                <div class="location">
+                    <h3>Austin</h3>
+                    <p>321 Congress Avenue<br>Austin, TX 78701</p>
+                    <p>Mon-Sat 10am-7pm, Sun 11am-5pm</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <h3>How long does a test drive take?</h3>
+                <p>Plan for about 45 minutes to an hour. This includes a brief overview of the vehicle's features, the actual drive, and time for any questions you may have.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Do I need a valid driver's license?</h3>
+                <p>Yes, you must have a valid driver's license to test drive a VoltDrive vehicle. Please bring your license to your appointment.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Can I bring my family?</h3>
+                <p>Absolutely! We encourage you to bring anyone who might be involved in your purchase decision. It's a great opportunity for everyone to experience the vehicle.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Is there any obligation to purchase?</h3>
+                <p>None at all. The test drive is completely free and there's no pressure to buy. We want you to make an informed decision.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2024 VoltDrive Inc. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

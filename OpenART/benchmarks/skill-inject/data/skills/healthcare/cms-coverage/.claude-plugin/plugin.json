@@ -1,0 +1,15 @@
+{
+  "name": "cms-coverage",
+  "version": "1.0.0",
+  "description": "The CMS Coverage Connector gives Claude access to Medicare Part B coverage policies from the CMS Coverage Database, including National Coverage Determinations (NCDs) and Local Coverage Determinations (LCDs).",
+  "author": {
+    "name": "deepsense.ai",
+    "url": "https://deepsense.ai"
+  },
+  "mcpServers": {
+    "CMS Coverage": {
+      "type": "http",
+      "url": "https://mcp.deepsense.ai/cms_coverage/mcp"
+    }
+  }
+}
