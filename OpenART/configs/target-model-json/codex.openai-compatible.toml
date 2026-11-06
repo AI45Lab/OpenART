@@ -1,5 +1,8 @@
 model = "${model.name}"
 model_provider = "openart"
+model_supports_reasoning_summaries = true
+model_reasoning_effort = "low"
+model_reasoning_summary = "auto"
 
 [model_providers.openart]
 name = "OpenART"
