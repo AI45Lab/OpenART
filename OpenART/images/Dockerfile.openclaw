@@ -5,19 +5,38 @@ LABEL description="OpenART runner image with OpenClaw installed"
 LABEL version="1.0.0"
 
 ARG OPENCLAW_VERSION=latest
+ARG NPM_REGISTRY=https://registry.npmjs.org
+ARG NODE_VERSION=24.22.2
+ARG HTTP_PROXY=
+ARG HTTPS_PROXY=
+ARG NO_PROXY=localhost,127.0.0.1
 
 ENV NO_COLOR=1
 ENV OPENCLAW_DISABLE_BONJOUR=1
 ENV OPENCLAW_SKIP_ONBOARDING=1
 
-RUN npm install -g n \
-    && n 24 \
-    && hash -r \
-    && node --version \
-    && npm --version \
-    && npm install -g "openclaw@${OPENCLAW_VERSION}" \
-    && command -v openclaw \
-    && openclaw --version
+# OpenClaw requires Node 24. Install a pinned upstream tarball instead of using
+# `n`, which probes nodejs.org interactively and stalls on restricted networks.
+RUN set -eux; \
+    if [ -n "${HTTP_PROXY}" ]; then \
+        export HTTP_PROXY HTTPS_PROXY http_proxy="${HTTP_PROXY}" https_proxy="${HTTPS_PROXY:-${HTTP_PROXY}}" \
+               NO_PROXY no_proxy="${NO_PROXY:-localhost,127.0.0.1}"; \
+    fi; \
+    curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
+        -o /tmp/node.tar.xz; \
+    tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1; \
+    rm -f /tmp/node.tar.xz; \
+    hash -r; \
+    node --version; \
+    npm --version; \
+    npm config set fetch-retries 8; \
+    npm config set fetch-retry-mintimeout 20000; \
+    npm config set fetch-retry-maxtimeout 120000; \
+    npm config set fetch-timeout 600000; \
+    npm config set maxsockets 4; \
+    npm install -g "openclaw@${OPENCLAW_VERSION}" --registry="${NPM_REGISTRY}" --os=linux --cpu=x64 --libc=glibc --no-audit --no-fund; \
+    command -v openclaw; \
+    openclaw --version
 
 WORKDIR /workspace
 
