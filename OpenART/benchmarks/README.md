@@ -9,8 +9,8 @@ target-native configuration, and evaluators.
 | Benchmark | Status | Task root | Notes |
 |---|---|---|---|
 | MCPTox | Imported | `mcptox/tasks/full` | 1,348 cases from upstream; 45 servers; benchmark-level harness profiles |
-| ASB | Planned | — | Tool/memory scenarios |
-| Skill-Inject | Planned | — | Native skill folders |
+| ASB | Imported | `asb/tasks` | 51 clean + 400 DPI cases; 20 ASB tools wrapped in `asb/tools/asb.*` |
+| Skill-Inject | Imported | `skill-inject/tasks` | 58 clean + 139 contextual + 180 obvious skill-injection bundles; 11 compatible harness targets |
 | SkillSafetyBench | Planned | — | Materialized tasks + rule verifier |
 | HarmfulSkillBench | Planned | — | Harmful skill folders |
 | Skill-Use | Planned | — | Skill-use rubric |
