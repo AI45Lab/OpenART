@@ -197,9 +197,11 @@ python3 -m framework.cli run \
 opencode codex claude_code gemini qwen_code kilo oh_my_pi goose hermes copilot_cli pi
 ```
 
-Harness verification is pending on this host because the Docker daemon is not
-available. Unit tests cover bundle loading, path remapping, evaluator polarity,
-and target-manifest consistency, but they do not replace a model-backed run.
+Model-backed harness verification has not been run for this pack. Unit tests
+cover bundle loading, path remapping, archive setup, evaluator polarity, and
+target-manifest consistency, and the bundled verifiers were smoke-run against
+their materialized workspaces. Those checks do not replace a model-backed run
+with a selected target.
 
 ## Import
 
