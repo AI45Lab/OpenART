@@ -653,7 +653,8 @@ class OrchestratorFactory:
         staged_hook = shared_root / hook_rel
         staged_hook.parent.mkdir(parents=True, exist_ok=True)
         staged_hook.write_text(resolved_source.read_text(encoding="utf-8"), encoding="utf-8")
-        return f"bash /workspace/{hook_rel.as_posix()}"
+        interpreter = "python3" if resolved_source.suffix.lower() == ".py" else "bash"
+        return f"{interpreter} /workspace/{hook_rel.as_posix()}"
 
     def _validate_no_legacy_target_model_fields(self, role_cfg: dict[str, Any]) -> None:
         legacy_fields = [name for name in _LEGACY_TARGET_MODEL_FIELDS if role_cfg.get(name) not in (None, "", [], {}, ())]

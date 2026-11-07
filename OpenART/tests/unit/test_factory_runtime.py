@@ -512,7 +512,7 @@ def test_factory_stages_repo_pre_run_hook_for_prompt_cli_target(tmp_path: Path) 
             "framework": "prompt_cli",
             "runner_image": "openart/claude-code:latest",
             "launch_cmd": "claude -p",
-            "pre_run_hook": "repo:configs/target-hooks/claude-code-enforce-settings.sh",
+            "pre_run_hook": "repo:configs/target-hooks/llm-gateway-compat.py",
         },
     )
     factory._workspace_manager.ensure_run_layout("run-1")
@@ -521,7 +521,7 @@ def test_factory_stages_repo_pre_run_hook_for_prompt_cli_target(tmp_path: Path) 
     runner = factory._create_runner("target")
 
     assert runner.runtime_env["OPENART_PRE_RUN_HOOK"] == (
-        "bash /workspace/.openart/runners/target/hooks/claude-code-enforce-settings.sh"
+        "python3 /workspace/.openart/runners/target/hooks/llm-gateway-compat.py"
     )
     staged_hook = (
         Path(factory._workspace_path)
@@ -529,10 +529,33 @@ def test_factory_stages_repo_pre_run_hook_for_prompt_cli_target(tmp_path: Path) 
         / "runners"
         / "target"
         / "hooks"
-        / "claude-code-enforce-settings.sh"
+        / "llm-gateway-compat.py"
     )
     assert staged_hook.is_file()
     assert "OPENART_CLAUDE_AUTO_APPROVAL_ALLOW" in staged_hook.read_text(encoding="utf-8")
+
+
+def test_factory_stages_shell_pre_run_hook_with_bash(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path)
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+        target_config={
+            "framework": "prompt_cli",
+            "runner_image": "openart/claude-code:latest",
+            "launch_cmd": "claude -p",
+            "pre_run_hook": "repo:configs/target-hooks/aider-bootstrap-load.sh",
+        },
+    )
+    factory._workspace_manager.ensure_run_layout("run-1")
+    factory._workspace_path = str(factory._workspace_manager.shared_dir("run-1"))
+
+    runner = factory._create_runner("target")
+
+    assert runner.runtime_env["OPENART_PRE_RUN_HOOK"] == (
+        "bash /workspace/.openart/runners/target/hooks/aider-bootstrap-load.sh"
+    )
 
 
 def test_factory_applies_model_integration_env_and_config_template(monkeypatch, tmp_path: Path) -> None:

@@ -173,16 +173,20 @@ gateway validates `reasoning` as an object and rejects null:
  "param":"reasoning","type":"invalid_request_error"}}
 ```
 
-The shared Codex template now sets:
+The shared Codex template therefore keeps:
 
 ```toml
-model_supports_reasoning_summaries = true
 model_reasoning_effort = "low"
-model_reasoning_summary = "auto"
 ```
 
-Codex then sends `{"effort":"low","summary":"auto"}` and the gateway accepts the
-request. Without those settings it sends `null` and fails.
+Do not enable `model_supports_reasoning_summaries` or set
+`model_reasoning_summary` against this gateway: Codex then sends a reasoning
+object whose `effort` is a map, and the gateway rejects it with
+`reasoning_effort: invalid type: map, expected a string`.
+
+The Codex target also runs `configs/target-hooks/llm-gateway-compat.py`, which
+injects `use_chat_completions_api` into Responses requests so multi-turn tool
+results are converted through the gateway's chat path.
 
 ## Why Gemini failed
 

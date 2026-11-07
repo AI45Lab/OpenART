@@ -5,6 +5,7 @@ target:
   network: host
   launch_cmd: codex exec --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox
     --model ${TARGET_MODEL} -c features.enable_request_compression=false -c tools_view_image=false
+  pre_run_hook: repo:configs/target-hooks/llm-gateway-compat.py
   model_integration:
     binding:
       provider_family: openai_compatible
@@ -17,6 +18,8 @@ target:
         api_key: OPENAI_API_KEY
         base_url: OPENAI_BASE_URL
         model: OPENAI_MODEL
+      env:
+        OPENART_LLM_GATEWAY_COMPAT: codex
       config_template:
         source: repo:configs/target-model-json/codex.openai-compatible.toml
         destination: HOME/.codex/config.toml

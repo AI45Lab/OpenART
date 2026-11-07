@@ -22,6 +22,15 @@ GRAPH_RL_MODULE_PATH = REPO_ROOT / "configs" / "attacker-configs" / "graph-rl-co
 OPENCODE_ATTACKER_MODULE_PATH = (
     REPO_ROOT / "configs" / "attacker-configs" / "universal" / "opencode-native-control" / "run_opencode_attacker.py"
 )
+LLM_GATEWAY_COMPAT_MODULE_PATH = REPO_ROOT / "configs" / "target-hooks" / "llm-gateway-compat.py"
+
+
+def _load_llm_gateway_compat_module():
+    spec = importlib.util.spec_from_file_location("llm_gateway_compat_for_runner_tests", LLM_GATEWAY_COMPAT_MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
 
 
 def _load_graph_rl_module():
@@ -514,20 +523,12 @@ def test_claude_settings_hook_preserves_auto_approval_after_home_overlay(tmp_pat
         ),
         encoding="utf-8",
     )
-    hook_path = REPO_ROOT / "configs" / "target-hooks" / "claude-code-enforce-settings.sh"
+    hook_path = REPO_ROOT / "configs" / "target-hooks" / "llm-gateway-compat.py"
+    hook = _load_llm_gateway_compat_module()
 
-    result = subprocess.run(
-        ["bash", str(hook_path)],
-        env={
-            **os.environ,
-            "HOME": str(home),
-            "OPENART_CLAUDE_AUTO_APPROVAL_ALLOW": "Bash,Read,Write",
-        },
-        text=True,
-        capture_output=True,
-    )
+    proxy_base_url = "http://127.0.0.1:18080"
+    hook.rewrite_claude_settings(settings_path, proxy_base_url, ["Bash", "Read", "Write"])
 
-    assert result.returncode == 0, result.stderr
     config = json.loads(settings_path.read_text(encoding="utf-8"))
     assert config["bypassPermissions"] is True
     assert config["permissionMode"] == "acceptEdits"
@@ -538,6 +539,8 @@ def test_claude_settings_hook_preserves_auto_approval_after_home_overlay(tmp_pat
     assert "Bash" not in config["permissions"]["deny"]
     assert "Bash(python3 *)" not in config["permissions"]["deny"]
     assert config["maxTurns"] == 3
+    assert config["env"]["ANTHROPIC_BASE_URL"] == proxy_base_url
+    assert hook_path.is_file()
 
 
 def test_runner_installs_user_tool_wrappers_and_guide() -> None:
@@ -1056,13 +1059,13 @@ def test_prompt_cli_runner_stdin_transport_runs_pre_hook_before_prompt_pipe() ->
         command=CommandSpec(template="claude -p"),
         credentials=CredentialBundle(values={}),
         runtime_env={
-            "OPENART_PRE_RUN_HOOK": "bash /workspace/.openart/runners/target/hooks/claude-code-enforce-settings.sh"
+            "OPENART_PRE_RUN_HOOK": "python3 /workspace/.openart/runners/target/hooks/llm-gateway-compat.py"
         },
         extra_config={"prompt_transport": "stdin"},
     )
 
     command = runner.render_command("/task/instructions/target.md")
 
-    hook_index = command.index("claude-code-enforce-settings.sh")
+    hook_index = command.index("llm-gateway-compat.py")
     pipe_index = command.index("printf '%s' \"$prompt\" | exec claude -p")
     assert hook_index < pipe_index

@@ -88,6 +88,7 @@ def test_skill_safety_all_targets_uses_pack_runner_and_mirror_args() -> None:
     assert '"--target-config"' in source
     for key in ("GOOSE_RELEASE_BASE_URL", "NPM_REGISTRY", "PIP_INDEX_URL"):
         assert f'"{key}"' in source
+    assert "default=3600" in source
 
 
 def test_oh_my_pi_installs_bun_from_npm() -> None:

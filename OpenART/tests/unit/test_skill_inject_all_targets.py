@@ -86,13 +86,28 @@ def test_all_targets_runner_forwards_mirror_build_args() -> None:
         assert f'"{key}"' in source
 
 
-def test_codex_template_sends_reasoning_object() -> None:
+def test_codex_template_uses_gateway_compatible_reasoning() -> None:
     template = (
         PACK.parents[1] / "configs" / "target-model-json" / "codex.openai-compatible.toml"
     ).read_text(encoding="utf-8")
-    assert "model_supports_reasoning_summaries = true" in template
     assert 'model_reasoning_effort = "low"' in template
-    assert 'model_reasoning_summary = "auto"' in template
+    assert "model_supports_reasoning_summaries" not in template
+    assert "model_reasoning_summary" not in template
+
+
+def test_claude_and_codex_use_gateway_compat_hook() -> None:
+    expected_harness = {"claude-code": "claude_code", "codex": "codex"}
+    for config_name, harness in expected_harness.items():
+        config = yaml.safe_load(
+            (PACK.parents[1] / "configs" / "target-configs" / f"target.{config_name}.yaml").read_text(
+                encoding="utf-8"
+            )
+        )
+        target = config["target"]
+        hook = target["pre_run_hook"]
+        assert hook == "repo:configs/target-hooks/llm-gateway-compat.py"
+        assert target["model_integration"]["delivery"]["env"]["OPENART_LLM_GATEWAY_COMPAT"] == harness
+        assert (PACK.parents[1] / hook[len("repo:") :]).is_file()
 
 
 def test_hermes_image_uses_python_314_via_uv() -> None:

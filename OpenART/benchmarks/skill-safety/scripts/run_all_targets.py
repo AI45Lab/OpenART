@@ -204,7 +204,12 @@ def main() -> int:
         "--output-dir",
         default=str(OPENART / "runs" / "skill-safety-all-targets"),
     )
-    parser.add_argument("--timeout-seconds", type=int, default=1200)
+    parser.add_argument(
+        "--timeout-seconds",
+        type=int,
+        default=3600,
+        help="Per-target wall-clock cap; long-horizon cases can need ~30 minutes.",
+    )
     parser.add_argument("--no-build", action="store_true")
     parser.add_argument("--prune-images", action="store_true")
     args = parser.parse_args()

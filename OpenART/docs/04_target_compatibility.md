@@ -116,8 +116,12 @@ Current example:
 ```yaml
 target:
   framework: prompt_cli
-  pre_run_hook: repo:configs/target-hooks/claude-code-enforce-settings.sh
+  pre_run_hook: repo:configs/target-hooks/llm-gateway-compat.py
 ```
+
+The shell hook that previously enforced Claude Code permissions is now part of
+`llm-gateway-compat.py`, which also handles the gateway compatibility proxy for
+Claude Code and Codex.
 
 Supported source prefixes:
 
@@ -136,8 +140,18 @@ OpenART stages hook files into the shared workspace:
 and exposes the command through:
 
 ```text
-OPENART_PRE_RUN_HOOK="bash /workspace/.openart/runners/<role>/hooks/<hook-file>"
+OPENART_PRE_RUN_HOOK="python3 /workspace/.openart/runners/<role>/hooks/<hook-file>.py"
 ```
+
+Hook files with a `.py` suffix run with `python3`; other extensions run with
+`bash`.
+
+The shared `llm-gateway-compat.py` hook is the current Claude Code/Codex
+example. It starts a loopback proxy that injects
+`use_chat_completions_api: true` into Messages/Responses requests, rewrites the
+harness endpoint to the proxy, and keeps the proxy log under the run state
+directory. Set `OPENART_LLM_GATEWAY_COMPAT` to `claude_code` or `codex` in the
+target's `model_integration.delivery.env` to select the harness branch.
 
 For `PromptCLIRunner` argv transport, the rendered command is:
 
@@ -355,7 +369,7 @@ target:
   runner_image: openart/claude-code:latest
   network: host
   launch_cmd: claude -p
-  pre_run_hook: repo:configs/target-hooks/claude-code-enforce-settings.sh
+  pre_run_hook: repo:configs/target-hooks/llm-gateway-compat.py
   config_overlay:
     prompt_transport: argv
     prompt_flag: -p

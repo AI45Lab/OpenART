@@ -4,7 +4,7 @@ target:
   runner_image: openart/claude-code:latest
   network: host
   launch_cmd: claude -p
-  pre_run_hook: repo:configs/target-hooks/claude-code-enforce-settings.sh
+  pre_run_hook: repo:configs/target-hooks/llm-gateway-compat.py
   config_overlay:
     prompt_transport: stdin
     prompt_flag: -p
@@ -27,6 +27,7 @@ target:
         ANTHROPIC_DEFAULT_HAIKU_MODEL: ${model.name}
         CLAUDE_CODE_SUBAGENT_MODEL: ${model.name}
         OPENART_CLAUDE_AUTO_APPROVAL_ALLOW: Bash,Read,Write
+        OPENART_LLM_GATEWAY_COMPAT: claude_code
 
   attack_surfaces:
     - vector: claude_md
