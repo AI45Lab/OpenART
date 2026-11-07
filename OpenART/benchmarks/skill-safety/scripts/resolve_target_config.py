@@ -55,11 +55,17 @@ def resolve_target(target_name: str) -> tuple[dict[str, Any], dict[str, Any]]:
             f"expected one of {expected}, found {sorted(declared)}"
         )
 
+    launch_cmd_append = str(entry.get("launch_cmd_append") or "").strip()
+    if launch_cmd_append:
+        launch_cmd = str(target.get("launch_cmd") or "").strip()
+        target["launch_cmd"] = f"{launch_cmd} {launch_cmd_append}".strip()
+
     metadata = {
         "target": target_name,
         "base_config": str(base_path),
         "skills": compatible,
         "runner_image": target.get("runner_image", ""),
+        "launch_cmd": target.get("launch_cmd", ""),
     }
     return config, metadata
 

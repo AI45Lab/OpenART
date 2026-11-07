@@ -13,10 +13,9 @@ RUN npm install -g n \
     && n 22 \
     && node --version \
     && npm --version \
-    && curl -fsSL https://bun.sh/install | bash \
+    && npm install -g bun \
     && bun --version \
     && bun install -g "@oh-my-pi/pi-coding-agent@${OMP_VERSION}" \
-    && ln -sf /opt/bun/bin/bun /usr/local/bin/bun \
     && ln -sf /opt/bun/bin/omp /usr/local/bin/omp \
     && command -v omp \
     && omp --version

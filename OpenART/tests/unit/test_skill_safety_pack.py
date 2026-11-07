@@ -280,6 +280,13 @@ def test_skill_safety_target_resolver_selects_base_config() -> None:
         resolver.resolve_target("not-a-target")
 
 
+def test_skill_safety_opencode_resolver_uses_standalone_server() -> None:
+    resolver = _load_target_resolver()
+    config, metadata = resolver.resolve_target("opencode")
+    assert config["target"]["launch_cmd"] == "opencode run --standalone"
+    assert metadata["launch_cmd"] == "opencode run --standalone"
+
+
 def test_skill_safety_runner_requires_explicit_target() -> None:
     script = (PACK / "scripts" / "run_task.sh").read_text(encoding="utf-8")
     assert "resolve_target_config.py" in script
