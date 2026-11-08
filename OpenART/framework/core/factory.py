@@ -34,6 +34,7 @@ from framework.core.target_adapters import (
 from framework.models.common import CommandSpec, CredentialBundle, SkillSpec, ToolSpec
 from framework.models.container import ContainerSpec, MountSpec
 from framework.models.task import TaskBundleSpec
+from framework.task_bundles.services import load_service_catalog
 
 
 # =============================================================================
@@ -75,27 +76,26 @@ _LEGACY_TARGET_MODEL_FIELDS = ("model", "base_url", "api_base_url", "api_key", "
 _LEGACY_TARGET_SURFACE_FIELDS = ("control_plane", "control_plane_mount_mode")
 _OBSOLETE_TARGET_SURFACE_FIELDS = ("target_surface_mount_mode",)
 
-# Service-facing credentials. These are withheld from attackers unless the
-# attacker explicitly requests the ``service_state`` vector.
-_SERVICE_ENV_PREFIXES = (
-    "GITLAB_",
-    "OWNCLOUD_",
-    "DTAP_",
-    "GITEA_",
-    "NEXTCLOUD_",
-    "MATTERMOST_",
-    "PLANE_",
-    "MAILPIT_",
-    "MINIO_",
-    "LOCALSTACK_",
-)
+
+def _service_env_prefixes() -> tuple[str, ...]:
+    """Credential prefixes declared by the service catalog.
+
+    The framework does not enumerate services.  Prefixes come from
+    ``selection.credential_prefixes`` or are derived from the catalog's
+    environment variable names.
+    """
+
+    try:
+        return load_service_catalog().credential_prefixes
+    except Exception:  # noqa: BLE001 - a missing catalog must not break runs
+        return ()
 
 
-def _is_service_env_key(key: str) -> bool:
+def _is_service_env_key(key: str, prefixes: tuple[str, ...]) -> bool:
     normalized = str(key or "").strip().upper()
     if not normalized:
         return False
-    return any(normalized.startswith(prefix) for prefix in _SERVICE_ENV_PREFIXES)
+    return any(normalized.startswith(prefix) for prefix in prefixes)
 
 
 # =============================================================================
@@ -764,12 +764,13 @@ class OrchestratorFactory:
         feedback_mount = "/workspace/.openart_feedback"
 
         service_state_allowed = attacker_spec.allows_service_state()
+        service_prefixes = _service_env_prefixes()
         runtime_env = self._runtime_env()
         if not service_state_allowed:
             runtime_env = {
                 key: value
                 for key, value in runtime_env.items()
-                if not _is_service_env_key(key)
+                if not _is_service_env_key(key, service_prefixes)
             }
         # Bundle runners use these two variables to opt into the live-service
         # write channel without baking a marker into the generated config.
@@ -847,7 +848,7 @@ class OrchestratorFactory:
         runtime_env.update(attacker_spec.env)
         if not service_state_allowed:
             for key in list(runtime_env):
-                if _is_service_env_key(key):
+                if _is_service_env_key(key, service_prefixes):
                     runtime_env.pop(key, None)
 
         target_instruction_path = self._container_task_path(self.bundle.target_instruction_path) or self.bundle.target_instruction_path

@@ -16,7 +16,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from framework.task_bundles.generate import DEFAULT_OPENART_ROOT, DEFAULT_TOOL_STORE, generate_bundle
-from framework.task_bundles.services import extract_required_services
+from framework.task_bundles.services import DEFAULT_CATALOG_PATH, extract_required_services, load_service_catalog
 
 
 def _iter_tasks(zip_path: Path) -> list[str]:
@@ -58,6 +58,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--task-prefix", default="openart", help="Only process task ids with this prefix")
     parser.add_argument("--openart-root", default=str(DEFAULT_OPENART_ROOT))
     parser.add_argument("--tool-store", default=str(DEFAULT_TOOL_STORE))
+    parser.add_argument(
+        "--service-catalog",
+        default=str(DEFAULT_CATALOG_PATH),
+        help="Service catalog YAML (defaults to services/catalog/services.yaml)",
+    )
     parser.add_argument("--network-mode", choices=["bridge", "host"], default="bridge")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
@@ -69,6 +74,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     out_root = Path(args.out).resolve()
+    catalog = load_service_catalog(args.service_catalog)
     processed = 0
     failures: list[dict[str, str]] = []
     summaries: list[dict[str, object]] = []
@@ -88,13 +94,14 @@ def main(argv: list[str] | None = None) -> int:
                         task_dir.mkdir()
                         _extract_task(archive, task_id, task_dir)
                         if args.dry_run:
-                            required = extract_required_services(task_dir)
+                            required = extract_required_services(task_dir, catalog=catalog)
                             summaries.append(
                                 {
                                     "task_id": task_id,
                                     "shard": shard.name,
                                     "services": list(required.services),
                                     "compose_services": list(required.compose_services),
+                                    "unknown_services": list(required.unknown),
                                 }
                             )
                         else:
@@ -106,6 +113,7 @@ def main(argv: list[str] | None = None) -> int:
                                 tool_store=args.tool_store,
                                 target_config=args.target_config,
                                 network_mode=args.network_mode,
+                                service_catalog=args.service_catalog,
                                 force=args.force,
                             )
                             summaries.append(result)

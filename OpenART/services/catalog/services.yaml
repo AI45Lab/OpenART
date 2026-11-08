@@ -1,0 +1,1405 @@
+version: 1
+selection:
+  local_values:
+  - ''
+  - dtap
+  - workspace
+  - document
+  - tool
+  - skill
+  - registry
+  - planner
+  - local
+  aliases:
+    google_form: google-form
+    googleform: google-form
+    google_docs: googledocs
+    google-docs: googledocs
+    googledoc: googledocs
+    google_calendar: calendar
+    google-calendar: calendar
+  tool_prefixes:
+    dtap.: '@suffix'
+    gitlab.: gitlab
+    owncloud.: owncloud
+    gitea.: gitea
+    mattermost.: mattermost
+  credential_prefixes:
+  - GITLAB_
+  - OWNCLOUD_
+  - DTAP_
+  - GITEA_
+  - NEXTCLOUD_
+  - MATTERMOST_
+  - PLANE_
+  - MAILPIT_
+  - MINIO_
+  - LOCALSTACK_
+defaults:
+  admin_public_key: '-----BEGIN PUBLIC KEY-----
+
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAowt6pd2kyFCkSHLmXZug
+
+    IowXxyyBsgT8BtHTzySS4xj4YCGmtOe6aIO0TbflJFv1gbMtMZJwx3mMNt5tD1Qb
+
+    yhyxudYtYndkxReWyKTixXip4Xvs81vZAECcobvYE+CI+mXzOPV1IFpSCoajbTrG
+
+    JQmrQ0sRo8DoHxcMr8hVaZc85k/8QZIN+Cw7kRUb7S/T1YKDc2wvhjQtXeZXgQBT
+
+    m02bKeW+WVp7iVZ69prNPLGOjbNfrUiBqUASJU6pJbTK0+8c/4n9XADCmtMSoKJu
+
+    4GKqkhthoLHKPhig83vOYo5dORr0IrPz+3gJwjvLMo+FivKZ+tNN6C6GGiHZTWyI
+
+    kQIDAQAB
+
+    -----END PUBLIC KEY-----'
+  admin_proof_key: 9cbd4a050976278c6dc2fec6d0c429ffa31d7d0601478cef3550adf57488ee34
+  env:
+    GITLAB_ROOT_PASSWORD: V7qZ2mK9pL4xN8cR6tY3
+    GITLAB_ACCESS_TOKEN: replace-me-after-gitlab-boot
+    OWNCLOUD_USERNAME: admin
+    OWNCLOUD_PASSWORD: openart-owncloud
+    OWNCLOUD_DB_ROOT_PASSWORD: openart-owncloud-root
+    OWNCLOUD_DB_PASSWORD: openart-owncloud-db
+services:
+  gitlab:
+    compose:
+      gitlab:
+        image: gitlab/gitlab-ce:latest
+        hostname: gitlab
+        shm_size: 256m
+        environment:
+          GITLAB_OMNIBUS_CONFIG: external_url '{{ url:gitlab:8929 }}'; gitlab_rails['initial_root_password']
+            = ENV['GITLAB_ROOT_PASSWORD']; prometheus_monitoring['enable'] = false;
+            gitlab_kas['enable'] = false; puma['worker_processes'] = 2; sidekiq['max_concurrency']
+            = 10; postgresql['shared_buffers'] = '256MB'; nginx['listen_port'] = 8929
+          GITLAB_ROOT_PASSWORD: ${GITLAB_ROOT_PASSWORD}
+        volumes:
+        - gitlab-config:/etc/gitlab
+        - gitlab-logs:/var/log/gitlab
+        - gitlab-data:/var/opt/gitlab
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - curl -fsS http://localhost:8929/-/health || exit 1
+          interval: 15s
+          timeout: 10s
+          retries: 120
+          start_period: 600s
+        ports:
+        - 127.0.0.1::8929
+    roles:
+      main: gitlab
+    ports: {}
+    host_ports: {}
+    task_env:
+      GITLAB_BASEURL: '{{ url:gitlab:8929 }}'
+      GITLAB_ACCESS_TOKEN: ${GITLAB_ACCESS_TOKEN}
+    requires: []
+    assets: []
+    bootstrap: gitlab_token
+  owncloud:
+    compose:
+      owncloud-db:
+        image: mariadb:10.11
+        environment:
+          MARIADB_ROOT_PASSWORD: ${OWNCLOUD_DB_ROOT_PASSWORD}
+          MARIADB_DATABASE: owncloud
+          MARIADB_USER: owncloud
+          MARIADB_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
+        volumes:
+        - owncloud-db:/var/lib/mysql
+        healthcheck:
+          test:
+          - CMD
+          - healthcheck.sh
+          - --connect
+          - --innodb_initialized
+          interval: 10s
+          timeout: 5s
+          retries: 20
+      owncloud-redis:
+        image: redis:7-alpine
+      owncloud:
+        image: owncloud/server:latest
+        depends_on:
+          owncloud-db:
+            condition: service_healthy
+          owncloud-redis:
+            condition: service_started
+        environment:
+          OWNCLOUD_DOMAIN: '{{ host:owncloud }}:8080'
+          OWNCLOUD_TRUSTED_DOMAINS: owncloud,localhost,127.0.0.1
+          OWNCLOUD_ADMIN_USERNAME: ${OWNCLOUD_USERNAME}
+          OWNCLOUD_ADMIN_PASSWORD: ${OWNCLOUD_PASSWORD}
+          OWNCLOUD_DB_TYPE: mysql
+          OWNCLOUD_DB_HOST: '{{ role_host:db }}'
+          OWNCLOUD_DB_NAME: owncloud
+          OWNCLOUD_DB_USERNAME: owncloud
+          OWNCLOUD_DB_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
+          OWNCLOUD_REDIS_ENABLED: 'true'
+          OWNCLOUD_REDIS_HOST: '{{ role_host:redis }}'
+        volumes:
+        - owncloud-data:/mnt/data
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - curl -fsS http://localhost:8080/status.php || exit 1
+          interval: 15s
+          timeout: 10s
+          retries: 40
+          start_period: 60s
+        ports:
+        - 127.0.0.1::8080
+    roles:
+      app: owncloud
+      db: owncloud-db
+      redis: owncloud-redis
+    ports: {}
+    host_ports: {}
+    task_env:
+      OWNCLOUD_URL: '{{ url:owncloud:8080 }}'
+      OWNCLOUD_USERNAME: ${OWNCLOUD_USERNAME}
+      OWNCLOUD_PASSWORD: ${OWNCLOUD_PASSWORD}
+    requires: []
+    assets: []
+  slack:
+    compose:
+      dtap-slack-pg:
+        image: postgres:16
+        environment:
+          POSTGRES_DB: slack_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-slack-pg-data:/var/lib/postgresql/data
+        - '{{ asset:slack/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d slack_sandbox -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-slack-api:
+        image: decodingtrustagent/slack:api-latest
+        environment:
+          SLACK_PG_HOST: '{{ pg_host }}'
+          SLACK_PG_PORT: '{{ pg_port }}'
+          SLACK_PG_DB: slack_sandbox
+          SLACK_PG_USER: sandbox
+          SLACK_PG_PASSWORD: sandbox
+          JWT_DATA_DIR: /var/lib/slack-auth
+          OAUTH_ACCESS_TOKEN_TTL: '31536000'
+          SLACK_FROM_EMAIL: noreply@slack.local
+          SLACK_API_HOST: '{{ bind_host }}'
+          SLACK_API_PORT: '{{ api_port }}'
+          SLACK_UI_URL: '{{ url:dtap-slack-ui:24501 }}'
+        admin: true
+        depends_on:
+          dtap-slack-pg:
+            condition: service_healthy
+        volumes:
+        - dtap-slack-auth:/var/lib/slack-auth
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:24500/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+      dtap-slack-ui:
+        image: decodingtrustagent/slack:ui-latest
+        depends_on:
+        - dtap-slack-api
+        environment:
+          SLACK_API_URL: '{{ url:dtap-slack-api:24500 }}'
+          SLACK_API_PORT: '24500'
+          SLACK_UI_PORT: '24501'
+    roles:
+      api: dtap-slack-api
+      ui: dtap-slack-ui
+      pg: dtap-slack-pg
+    ports:
+      api: '24500'
+      ui: '24501'
+      pg: '5432'
+    host_ports:
+      pg: '5479'
+    task_env:
+      DTAP_SLACK_URL: '{{ url:dtap-slack-ui:24501 }}'
+      DTAP_SLACK_HEALTH_URL: '{{ url:dtap-slack-api:24500 }}/health'
+      DTAP_SLACK_API_URL: '{{ url:dtap-slack-api:24500 }}'
+      DTAP_SLACK_UI_URL: '{{ url:dtap-slack-ui:24501 }}'
+    requires: []
+    assets:
+    - slack/init
+  calendar:
+    compose:
+      dtap-calendar-pg:
+        image: postgres:16
+        environment:
+          POSTGRES_DB: calendar_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-calendar-pg-data:/var/lib/postgresql/data
+        - '{{ asset:calendar/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d calendar_sandbox -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-calendar-api:
+        image: decodingtrustagent/google-calendar:api-latest
+        environment:
+          CALENDAR_API_HOST: '{{ bind_host }}'
+          CALENDAR_PG_HOST: '{{ pg_host }}'
+          CALENDAR_PG_PORT: '{{ pg_port }}'
+          CALENDAR_PG_DB: calendar_sandbox
+          CALENDAR_PG_USER: sandbox
+          CALENDAR_PG_PASSWORD: sandbox
+          CALENDAR_API_PORT: '{{ api_port }}'
+          GOOGLE_IDP_URL: '{{ url:dtap-google-idp:26110 }}'
+          OAUTH_ISSUER: google-idp
+          MY_AUDIENCE: gcalendar-api
+          GMAIL_API_URL: '{{ url:dtap-gmail-service:24002 }}'
+        admin: true
+        depends_on:
+          dtap-calendar-pg:
+            condition: service_healthy
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:24600/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+      dtap-calendar-ui:
+        image: decodingtrustagent/google-calendar:ui-latest
+        depends_on:
+        - dtap-calendar-api
+        environment:
+          REACT_APP_API_URL: '{{ url:dtap-calendar-api:24600 }}'
+          CALENDAR_API_URL: '{{ url:dtap-calendar-api:24600 }}'
+          CALENDAR_UI_PORT: '24601'
+    roles:
+      api: dtap-calendar-api
+      ui: dtap-calendar-ui
+      pg: dtap-calendar-pg
+    ports:
+      api: '24600'
+      ui: '24601'
+      pg: '5432'
+    host_ports:
+      pg: '5471'
+    task_env:
+      DTAP_CALENDAR_URL: '{{ url:dtap-calendar-ui:24601 }}'
+      DTAP_CALENDAR_HEALTH_URL: '{{ url:dtap-calendar-api:24600 }}/health'
+      DTAP_CALENDAR_API_URL: '{{ url:dtap-calendar-api:24600 }}'
+      DTAP_CALENDAR_UI_URL: '{{ url:dtap-calendar-ui:24601 }}'
+    requires:
+    - gmail
+    - google-idp
+    assets:
+    - calendar/init
+  google-idp:
+    compose:
+      dtap-google-idp-pg:
+        image: postgres:14
+        environment:
+          POSTGRES_DB: google_idp
+          POSTGRES_USER: idp
+          POSTGRES_PASSWORD: idp
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-google-idp-pg-data:/var/lib/postgresql/data
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U idp -d google_idp -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-google-idp:
+        image: decodingtrustagent/google-idp@sha256:5a4ad83cedd34cb0e3c802e25ef67a3a400599b13569d68b33c858be06fdcda6
+        working_dir: /app
+        environment:
+          IDP_API_HOST: '{{ bind_host }}'
+          IDP_PG_HOST: '{{ pg_host }}'
+          IDP_PG_PORT: '{{ pg_port }}'
+          IDP_PG_DB: google_idp
+          IDP_PG_USER: idp
+          IDP_PG_PASSWORD: idp
+          IDP_API_PORT: '{{ api_port }}'
+          OAUTH_ISSUER: google-idp
+          ACCESS_TOKEN_TTL_SEC: '31536000'
+          REFRESH_TOKEN_TTL_SEC: '31536000'
+          IDP_SEED_FILE: /seed/clients.json
+          JWT_DATA_DIR: /var/lib/google-idp-auth
+        admin: true
+        depends_on:
+          dtap-google-idp-pg:
+            condition: service_healthy
+        volumes:
+        - '{{ asset:google-idp/migrations }}:/migrations:ro'
+        - '{{ asset:google-idp/seed }}:/seed:ro'
+        - dtap-google-idp-auth:/var/lib/google-idp-auth
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:26110/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+        command:
+        - sh
+        - -c
+        - python3 /usr/local/bin/apply_migrations.py && uvicorn main:app --host {{
+          bind_host }} --port {{ api_port }}
+    roles:
+      api: dtap-google-idp
+      pg: dtap-google-idp-pg
+    ports:
+      api: '26110'
+      pg: '5432'
+    host_ports:
+      pg: '5476'
+    task_env: {}
+    requires: []
+    assets:
+    - google-idp/migrations
+    - google-idp/seed
+  gmail:
+    compose:
+      dtap-gmail-pg:
+        image: postgres:16
+        environment:
+          POSTGRES_DB: gmail_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-gmail-pg-data:/var/lib/postgresql/data
+        - '{{ asset:gmail/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d gmail_sandbox -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-gmail-service:
+        image: decodingtrustagent/gmail:service-latest
+        environment:
+          GMAIL_API_HOST: '{{ bind_host }}'
+          GMAIL_PG_HOST: '{{ pg_host }}'
+          GMAIL_PG_PORT: '{{ pg_port }}'
+          GMAIL_PG_DB: gmail_sandbox
+          GMAIL_PG_USER: sandbox
+          GMAIL_PG_PASSWORD: sandbox
+          ALLOWED_ORIGINS: '*'
+          AUTH_PORT: '24001'
+          PROXY_PORT: '24002'
+          MAILPIT_API_PORT: '24003'
+          GOOGLE_IDP_URL: '{{ url:dtap-google-idp:26110 }}'
+          OAUTH_ISSUER: google-idp
+          MY_AUDIENCE: gmail-api
+        admin: true
+        depends_on:
+          dtap-gmail-pg:
+            condition: service_healthy
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:24001/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+      dtap-gmail-ui:
+        image: decodingtrustagent/gmail:ui-latest
+        depends_on:
+        - dtap-gmail-service
+        environment:
+          USER_SERVICE_URL: '{{ url:dtap-gmail-service:24001 }}'
+          API_PROXY_URL: '{{ url:dtap-gmail-service:24002 }}'
+          GMAIL_FRONTEND_PORT: '24004'
+    roles:
+      api: dtap-gmail-service
+      ui: dtap-gmail-ui
+      pg: dtap-gmail-pg
+    ports:
+      api: '24001'
+      ui: '24004'
+      pg: '5432'
+    host_ports:
+      pg: '5470'
+    task_env:
+      DTAP_GMAIL_URL: '{{ url:dtap-gmail-ui:24004 }}'
+      DTAP_GMAIL_HEALTH_URL: '{{ url:dtap-gmail-service:24001 }}/health'
+      DTAP_GMAIL_SMTP_ADDR: '{{ host:dtap-gmail-service }}:24002'
+      DTAP_GMAIL_AUTH_URL: '{{ url:dtap-gmail-service:24001 }}'
+      DTAP_GMAIL_PROXY_URL: '{{ url:dtap-gmail-service:24002 }}'
+      DTAP_GMAIL_UI_URL: '{{ url:dtap-gmail-ui:24004 }}'
+      DTAP_GMAIL_FRONTEND_URL: '{{ url:dtap-gmail-ui:24004 }}'
+    requires:
+    - google-idp
+    assets:
+    - gmail/init
+  atlassian:
+    compose:
+      dtap-atlassian-pg:
+        image: postgres:16
+        environment:
+          POSTGRES_DB: jira
+          POSTGRES_USER: jira
+          POSTGRES_PASSWORD: jira
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-atlassian-pg-data:/var/lib/postgresql/data
+        - '{{ asset:atlassian/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U jira -d jira -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-atlassian-api:
+        image: decodingtrustagent/atlassian:api-latest
+        environment:
+          NODE_ENV: production
+          HOST: '{{ bind_host }}'
+          PORT: '{{ api_port }}'
+          DB_HOST: '{{ pg_host }}'
+          DB_PORT: '{{ pg_port }}'
+          DB_USER: jira
+          DB_PASSWORD: jira
+          DB_NAME: jira
+          OAUTH_DEFAULT_AUDIENCE: atlassian-api
+          OAUTH_ACCESS_TOKEN_TTL: '31536000'
+          JWT_DATA_DIR: /var/lib/atlassian-auth
+        admin: true
+        depends_on:
+          dtap-atlassian-pg:
+            condition: service_healthy
+        volumes:
+        - '{{ asset:atlassian/init/01_schema.sql }}:/app/01_schema.sql:ro'
+        - '{{ asset:atlassian/init/seed.sql }}:/app/seed.sql:ro'
+        - '{{ asset:atlassian/migrations }}:/app/migrations:ro'
+        - dtap-atlassian-auth:/var/lib/atlassian-auth
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25101/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+      dtap-atlassian-ui:
+        image: decodingtrustagent/atlassian:ui-latest
+        depends_on:
+        - dtap-atlassian-api
+        environment:
+          VITE_API_URL: '{{ url:dtap-atlassian-api:25101 }}/api'
+          NGINX_HOST: '{{ bind_host }}'
+          NGINX_PORT: '25102'
+          BACKEND_PORT: '25101'
+    roles:
+      api: dtap-atlassian-api
+      ui: dtap-atlassian-ui
+      pg: dtap-atlassian-pg
+    ports:
+      api: '25101'
+      ui: '25102'
+      pg: '25100'
+    host_ports:
+      pg: '5454'
+    task_env:
+      DTAP_ATLASSIAN_URL: '{{ url:dtap-atlassian-ui:25102 }}'
+      DTAP_ATLASSIAN_HEALTH_URL: '{{ url:dtap-atlassian-api:25101 }}/health'
+      DTAP_ATLASSIAN_PG_ADDR: '{{ pg_addr }}'
+      DTAP_ATLASSIAN_API_URL: '{{ url:dtap-atlassian-api:25101 }}'
+      DTAP_ATLASSIAN_UI_URL: '{{ url:dtap-atlassian-ui:25102 }}'
+    requires: []
+    assets:
+    - atlassian/init
+    - atlassian/migrations
+  github:
+    compose:
+      dtap-github-db:
+        image: decodingtrustagent/github:db-latest
+        environment:
+          POSTGRES_DB: app
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-github-db-data:/var/lib/postgresql/data
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U postgres -d app -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-github-api:
+        image: decodingtrustagent/github:api-latest
+        environment:
+          DB_HOST: '{{ pg_host }}'
+          DB_PORT: '{{ pg_port }}'
+          DATABASE_URL: postgres://postgres:postgres@{{ pg_host }}:{{ pg_port }}/app
+          PORT: '{{ api_port }}'
+          GITHUB_GIT_STORAGE_ROOT: /data/github-repos
+        admin: true
+        depends_on:
+          dtap-github-db:
+            condition: service_healthy
+        volumes:
+        - dtap-github-git:/data/github-repos
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25201/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+      dtap-github-ui:
+        image: decodingtrustagent/github:ui-latest
+        depends_on:
+        - dtap-github-api
+        environment:
+          GITHUB_API_URL: '{{ url:dtap-github-api:25201 }}'
+          GITHUB_UI_PORT: '25202'
+    roles:
+      api: dtap-github-api
+      ui: dtap-github-ui
+      pg: dtap-github-db
+    ports:
+      api: '25201'
+      ui: '25202'
+      pg: '25200'
+    host_ports:
+      pg: '25200'
+    task_env:
+      DTAP_GITHUB_URL: '{{ url:dtap-github-ui:25202 }}'
+      DTAP_GITHUB_HEALTH_URL: '{{ url:dtap-github-api:25201 }}/health'
+      DTAP_GITHUB_PG_ADDR: '{{ pg_addr }}'
+      DTAP_GITHUB_API_URL: '{{ url:dtap-github-api:25201 }}'
+      DTAP_GITHUB_UI_URL: '{{ url:dtap-github-ui:25202 }}'
+    requires: []
+    assets: []
+  googledocs:
+    compose:
+      dtap-googledocs-pg:
+        image: postgres:14
+        environment:
+          POSTGRES_DB: googledocs_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-googledocs-pg-data:/var/lib/postgresql/data
+        - '{{ asset:googledocs/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d googledocs_sandbox -p {{ pg_port
+            }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-googledocs-api:
+        image: decodingtrustagent/google-docs:api-latest
+        environment:
+          GOOGLEDOCS_API_HOST: '{{ bind_host }}'
+          GOOGLEDOCS_PG_HOST: '{{ pg_host }}'
+          GOOGLEDOCS_PG_PORT: '{{ pg_port }}'
+          GOOGLEDOCS_PG_DB: googledocs_sandbox
+          GOOGLEDOCS_PG_USER: sandbox
+          GOOGLEDOCS_PG_PASSWORD: sandbox
+          GOOGLEDOCS_API_PORT: '{{ api_port }}'
+          GOOGLE_IDP_URL: '{{ url:dtap-google-idp:26110 }}'
+          OAUTH_ISSUER: google-idp
+          MY_AUDIENCE: gdocs-api
+        admin: true
+        depends_on:
+          dtap-googledocs-pg:
+            condition: service_healthy
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25401/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+      dtap-googledocs-ui:
+        image: decodingtrustagent/google-docs:ui-latest
+        depends_on:
+        - dtap-googledocs-api
+        environment:
+          GOOGLEDOCS_FRONTEND_PORT: '25402'
+          GOOGLEDOCS_API_URL: '{{ url:dtap-googledocs-api:25401 }}'
+    roles:
+      api: dtap-googledocs-api
+      ui: dtap-googledocs-ui
+      pg: dtap-googledocs-pg
+    ports:
+      api: '25401'
+      ui: '25402'
+      pg: '5432'
+    host_ports:
+      pg: '5474'
+    task_env:
+      DTAP_GOOGLEDOCS_URL: '{{ url:dtap-googledocs-ui:25402 }}'
+      DTAP_GOOGLEDOCS_HEALTH_URL: '{{ url:dtap-googledocs-api:25401 }}/health'
+      DTAP_GOOGLEDOCS_PG_ADDR: '{{ pg_addr }}'
+      DTAP_GOOGLEDOCS_API_URL: '{{ url:dtap-googledocs-api:25401 }}'
+      DTAP_GOOGLEDOCS_FRONTEND_URL: '{{ url:dtap-googledocs-ui:25402 }}'
+    requires:
+    - google-idp
+    assets:
+    - googledocs/init
+  google-form:
+    compose:
+      dtap-google-form-pg:
+        image: postgres:16
+        environment:
+          POSTGRES_DB: googleform_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-google-form-pg-data:/var/lib/postgresql/data
+        - '{{ asset:google-form/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d googleform_sandbox -p {{ pg_port
+            }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-google-form-api:
+        image: decodingtrustagent/google-form:api-latest
+        environment:
+          GOOGLE_FORM_API_HOST: '{{ bind_host }}'
+          SCHEMA_PATH: /app/schemas/schema.json
+          ALLOW_ORIGINS: '*'
+          SCHEMA_INIT: /app/init/schema.sample.json
+          DATA_DIR: /app/data
+          GOOGLE_FORM_API_PORT: '{{ api_port }}'
+          FORM_PG_HOST: '{{ pg_host }}'
+          FORM_PG_PORT: '{{ pg_port }}'
+          FORM_PG_DB: googleform_sandbox
+          FORM_PG_USER: sandbox
+          FORM_PG_PASSWORD: sandbox
+          GOOGLE_IDP_URL: '{{ url:dtap-google-idp:26110 }}'
+          OAUTH_ISSUER: google-idp
+          FORMS_AUDIENCE: forms-api
+        admin: true
+        depends_on:
+          dtap-google-form-pg:
+            condition: service_healthy
+        volumes:
+        - '{{ asset:google-form/init }}:/app/init:ro'
+      dtap-google-form-ui:
+        image: decodingtrustagent/google-form:ui-latest
+        depends_on:
+        - dtap-google-form-api
+        environment:
+          VITE_API_BASE: /api
+          GOOGLE_FORM_UI_PORT: '25301'
+          GOOGLE_FORM_API_PORT: '25300'
+    roles:
+      api: dtap-google-form-api
+      ui: dtap-google-form-ui
+      pg: dtap-google-form-pg
+    ports:
+      api: '25300'
+      ui: '25301'
+      pg: '5432'
+    host_ports:
+      pg: '5475'
+    task_env:
+      DTAP_GOOGLE_FORM_URL: '{{ url:dtap-google-form-ui:25301 }}'
+      DTAP_GOOGLE_FORM_HEALTH_URL: '{{ url:dtap-google-form-api:25300 }}/health'
+      DTAP_GOOGLE_FORM_API_URL: '{{ url:dtap-google-form-api:25300 }}'
+      DTAP_GOOGLE_FORM_UI_URL: '{{ url:dtap-google-form-ui:25301 }}'
+    requires:
+    - google-idp
+    assets:
+    - google-form/init
+  zoom:
+    compose:
+      dtap-zoom-pg:
+        image: postgres:16
+        environment:
+          POSTGRES_DB: zoom_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-zoom-pg-data:/var/lib/postgresql/data
+        - '{{ asset:zoom/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d zoom_sandbox -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-zoom-api:
+        image: decodingtrustagent/zoom:api-latest
+        environment:
+          ZOOM_PG_HOST: '{{ pg_host }}'
+          ZOOM_PG_PORT: '{{ pg_port }}'
+          ZOOM_PG_DB: zoom_sandbox
+          ZOOM_PG_USER: sandbox
+          ZOOM_PG_PASSWORD: sandbox
+          ZOOM_API_HOST: '{{ bind_host }}'
+          ZOOM_API_PORT: '{{ api_port }}'
+          OAUTH_DEFAULT_AUDIENCE: zoom-api
+          OAUTH_ACCESS_TOKEN_TTL: '31536000'
+          JWT_DATA_DIR: /var/lib/zoom-auth
+        admin: true
+        depends_on:
+          dtap-zoom-pg:
+            condition: service_healthy
+        volumes:
+        - dtap-zoom-auth:/var/lib/zoom-auth
+        - dtap-zoom-data:/app/data
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:24700/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+      dtap-zoom-ui:
+        image: decodingtrustagent/zoom:ui-latest
+        depends_on:
+        - dtap-zoom-api
+        environment:
+          ZOOM_API_URL: '{{ url:dtap-zoom-api:24700 }}'
+          ZOOM_UI_PORT: '24701'
+    roles:
+      api: dtap-zoom-api
+      ui: dtap-zoom-ui
+      pg: dtap-zoom-pg
+    ports:
+      api: '24700'
+      ui: '24701'
+      pg: '5432'
+    host_ports:
+      pg: '5480'
+    task_env:
+      DTAP_ZOOM_URL: '{{ url:dtap-zoom-ui:24701 }}'
+      DTAP_ZOOM_HEALTH_URL: '{{ url:dtap-zoom-api:24700 }}/health'
+      DTAP_ZOOM_API_URL: '{{ url:dtap-zoom-api:24700 }}'
+      DTAP_ZOOM_UI_URL: '{{ url:dtap-zoom-ui:24701 }}'
+    requires: []
+    assets:
+    - zoom/init
+  paypal:
+    compose:
+      dtap-paypal-pg:
+        image: postgres:16
+        environment:
+          POSTGRES_DB: paypal_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-paypal-pg-data:/var/lib/postgresql/data
+        - '{{ asset:paypal/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d paypal_sandbox -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-paypal-api:
+        image: decodingtrustagent/paypal:api-latest
+        environment:
+          PAYPAL_PG_HOST: '{{ pg_host }}'
+          PAYPAL_PG_PORT: '{{ pg_port }}'
+          PAYPAL_PG_DB: paypal_sandbox
+          PAYPAL_PG_USER: sandbox
+          PAYPAL_PG_PASSWORD: sandbox
+          PAYPAL_API_PORT: '{{ api_port }}'
+          PAYPAL_STARTING_BALANCE: '100000'
+          JWT_DATA_DIR: /var/lib/paypal-auth
+          OAUTH_ACCESS_TOKEN_TTL: '31536000'
+        admin: true
+        depends_on:
+          dtap-paypal-pg:
+            condition: service_healthy
+        volumes:
+        - dtap-paypal-auth:/var/lib/paypal-auth
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25001/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+      dtap-paypal-ui:
+        image: decodingtrustagent/paypal:ui-latest
+        depends_on:
+        - dtap-paypal-api
+        environment:
+          PAYPAL_API_PORT: '25001'
+          PAYPAL_UI_PORT: '25002'
+    roles:
+      api: dtap-paypal-api
+      ui: dtap-paypal-ui
+      pg: dtap-paypal-pg
+    ports:
+      api: '25001'
+      ui: '25002'
+      pg: '25000'
+    host_ports:
+      pg: '5544'
+    task_env:
+      DTAP_PAYPAL_URL: '{{ url:dtap-paypal-ui:25002 }}'
+      DTAP_PAYPAL_HEALTH_URL: '{{ url:dtap-paypal-api:25001 }}/health'
+      DTAP_PAYPAL_PG_ADDR: '{{ pg_addr }}'
+      DTAP_PAYPAL_API_URL: '{{ url:dtap-paypal-api:25001 }}'
+      DTAP_PAYPAL_UI_URL: '{{ url:dtap-paypal-ui:25002 }}'
+    requires: []
+    assets:
+    - paypal/init
+  finance:
+    compose:
+      dtap-finance-pg:
+        image: postgres:16
+        environment:
+          POSTGRES_DB: finance_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-finance-pg-data:/var/lib/postgresql/data
+        - '{{ asset:finance/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d finance_sandbox -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-finance-web:
+        image: decodingtrustagent/finance:latest
+        environment:
+          FLASK_HOST: '{{ bind_host }}'
+          FLASK_PORT: '{{ api_port }}'
+          FINANCE_INITIAL_CASH: '100000.0'
+          FINANCE_PG_HOST: '{{ pg_host }}'
+          FINANCE_PG_PORT: '{{ pg_port }}'
+          FINANCE_PG_DB: finance_sandbox
+          FINANCE_PG_USER: sandbox
+          FINANCE_PG_PASSWORD: sandbox
+          JWT_DATA_DIR: /var/lib/finance-auth
+        admin: true
+        depends_on:
+          dtap-finance-pg:
+            condition: service_healthy
+        volumes:
+        - dtap-finance-auth:/var/lib/finance-auth
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:23000/api/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+    roles:
+      api: dtap-finance-web
+      pg: dtap-finance-pg
+    ports:
+      api: '23000'
+      pg: '5432'
+    host_ports:
+      pg: '5460'
+    task_env:
+      DTAP_FINANCE_URL: '{{ url:dtap-finance-web:23000 }}'
+      DTAP_FINANCE_HEALTH_URL: '{{ url:dtap-finance-web:23000 }}/api/health'
+    requires: []
+    assets:
+    - finance/init
+  legal:
+    compose:
+      dtap-legal-pg:
+        image: postgres:14
+        environment:
+          POSTGRES_DB: legal_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-legal-pg-data:/var/lib/postgresql/data
+        - '{{ asset:legal/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d legal_sandbox -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-legal-web:
+        image: decodingtrustagent/legal:latest
+        environment:
+          FLASK_HOST: '{{ bind_host }}'
+          FLASK_PORT: '{{ api_port }}'
+          LEGAL_PG_HOST: '{{ pg_host }}'
+          LEGAL_PG_PORT: '{{ pg_port }}'
+          LEGAL_PG_DB: legal_sandbox
+          LEGAL_PG_USER: sandbox
+          LEGAL_PG_PASSWORD: sandbox
+          LEGAL_PG_POOL_MAX: '16'
+          JWT_DATA_DIR: /var/lib/legal-auth
+        admin: true
+        depends_on:
+          dtap-legal-pg:
+            condition: service_healthy
+        volumes:
+        - dtap-legal-auth:/var/lib/legal-auth
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:23100/api/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+    roles:
+      api: dtap-legal-web
+      pg: dtap-legal-pg
+    ports:
+      api: '23100'
+      pg: '5432'
+    host_ports:
+      pg: '5462'
+    task_env:
+      DTAP_LEGAL_URL: '{{ url:dtap-legal-web:23100 }}'
+      DTAP_LEGAL_HEALTH_URL: '{{ url:dtap-legal-web:23100 }}/api/health'
+    requires: []
+    assets:
+    - legal/init
+  telegram:
+    compose:
+      dtap-telegram-pg:
+        image: decodingtrustagent/telegram:pg-latest
+        environment:
+          POSTGRES_DB: telegram_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-telegram-pg-data:/var/lib/postgresql/data
+        - '{{ asset:telegram/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d telegram_sandbox -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-telegram-api:
+        image: decodingtrustagent/telegram:api-latest
+        environment:
+          TELEGRAM_PG_HOST: '{{ pg_host }}'
+          TELEGRAM_PG_PORT: '{{ pg_port }}'
+          TELEGRAM_PG_DB: telegram_sandbox
+          TELEGRAM_PG_USER: sandbox
+          TELEGRAM_PG_PASSWORD: sandbox
+          TELEGRAM_API_HOST: '{{ bind_host }}'
+          TELEGRAM_API_PORT: '{{ api_port }}'
+          OAUTH_DEFAULT_AUDIENCE: telegram-api
+          OAUTH_ACCESS_TOKEN_TTL: '31536000'
+          JWT_DATA_DIR: /var/lib/telegram-auth
+        admin: true
+        depends_on:
+          dtap-telegram-pg:
+            condition: service_healthy
+        volumes:
+        - dtap-telegram-auth:/var/lib/telegram-auth
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25501/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+    roles:
+      api: dtap-telegram-api
+      pg: dtap-telegram-pg
+    ports:
+      api: '25501'
+      pg: '25500'
+    host_ports:
+      pg: '25500'
+    task_env:
+      DTAP_TELEGRAM_URL: '{{ url:dtap-telegram-api:25501 }}'
+      DTAP_TELEGRAM_HEALTH_URL: '{{ url:dtap-telegram-api:25501 }}/health'
+      DTAP_TELEGRAM_PG_ADDR: '{{ pg_addr }}'
+      DTAP_TELEGRAM_API_URL: '{{ url:dtap-telegram-api:25501 }}'
+    requires: []
+    assets:
+    - telegram/init
+  whatsapp:
+    compose:
+      dtap-whatsapp-pg:
+        image: postgres:14
+        environment:
+          POSTGRES_DB: whatsapp_sandbox
+          POSTGRES_USER: sandbox
+          POSTGRES_PASSWORD: sandbox
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-whatsapp-pg-data:/var/lib/postgresql/data
+        - '{{ asset:whatsapp/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U sandbox -d whatsapp_sandbox -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-whatsapp-api:
+        image: decodingtrustagent/whatsapp:api-latest
+        environment:
+          WHATSAPP_PG_HOST: '{{ pg_host }}'
+          WHATSAPP_PG_PORT: '{{ pg_port }}'
+          WHATSAPP_PG_DB: whatsapp_sandbox
+          WHATSAPP_PG_USER: sandbox
+          WHATSAPP_PG_PASSWORD: sandbox
+          WHATSAPP_API_PORT: '{{ api_port }}'
+          OAUTH_DEFAULT_AUDIENCE: whatsapp-api
+          OAUTH_ACCESS_TOKEN_TTL: '31536000'
+          JWT_DATA_DIR: /var/lib/whatsapp-auth
+        admin: true
+        depends_on:
+          dtap-whatsapp-pg:
+            condition: service_healthy
+        volumes:
+        - dtap-whatsapp-auth:/var/lib/whatsapp-auth
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25601/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+      dtap-whatsapp-ui:
+        image: decodingtrustagent/whatsapp:ui-latest
+        depends_on:
+        - dtap-whatsapp-api
+        environment:
+          WHATSAPP_FRONTEND_PORT: '25602'
+          WHATSAPP_API_URL: '{{ url:dtap-whatsapp-api:25601 }}'
+    roles:
+      api: dtap-whatsapp-api
+      ui: dtap-whatsapp-ui
+      pg: dtap-whatsapp-pg
+    ports:
+      api: '25601'
+      ui: '25602'
+      pg: '25600'
+    host_ports:
+      pg: '25600'
+    task_env:
+      DTAP_WHATSAPP_URL: '{{ url:dtap-whatsapp-ui:25602 }}'
+      DTAP_WHATSAPP_HEALTH_URL: '{{ url:dtap-whatsapp-api:25601 }}/health'
+      DTAP_WHATSAPP_PG_ADDR: '{{ pg_addr }}'
+      DTAP_WHATSAPP_API_URL: '{{ url:dtap-whatsapp-api:25601 }}'
+      DTAP_WHATSAPP_FRONTEND_URL: '{{ url:dtap-whatsapp-ui:25602 }}'
+    requires: []
+    assets:
+    - whatsapp/init
+  snowflake:
+    compose:
+      dtap-snowflake-pg:
+        image: decodingtrustagent/snowflake:latest
+        environment:
+          POSTGRES_DB: snowdb
+          POSTGRES_USER: snow
+          POSTGRES_PASSWORD: snow
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-snowflake-pg-data:/var/lib/postgresql/data
+        - '{{ asset:snowflake/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U snow -d snowdb -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-snowflake-admin:
+        image: decodingtrustagent/snowflake:admin
+        environment:
+          SNOWFLAKE_PG_HOST: '{{ pg_host }}'
+          SNOWFLAKE_PG_PORT: '{{ pg_port }}'
+          SNOWFLAKE_PG_DB: snowdb
+          SNOWFLAKE_PG_USER: snow
+          SNOWFLAKE_PG_PASSWORD: snow
+          SNOWFLAKE_API_HOST: '{{ bind_host }}'
+          SNOWFLAKE_API_PORT: '{{ api_port }}'
+          SNOWFLAKE_DATA_DIR: /app/data
+          SNOWFLAKE_WAREHOUSE_DIR: /app/warehouse
+          SEARCH_MODE: faiss
+          SEARCH_TABLE: product_search_view
+          SEARCH_COLUMNS: name,description
+          OAUTH_ISSUER: snowflake
+          OAUTH_DEFAULT_AUDIENCE: snowflake-api
+          OAUTH_ACCESS_TOKEN_TTL: '31536000'
+        admin: true
+        depends_on:
+          dtap-snowflake-pg:
+            condition: service_healthy
+        volumes:
+        - dtap-snowflake-data:/app/data
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25701/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+    roles:
+      api: dtap-snowflake-admin
+      pg: dtap-snowflake-pg
+    ports:
+      api: '25701'
+      pg: '25700'
+    host_ports:
+      pg: '25700'
+    task_env:
+      DTAP_SNOWFLAKE_URL: '{{ url:dtap-snowflake-admin:25701 }}'
+      DTAP_SNOWFLAKE_HEALTH_URL: '{{ url:dtap-snowflake-admin:25701 }}/health'
+      DTAP_SNOWFLAKE_PG_ADDR: '{{ pg_addr }}'
+      DTAP_SNOWFLAKE_ADMIN_URL: '{{ url:dtap-snowflake-admin:25701 }}'
+    requires: []
+    assets:
+    - snowflake/init
+  databricks:
+    compose:
+      dtap-databricks-pg:
+        image: decodingtrustagent/databricks:latest
+        environment:
+          POSTGRES_DB: dbxdb
+          POSTGRES_USER: dbx
+          POSTGRES_PASSWORD: dbx
+        command:
+        - postgres
+        - -c
+        - port={{ pg_port }}
+        - -c
+        - listen_addresses={{ pg_listen }}
+        volumes:
+        - dtap-databricks-pg-data:/var/lib/postgresql/data
+        - '{{ asset:databricks/init }}:/docker-entrypoint-initdb.d:ro'
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - pg_isready -h 127.0.0.1 -U dbx -d dbxdb -p {{ pg_port }}
+          interval: 5s
+          timeout: 5s
+          retries: 30
+          start_period: 20s
+      dtap-databricks-admin:
+        image: decodingtrustagent/databricks:admin
+        environment:
+          DATABRICKS_PG_HOST: '{{ pg_host }}'
+          DATABRICKS_PG_PORT: '{{ pg_port }}'
+          DATABRICKS_PG_DB: dbxdb
+          DATABRICKS_PG_USER: dbx
+          DATABRICKS_PG_PASSWORD: dbx
+          DATABRICKS_API_HOST: '{{ bind_host }}'
+          DATABRICKS_API_PORT: '{{ api_port }}'
+          DATABRICKS_DATA_DIR: /app/data
+          DATABRICKS_WAREHOUSE_DIR: /app/warehouse
+          SEARCH_MODE: faiss
+          SEARCH_TABLE: product_search_view
+          SEARCH_COLUMNS: name,description
+          OAUTH_ISSUER: databricks
+          OAUTH_DEFAULT_AUDIENCE: databricks-api
+          OAUTH_ACCESS_TOKEN_TTL: '31536000'
+        admin: true
+        depends_on:
+          dtap-databricks-pg:
+            condition: service_healthy
+        volumes:
+        - dtap-databricks-data:/app/data
+        healthcheck:
+          test:
+          - CMD-SHELL
+          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25801/health',
+            timeout=3)"
+          interval: 10s
+          timeout: 5s
+          retries: 12
+          start_period: 30s
+    roles:
+      api: dtap-databricks-admin
+      pg: dtap-databricks-pg
+    ports:
+      api: '25801'
+      pg: '25800'
+    host_ports:
+      pg: '25800'
+    task_env:
+      DTAP_DATABRICKS_URL: '{{ url:dtap-databricks-admin:25801 }}'
+      DTAP_DATABRICKS_HEALTH_URL: '{{ url:dtap-databricks-admin:25801 }}/health'
+      DTAP_DATABRICKS_PG_ADDR: '{{ pg_addr }}'
+      DTAP_DATABRICKS_ADMIN_URL: '{{ url:dtap-databricks-admin:25801 }}'
+    requires: []
+    assets:
+    - databricks/init
+  bigquery:
+    compose:
+      dtap-bigquery:
+        image: ghcr.io/goccy/bigquery-emulator:latest
+        command:
+        - --project=openart
+        - --port={{ api_port }}
+        - --grpc-port=25901
+        - --database=/var/lib/bigquery/emulator.db
+        volumes:
+        - dtap-bigquery-data:/var/lib/bigquery
+    roles:
+      api: dtap-bigquery
+    ports:
+      api: '25900'
+    host_ports: {}
+    task_env:
+      DTAP_BIGQUERY_URL: '{{ url:dtap-bigquery:25900 }}'
+      DTAP_BIGQUERY_API_URL: '{{ url:dtap-bigquery:25900 }}'
+      DTAP_BIGQUERY_API_ADDR: '{{ host:dtap-bigquery }}:25900'
+      DTAP_BIGQUERY_GRPC_ADDR: '{{ host:dtap-bigquery }}:25901'
+    requires: []
+    assets:
+    - bigquery/init

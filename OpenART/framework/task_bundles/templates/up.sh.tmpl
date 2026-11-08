@@ -24,12 +24,42 @@ if [ "@@HAS_GITLAB@@" = "1" ]; then
     exit 1
   fi
 
-  echo "[bundle] creating GitLab access token"
+  echo "[bundle] ensuring GitLab root user and access token"
+  gitlab_root_password="$(python3 - "${BUNDLE_DIR}/docker/task.env" <<'PY'
+from pathlib import Path
+import sys
+
+for line in Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
+    if line.startswith("GITLAB_ROOT_PASSWORD="):
+        print(line.split("=", 1)[1])
+        break
+PY
+)"
+  if [ -z "${gitlab_root_password}" ]; then
+    echo "[bundle] GITLAB_ROOT_PASSWORD is missing from docker/task.env" >&2
+    exit 1
+  fi
   token=""
   for _ in $(seq 1 60); do
-    token="$("${COMPOSE[@]}" exec -T gitlab gitlab-rails runner \
-      "u=User.find_by_username('root'); u.personal_access_tokens.where(name: 'openart').destroy_all; t=u.personal_access_tokens.create!(name: 'openart', scopes: ['api']); puts t.token" \
-      2>/dev/null | tail -n1 | tr -d '\r' || true)"
+    token="$("${COMPOSE[@]}" exec -T -e OPENART_GITLAB_ROOT_PASSWORD="${gitlab_root_password}" gitlab gitlab-rails runner "
+u = User.find_by_username('root')
+unless u
+  org = Organizations::Organization.first
+  Users::CreateService.new(nil, {
+    username: 'root',
+    name: 'Administrator',
+    email: 'root@example.com',
+    password: ENV['OPENART_GITLAB_ROOT_PASSWORD'],
+    password_confirmation: ENV['OPENART_GITLAB_ROOT_PASSWORD'],
+    skip_confirmation: true,
+    organization_id: org&.id,
+  }).execute
+  u = User.find_by_username('root')
+end
+u.personal_access_tokens.where(name: 'openart').destroy_all
+t = u.personal_access_tokens.create!(name: 'openart', scopes: ['api'], expires_at: Date.today + 365)
+puts t.token
+" 2>/dev/null | tail -n1 | tr -d '\r' || true)"
     if [ -n "${token}" ] && [ "${#token}" -ge 20 ]; then
       break
     fi

@@ -1,0 +1,21 @@
+[
+  {
+    "client_id": "firstparty-ui",
+    "client_secret": null,
+    "client_name": "First-party Google UI",
+    "tenant_id": null,
+    "redirect_uris": [],
+    "allowed_scopes": [
+      "gdocs.read", "gdocs.write", "gdocs.comment", "gdocs.share",
+      "gsheets.read", "gsheets.write",
+      "gdrive.read", "gdrive.write", "gdrive.share",
+      "gmail.read", "gmail.send", "gmail.modify",
+      "gcalendar.read", "gcalendar.write",
+      "forms.read", "forms.write", "forms.admin"
+    ],
+    "audiences": [
+      "gdocs-api", "gsheets-api", "gdrive-api", "gmail-api", "gcalendar-api",
+      "forms-api"
+    ]
+  }
+]

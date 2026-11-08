@@ -1,9 +1,139 @@
+"""Service catalog loading and task → service extraction.
+
+The framework intentionally knows nothing about concrete services.  It reads a
+catalog (``services/catalog/services.yaml`` by default) that describes the
+Compose services, endpoint environment, ports, assets, and dependencies for
+each logical service.  Adding a service is a catalog change.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import os
 from pathlib import Path
 from typing import Any, Iterable
+
+import yaml
+
+
+DEFAULT_CATALOG_PATH = Path(__file__).resolve().parents[2] / "services" / "catalog" / "services.yaml"
+
+
+@dataclass(frozen=True)
+class ServiceDefinition:
+    name: str
+    compose: dict[str, dict[str, Any]]
+    roles: dict[str, str]
+    ports: dict[str, str]
+    host_ports: dict[str, str]
+    task_env: dict[str, str]
+    requires: tuple[str, ...]
+    assets: tuple[str, ...]
+    bootstrap: str | None = None
+
+    @property
+    def compose_services(self) -> tuple[str, ...]:
+        return tuple(self.compose)
+
+
+@dataclass(frozen=True)
+class ServiceCatalog:
+    path: Path
+    services: dict[str, ServiceDefinition]
+    local_values: frozenset[str]
+    aliases: dict[str, str]
+    tool_prefixes: dict[str, str]
+    admin_public_key: str
+    admin_proof_key: str
+    env_defaults: dict[str, str]
+    credential_prefixes: tuple[str, ...]
+
+    def normalize_service(self, value: str) -> str:
+        text = str(value or "").strip().lower()
+        return self.aliases.get(text, text)
+
+    def infer_service(self, tool: str) -> str:
+        for prefix, target in self.tool_prefixes.items():
+            if not tool.startswith(prefix):
+                continue
+            if target == "@suffix":
+                return self.normalize_service(tool[len(prefix) :])
+            return self.normalize_service(target)
+        return ""
+
+    def resolve_service(self, tool: str, pool_service: str) -> str:
+        inferred = self.infer_service(tool)
+        if inferred:
+            return inferred
+        pool = self.normalize_service(pool_service)
+        if pool in self.local_values:
+            return ""
+        return pool
+
+    def expand(self, names: Iterable[str]) -> set[str]:
+        result = {name for name in names if name}
+        queue = list(result)
+        while queue:
+            definition = self.services.get(queue.pop())
+            if definition is None:
+                continue
+            for required in definition.requires:
+                if required in self.services and required not in result:
+                    result.add(required)
+                    queue.append(required)
+        return result
+
+    def compose_services_for(self, names: Iterable[str]) -> tuple[str, ...]:
+        result: list[str] = []
+        for name in sorted(set(names)):
+            definition = self.services.get(name)
+            if definition is None:
+                continue
+            for compose_name in definition.compose_services:
+                if compose_name not in result:
+                    result.append(compose_name)
+        return tuple(result)
+
+    def task_env_for(self, names: Iterable[str]) -> dict[str, str]:
+        env: dict[str, str] = {}
+        for name in sorted(set(names)):
+            definition = self.services.get(name)
+            if definition is None:
+                continue
+            env.update(definition.task_env)
+        return env
+
+    def health_env_for(self, names: Iterable[str]) -> dict[str, str]:
+        """Map each selected service to its task.env health URL key."""
+
+        result: dict[str, str] = {}
+        for name in sorted(set(names)):
+            definition = self.services.get(name)
+            if definition is None:
+                continue
+            for key in definition.task_env:
+                if key.endswith("_HEALTH_URL"):
+                    result[name] = key
+                    break
+        return result
+
+    def assets_for(self, names: Iterable[str]) -> dict[str, str]:
+        result: dict[str, str] = {}
+        for name in sorted(set(names)):
+            definition = self.services.get(name)
+            if definition is None:
+                continue
+            for asset in definition.assets:
+                result[asset] = asset
+        return result
+
+    def bootstrap_for(self, names: Iterable[str]) -> str:
+        for name in sorted(set(names)):
+            definition = self.services.get(name)
+            if definition is not None and definition.bootstrap:
+                return definition.bootstrap
+        return ""
 
 
 @dataclass(frozen=True)
@@ -16,133 +146,83 @@ class RequiredServices:
     tools: tuple[str, ...]
 
 
-# Logical service -> Compose service names.  Only these services are started.
-SERVICE_COMPOSE: dict[str, tuple[str, ...]] = {
-    "gitlab": ("gitlab",),
-    "owncloud": ("owncloud", "owncloud-db", "owncloud-redis"),
-    "finance": ("dtap-finance-web",),
-    "legal": ("dtap-legal-web",),
-    "gmail": ("dtap-gmail-mailpit", "dtap-gmail-service", "dtap-gmail-ui"),
-    "slack": ("dtap-slack-api", "dtap-slack-ui"),
-    "calendar": ("dtap-calendar-api", "dtap-calendar-ui"),
-    "zoom": ("dtap-zoom-api", "dtap-zoom-ui"),
-    "paypal": ("dtap-paypal-pg", "dtap-paypal-api", "dtap-paypal-ui"),
-    "atlassian": ("dtap-atlassian-pg", "dtap-atlassian-api", "dtap-atlassian-ui"),
-    "github": ("dtap-github-db", "dtap-github-api", "dtap-github-ui"),
-    "google-form": ("dtap-google-form-api", "dtap-google-form-ui"),
-    "googledocs": ("dtap-googledocs-db", "dtap-googledocs-api", "dtap-googledocs-ui"),
-    "telegram": ("dtap-telegram-pg", "dtap-telegram-api"),
-    "whatsapp": ("dtap-whatsapp-pg", "dtap-whatsapp-api", "dtap-whatsapp-ui"),
-    "snowflake": ("dtap-snowflake-pg", "dtap-snowflake-admin"),
-    "databricks": ("dtap-databricks-pg", "dtap-databricks-admin"),
-    "bigquery": ("dtap-bigquery",),
-}
+def _derive_credential_prefixes(
+    services: dict[str, ServiceDefinition],
+    env_defaults: dict[str, str],
+) -> tuple[str, ...]:
+    """Infer credential prefixes from catalog environment variable names.
+
+    A catalog can override this with ``selection.credential_prefixes``.  The
+    fallback keeps new services protected without editing framework code:
+    ``ACME_URL`` yields ``ACME_`` and ``DTAP_SLACK_URL`` yields ``DTAP_``.
+    """
+
+    prefixes: set[str] = set()
+    for key in env_defaults:
+        head, separator, _tail = key.partition("_")
+        if separator and head:
+            prefixes.add(f"{head.upper()}_")
+    for definition in services.values():
+        for key in definition.task_env:
+            head, separator, _tail = key.partition("_")
+            if separator and head:
+                prefixes.add(f"{head.upper()}_")
+    return tuple(sorted(prefixes))
 
 
-# Service endpoint variables understood by the openart-tools wrappers.  Hosts
-# are Compose service names; ports are the DTAP in-container ports.
-DTAP_SERVICE_ENV: dict[str, dict[str, str]] = {
-    "finance": {
-        "DTAP_FINANCE_URL": "http://dtap-finance-web:23000",
-        "DTAP_FINANCE_HEALTH_URL": "http://dtap-finance-web:23000/api/health",
-    },
-    "legal": {
-        "DTAP_LEGAL_URL": "http://dtap-legal-web:23100",
-        "DTAP_LEGAL_HEALTH_URL": "http://dtap-legal-web:23100/api/health",
-    },
-    "gmail": {
-        "DTAP_GMAIL_URL": "http://dtap-gmail-ui:24004",
-        "DTAP_GMAIL_HEALTH_URL": "http://dtap-gmail-service:24001/health",
-        "DTAP_GMAIL_SMTP_ADDR": "dtap-gmail-mailpit:24000",
-        "DTAP_GMAIL_AUTH_URL": "http://dtap-gmail-service:24001",
-        "DTAP_GMAIL_PROXY_URL": "http://dtap-gmail-service:24002",
-        "DTAP_GMAIL_UI_URL": "http://dtap-gmail-ui:24003",
-        "DTAP_GMAIL_FRONTEND_URL": "http://dtap-gmail-ui:24004",
-    },
-    "slack": {
-        "DTAP_SLACK_URL": "http://dtap-slack-ui:24501",
-        "DTAP_SLACK_HEALTH_URL": "http://dtap-slack-api:24500/health",
-        "DTAP_SLACK_API_URL": "http://dtap-slack-api:24500",
-        "DTAP_SLACK_UI_URL": "http://dtap-slack-ui:24501",
-    },
-    "calendar": {
-        "DTAP_CALENDAR_URL": "http://dtap-calendar-ui:24601",
-        "DTAP_CALENDAR_HEALTH_URL": "http://dtap-calendar-api:24600/health",
-        "DTAP_CALENDAR_API_URL": "http://dtap-calendar-api:24600",
-        "DTAP_CALENDAR_UI_URL": "http://dtap-calendar-ui:24601",
-    },
-    "zoom": {
-        "DTAP_ZOOM_URL": "http://dtap-zoom-ui:24701",
-        "DTAP_ZOOM_HEALTH_URL": "http://dtap-zoom-api:24700/health",
-        "DTAP_ZOOM_API_URL": "http://dtap-zoom-api:24700",
-        "DTAP_ZOOM_UI_URL": "http://dtap-zoom-ui:24701",
-    },
-    "paypal": {
-        "DTAP_PAYPAL_URL": "http://dtap-paypal-ui:25002",
-        "DTAP_PAYPAL_HEALTH_URL": "http://dtap-paypal-api:25001/health",
-        "DTAP_PAYPAL_PG_ADDR": "dtap-paypal-pg:25000",
-        "DTAP_PAYPAL_API_URL": "http://dtap-paypal-api:25001",
-        "DTAP_PAYPAL_UI_URL": "http://dtap-paypal-ui:25002",
-    },
-    "atlassian": {
-        "DTAP_ATLASSIAN_URL": "http://dtap-atlassian-ui:25102",
-        "DTAP_ATLASSIAN_HEALTH_URL": "http://dtap-atlassian-api:25101/health",
-        "DTAP_ATLASSIAN_PG_ADDR": "dtap-atlassian-pg:25100",
-        "DTAP_ATLASSIAN_API_URL": "http://dtap-atlassian-api:25101",
-        "DTAP_ATLASSIAN_UI_URL": "http://dtap-atlassian-ui:25102",
-    },
-    "github": {
-        "DTAP_GITHUB_URL": "http://dtap-github-ui:25202",
-        "DTAP_GITHUB_HEALTH_URL": "http://dtap-github-api:25201/health",
-        "DTAP_GITHUB_PG_ADDR": "dtap-github-db:25200",
-        "DTAP_GITHUB_API_URL": "http://dtap-github-api:25201",
-        "DTAP_GITHUB_UI_URL": "http://dtap-github-ui:25202",
-    },
-    "google-form": {
-        "DTAP_GOOGLE_FORM_URL": "http://dtap-google-form-ui:25301",
-        "DTAP_GOOGLE_FORM_HEALTH_URL": "http://dtap-google-form-api:25300/health",
-        "DTAP_GOOGLE_FORM_API_URL": "http://dtap-google-form-api:25300",
-        "DTAP_GOOGLE_FORM_UI_URL": "http://dtap-google-form-ui:25301",
-    },
-    "googledocs": {
-        "DTAP_GOOGLEDOCS_URL": "http://dtap-googledocs-ui:25402",
-        "DTAP_GOOGLEDOCS_HEALTH_URL": "http://dtap-googledocs-api:25401/health",
-        "DTAP_GOOGLEDOCS_PG_ADDR": "dtap-googledocs-db:25400",
-        "DTAP_GOOGLEDOCS_API_URL": "http://dtap-googledocs-api:25401",
-        "DTAP_GOOGLEDOCS_FRONTEND_URL": "http://dtap-googledocs-ui:25402",
-    },
-    "telegram": {
-        "DTAP_TELEGRAM_URL": "http://dtap-telegram-api:25501",
-        "DTAP_TELEGRAM_HEALTH_URL": "http://dtap-telegram-api:25501/health",
-        "DTAP_TELEGRAM_PG_ADDR": "dtap-telegram-pg:25500",
-        "DTAP_TELEGRAM_API_URL": "http://dtap-telegram-api:25501",
-    },
-    "whatsapp": {
-        "DTAP_WHATSAPP_URL": "http://dtap-whatsapp-ui:25602",
-        "DTAP_WHATSAPP_HEALTH_URL": "http://dtap-whatsapp-api:25601/health",
-        "DTAP_WHATSAPP_PG_ADDR": "dtap-whatsapp-pg:25600",
-        "DTAP_WHATSAPP_API_URL": "http://dtap-whatsapp-api:25601",
-        "DTAP_WHATSAPP_FRONTEND_URL": "http://dtap-whatsapp-ui:25602",
-    },
-    "snowflake": {
-        "DTAP_SNOWFLAKE_URL": "http://dtap-snowflake-admin:25701",
-        "DTAP_SNOWFLAKE_HEALTH_URL": "http://dtap-snowflake-admin:25701/health",
-        "DTAP_SNOWFLAKE_PG_ADDR": "dtap-snowflake-pg:25700",
-        "DTAP_SNOWFLAKE_ADMIN_URL": "http://dtap-snowflake-admin:25701",
-    },
-    "databricks": {
-        "DTAP_DATABRICKS_URL": "http://dtap-databricks-admin:25801",
-        "DTAP_DATABRICKS_HEALTH_URL": "http://dtap-databricks-admin:25801/health",
-        "DTAP_DATABRICKS_PG_ADDR": "dtap-databricks-pg:25800",
-        "DTAP_DATABRICKS_ADMIN_URL": "http://dtap-databricks-admin:25801",
-    },
-    "bigquery": {
-        "DTAP_BIGQUERY_URL": "http://dtap-bigquery:25900",
-        "DTAP_BIGQUERY_API_URL": "http://dtap-bigquery:25900",
-        "DTAP_BIGQUERY_API_ADDR": "dtap-bigquery:25900",
-        "DTAP_BIGQUERY_GRPC_ADDR": "dtap-bigquery:25901",
-    },
-}
+def load_service_catalog(path: str | Path | None = None) -> ServiceCatalog:
+    catalog_path = Path(
+        path
+        or os.environ.get("OPENART_SERVICE_CATALOG", "")
+        or DEFAULT_CATALOG_PATH
+    ).resolve()
+    payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"service catalog is not a mapping: {catalog_path}")
+
+    selection = payload.get("selection") if isinstance(payload.get("selection"), dict) else {}
+    defaults = payload.get("defaults") if isinstance(payload.get("defaults"), dict) else {}
+
+    services: dict[str, ServiceDefinition] = {}
+    for name, raw in (payload.get("services") or {}).items():
+        if not isinstance(raw, dict):
+            continue
+        compose = raw.get("compose") if isinstance(raw.get("compose"), dict) else {}
+        services[str(name)] = ServiceDefinition(
+            name=str(name),
+            compose={str(key): value for key, value in compose.items() if isinstance(value, dict)},
+            roles={str(key): str(value) for key, value in (raw.get("roles") or {}).items()},
+            ports={str(key): str(value) for key, value in (raw.get("ports") or {}).items()},
+            host_ports={str(key): str(value) for key, value in (raw.get("host_ports") or {}).items()},
+            task_env={str(key): str(value) for key, value in (raw.get("task_env") or {}).items()},
+            requires=tuple(str(item) for item in (raw.get("requires") or [])),
+            assets=tuple(str(item) for item in (raw.get("assets") or [])),
+            bootstrap=str(raw.get("bootstrap") or "") or None,
+        )
+
+    env_defaults = {str(key): str(value) for key, value in (defaults.get("env") or {}).items()}
+    credential_prefixes = tuple(
+        str(item).strip().upper()
+        for item in (selection.get("credential_prefixes") or [])
+        if str(item).strip()
+    ) or _derive_credential_prefixes(services, env_defaults)
+
+    return ServiceCatalog(
+        path=catalog_path,
+        services=services,
+        local_values=frozenset(str(item).strip().lower() for item in (selection.get("local_values") or [])),
+        aliases={
+            str(key).strip().lower(): str(value).strip().lower()
+            for key, value in (selection.get("aliases") or {}).items()
+        },
+        tool_prefixes={
+            str(key): str(value) for key, value in (selection.get("tool_prefixes") or {}).items()
+        },
+        admin_public_key=str(defaults.get("admin_public_key") or ""),
+        admin_proof_key=str(defaults.get("admin_proof_key") or ""),
+        env_defaults=env_defaults,
+        credential_prefixes=credential_prefixes,
+    )
 
 
 def _read_json(path: Path) -> Any:
@@ -182,75 +262,18 @@ def _tool_service_map(pool: Any) -> dict[str, str]:
     return result
 
 
-# Tool-pool ``service`` values that describe local tool categories rather than
-# external services.  They must never start a container.
-NON_SERVICE_CATEGORIES = frozenset(
-    {
-        "",
-        "dtap",
-        "workspace",
-        "document",
-        "tool",
-        "skill",
-        "registry",
-        "planner",
-        "local",
-    }
-)
-
-# Spelling differences between tool-pool metadata and Compose service names.
-SERVICE_ALIASES = {
-    "google_form": "google-form",
-    "googleform": "google-form",
-    "google_docs": "googledocs",
-    "google-docs": "googledocs",
-    "googledoc": "googledocs",
-    "google_calendar": "calendar",
-    "google-calendar": "calendar",
-}
-
-
-def _normalize_service(value: str) -> str:
-    text = str(value or "").strip().lower()
-    return SERVICE_ALIASES.get(text, text)
-
-
-def _infer_service(tool: str) -> str:
-    if tool.startswith("dtap."):
-        return _normalize_service(tool.split(".", 1)[1])
-    if tool.startswith("gitlab."):
-        return "gitlab"
-    if tool.startswith("owncloud."):
-        return "owncloud"
-    if tool.startswith("gitea."):
-        return "gitea"
-    if tool.startswith("mattermost."):
-        return "mattermost"
-    return ""
-
-
-def _resolve_service(tool: str, pool_service: str) -> str:
-    """Resolve a tool to a logical service.
-
-    A tool-name prefix is authoritative when it names a known service family.
-    Some planner tasks contain a generic pool value such as ``dtap`` for a
-    concrete ``dtap.atlassian`` tool, or a local category such as ``workspace``
-    for a file tool.  Only genuinely external services should survive.
-    """
-
-    inferred = _infer_service(tool)
-    if inferred:
-        return inferred
-    return _normalize_service(pool_service)
-
-
-def extract_required_services(task_root: str | Path) -> RequiredServices:
+def extract_required_services(
+    task_root: str | Path,
+    *,
+    catalog: ServiceCatalog | None = None,
+) -> RequiredServices:
     root = Path(task_root)
     graph_path = root / "tool_use_graph.json"
     pool_path = root / "tool_pool.json"
     if not graph_path.is_file():
         return RequiredServices((), (), (), ())
 
+    active_catalog = catalog or load_service_catalog()
     graph = _read_json(graph_path)
     tools = tool_names_from_graph(graph)
     by_tool: dict[str, str] = {}
@@ -260,45 +283,53 @@ def extract_required_services(task_root: str | Path) -> RequiredServices:
     found: set[str] = set()
     unknown: set[str] = set()
     for tool in tools:
-        service = _resolve_service(tool, by_tool.get(tool, ""))
-        if not service or service in NON_SERVICE_CATEGORIES:
+        service = active_catalog.resolve_service(tool, by_tool.get(tool, ""))
+        if not service or service in active_catalog.local_values:
             continue
-        if service in SERVICE_COMPOSE:
+        if service in active_catalog.services:
             found.add(service)
         else:
             unknown.add(service)
 
-    services = tuple(sorted(found))
-    compose_services: list[str] = []
-    for service in services:
-        for name in SERVICE_COMPOSE[service]:
-            if name not in compose_services:
-                compose_services.append(name)
+    expanded = active_catalog.expand(found)
     return RequiredServices(
-        services=services,
-        compose_services=tuple(compose_services),
+        services=tuple(sorted(expanded)),
+        compose_services=active_catalog.compose_services_for(expanded),
         unknown=tuple(sorted(unknown)),
         tools=tuple(sorted(tools)),
     )
 
 
-def service_env(services: Iterable[str]) -> dict[str, str]:
-    """Return task-side environment variables for the selected services."""
+def service_env(
+    services: Iterable[str],
+    *,
+    catalog: ServiceCatalog | None = None,
+) -> dict[str, str]:
+    """Return raw task-side environment templates for the selected services."""
 
-    env: dict[str, str] = {}
-    selected = set(services)
-    if "gitlab" in selected:
-        env["GITLAB_BASEURL"] = "http://gitlab:8929"
-        env["GITLAB_ACCESS_TOKEN"] = "${GITLAB_ACCESS_TOKEN}"
-    if "owncloud" in selected:
-        env["OWNCLOUD_URL"] = "http://owncloud:8080"
-        env["OWNCLOUD_USERNAME"] = "${OWNCLOUD_USERNAME}"
-        env["OWNCLOUD_PASSWORD"] = "${OWNCLOUD_PASSWORD}"
-    for service, values in DTAP_SERVICE_ENV.items():
-        if service in selected:
-            env.update(values)
-    return env
+    active_catalog = catalog or load_service_catalog()
+    return active_catalog.task_env_for(services)
 
 
-def compose_service_names(required: RequiredServices) -> tuple[str, ...]:
-    return required.compose_services
+def compose_service_names(
+    required: RequiredServices,
+    *,
+    catalog: ServiceCatalog | None = None,
+) -> tuple[str, ...]:
+    if required.compose_services:
+        return required.compose_services
+    active_catalog = catalog or load_service_catalog()
+    return active_catalog.compose_services_for(required.services)
+
+
+__all__ = [
+    "DEFAULT_CATALOG_PATH",
+    "RequiredServices",
+    "ServiceCatalog",
+    "ServiceDefinition",
+    "compose_service_names",
+    "extract_required_services",
+    "load_service_catalog",
+    "service_env",
+    "tool_names_from_graph",
+]

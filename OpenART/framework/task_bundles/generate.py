@@ -13,7 +13,12 @@ import yaml
 
 from framework.task_bundles.compose import build_compose, build_env, network_name, write_compose, write_env
 from framework.task_bundles.evaluator import parse_public_roots, write_public_roots
-from framework.task_bundles.services import extract_required_services
+from framework.task_bundles.services import (
+    DEFAULT_CATALOG_PATH,
+    ServiceCatalog,
+    extract_required_services,
+    load_service_catalog,
+)
 
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
@@ -47,6 +52,27 @@ def _copy_task(task_dir: Path, target: Path) -> None:
                 path.chmod(path.stat().st_mode | stat.S_IWUSR | stat.S_IXUSR)
             except OSError:
                 pass
+
+
+def _copy_service_assets(
+    catalog: ServiceCatalog,
+    required_services: tuple[str, ...],
+    destination: Path,
+) -> list[str]:
+    copied: list[str] = []
+    assets_root = catalog.path.parent / "assets"
+    for asset in sorted(set(catalog.assets_for(required_services))):
+        source = assets_root / asset
+        if not source.exists():
+            raise FileNotFoundError(f"service asset not found: {source}")
+        target = destination / "service_assets" / asset
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if source.is_dir():
+            shutil.copytree(source, target, dirs_exist_ok=True)
+        else:
+            shutil.copy2(source, target)
+        copied.append(asset)
+    return copied
 
 
 def _ports_env(openart_root: Path) -> str:
@@ -84,6 +110,7 @@ def generate_bundle(
     tool_store: str | Path = DEFAULT_TOOL_STORE,
     target_config: str = "",
     network_mode: str = "bridge",
+    service_catalog: str | Path = DEFAULT_CATALOG_PATH,
     force: bool = False,
 ) -> dict[str, Any]:
     task_root = Path(task_dir).resolve()
@@ -98,11 +125,12 @@ def generate_bundle(
     if output.exists() and any(output.iterdir()) and not force:
         raise FileExistsError(f"output directory is not empty: {output} (use --force)")
 
+    catalog = load_service_catalog(service_catalog)
     resolved_task_id = str(task_id or task_root.name).strip()
-    required = extract_required_services(task_root)
+    required = extract_required_services(task_root, catalog=catalog)
     roots = parse_public_roots(task_root)
-    env = build_env(resolved_task_id, required, network_mode=network_mode)
-    compose = build_compose(resolved_task_id, required, network_mode=network_mode)
+    env = build_env(resolved_task_id, required, network_mode=network_mode, catalog=catalog)
+    compose = build_compose(resolved_task_id, required, network_mode=network_mode, catalog=catalog)
 
     output.mkdir(parents=True, exist_ok=True)
     task_copy = output / "task"
@@ -112,11 +140,16 @@ def generate_bundle(
     _write(docker_dir / "task.env", "\n".join(f"{key}={value}" for key, value in env.items()) + "\n")
     _write(docker_dir / "ports.env", _ports_env(openart))
     write_compose(docker_dir / "docker-compose.yml", compose)
+    copied_assets = _copy_service_assets(catalog, required.services, docker_dir)
 
     services_json = json.dumps(list(required.services))
+    health_env_json = json.dumps(catalog.health_env_for(required.services))
     _write(
         docker_dir / "seed" / "seed_services.py",
-        _render("seed_services.py.tmpl", {"SERVICES_JSON": services_json}),
+        _render(
+            "seed_services.py.tmpl",
+            {"SERVICES_JSON": services_json, "HEALTH_ENV_JSON": health_env_json},
+        ),
         executable=True,
     )
 
@@ -150,14 +183,17 @@ def generate_bundle(
         _render("attacker_instruction.md.tmpl", {"NETWORK_NAME": network_name(resolved_task_id)}),
     )
 
+    bootstrap = catalog.bootstrap_for(required.services)
+    resolved_target_config = str(Path(target_config).resolve()) if target_config else ""
     common = {
         "TASK_ID": resolved_task_id,
         "NETWORK_NAME": network_name(resolved_task_id),
         "NETWORK_MODE": network_mode,
-        "HAS_GITLAB": "1" if "gitlab" in required.services else "0",
+        "HAS_GITLAB": "1" if bootstrap == "gitlab_token" else "0",
         "OPENART_ROOT": str(openart),
         "TOOL_STORE": str(Path(tool_store).resolve()),
-        "TARGET_CONFIG": target_config,
+        "TARGET_CONFIG": resolved_target_config,
+        "SERVICE_CATALOG": str(catalog.path),
     }
     _write(output / "up.sh", _render("up.sh.tmpl", common), executable=True)
     _write(output / "run.sh", _render("run.sh.tmpl", common), executable=True)
@@ -179,8 +215,10 @@ def generate_bundle(
         "public_roots": list(roots),
         "network_mode": network_mode,
         "network_name": network_name(resolved_task_id),
-        "target_config": target_config,
+        "target_config": resolved_target_config,
         "tool_store": str(Path(tool_store).resolve()),
+        "service_catalog": str(catalog.path),
+        "service_assets": copied_assets,
     }
 
 
@@ -193,6 +231,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--task-id", default="", help="Task id (defaults to the task directory name)")
     parser.add_argument("--openart-root", default=str(DEFAULT_OPENART_ROOT), help="OpenART checkout root")
     parser.add_argument("--tool-store", default=str(DEFAULT_TOOL_STORE), help="openart-tools store path")
+    parser.add_argument(
+        "--service-catalog",
+        default=str(DEFAULT_CATALOG_PATH),
+        help="Service catalog YAML (defaults to services/catalog/services.yaml)",
+    )
     parser.add_argument("--target-config", required=True, help="Explicit target config YAML")
     parser.add_argument("--network-mode", choices=["bridge", "host"], default="bridge")
     parser.add_argument("--force", action="store_true", help="Replace an existing output directory")
@@ -202,8 +245,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
+    catalog = load_service_catalog(args.service_catalog)
     if args.dry_run:
-        required = extract_required_services(args.task)
+        required = extract_required_services(args.task, catalog=catalog)
         roots = parse_public_roots(args.task)
         print(
             json.dumps(
@@ -214,6 +258,7 @@ def main(argv: list[str] | None = None) -> int:
                     "unknown_services": list(required.unknown),
                     "public_roots": list(roots),
                     "network_mode": args.network_mode,
+                    "service_catalog": str(catalog.path),
                 },
                 indent=2,
             )
@@ -227,6 +272,7 @@ def main(argv: list[str] | None = None) -> int:
         tool_store=args.tool_store,
         target_config=args.target_config,
         network_mode=args.network_mode,
+        service_catalog=args.service_catalog,
         force=args.force,
     )
     print(json.dumps(result, indent=2))

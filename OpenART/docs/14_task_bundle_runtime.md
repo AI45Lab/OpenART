@@ -16,6 +16,7 @@ openart-mid-000001/
 │   ├── docker-compose.yml      GitLab, ownCloud, selected DTAP services
 │   ├── task.env                service URLs, credentials, task id
 │   ├── ports.env               DTAP port defaults
+│   ├── service_assets/         catalog assets used by this task
 │   ├── seed/seed_services.py   loads workspace mirrors into the services
 │   └── attacker/
 │       ├── config.yaml         live-service attacker config
@@ -33,7 +34,7 @@ openart-mid-000001/
 - `tool_use_graph.json` — the tools the task's safe and unsafe workflows use
 - `tool_pool.json` — the `service` field for each tool
 
-It maps tool names to logical services and then to Compose services:
+It maps tool names to catalog services and then to Compose services:
 
 ```text
 dtap.slack          -> slack       -> dtap-slack-api, dtap-slack-ui
@@ -52,6 +53,45 @@ such as `google_form` to `google-form`, and skips local categories. On the
 current `mid` corpus this resolves all 1,046 tasks to known services with no
 unknown entries.
 
+## Service catalog
+
+Concrete service names, images, Compose definitions, ports, endpoint
+environment, dependencies, and seed assets live outside the framework in
+`services/catalog/services.yaml` (assets under `services/catalog/assets/`).
+The framework only knows the catalog schema and a small set of placeholders.
+Adding a service is therefore a catalog change, not a framework change:
+
+1. Add an entry under `services.services.<name>` with `compose`, `roles`,
+   `ports`, optional `host_ports`, `task_env`, `requires`, `assets`, and
+   optional `bootstrap`.
+2. Put any init SQL, migrations, or seed data under
+   `services/catalog/assets/<name>/` and list the paths in `assets`.
+3. If tools use a new name, add it to `selection.aliases`; if they use a new
+   prefix, add it to `selection.tool_prefixes`.
+4. Run `python -m framework.task_bundles.generate --dry-run` to confirm the
+   task resolves to the new service.
+
+`requires` is transitive: a service can depend on shared catalog services
+without repeating their Compose definitions. `bootstrap` selects a generic
+post-start step such as `gitlab_token`; omit it for services that need none.
+
+Catalog placeholders:
+
+```text
+{{ bind_host }}         0.0.0.0 in bridge, 127.0.0.1 in host mode
+{{ pg_host }}           role "pg" host: Compose DNS name or 127.0.0.1
+{{ pg_port }}           role "pg" port: container port or host-mapped port
+{{ pg_addr }}           "pg_host:pg_port" for the current service
+{{ role_host:<role> }}  host of a named role (db, redis, api, ...)
+{{ host:<compose> }}    Compose service DNS name, or 127.0.0.1 in host mode
+{{ url:<compose>:<p> }} http URL to a Compose service and port
+{{ api_port }}          service role "api" port
+{{ ui_port }}           service role "ui" port
+{{ asset:<path> }}      ./service_assets/<path> in the generated bundle
+```
+
+`--service-catalog` (or `OPENART_SERVICE_CATALOG`) overrides the catalog path.
+
 ## Generate a bundle
 
 ```bash
@@ -60,6 +100,7 @@ python -m framework.task_bundles.generate \
   --out /path/to/bundles/openart-mid-000001 \
   --target-config /path/to/target.yaml \
   --network-mode bridge \
+  --service-catalog services/catalog/services.yaml \
   --force
 ```
 
@@ -176,21 +217,32 @@ workspace.
 
 Use host mode only when a DTAP image cannot run on a bridge network.
 
-## Known Phase 0 checks
+## Validation status
 
-Before generating the full `mid` set:
+The bridge path was verified end to end on `openart-mid-000001`:
 
-1. Pull `gitlab/gitlab-ce`, `owncloud/server`, `mariadb`, `redis`, and one
-   DTAP image through the corporate proxy.
-2. Verify GitLab becomes healthy on `gitlab:8929`.
-3. Verify ownCloud becomes healthy on `owncloud:8080`.
-4. Verify one DTAP API works on the private bridge.
-5. Run `openart-mid-000001` with a live-service attacker and confirm the
-   exported GitLab/ownCloud files reach the evaluator.
+1. All 15 services for the task, including GitLab, ownCloud, PostgreSQL
+   sidecars, the Google IdP, and the DTAP APIs/UIs, became healthy on
+   `openart-mid-000001-net`.
+2. `up.sh` created the GitLab root user and personal access token, then
+   seeded GitLab and ownCloud from the task workspace.
+3. The live-service attacker joined the network and wrote a marker to both
+   GitLab and ownCloud when `OPENART_ATTACK_SERVICE_WRITE=1`.
+4. `export_services.py` ran before evaluation and copied the live state into
+   `gitlab_snapshots/` and `owncloud_uploads/`.
+5. The deterministic evaluator detected the exported marker in both roots.
+
+All 1,046 `mid` tasks resolve to catalog services with zero unknown names, and
+the generator produced one bundle per task without failures.
+
+GitLab's first boot performs database migrations and can take a long time on a
+busy host. The Compose health check allows 40 minutes. Reusing a per-task
+volume avoids repeated migrations; deleting volumes with `down.sh` restores a
+clean first boot.
 
 The DTAP images were originally documented for `network_mode: host`; bridge
-compatibility is the main unknown. The generator keeps host mode as the
-fallback.
+mode now works when the Docker daemon has working DNS and iptables. The
+generator keeps host mode as the fallback.
 
 ## Tests
 
@@ -198,5 +250,7 @@ fallback.
 pytest tests/unit/test_task_bundles.py -q
 ```
 
-The tests cover service extraction, evaluator-root parsing, Compose rendering,
-bundle generation, and the opt-in `service_state` permission.
+The tests cover catalog loading, service extraction, evaluator-root parsing,
+Compose rendering in bridge/host modes, bundle generation, adding a service
+through a temporary catalog without touching framework code, and the opt-in
+`service_state` permission.

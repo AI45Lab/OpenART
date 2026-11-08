@@ -7,10 +7,10 @@ from pathlib import Path
 import yaml
 
 from framework.attackers.models import AttackerSpec
-from framework.task_bundles.compose import build_compose
+from framework.task_bundles.compose import build_compose, build_env
 from framework.task_bundles.evaluator import parse_public_roots
 from framework.task_bundles.generate import generate_bundle
-from framework.task_bundles.services import extract_required_services
+from framework.task_bundles.services import extract_required_services, load_service_catalog
 
 
 def _write_task(root: Path) -> None:
@@ -88,6 +88,13 @@ def test_extract_required_services(tmp_path: Path) -> None:
     assert required.unknown == ()
 
 
+def test_default_catalog_declares_credential_prefixes() -> None:
+    catalog = load_service_catalog()
+    assert "DTAP_" in catalog.credential_prefixes
+    assert "GITLAB_" in catalog.credential_prefixes
+    assert "OWNCLOUD_" in catalog.credential_prefixes
+
+
 def test_parse_public_roots_normalizes_workspace_prefixes(tmp_path: Path) -> None:
     task = tmp_path / "task"
     task.mkdir()
@@ -149,7 +156,7 @@ def test_extract_skips_local_categories_and_normalizes_aliases(tmp_path: Path) -
         encoding="utf-8",
     )
     required = extract_required_services(task)
-    assert required.services == ("atlassian", "google-form")
+    assert required.services == ("atlassian", "google-form", "google-idp")
     assert required.unknown == ()
 
 
@@ -238,3 +245,93 @@ def test_attacker_service_state_is_opt_in() -> None:
     assert AttackerSpec(name="test", vector_permissions=["workspace_files"]).allows_service_state() is False
     assert AttackerSpec(name="test", vector_permissions=["workspace_files", "service_state"]).allows_service_state() is True
     assert AttackerSpec(name="test", vector_permissions=["SERVICE_STATE"]).allows_service_state() is True
+
+
+def test_task_env_addresses_follow_network_mode(tmp_path: Path) -> None:
+    task = tmp_path / "task"
+    task.mkdir()
+    (task / "tool_use_graph.json").write_text(
+        json.dumps({"nodes": [{"tool": "dtap.atlassian"}]}),
+        encoding="utf-8",
+    )
+    required = extract_required_services(task)
+    assert required.services == ("atlassian",)
+
+    bridge_env = build_env("openart-test-000002", required, network_mode="bridge")
+    assert bridge_env["DTAP_ATLASSIAN_PG_ADDR"] == "dtap-atlassian-pg:25100"
+    assert bridge_env["DTAP_ATLASSIAN_URL"] == "http://dtap-atlassian-ui:25102"
+
+    host_env = build_env("openart-test-000002", required, network_mode="host")
+    assert host_env["DTAP_ATLASSIAN_PG_ADDR"] == "127.0.0.1:5454"
+    assert host_env["DTAP_ATLASSIAN_URL"] == "http://127.0.0.1:25102"
+
+
+def test_new_service_is_added_by_catalog_only(tmp_path: Path) -> None:
+    catalog_path = tmp_path / "catalog" / "services.yaml"
+    catalog_path.parent.mkdir()
+    catalog_path.write_text(
+        yaml.safe_dump(
+            {
+                "version": 1,
+                "selection": {
+                    "local_values": ["", "workspace"],
+                    "tool_prefixes": {"dtap.": "@suffix"},
+                },
+                "defaults": {
+                    "admin_public_key": "public-key",
+                    "admin_proof_key": "proof-key",
+                    "env": {},
+                },
+                "services": {
+                    "shared": {
+                        "compose": {
+                            "shared-api": {
+                                "image": "example/shared:latest",
+                                "environment": {"SHARED_PORT": "{{ api_port }}"},
+                            }
+                        },
+                        "roles": {"api": "shared-api"},
+                        "ports": {"api": "26001"},
+                        "task_env": {"SHARED_URL": "{{ url:shared-api:26001 }}"},
+                    },
+                    "acme": {
+                        "compose": {
+                            "acme-api": {
+                                "image": "example/acme:latest",
+                                "environment": {"ACME_PORT": "{{ api_port }}"},
+                                "admin": True,
+                            }
+                        },
+                        "roles": {"api": "acme-api"},
+                        "ports": {"api": "26000"},
+                        "task_env": {"ACME_URL": "{{ url:acme-api:26000 }}"},
+                        "requires": ["shared"],
+                    }
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    catalog = load_service_catalog(catalog_path)
+    assert catalog.credential_prefixes == ("ACME_", "SHARED_")
+
+    task = tmp_path / "task"
+    task.mkdir()
+    (task / "tool_use_graph.json").write_text(
+        json.dumps({"nodes": [{"tool": "dtap.acme"}]}),
+        encoding="utf-8",
+    )
+    required = extract_required_services(task, catalog=catalog)
+    assert required.services == ("acme", "shared")
+    assert required.unknown == ()
+
+    compose = build_compose("openart-test-000003", required, catalog=catalog)
+    assert compose["services"]["acme-api"]["image"] == "example/acme:latest"
+    assert compose["services"]["shared-api"]["image"] == "example/shared:latest"
+    assert compose["services"]["acme-api"]["environment"]["DTAP_ADMIN_AUDIENCE"] == "acme-api"
+    assert compose["services"]["acme-api"]["environment"]["DTAP_BACKEND_PROOF_KEY"] == "proof-key"
+
+    env = build_env("openart-test-000003", required, catalog=catalog)
+    assert env["ACME_URL"] == "http://acme-api:26000"
+    assert env["SHARED_URL"] == "http://shared-api:26001"

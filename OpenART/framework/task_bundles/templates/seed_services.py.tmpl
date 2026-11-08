@@ -14,6 +14,7 @@ import yaml
 
 
 SERVICES = @@SERVICES_JSON@@
+HEALTH_URLS = @@HEALTH_ENV_JSON@@
 WORKSPACE = Path(os.environ.get("OPENART_SEED_WORKSPACE", "/bundle/workspace"))
 MAX_FILES = 200
 MAX_BYTES = 1_000_000
@@ -45,16 +46,17 @@ def _wait(url: str, session: requests.Session, timeout: float = 180.0) -> None:
     raise RuntimeError(f"service did not become ready: {url} ({last_error})")
 
 
-def wait_dtap() -> dict:
-    """Wait until every selected DTAP service answers on its health URL."""
+def wait_services() -> dict:
+    """Wait until every selected service publishes a healthy endpoint.
+
+    The catalog supplies the environment key for each service, so the
+    framework does not assume a service-name or health-URL convention.
+    """
 
     session = _session()
     ready: dict[str, str] = {}
-    for service in SERVICES:
-        if service in {"gitlab", "owncloud"}:
-            continue
-        key = "DTAP_" + service.upper().replace("-", "_") + "_HEALTH_URL"
-        url = _env(key) or _env(key.replace("_HEALTH_URL", "_URL"))
+    for service, key in HEALTH_URLS.items():
+        url = _env(key)
         if not url:
             continue
         _wait(url, session)
@@ -98,6 +100,30 @@ def _gitlab_project(base: str, session: requests.Session, headers: dict[str, str
     return {}
 
 
+def _find_project(
+    base: str,
+    session: requests.Session,
+    headers: dict[str, str],
+    full_path: str,
+    path: str,
+) -> dict:
+    existing = _gitlab_project(base, session, headers, full_path)
+    if existing:
+        return existing
+    response = session.get(
+        f"{base}/api/v4/projects",
+        headers=headers,
+        params={"search": path, "simple": "true", "per_page": 100},
+        timeout=30,
+    )
+    if response.status_code != 200:
+        return {}
+    for item in response.json() if isinstance(response.json(), list) else []:
+        if isinstance(item, dict) and item.get("path") == path:
+            return item
+    return {}
+
+
 def _ensure_group(base: str, session: requests.Session, headers: dict[str, str], name: str) -> dict:
     response = session.post(
         f"{base}/api/v4/groups",
@@ -132,8 +158,8 @@ def _ensure_project(
     if response.status_code in {200, 201}:
         return response.json()
     if response.status_code == 400 and "already been taken" in response.text.lower():
-        full_path = f"{namespace_path}/{path}" if namespace_path else path
-        existing = _gitlab_project(base, session, headers, full_path)
+        full_path = f"{namespace_path}/{path}" if namespace_path else f"root/{path}"
+        existing = _find_project(base, session, headers, full_path, path)
         if existing:
             return existing
     raise RuntimeError(f"could not create GitLab project {path}: {response.status_code} {response.text[:200]}")
@@ -291,8 +317,8 @@ def seed_owncloud() -> dict:
 def main() -> int:
     summary: dict[str, object] = {"services": SERVICES}
     try:
-        if any(service not in {"gitlab", "owncloud"} for service in SERVICES):
-            summary["dtap"] = wait_dtap()
+        if HEALTH_URLS:
+            summary["health"] = wait_services()
         if "gitlab" in SERVICES:
             summary["gitlab"] = seed_gitlab()
         if "owncloud" in SERVICES:

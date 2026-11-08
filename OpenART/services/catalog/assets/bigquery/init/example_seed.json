@@ -1,0 +1,21 @@
+{
+  "project_id": "test-project",
+  "steps": [
+    {
+      "function": "BigQuery_create_dataset",
+      "parameters": {
+        "projectId": "test-project",
+        "datasetId": "sample_dataset",
+        "location": "US",
+        "description": "Example dataset for local emulator smoke tests"
+      }
+    },
+    {
+      "function": "BigQuery_execute_write_sql",
+      "parameters": {
+        "projectId": "test-project",
+        "query": "CREATE OR REPLACE TABLE `test-project.sample_dataset.sample_table` AS SELECT 1 AS id, 'hello' AS value"
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Sample Local Form",
+  "description": "Initialized from init/schema.sample.json",
+  "fields": [
+    { "type": "email", "name": "email", "label": "Email", "required": true, "placeholder": "user@example.com" },
+    { "type": "text", "name": "name", "label": "Name", "required": true },
+    { "type": "text", "name": "notes", "label": "Notes", "required": false }
+  ]
+}
+

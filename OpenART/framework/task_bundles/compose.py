@@ -1,16 +1,27 @@
+"""Render a task bundle's Docker Compose document from a service catalog.
+
+No concrete service names or images live in this module.  The catalog supplies
+Compose definitions, endpoint variables, ports, assets, and dependencies; this
+module only expands a small set of bridge/host placeholders.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Iterable
-from urllib.parse import urlsplit, urlunsplit
+import re
+from typing import Any
 
 import yaml
 
-from framework.task_bundles.services import RequiredServices, SERVICE_COMPOSE, service_env
+from framework.task_bundles.services import (
+    RequiredServices,
+    ServiceCatalog,
+    ServiceDefinition,
+    load_service_catalog,
+)
 
 
-GITLAB_INTERNAL_URL = "http://gitlab:8929"
-OWNCLOUD_INTERNAL_URL = "http://owncloud:8080"
+_PLACEHOLDER = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
 
 
 def project_name(task_id: str) -> str:
@@ -24,378 +35,147 @@ def network_name(task_id: str) -> str:
     return f"{project_name(task_id)}-net"
 
 
-def _host_url(value: str) -> str:
-    """Rewrite an internal service URL to a host-loopback URL."""
-
-    text = str(value or "").strip()
-    if not text:
-        return text
-    if "://" in text:
-        parts = urlsplit(text)
-        if not parts.hostname:
-            return text
-        netloc = "127.0.0.1"
-        if parts.port:
-            netloc = f"{netloc}:{parts.port}"
-        return urlunsplit((parts.scheme, netloc, parts.path, parts.query, parts.fragment))
-    host, separator, port = text.rpartition(":")
-    if separator and host and port.isdigit():
-        return f"127.0.0.1:{port}"
-    return text
+def _service_host(service_name: str, network_mode: str) -> str:
+    return service_name if network_mode == "bridge" else "127.0.0.1"
 
 
-def build_env(task_id: str, required: RequiredServices, *, network_mode: str = "bridge") -> dict[str, str]:
-    defaults = {
-        "GITLAB_ROOT_PASSWORD": "openart-gitlab-root",
-        "GITLAB_ACCESS_TOKEN": "replace-me-after-gitlab-boot",
-        "OWNCLOUD_USERNAME": "admin",
-        "OWNCLOUD_PASSWORD": "openart-owncloud",
-        "OWNCLOUD_DB_ROOT_PASSWORD": "openart-owncloud-root",
-        "OWNCLOUD_DB_PASSWORD": "openart-owncloud-db",
-    }
-    env: dict[str, str] = {
-        "TASK_ID": task_id,
-        "COMPOSE_PROJECT_NAME": project_name(task_id),
-        **defaults,
-    }
-    for key, value in service_env(required.services).items():
-        env[key] = value
-    placeholders = {f"${{{key}}}": value for key, value in defaults.items()}
-    for key, value in list(env.items()):
-        if value in placeholders:
-            env[key] = placeholders[value]
-    if network_mode == "host":
-        for key, value in list(env.items()):
-            if key.startswith(("GITLAB_", "OWNCLOUD_", "DTAP_")):
-                env[key] = _host_url(value)
-    return env
+def _render_placeholder(match: re.Match[str], context: dict[str, Any]) -> str:
+    expression = match.group(1).strip()
+    network_mode = context["network_mode"]
+    definition: ServiceDefinition | None = context.get("definition")
+    catalog: ServiceCatalog = context["catalog"]
+
+    if expression == "bind_host":
+        return "0.0.0.0" if network_mode == "bridge" else "127.0.0.1"
+    if expression == "pg_listen":
+        return "*" if network_mode == "bridge" else "127.0.0.1"
+    if expression in {"admin_public_key", "admin_proof_key"}:
+        return getattr(catalog, expression)
+    if expression == "service_name":
+        return str(context.get("service_name", ""))
+
+    if expression == "pg_host" or expression.startswith(("role_host:", "host:")):
+        role_or_service = expression.split(":", 1)[1] if ":" in expression else "pg"
+        if expression == "pg_host" or expression.startswith("role_host:"):
+            if definition is None:
+                raise ValueError(f"{expression!r} is not valid outside a service definition")
+            service_name = definition.roles.get(role_or_service, role_or_service)
+        else:
+            service_name = role_or_service
+        return _service_host(service_name, network_mode)
+
+    if expression == "pg_port":
+        if definition is None:
+            raise ValueError("{{ pg_port }} is not valid outside a service definition")
+        bridge_port = definition.ports.get("pg", "5432")
+        if network_mode == "bridge":
+            return bridge_port
+        return definition.host_ports.get("pg", bridge_port)
+    if expression == "pg_addr":
+        if definition is None:
+            raise ValueError("{{ pg_addr }} is not valid outside a service definition")
+        pg_service = definition.roles.get("pg", "pg")
+        pg_host = _service_host(pg_service, network_mode)
+        bridge_port = definition.ports.get("pg", "5432")
+        pg_port = (
+            bridge_port
+            if network_mode == "bridge"
+            else definition.host_ports.get("pg", bridge_port)
+        )
+        return f"{pg_host}:{pg_port}"
+
+    if expression in {"api_port", "ui_port"}:
+        if definition is None:
+            raise ValueError(f"{{{{ {expression} }}}} is not valid outside a service definition")
+        role = expression.split("_", 1)[0]
+        if role not in definition.ports:
+            raise ValueError(f"{definition.name}: catalog is missing ports.{role}")
+        return definition.ports[role]
+
+    if expression.startswith("asset:"):
+        return f"./service_assets/{expression.split(':', 1)[1].strip('/')}"
+
+    if expression.startswith("url:"):
+        parts = expression.split(":", 2)
+        if len(parts) != 3:
+            raise ValueError(f"invalid url placeholder: {expression!r}")
+        return f"http://{_service_host(parts[1], network_mode)}:{parts[2]}"
+
+    raise ValueError(f"unknown service catalog placeholder: {expression!r}")
 
 
-def _dtap_base(image: str, *, network_mode: str, **extra: Any) -> dict[str, Any]:
-    service: dict[str, Any] = {
-        "image": image,
-        "restart": "unless-stopped",
-        "env_file": ["ports.env"],
-    }
+def _render_value(value: Any, context: dict[str, Any]) -> Any:
+    if isinstance(value, str):
+        return _PLACEHOLDER.sub(lambda match: _render_placeholder(match, context), value)
+    if isinstance(value, list):
+        return [_render_value(item, context) for item in value]
+    if isinstance(value, dict):
+        return {key: _render_value(item, context) for key, item in value.items()}
+    return value
+
+
+def _finalize_service(
+    compose_name: str,
+    definition: dict[str, Any],
+    *,
+    network_mode: str,
+    catalog: ServiceCatalog,
+) -> dict[str, Any]:
+    service = dict(definition)
+    admin = bool(service.pop("admin", False))
+    service.setdefault("restart", "unless-stopped")
+    service.setdefault("env_file", ["ports.env"])
     if network_mode == "host":
         service["network_mode"] = "host"
+        service.pop("networks", None)
+        service.pop("ports", None)
     else:
-        environment = dict(extra.pop("environment", {}) or {})
-        environment.setdefault("SERVICE_BIND_HOST", "0.0.0.0")
-        environment.setdefault("DTAP_HOST", "0.0.0.0")
-        extra["environment"] = environment
+        if "network_mode" in service:
+            raise ValueError(f"{compose_name}: catalog cannot force network_mode in bridge mode")
         service["networks"] = ["tasknet"]
-    service.update(extra)
+    if admin:
+        environment = dict(service.get("environment") or {})
+        environment["DTAP_ADMIN_PUBLIC_KEY"] = catalog.admin_public_key
+        environment["DTAP_ADMIN_AUDIENCE"] = compose_name
+        environment["DTAP_BACKEND_PROOF_KEY"] = catalog.admin_proof_key
+        service["environment"] = environment
     return service
 
 
-def _dtap_services(selected: Iterable[str], *, network_mode: str) -> dict[str, dict[str, Any]]:
-    selected = set(selected)
-    services: dict[str, dict[str, Any]] = {}
-    if "finance" in selected:
-        services["dtap-finance-web"] = _dtap_base("decodingtrustagent/finance:latest", network_mode=network_mode)
-    if "legal" in selected:
-        services["dtap-legal-web"] = _dtap_base("decodingtrustagent/legal:latest", network_mode=network_mode)
-    if "gmail" in selected:
-        services["dtap-gmail-mailpit"] = _dtap_base("axllent/mailpit:latest", network_mode=network_mode)
-        services["dtap-gmail-service"] = _dtap_base(
-            "decodingtrustagent/gmail:service-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-gmail-mailpit"],
-        )
-        services["dtap-gmail-ui"] = _dtap_base(
-            "decodingtrustagent/gmail:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-gmail-service"],
-        )
-    if "slack" in selected:
-        services["dtap-slack-api"] = _dtap_base("decodingtrustagent/slack:api-latest", network_mode=network_mode)
-        services["dtap-slack-ui"] = _dtap_base(
-            "decodingtrustagent/slack:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-slack-api"],
-        )
-    if "calendar" in selected:
-        services["dtap-calendar-api"] = _dtap_base("decodingtrustagent/google-calendar:api-latest", network_mode=network_mode)
-        services["dtap-calendar-ui"] = _dtap_base(
-            "decodingtrustagent/google-calendar:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-calendar-api"],
-        )
-    if "zoom" in selected:
-        services["dtap-zoom-api"] = _dtap_base("decodingtrustagent/zoom:api-latest", network_mode=network_mode)
-        services["dtap-zoom-ui"] = _dtap_base(
-            "decodingtrustagent/zoom:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-zoom-api"],
-        )
-    if "paypal" in selected:
-        services["dtap-paypal-pg"] = _dtap_base(
-            "postgres:16",
-            network_mode=network_mode,
-            command=["postgres", "-c", "port=25000"],
-            environment={
-                "POSTGRES_USER": "postgres",
-                "POSTGRES_PASSWORD": "postgres",
-                "POSTGRES_DB": "paypal",
-            },
-            volumes=["dtap-paypal-pg:/var/lib/postgresql/data"],
-        )
-        services["dtap-paypal-api"] = _dtap_base(
-            "decodingtrustagent/paypal:api-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-paypal-pg"],
-        )
-        services["dtap-paypal-ui"] = _dtap_base(
-            "decodingtrustagent/paypal:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-paypal-api"],
-        )
-    if "atlassian" in selected:
-        services["dtap-atlassian-pg"] = _dtap_base(
-            "postgres:16",
-            network_mode=network_mode,
-            command=["postgres", "-c", "port=25100"],
-            environment={
-                "POSTGRES_USER": "postgres",
-                "POSTGRES_PASSWORD": "postgres",
-                "POSTGRES_DB": "atlassian",
-            },
-            volumes=["dtap-atlassian-pg:/var/lib/postgresql/data"],
-        )
-        services["dtap-atlassian-api"] = _dtap_base(
-            "decodingtrustagent/atlassian:api-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-atlassian-pg"],
-        )
-        services["dtap-atlassian-ui"] = _dtap_base(
-            "decodingtrustagent/atlassian:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-atlassian-api"],
-        )
-    if "github" in selected:
-        services["dtap-github-db"] = _dtap_base(
-            "decodingtrustagent/github:db-latest",
-            network_mode=network_mode,
-            volumes=["dtap-github-db:/var/lib/postgresql/data"],
-        )
-        services["dtap-github-api"] = _dtap_base(
-            "decodingtrustagent/github:api-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-github-db"],
-        )
-        services["dtap-github-ui"] = _dtap_base(
-            "decodingtrustagent/github:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-github-api"],
-        )
-    if "google-form" in selected:
-        services["dtap-google-form-api"] = _dtap_base(
-            "decodingtrustagent/google-form:api-latest",
-            network_mode=network_mode,
-        )
-        services["dtap-google-form-ui"] = _dtap_base(
-            "decodingtrustagent/google-form:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-google-form-api"],
-        )
-    if "googledocs" in selected:
-        services["dtap-googledocs-db"] = _dtap_base(
-            "decodingtrustagent/google-docs:db-latest",
-            network_mode=network_mode,
-            volumes=["dtap-googledocs-db:/var/lib/postgresql/data"],
-        )
-        services["dtap-googledocs-api"] = _dtap_base(
-            "decodingtrustagent/google-docs:api-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-googledocs-db"],
-        )
-        services["dtap-googledocs-ui"] = _dtap_base(
-            "decodingtrustagent/google-docs:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-googledocs-api"],
-        )
-    if "telegram" in selected:
-        services["dtap-telegram-pg"] = _dtap_base(
-            "decodingtrustagent/telegram:pg-latest",
-            network_mode=network_mode,
-            volumes=["dtap-telegram-pg:/var/lib/postgresql/data"],
-        )
-        services["dtap-telegram-api"] = _dtap_base(
-            "decodingtrustagent/telegram:api-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-telegram-pg"],
-        )
-    if "whatsapp" in selected:
-        services["dtap-whatsapp-pg"] = _dtap_base(
-            "decodingtrustagent/whatsapp:pg",
-            network_mode=network_mode,
-            volumes=["dtap-whatsapp-pg:/var/lib/postgresql/data"],
-        )
-        services["dtap-whatsapp-api"] = _dtap_base(
-            "decodingtrustagent/whatsapp:api-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-whatsapp-pg"],
-        )
-        services["dtap-whatsapp-ui"] = _dtap_base(
-            "decodingtrustagent/whatsapp:ui-latest",
-            network_mode=network_mode,
-            depends_on=["dtap-whatsapp-api"],
-        )
-    if "snowflake" in selected:
-        services["dtap-snowflake-pg"] = _dtap_base(
-            "decodingtrustagent/snowflake:latest",
-            network_mode=network_mode,
-            volumes=["dtap-snowflake-pg:/var/lib/postgresql/data"],
-        )
-        services["dtap-snowflake-admin"] = _dtap_base(
-            "decodingtrustagent/snowflake:admin",
-            network_mode=network_mode,
-            depends_on=["dtap-snowflake-pg"],
-        )
-    if "databricks" in selected:
-        services["dtap-databricks-pg"] = _dtap_base(
-            "decodingtrustagent/databricks:latest",
-            network_mode=network_mode,
-            volumes=["dtap-databricks-pg:/var/lib/postgresql/data"],
-        )
-        services["dtap-databricks-admin"] = _dtap_base(
-            "decodingtrustagent/databricks:admin",
-            network_mode=network_mode,
-            depends_on=["dtap-databricks-pg"],
-        )
-    if "bigquery" in selected:
-        services["dtap-bigquery"] = _dtap_base(
-            "ghcr.io/goccy/bigquery-emulator:latest",
-            network_mode=network_mode,
-            command=["--project=openart", "--port=25900", "--grpc-port=25901"],
-            volumes=["dtap-bigquery-data:/data"],
-        )
-    return services
-
-
-def _gitlab_service(*, network_mode: str) -> dict[str, Any]:
-    external_url = "http://127.0.0.1:8929" if network_mode == "host" else GITLAB_INTERNAL_URL
-    omnibus = "; ".join(
-        [
-            f"external_url '{external_url}'",
-            "gitlab_rails['initial_root_password'] = ENV['GITLAB_ROOT_PASSWORD']",
-            "prometheus_monitoring['enable'] = false",
-            "gitlab_kas['enable'] = false",
-            "puma['worker_processes'] = 2",
-            "sidekiq['max_concurrency'] = 10",
-            "postgresql['shared_buffers'] = '256MB'",
-            "nginx['listen_port'] = 8929",
-        ]
-    )
-    service: dict[str, Any] = {
-        "image": "gitlab/gitlab-ce:latest",
-        "hostname": "gitlab",
-        "restart": "unless-stopped",
-        "shm_size": "256m",
-        "environment": {
-            "GITLAB_OMNIBUS_CONFIG": omnibus,
-            "GITLAB_ROOT_PASSWORD": "${GITLAB_ROOT_PASSWORD}",
-        },
-        "volumes": [
-            "gitlab-config:/etc/gitlab",
-            "gitlab-logs:/var/log/gitlab",
-            "gitlab-data:/var/opt/gitlab",
-        ],
-        "healthcheck": {
-            "test": ["CMD-SHELL", "curl -fsS http://localhost:8929/-/health || exit 1"],
-            "interval": "15s",
-            "timeout": "10s",
-            "retries": 60,
-            "start_period": "120s",
-        },
-    }
-    if network_mode == "host":
-        service["network_mode"] = "host"
-    else:
-        service["networks"] = ["tasknet"]
-        service["ports"] = ["127.0.0.1::8929"]
-    return service
-
-
-def _owncloud_services(*, network_mode: str) -> dict[str, dict[str, Any]]:
-    domain = "127.0.0.1:8080" if network_mode == "host" else "owncloud:8080"
-    db = {
-        "image": "mariadb:10.11",
-        "restart": "unless-stopped",
-        "environment": {
-            "MARIADB_ROOT_PASSWORD": "${OWNCLOUD_DB_ROOT_PASSWORD}",
-            "MARIADB_DATABASE": "owncloud",
-            "MARIADB_USER": "owncloud",
-            "MARIADB_PASSWORD": "${OWNCLOUD_DB_PASSWORD}",
-        },
-        "volumes": ["owncloud-db:/var/lib/mysql"],
-        "healthcheck": {
-            "test": ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"],
-            "interval": "10s",
-            "timeout": "5s",
-            "retries": 20,
-        },
-    }
-    redis = {"image": "redis:7-alpine", "restart": "unless-stopped"}
-    app: dict[str, Any] = {
-        "image": "owncloud/server:latest",
-        "restart": "unless-stopped",
-        "depends_on": {
-            "owncloud-db": {"condition": "service_healthy"},
-            "owncloud-redis": {"condition": "service_started"},
-        },
-        "environment": {
-            "OWNCLOUD_DOMAIN": domain,
-            "OWNCLOUD_TRUSTED_DOMAINS": "owncloud localhost 127.0.0.1",
-            "OWNCLOUD_ADMIN_USERNAME": "${OWNCLOUD_USERNAME}",
-            "OWNCLOUD_ADMIN_PASSWORD": "${OWNCLOUD_PASSWORD}",
-            "OWNCLOUD_DB_TYPE": "mysql",
-            "OWNCLOUD_DB_HOST": "owncloud-db",
-            "OWNCLOUD_DB_NAME": "owncloud",
-            "OWNCLOUD_DB_USERNAME": "owncloud",
-            "OWNCLOUD_DB_PASSWORD": "${OWNCLOUD_DB_PASSWORD}",
-            "OWNCLOUD_REDIS_ENABLED": "true",
-            "OWNCLOUD_REDIS_HOST": "owncloud-redis",
-        },
-        "volumes": ["owncloud-data:/mnt/data"],
-        "healthcheck": {
-            "test": ["CMD-SHELL", "curl -fsS http://localhost:8080/status.php || exit 1"],
-            "interval": "15s",
-            "timeout": "10s",
-            "retries": 40,
-            "start_period": "60s",
-        },
-    }
-    if network_mode == "host":
-        db["network_mode"] = "host"
-        redis["network_mode"] = "host"
-        app["network_mode"] = "host"
-    else:
-        db["networks"] = ["tasknet"]
-        redis["networks"] = ["tasknet"]
-        app["networks"] = ["tasknet"]
-        app["ports"] = ["127.0.0.1::8080"]
-    return {"owncloud-db": db, "owncloud-redis": redis, "owncloud": app}
-
-
-def _seed_service(required: RequiredServices, *, network_mode: str) -> dict[str, Any]:
-    depends: dict[str, Any] = {}
-    if "gitlab" in required.services:
-        depends["gitlab"] = {"condition": "service_healthy"}
-    if "owncloud" in required.services:
-        depends["owncloud"] = {"condition": "service_started"}
-    for service in required.services:
-        names = SERVICE_COMPOSE.get(service, ())
-        if not names or service in {"gitlab", "owncloud"}:
+def _seed_depends_on(
+    required: RequiredServices,
+    catalog: ServiceCatalog,
+) -> dict[str, dict[str, str]]:
+    depends: dict[str, dict[str, str]] = {}
+    for logical_name in required.services:
+        definition = catalog.services.get(logical_name)
+        if definition is None:
             continue
-        name = names[0]
-        depends[name] = {"condition": "service_started"}
+        target = (
+            definition.roles.get("api")
+            or definition.roles.get("app")
+            or definition.roles.get("main")
+            or next(iter(definition.compose), "")
+        )
+        if not target:
+            continue
+        compose_definition = definition.compose.get(target) or {}
+        condition = "service_healthy" if compose_definition.get("healthcheck") else "service_started"
+        depends[target] = {"condition": condition}
+    return depends
+
+
+def _seed_service(
+    required: RequiredServices,
+    catalog: ServiceCatalog,
+    *,
+    network_mode: str,
+) -> dict[str, Any]:
     service: dict[str, Any] = {
         "image": "openart/task-base:latest",
         "restart": "no",
         "profiles": ["seed"],
-        "depends_on": depends,
+        "depends_on": _seed_depends_on(required, catalog),
         "env_file": ["task.env"],
         "volumes": ["./seed:/seed:ro", "../task/workspace:/bundle/workspace:ro"],
         "command": ["/bin/bash", "-lc", "/opt/openart-venv/bin/python3 /seed/seed_services.py"],
@@ -407,19 +187,81 @@ def _seed_service(required: RequiredServices, *, network_mode: str) -> dict[str,
     return service
 
 
+def _collect_volumes(services: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    volumes: dict[str, Any] = {}
+    for service in services.values():
+        for volume in service.get("volumes", []) or []:
+            if not isinstance(volume, str):
+                continue
+            name = volume.split(":", 1)[0].strip()
+            if not name or name.startswith((".", "/")):
+                continue
+            volumes.setdefault(name, {})
+    return volumes
+
+
+def build_env(
+    task_id: str,
+    required: RequiredServices,
+    *,
+    network_mode: str = "bridge",
+    catalog: ServiceCatalog | None = None,
+) -> dict[str, str]:
+    active_catalog = catalog or load_service_catalog()
+    defaults = dict(active_catalog.env_defaults)
+    env: dict[str, str] = {
+        "TASK_ID": task_id,
+        "COMPOSE_PROJECT_NAME": project_name(task_id),
+        **defaults,
+    }
+    for logical_name in required.services:
+        definition = active_catalog.services.get(logical_name)
+        if definition is None:
+            continue
+        context = {
+            "network_mode": network_mode,
+            "catalog": active_catalog,
+            "definition": definition,
+            "logical_service": logical_name,
+        }
+        env.update(_render_value(dict(definition.task_env), context))
+    for key, value in list(env.items()):
+        for name, default in defaults.items():
+            value = value.replace(f"${{{name}}}", default)
+        env[key] = value
+    return env
+
+
 def build_compose(
     task_id: str,
     required: RequiredServices,
     *,
     network_mode: str = "bridge",
+    catalog: ServiceCatalog | None = None,
 ) -> dict[str, Any]:
+    active_catalog = catalog or load_service_catalog()
     services: dict[str, dict[str, Any]] = {}
-    if "gitlab" in required.services:
-        services["gitlab"] = _gitlab_service(network_mode=network_mode)
-    if "owncloud" in required.services:
-        services.update(_owncloud_services(network_mode=network_mode))
-    services.update(_dtap_services(required.services, network_mode=network_mode))
-    services["seed"] = _seed_service(required, network_mode=network_mode)
+    for logical_name in required.services:
+        definition = active_catalog.services.get(logical_name)
+        if definition is None:
+            continue
+        context = {
+            "network_mode": network_mode,
+            "catalog": active_catalog,
+            "definition": definition,
+            "logical_service": logical_name,
+        }
+        for compose_name, raw_definition in definition.compose.items():
+            service_context = {**context, "service_name": compose_name}
+            rendered = _render_value(raw_definition, service_context)
+            services[compose_name] = _finalize_service(
+                compose_name,
+                rendered,
+                network_mode=network_mode,
+                catalog=active_catalog,
+            )
+
+    services["seed"] = _seed_service(required, active_catalog, network_mode=network_mode)
 
     compose: dict[str, Any] = {
         "name": project_name(task_id),
@@ -432,15 +274,7 @@ def build_compose(
                 "driver": "bridge",
             }
         }
-    volumes: dict[str, Any] = {}
-    for service in services.values():
-        for volume in service.get("volumes", []) or []:
-            if not isinstance(volume, str):
-                continue
-            name = volume.split(":", 1)[0].strip()
-            if not name or name.startswith((".", "/")):
-                continue
-            volumes.setdefault(name, {})
+    volumes = _collect_volumes(services)
     if volumes:
         compose["volumes"] = volumes
     return compose
@@ -459,3 +293,13 @@ def write_env(path: str | Path, env: dict[str, str]) -> str:
     lines = [f"{key}={value}" for key, value in env.items()]
     target.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return str(target)
+
+
+__all__ = [
+    "build_compose",
+    "build_env",
+    "network_name",
+    "project_name",
+    "write_compose",
+    "write_env",
+]
