@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Start the task's services, create the GitLab token, and seed the services.
+set -euo pipefail
+
+BUNDLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMPOSE=(docker compose --env-file "${BUNDLE_DIR}/docker/task.env" -f "${BUNDLE_DIR}/docker/docker-compose.yml")
+
+echo "[bundle] starting services for @@TASK_ID@@"
+"${COMPOSE[@]}" up -d
+
+if [ "@@HAS_GITLAB@@" = "1" ]; then
+  echo "[bundle] waiting for GitLab health"
+  ready=0
+  for _ in $(seq 1 360); do
+    if "${COMPOSE[@]}" exec -T gitlab curl -fsS http://localhost:8929/-/health >/dev/null 2>&1; then
+      ready=1
+      break
+    fi
+    sleep 5
+  done
+  if [ "${ready}" != "1" ]; then
+    echo "[bundle] GitLab did not become healthy" >&2
+    "${COMPOSE[@]}" ps >&2 || true
+    exit 1
+  fi
+
+  echo "[bundle] creating GitLab access token"
+  token=""
+  for _ in $(seq 1 60); do
+    token="$("${COMPOSE[@]}" exec -T gitlab gitlab-rails runner \
+      "u=User.find_by_username('root'); u.personal_access_tokens.where(name: 'openart').destroy_all; t=u.personal_access_tokens.create!(name: 'openart', scopes: ['api']); puts t.token" \
+      2>/dev/null | tail -n1 | tr -d '\r' || true)"
+    if [ -n "${token}" ] && [ "${#token}" -ge 20 ]; then
+      break
+    fi
+    sleep 5
+  done
+  if [ -z "${token}" ] || [ "${#token}" -lt 20 ]; then
+    echo "[bundle] failed to create a GitLab access token" >&2
+    exit 1
+  fi
+  python3 - "${BUNDLE_DIR}/docker/task.env" "${token}" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+token = sys.argv[2]
+lines = []
+for line in path.read_text(encoding="utf-8").splitlines():
+    if line.startswith("GITLAB_ACCESS_TOKEN="):
+        line = f"GITLAB_ACCESS_TOKEN={token}"
+    lines.append(line)
+path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+PY
+  echo "[bundle] GitLab token written to docker/task.env"
+fi
+
+echo "[bundle] seeding services"
+if [ "@@HAS_GITLAB@@" = "1" ]; then
+  "${COMPOSE[@]}" run --rm -e GITLAB_ACCESS_TOKEN="${token}" seed
+else
+  "${COMPOSE[@]}" run --rm seed
+fi
+
+echo "[bundle] services ready"
+"${COMPOSE[@]}" ps

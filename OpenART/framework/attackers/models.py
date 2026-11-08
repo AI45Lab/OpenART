@@ -5,6 +5,7 @@ from typing import Any, Optional
 
 
 WORKSPACE_FILES_VECTOR = "workspace_files"
+SERVICE_STATE_VECTOR = "service_state"
 DEFAULT_ATTACKER_TIMEOUT_SECONDS = 7200
 
 
@@ -25,6 +26,7 @@ class AttackerSpec:
     timeout_seconds: int = DEFAULT_ATTACKER_TIMEOUT_SECONDS
     feedback_loop: bool = False
     vector_permissions: Optional[list[str]] = None
+    network: Optional[str] = None
     visibility_policy: dict[str, Any] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -47,17 +49,36 @@ class AttackerSpec:
             return True
         return WORKSPACE_FILES_VECTOR in permissions
 
+    def allows_service_state(self) -> bool:
+        """Live service access is opt-in.
+
+        A missing ``vector_permissions`` list keeps the historical
+        workspace-only behavior; callers must explicitly list
+        ``service_state`` to let the attacker join the task service network.
+        """
+
+        permissions = self.normalized_vector_permissions()
+        if permissions is None:
+            return False
+        return SERVICE_STATE_VECTOR in permissions
+
     def allowed_control_vectors(self, provider: Any | None = None) -> tuple[str, ...]:
         permissions = self.normalized_vector_permissions()
         if permissions is None:
             defaults = getattr(provider, "default_attacker_vectors", ()) if provider is not None else ()
             return tuple(str(item).strip().lower() for item in defaults if str(item).strip())
-        return tuple(item for item in permissions if item != WORKSPACE_FILES_VECTOR)
+        return tuple(
+            item
+            for item in permissions
+            if item not in {WORKSPACE_FILES_VECTOR, SERVICE_STATE_VECTOR}
+        )
 
     def resolved_vector_permissions(self, provider: Any | None = None) -> tuple[str, ...]:
         permissions = list(self.allowed_control_vectors(provider))
         if self.allows_workspace_files():
             permissions.insert(0, WORKSPACE_FILES_VECTOR)
+        if self.allows_service_state():
+            permissions.append(SERVICE_STATE_VECTOR)
         return tuple(permissions)
 
 

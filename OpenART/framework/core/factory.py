@@ -75,6 +75,28 @@ _LEGACY_TARGET_MODEL_FIELDS = ("model", "base_url", "api_base_url", "api_key", "
 _LEGACY_TARGET_SURFACE_FIELDS = ("control_plane", "control_plane_mount_mode")
 _OBSOLETE_TARGET_SURFACE_FIELDS = ("target_surface_mount_mode",)
 
+# Service-facing credentials. These are withheld from attackers unless the
+# attacker explicitly requests the ``service_state`` vector.
+_SERVICE_ENV_PREFIXES = (
+    "GITLAB_",
+    "OWNCLOUD_",
+    "DTAP_",
+    "GITEA_",
+    "NEXTCLOUD_",
+    "MATTERMOST_",
+    "PLANE_",
+    "MAILPIT_",
+    "MINIO_",
+    "LOCALSTACK_",
+)
+
+
+def _is_service_env_key(key: str) -> bool:
+    normalized = str(key or "").strip().upper()
+    if not normalized:
+        return False
+    return any(normalized.startswith(prefix) for prefix in _SERVICE_ENV_PREFIXES)
+
 
 # =============================================================================
 # ORCHESTRATOR FACTORY
@@ -741,13 +763,32 @@ class OrchestratorFactory:
         control_output_mount = "/workspace/.openart_target_control_output"
         feedback_mount = "/workspace/.openart_feedback"
 
+        service_state_allowed = attacker_spec.allows_service_state()
+        runtime_env = self._runtime_env()
+        if not service_state_allowed:
+            runtime_env = {
+                key: value
+                for key, value in runtime_env.items()
+                if not _is_service_env_key(key)
+            }
+        # Bundle runners use these two variables to opt into the live-service
+        # write channel without baking a marker into the generated config.
+        for key in ("OPENART_ATTACK_SERVICE_WRITE", "OPENART_ATTACKER_MARKER"):
+            value = os.environ.get(key, "")
+            if value:
+                runtime_env[key] = value
+        attacker_network = self._resolve_container_network(
+            "attacker",
+            explicit=attacker_spec.network if service_state_allowed else None,
+        )
+
         container_spec = ContainerSpec(
             name=f"openart-attacker-{self.run_id}",
             image=attacker_spec.image or DEFAULT_ATTACKER_IMAGE,
             command=["tail", "-f", "/dev/null"],
-            env=self._runtime_env(),
+            env=dict(runtime_env),
             working_dir="/workspace",
-            network=self._resolve_container_network("attacker"),
+            network=attacker_network,
             lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
             labels=self._container_labels("attacker"),
         )
@@ -765,7 +806,6 @@ class OrchestratorFactory:
             container_spec.mounts.append(MountSpec(host_path=str(live_control_output_dir), container_path=control_output_mount, read_only=False))
         container = RunnerContainer(container_spec)
 
-        runtime_env = self._runtime_env()
         resolved_vector_permissions = attacker_spec.resolved_vector_permissions(self._control_manager.provider)
         target_tool_names = [tool.name for tool in _parse_tool_specs((self.target_config or {}).get("tools"))]
         runtime_env["HOME"] = f"/tmp/openart/attackers/{attacker_spec.name}/home"
@@ -805,6 +845,10 @@ class OrchestratorFactory:
         for key, source in attacker_spec.env_from.items():
             runtime_env[key] = os.environ.get(source, "")
         runtime_env.update(attacker_spec.env)
+        if not service_state_allowed:
+            for key in list(runtime_env):
+                if _is_service_env_key(key):
+                    runtime_env.pop(key, None)
 
         target_instruction_path = self._container_task_path(self.bundle.target_instruction_path) or self.bundle.target_instruction_path
         attacker_instruction_container_path = self._container_task_path(attacker_instruction_path) or attacker_instruction_path

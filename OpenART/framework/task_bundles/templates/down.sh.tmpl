@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Stop the task's services and delete their state.
+set -euo pipefail
+
+BUNDLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMPOSE=(docker compose --env-file "${BUNDLE_DIR}/docker/task.env" -f "${BUNDLE_DIR}/docker/docker-compose.yml")
+
+"${COMPOSE[@]}" down -v --remove-orphans
+echo "[bundle] stopped @@TASK_ID@@ and removed volumes"

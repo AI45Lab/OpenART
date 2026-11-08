@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from dataclasses import replace
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -300,6 +301,8 @@ class Orchestrator:
             if target_exit_code != 0:
                 return self._runner_failure_result(run_id, "target", target_exit_code)
 
+            with self.timing.phase(f"pre_eval_hook_iter_{iteration:03d}_ms"):
+                self._run_pre_eval_hook(iteration)
             task_snapshot = self.task_container.snapshot()
             service_snapshots: dict[str, Any] = {}
             self._write_evaluator_inputs(task_snapshot, service_snapshots, iteration=iteration)
@@ -349,6 +352,8 @@ class Orchestrator:
         if best_result is not None:
             return self._normalize_final_result(best_result)
 
+        with self.timing.phase("pre_eval_hook_iter_001_ms"):
+            self._run_pre_eval_hook(1)
         task_snapshot = self.task_container.snapshot()
         service_snapshots: dict[str, Any] = {}
         self._write_evaluator_inputs(task_snapshot, service_snapshots, iteration=1)
@@ -650,6 +655,53 @@ class Orchestrator:
         with self._timing_event("attack.workspace_listing_after_phase", role="attack", category="workspace", phase=phase, attack_iteration=attack_iteration):
             self._capture_task_workspace_listing(f"after_attack_{phase}_{attack_iteration:03d}")
         return result
+
+    def _run_pre_eval_hook(self, iteration: int = 1) -> None:
+        """Run the task-container hook that materializes service state.
+
+        Bundled tasks can point ``OPENART_PRE_EVAL_HOOK`` at a script such as
+        ``/task/finalize/export_services.py``. The script runs inside the task
+        container before each workspace snapshot so its writes are visible to
+        the evaluator.
+        """
+
+        hook = str(os.environ.get("OPENART_PRE_EVAL_HOOK", "") or "").strip()
+        if not hook:
+            return
+        try:
+            timeout_seconds = max(1, int(os.environ.get("OPENART_PRE_EVAL_HOOK_TIMEOUT_SECONDS", "300") or 300))
+        except ValueError:
+            timeout_seconds = 300
+        env = dict(getattr(getattr(self.task_container, "spec", None), "env", {}) or {})
+        with self._timing_event(
+            "evaluator.pre_eval_hook",
+            role="framework",
+            category="evaluator",
+            iteration=iteration,
+            phase="pre_eval",
+        ) as event:
+            code, stdout, stderr = self.task_container.exec(
+                ["/bin/bash", "-lc", hook],
+                env=env,
+                timeout_seconds=timeout_seconds,
+            )
+            if event is not None:
+                event.metadata["exit_code"] = code
+                event.metadata["hook"] = hook
+        output = (stdout or "").strip()
+        error = (stderr or "").strip()
+        if output:
+            append_runtime_log(
+                f"[openart] pre-eval hook: {output[:1000]}",
+                self._run_dir() / "runtime.log",
+            )
+        if code != 0:
+            detail = error or output or "no output"
+            append_runtime_log(
+                f"[openart] pre-eval hook failed (exit {code}): {detail[:2000]}",
+                self._run_dir() / "runtime.log",
+            )
+            raise RuntimeError(f"pre-eval hook failed with exit code {code}: {detail}")
 
     def _materialize_base_control(self, run_id: str) -> None:
         if not self.control_manager.enabled():

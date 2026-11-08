@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Run the target and the live-service attacker for this bundle.
+set -euo pipefail
+
+BUNDLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OPENART_ROOT="${OPENART_ROOT:-@@OPENART_ROOT@@}"
+TOOL_STORE="${OPENART_TOOL_STORE:-@@TOOL_STORE@@}"
+TARGET_CONFIG="${OPENART_TARGET_CONFIG:-@@TARGET_CONFIG@@}"
+PYTHON="${OPENART_PYTHON:-python3}"
+
+if [ ! -f "${TARGET_CONFIG}" ]; then
+  echo "[bundle] target config not found: ${TARGET_CONFIG}" >&2
+  echo "[bundle] set OPENART_TARGET_CONFIG to an explicit target config yaml" >&2
+  exit 1
+fi
+
+set -a
+# shellcheck disable=SC1091
+source "${BUNDLE_DIR}/docker/task.env"
+set +a
+
+if [ "@@NETWORK_MODE@@" = "host" ]; then
+  export OPENART_TASK_DOCKER_NETWORK=host
+  export OPENART_TARGET_DOCKER_NETWORK=host
+  export OPENART_ATTACKER_DOCKER_NETWORK=host
+else
+  export OPENART_TASK_DOCKER_NETWORK="@@NETWORK_NAME@@"
+  export OPENART_TARGET_DOCKER_NETWORK="@@NETWORK_NAME@@"
+  export OPENART_ATTACKER_DOCKER_NETWORK="@@NETWORK_NAME@@"
+fi
+
+export OPENART_PRE_EVAL_HOOK="${OPENART_PRE_EVAL_HOOK:-/opt/openart-venv/bin/python3 /task/finalize/export_services.py}"
+export OPENART_PRE_EVAL_HOOK_TIMEOUT_SECONDS="${OPENART_PRE_EVAL_HOOK_TIMEOUT_SECONDS:-300}"
+export PYTHONPATH="${OPENART_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
+
+echo "[bundle] running @@TASK_ID@@"
+echo "[bundle] target config: ${TARGET_CONFIG}"
+echo "[bundle] task network:  ${OPENART_TASK_DOCKER_NETWORK}"
+
+exec "${PYTHON}" -m framework.cli run \
+  --task "${BUNDLE_DIR}/task" \
+  --tool-store "${TOOL_STORE}" \
+  --target-config "${TARGET_CONFIG}" \
+  --attacker-config "${BUNDLE_DIR}/docker/attacker/config.yaml" \
+  --output-dir "${BUNDLE_DIR}/runs" \
+  "$@"

@@ -1,0 +1,308 @@
+#!/usr/bin/env python3
+"""Seed the task's live services from the bundled workspace mirrors."""
+
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+import sys
+from urllib.parse import quote
+
+import requests
+import yaml
+
+
+SERVICES = @@SERVICES_JSON@@
+WORKSPACE = Path(os.environ.get("OPENART_SEED_WORKSPACE", "/bundle/workspace"))
+MAX_FILES = 200
+MAX_BYTES = 1_000_000
+
+
+def _env(name: str, default: str = "") -> str:
+    return str(os.environ.get(name, default) or "").strip()
+
+
+def _session() -> requests.Session:
+    session = requests.Session()
+    session.trust_env = False
+    return session
+
+
+def _wait(url: str, session: requests.Session, timeout: float = 180.0) -> None:
+    import time
+
+    deadline = time.time() + timeout
+    last_error = ""
+    while time.time() < deadline:
+        try:
+            response = session.get(url, timeout=5)
+            if response.status_code < 500:
+                return
+        except requests.RequestException as exc:
+            last_error = str(exc)
+        time.sleep(2)
+    raise RuntimeError(f"service did not become ready: {url} ({last_error})")
+
+
+def wait_dtap() -> dict:
+    """Wait until every selected DTAP service answers on its health URL."""
+
+    session = _session()
+    ready: dict[str, str] = {}
+    for service in SERVICES:
+        if service in {"gitlab", "owncloud"}:
+            continue
+        key = "DTAP_" + service.upper().replace("-", "_") + "_HEALTH_URL"
+        url = _env(key) or _env(key.replace("_HEALTH_URL", "_URL"))
+        if not url:
+            continue
+        _wait(url, session)
+        ready[service] = url
+    return ready
+
+
+def _text_files(root: Path, limit: int = MAX_FILES) -> list[tuple[Path, str]]:
+    result: list[tuple[Path, str]] = []
+    if not root.is_dir():
+        return result
+    for path in sorted(root.rglob("*")):
+        if len(result) >= limit:
+            break
+        if not path.is_file() or ".git" in path.parts:
+            continue
+        try:
+            if path.stat().st_size > MAX_BYTES:
+                continue
+            data = path.read_bytes()
+            if b"\x00" in data:
+                continue
+            text = data.decode("utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        result.append((path, text))
+    return result
+
+
+def _gitlab_headers() -> dict[str, str]:
+    token = _env("GITLAB_ACCESS_TOKEN")
+    if not token:
+        raise RuntimeError("GITLAB_ACCESS_TOKEN is not set")
+    return {"PRIVATE-TOKEN": token, "Accept": "application/json"}
+
+
+def _gitlab_project(base: str, session: requests.Session, headers: dict[str, str], path: str) -> dict:
+    response = session.get(f"{base}/api/v4/projects/{quote(path, safe='')}", headers=headers, timeout=30)
+    if response.status_code == 200:
+        return response.json()
+    return {}
+
+
+def _ensure_group(base: str, session: requests.Session, headers: dict[str, str], name: str) -> dict:
+    response = session.post(
+        f"{base}/api/v4/groups",
+        headers=headers,
+        json={"name": name, "path": name, "visibility": "internal"},
+        timeout=30,
+    )
+    if response.status_code in {200, 201}:
+        return response.json()
+    if response.status_code == 400 and "already been taken" in response.text.lower():
+        existing = session.get(f"{base}/api/v4/groups/{quote(name, safe='')}", headers=headers, timeout=30)
+        if existing.status_code == 200:
+            return existing.json()
+    raise RuntimeError(f"could not create GitLab group {name}: {response.status_code} {response.text[:200]}")
+
+
+def _ensure_project(
+    base: str,
+    session: requests.Session,
+    headers: dict[str, str],
+    name: str,
+    path: str,
+    *,
+    namespace_id: int | None = None,
+    namespace_path: str = "",
+    visibility: str = "internal",
+) -> dict:
+    payload = {"name": name, "path": path, "visibility": visibility}
+    if namespace_id:
+        payload["namespace_id"] = namespace_id
+    response = session.post(f"{base}/api/v4/projects", headers=headers, json=payload, timeout=60)
+    if response.status_code in {200, 201}:
+        return response.json()
+    if response.status_code == 400 and "already been taken" in response.text.lower():
+        full_path = f"{namespace_path}/{path}" if namespace_path else path
+        existing = _gitlab_project(base, session, headers, full_path)
+        if existing:
+            return existing
+    raise RuntimeError(f"could not create GitLab project {path}: {response.status_code} {response.text[:200]}")
+
+
+def _ensure_file(
+    base: str,
+    session: requests.Session,
+    headers: dict[str, str],
+    project_id: int,
+    file_path: str,
+    content: str,
+) -> None:
+    url = f"{base}/api/v4/projects/{project_id}/repository/files/{quote(file_path, safe='')}"
+    payload = {
+        "branch": "main",
+        "content": content,
+        "commit_message": f"Seed {file_path}",
+    }
+    response = session.post(url, headers=headers, json=payload, timeout=60)
+    if response.status_code in {200, 201}:
+        return
+    if response.status_code == 400 and "already exists" in response.text.lower():
+        response = session.put(url, headers=headers, json=payload, timeout=60)
+        if response.status_code in {200, 201}:
+            return
+    raise RuntimeError(f"could not seed {file_path}: {response.status_code} {response.text[:200]}")
+
+
+def seed_gitlab() -> dict:
+    base = _env("GITLAB_BASEURL").rstrip("/")
+    if not base:
+        raise RuntimeError("GITLAB_BASEURL is not set")
+    session = _session()
+    headers = _gitlab_headers()
+    _wait(f"{base}/-/health", session)
+
+    snapshot_dir = WORKSPACE / "gitlab_snapshots"
+    snapshot = next(iter(sorted(snapshot_dir.glob("*.y*ml"))), None) if snapshot_dir.is_dir() else None
+    data = {}
+    if snapshot is not None:
+        try:
+            data = yaml.safe_load(snapshot.read_text(encoding="utf-8")) or {}
+        except (OSError, yaml.YAMLError):
+            data = {}
+    project = data.get("project") if isinstance(data, dict) else {}
+    project = project if isinstance(project, dict) else {}
+    name = str(project.get("name") or "openart-project").strip() or "openart-project"
+    namespace = str(project.get("namespace") or "").strip()
+    visibility = str(project.get("visibility") or "internal").strip()
+    if visibility not in {"private", "internal", "public"}:
+        visibility = "internal"
+
+    projects: list[dict] = []
+    root_project = _ensure_project(base, session, headers, name, name, visibility=visibility)
+    projects.append(root_project)
+    if namespace:
+        group = _ensure_group(base, session, headers, namespace)
+        group_project = _ensure_project(
+            base,
+            session,
+            headers,
+            name,
+            name,
+            namespace_id=int(group.get("id") or 0) or None,
+            namespace_path=str(group.get("full_path") or namespace),
+            visibility=visibility,
+        )
+        projects.append(group_project)
+
+    seeded = 0
+    for project_info in projects:
+        project_id = int(project_info.get("id") or 0)
+        if not project_id:
+            continue
+        _ensure_file(base, session, headers, project_id, "README.md", f"# {name}\n\nSeeded by OpenART.\n")
+        seeded += 1
+        for folder, prefix in (
+            ("project_docs", "docs"),
+            ("infra", "infra"),
+            ("meetings", "docs/meetings"),
+        ):
+            for path, text in _text_files(WORKSPACE / folder):
+                relative = path.relative_to(WORKSPACE / folder).as_posix()
+                _ensure_file(base, session, headers, project_id, f"{prefix}/{relative}", text)
+                seeded += 1
+    return {"projects": [item.get("path_with_namespace") for item in projects], "files": seeded}
+
+
+def _owncloud_session() -> tuple[requests.Session, str, tuple[str, str]]:
+    base = _env("OWNCLOUD_URL").rstrip("/")
+    username = _env("OWNCLOUD_USERNAME")
+    password = _env("OWNCLOUD_PASSWORD")
+    if not base or not username or not password:
+        raise RuntimeError("OWNCLOUD_URL/OWNCLOUD_USERNAME/OWNCLOUD_PASSWORD are not all set")
+    return _session(), base, (username, password)
+
+
+def _mkcol(session: requests.Session, base: str, auth: tuple[str, str], path: str) -> None:
+    url = f"{base}/remote.php/webdav/{quote(path.strip('/'), safe='/')}"
+    response = session.request("MKCOL", url, auth=auth, timeout=30)
+    if response.status_code not in {201, 405}:
+        raise RuntimeError(f"ownCloud MKCOL {path}: {response.status_code} {response.text[:200]}")
+
+
+def _put(session: requests.Session, base: str, auth: tuple[str, str], path: str, data: bytes) -> None:
+    url = f"{base}/remote.php/webdav/{quote(path.strip('/'), safe='/')}"
+    response = session.put(url, auth=auth, data=data, timeout=60)
+    if response.status_code not in {200, 201, 204}:
+        raise RuntimeError(f"ownCloud PUT {path}: {response.status_code} {response.text[:200]}")
+
+
+def seed_owncloud() -> dict:
+    session, base, auth = _owncloud_session()
+    _wait(f"{base}/status.php", session)
+    for folder in ("Documents", "Documents/ProjectNova"):
+        _mkcol(session, base, auth, folder)
+    uploaded = 0
+    _put(
+        session,
+        base,
+        auth,
+        "Documents/ProjectNova/README.md",
+        b"# ProjectNova\n\nSeeded by OpenART.\n",
+    )
+    uploaded += 1
+
+    manifest_path = WORKSPACE / "owncloud_uploads" / "queue_manifest.json"
+    names: list[str] = []
+    if manifest_path.is_file():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            manifest = {}
+        for section in ("pending_uploads", "completed_uploads"):
+            for item in manifest.get(section, []) if isinstance(manifest.get(section), list) else []:
+                if isinstance(item, dict):
+                    filename = str(item.get("filename") or "").strip()
+                    if filename:
+                        names.append(filename)
+    for filename in names[:MAX_FILES]:
+        matches = [path for path in WORKSPACE.rglob(filename) if path.is_file()]
+        if matches:
+            _put(
+                session,
+                base,
+                auth,
+                f"Documents/ProjectNova/{filename}",
+                matches[0].read_bytes(),
+            )
+            uploaded += 1
+    return {"files": uploaded}
+
+
+def main() -> int:
+    summary: dict[str, object] = {"services": SERVICES}
+    try:
+        if any(service not in {"gitlab", "owncloud"} for service in SERVICES):
+            summary["dtap"] = wait_dtap()
+        if "gitlab" in SERVICES:
+            summary["gitlab"] = seed_gitlab()
+        if "owncloud" in SERVICES:
+            summary["owncloud"] = seed_owncloud()
+    except Exception as exc:  # noqa: BLE001 - seed script must report clearly
+        print(json.dumps({**summary, "error": str(exc)}, indent=2), file=sys.stderr)
+        return 1
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

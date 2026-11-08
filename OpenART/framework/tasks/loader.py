@@ -183,6 +183,7 @@ def _load_attacker_spec(
         ),
         feedback_loop=bool(raw_attacker.get("feedback_loop", False)),
         vector_permissions=vector_permissions,
+        network=str(raw_attacker.get("network", "") or "").strip() or None,
         visibility_policy={str(key): value for key, value in raw_visibility_policy.items()},
         metadata={str(key): value for key, value in raw_metadata.items()},
     )
