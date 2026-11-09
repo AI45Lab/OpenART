@@ -239,6 +239,8 @@ def test_generate_bundle_writes_files(tmp_path: Path) -> None:
     assert (out / "run.sh").is_file()
     assert (out / "up.sh").is_file()
     assert (out / "down.sh").is_file()
+    down_script = (out / "down.sh").read_text(encoding="utf-8")
+    assert "docker network rm \"openart-test-000001-net\"" in down_script
 
     compose = yaml.safe_load((out / "docker" / "docker-compose.yml").read_text(encoding="utf-8"))
     assert "dtap-slack-ui" in compose["services"]
