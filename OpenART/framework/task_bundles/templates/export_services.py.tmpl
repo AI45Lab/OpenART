@@ -6,290 +6,70 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-import re
+import subprocess
 import sys
-from urllib.parse import quote, unquote, urlparse
-from xml.etree import ElementTree as ET
-
-import requests
 
 
 SERVICES = @@SERVICES_JSON@@
 PUBLIC_ROOTS = @@PUBLIC_ROOTS_JSON@@
+EXPORT_HOOKS = @@EXPORT_HOOKS_JSON@@
 WORKSPACE = Path(os.environ.get("OPENART_WORKSPACE", "/workspace"))
-MAX_FILES = 200
-MAX_BYTES = 20_000_000
+TASK_ROOT = Path(__file__).resolve().parents[1]
 
 
-def _env(name: str, default: str = "") -> str:
-    return str(os.environ.get(name, default) or "").strip()
+def _hook_command(path: str) -> list[str]:
+    suffix = Path(path).suffix.lower()
+    if suffix == ".py":
+        return [sys.executable, path]
+    if suffix == ".sh":
+        return ["/bin/bash", path]
+    raise RuntimeError(f"unsupported export hook: {path}")
 
 
-def _session() -> requests.Session:
-    session = requests.Session()
-    session.trust_env = False
-    return session
-
-
-def _clean_root(root: str) -> str:
-    text = str(root or "").replace("\\", "/").strip()
-    text = text.replace("'", "").replace('"', "")
-    text = re.sub(r"\s*/\s*", "/", text).strip("/")
-    parts = [part for part in text.split("/") if part and part not in {".", "..", "*"}]
-    if parts and parts[0] == "workspace":
-        parts = parts[1:]
-    return "/".join(parts)
-
-
-def _looks_like_file(root: str) -> bool:
-    last = root.rsplit("/", 1)[-1]
-    return "." in last
-
-
-def _root_for(needles: tuple[str, ...], default: str) -> str:
-    """Pick the most specific public root that matches a service.
-
-    Evaluators may inspect chained roots such as ``owncloud_mirror/uploads``.
-    Writing to the longest match keeps the exported tree at the exact path the
-    evaluator reads instead of the parent directory.  Roots are normalized to
-    be relative to the mounted workspace, so ``workspace/gitlab_snapshots``
-    becomes ``gitlab_snapshots``.
-    """
-
-    matches: list[str] = []
-    for raw in PUBLIC_ROOTS:
-        root = _clean_root(raw)
-        if not root or _looks_like_file(root):
-            continue
-        if any(needle in root.lower() for needle in needles):
-            matches.append(root)
-    if not matches:
-        return default
-    return max(matches, key=lambda root: (root.count("/"), len(root)))
-
-
-def _safe_write(root: str, relative: str, data: bytes, budget: list[int]) -> bool:
-    if len(data) > MAX_BYTES or budget[0] + len(data) > MAX_BYTES:
-        return False
-    path = WORKSPACE / root / relative
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(data)
-    except OSError:
-        return False
-    budget[0] += len(data)
-    return True
-
-
-def export_gitlab() -> dict:
-    base = _env("GITLAB_BASEURL").rstrip("/")
-    token = _env("GITLAB_ACCESS_TOKEN")
-    summary = {"root": "", "projects": 0, "files": 0, "errors": []}
-    if not base or not token:
-        summary["errors"].append("GITLAB_BASEURL or GITLAB_ACCESS_TOKEN missing")
-        return summary
-    root = _root_for(("gitlab",), "gitlab_snapshots")
-    summary["root"] = root
-    session = _session()
-    headers = {"PRIVATE-TOKEN": token}
-    budget = [0]
-    try:
-        response = session.get(
-            f"{base}/api/v4/projects",
-            headers=headers,
-            params={"membership": "true", "per_page": 100},
-            timeout=30,
-        )
-        response.raise_for_status()
-        projects = response.json()
-    except (requests.RequestException, ValueError) as exc:
-        summary["errors"].append(f"list projects: {exc}")
-        return summary
-
-    project_rows = []
-    for project in projects if isinstance(projects, list) else []:
-        if not isinstance(project, dict):
-            continue
-        project_id = project.get("id")
-        project_path = str(project.get("path_with_namespace") or project.get("path") or f"project-{project_id}")
-        project_rows.append(
-            {
-                "id": project_id,
-                "path_with_namespace": project_path,
-                "web_url": project.get("web_url"),
-                "default_branch": project.get("default_branch"),
-            }
-        )
-        summary["projects"] += 1
-        if summary["files"] >= MAX_FILES:
-            break
-        try:
-            tree_response = session.get(
-                f"{base}/api/v4/projects/{project_id}/repository/tree",
-                headers=headers,
-                params={"recursive": "true", "per_page": 100, "ref": project.get("default_branch") or "main"},
-                timeout=30,
-            )
-            if tree_response.status_code != 200:
-                continue
-            entries = tree_response.json()
-        except (requests.RequestException, ValueError) as exc:
-            summary["errors"].append(f"{project_path}: tree: {exc}")
-            continue
-        for entry in entries if isinstance(entries, list) else []:
-            if not isinstance(entry, dict) or entry.get("type") != "blob":
-                continue
-            file_path = str(entry.get("path") or "")
-            if not file_path:
-                continue
-            try:
-                raw = session.get(
-                    f"{base}/api/v4/projects/{project_id}/repository/files/{quote(file_path, safe='')}/raw",
-                    headers=headers,
-                    params={"ref": project.get("default_branch") or "main"},
-                    timeout=30,
-                )
-                if raw.status_code != 200:
-                    continue
-                if _safe_write(root, f"{project_path}/{file_path}", raw.content, budget):
-                    summary["files"] += 1
-            except requests.RequestException as exc:
-                summary["errors"].append(f"{project_path}/{file_path}: {exc}")
-            if summary["files"] >= MAX_FILES:
-                break
-
-    try:
-        (WORKSPACE / root / "_projects.json").parent.mkdir(parents=True, exist_ok=True)
-        (WORKSPACE / root / "_projects.json").write_text(
-            json.dumps(project_rows, indent=2) + "\n", encoding="utf-8"
-        )
-    except OSError:
-        pass
-    return summary
-
-
-def _propfind(
-    session: requests.Session,
-    base: str,
-    auth: tuple[str, str],
-    path: str,
-    *,
-    depth: str = "1",
-) -> str:
-    url = f"{base}/remote.php/webdav/{quote(path.strip('/'), safe='/')}"
-    response = session.request(
-        "PROPFIND",
-        url,
-        auth=auth,
-        headers={"Depth": depth, "Content-Type": "application/xml"},
-        data='<?xml version="1.0"?><d:propfind xmlns:d="DAV:"><d:allprop/></d:propfind>',
-        timeout=60,
+def _run_hook(service: str, path: str) -> dict:
+    hook_dir = Path(path).resolve().parent
+    env = dict(os.environ)
+    env.update(
+        {
+            "OPENART_SERVICE_NAME": service,
+            "OPENART_WORKSPACE": str(WORKSPACE),
+            "OPENART_PUBLIC_ROOTS_JSON": json.dumps(PUBLIC_ROOTS),
+            "OPENART_TASK_ROOT": str(TASK_ROOT),
+            "OPENART_HOOK_DIR": str(hook_dir),
+        }
     )
-    if response.status_code != 207:
-        raise RuntimeError(f"PROPFIND {path}: {response.status_code} {response.text[:200]}")
-    return response.text
-
-
-def _href_relative(href: str) -> str:
-    parsed = urlparse(href)
-    path = unquote(parsed.path or href)
-    marker = "/remote.php/webdav/"
-    if marker in path:
-        relative = path.split(marker, 1)[1]
-    else:
-        relative = path.lstrip("/")
-    return relative.strip("/")
-
-
-def _walk_owncloud(
-    session: requests.Session,
-    base: str,
-    auth: tuple[str, str],
-    path: str,
-    root: str,
-    budget: list[int],
-    summary: dict,
-    *,
-    depth: int = 0,
-    seen: set[str] | None = None,
-) -> None:
-    if depth > 8 or summary["files"] >= MAX_FILES:
-        return
-    seen = seen if seen is not None else set()
+    proc = subprocess.run(
+        _hook_command(path),
+        cwd=str(hook_dir),
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=240,
+    )
+    output = (proc.stdout or "").strip()
+    error = (proc.stderr or "").strip()
+    if proc.returncode != 0:
+        raise RuntimeError(f"{service} export hook failed: {error or output or 'no output'}")
+    if not output:
+        return {}
     try:
-        xml_text = _propfind(session, base, auth, path, depth="1")
-        tree = ET.fromstring(xml_text)
-    except (requests.RequestException, RuntimeError, ET.ParseError) as exc:
-        summary["errors"].append(f"propfind {path or '/'}: {exc}")
-        return
-
-    current = path.strip("/")
-    for response in tree.findall(".//{DAV:}response"):
-        relative = _href_relative(response.findtext("{DAV:}href") or "")
-        if not relative or relative in seen:
-            continue
-        seen.add(relative)
-        is_collection = response.find(".//{DAV:}collection") is not None
-        if is_collection:
-            if relative != current:
-                _walk_owncloud(
-                    session,
-                    base,
-                    auth,
-                    relative,
-                    root,
-                    budget,
-                    summary,
-                    depth=depth + 1,
-                    seen=seen,
-                )
-            if summary["files"] >= MAX_FILES:
-                return
-            continue
-        try:
-            raw = session.get(
-                f"{base}/remote.php/webdav/{quote(relative, safe='/')}",
-                auth=auth,
-                timeout=30,
-            )
-            if raw.status_code != 200:
-                continue
-            if _safe_write(root, relative, raw.content, budget):
-                summary["files"] += 1
-        except requests.RequestException as exc:
-            summary["errors"].append(f"{relative}: {exc}")
-        if summary["files"] >= MAX_FILES:
-            return
-
-
-def export_owncloud() -> dict:
-    base = _env("OWNCLOUD_URL").rstrip("/")
-    username = _env("OWNCLOUD_USERNAME")
-    password = _env("OWNCLOUD_PASSWORD")
-    summary = {"root": "", "files": 0, "errors": []}
-    if not base or not username or not password:
-        summary["errors"].append("OWNCLOUD_URL/OWNCLOUD_USERNAME/OWNCLOUD_PASSWORD missing")
-        return summary
-    root = _root_for(("owncloud",), "owncloud_mirror")
-    summary["root"] = root
-    session = _session()
-    auth = (username, password)
-    budget = [0]
-    _walk_owncloud(session, base, auth, "", root, budget, summary)
-    return summary
+        return json.loads(output)
+    except ValueError:
+        return {"stdout": output}
 
 
 def main() -> int:
-    summary = {"services": SERVICES, "public_roots": PUBLIC_ROOTS}
+    summary: dict[str, object] = {"services": SERVICES, "public_roots": PUBLIC_ROOTS}
     errors = 0
-    if "gitlab" in SERVICES:
-        result = export_gitlab()
-        summary["gitlab"] = result
-        errors += len(result.get("errors", []))
-    if "owncloud" in SERVICES:
-        result = export_owncloud()
-        summary["owncloud"] = result
-        errors += len(result.get("errors", []))
+    for service, path in EXPORT_HOOKS.items():
+        try:
+            result = _run_hook(service, path)
+        except Exception as exc:  # noqa: BLE001 - report every hook failure
+            result = {"errors": [str(exc)]}
+        summary[service] = result
+        hook_errors = result.get("errors") if isinstance(result, dict) else None
+        if isinstance(hook_errors, list):
+            errors += len(hook_errors)
     try:
         target = WORKSPACE / ".openart" / "service_export.json"
         target.parent.mkdir(parents=True, exist_ok=True)

@@ -8,6 +8,7 @@ framework code.
 
 from framework.task_bundles.services import (
     DEFAULT_CATALOG_PATH,
+    HOOK_TYPES,
     RequiredServices,
     ServiceCatalog,
     ServiceDefinition,
@@ -19,6 +20,7 @@ from framework.task_bundles.services import (
 
 __all__ = [
     "DEFAULT_CATALOG_PATH",
+    "HOOK_TYPES",
     "RequiredServices",
     "ServiceCatalog",
     "ServiceDefinition",

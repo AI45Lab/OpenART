@@ -60,7 +60,7 @@ def _copy_service_assets(
     destination: Path,
 ) -> list[str]:
     copied: list[str] = []
-    assets_root = catalog.path.parent / "assets"
+    assets_root = catalog.assets_root
     for asset in sorted(set(catalog.assets_for(required_services))):
         source = assets_root / asset
         if not source.exists():
@@ -73,6 +73,79 @@ def _copy_service_assets(
             shutil.copy2(source, target)
         copied.append(asset)
     return copied
+
+
+def _hook_entrypoint(target: Path) -> str:
+    for name in ("run.py", "run.sh"):
+        if (target / name).is_file():
+            return name
+    raise FileNotFoundError(
+        f"hook directory must contain run.py or run.sh: {target}"
+    )
+
+
+def _copy_hooks(
+    catalog: ServiceCatalog,
+    required_services: tuple[str, ...],
+    docker_dir: Path,
+    task_copy: Path,
+) -> dict[str, Any]:
+    """Copy catalog hook scripts into the generated bundle.
+
+    Hook types are generic; the framework never knows which concrete service
+    supplies them.
+    """
+
+    assets_root = catalog.assets_root
+    common_source = assets_root / "_shared" / "hook_common.py"
+    destinations = {
+        "bootstrap": docker_dir / "hooks",
+        "seed": docker_dir / "seed" / "hooks",
+        "export": task_copy / "finalize" / "hooks",
+        "attacker": docker_dir / "attacker" / "hooks",
+    }
+    bootstrap_lines: list[str] = []
+    attacker_lines: list[str] = []
+    seed_hooks: dict[str, str] = {}
+    export_hooks: dict[str, str] = {}
+    used: dict[str, list[str]] = {}
+
+    for hook_type, per_service in catalog.hooks_for(required_services).items():
+        root = destinations[hook_type]
+        for service, asset_path in per_service.items():
+            source = assets_root / asset_path
+            if not source.exists():
+                raise FileNotFoundError(f"service hook not found: {source}")
+            target = root / service
+            if target.exists():
+                shutil.rmtree(target)
+            if source.is_dir():
+                shutil.copytree(source, target, dirs_exist_ok=True)
+            else:
+                target.mkdir(parents=True, exist_ok=True)
+                name = "run.py" if source.suffix == ".py" else "run.sh" if source.suffix == ".sh" else source.name
+                shutil.copy2(source, target / name)
+            entrypoint = _hook_entrypoint(target)
+            if common_source.is_file():
+                shutil.copy2(common_source, target / "hook_common.py")
+            used.setdefault(hook_type, []).append(service)
+            if hook_type == "bootstrap":
+                relative = target.relative_to(docker_dir.parent).as_posix()
+                bootstrap_lines.append(f"{service}|{relative}")
+            elif hook_type == "seed":
+                seed_hooks[service] = f"/seed/hooks/{service}/{entrypoint}"
+            elif hook_type == "export":
+                export_hooks[service] = f"/task/finalize/hooks/{service}/{entrypoint}"
+            elif hook_type == "attacker":
+                attacker_lines.append(f"{service}|/attacker_config/hooks/{service}/{entrypoint}")
+
+    return {
+        "bootstrap": "\n".join(bootstrap_lines),
+        "attacker": "\n".join(attacker_lines),
+        "seed": seed_hooks,
+        "export": export_hooks,
+        "services": {key: sorted(value) for key, value in used.items()},
+    }
 
 
 def _ports_env(openart_root: Path) -> str:
@@ -141,6 +214,7 @@ def generate_bundle(
     _write(docker_dir / "ports.env", _ports_env(openart))
     write_compose(docker_dir / "docker-compose.yml", compose)
     copied_assets = _copy_service_assets(catalog, required.services, docker_dir)
+    hook_data = _copy_hooks(catalog, required.services, docker_dir, task_copy)
 
     services_json = json.dumps(list(required.services))
     health_env_json = json.dumps(catalog.health_env_for(required.services))
@@ -148,7 +222,11 @@ def generate_bundle(
         docker_dir / "seed" / "seed_services.py",
         _render(
             "seed_services.py.tmpl",
-            {"SERVICES_JSON": services_json, "HEALTH_ENV_JSON": health_env_json},
+            {
+                "SERVICES_JSON": services_json,
+                "HEALTH_ENV_JSON": health_env_json,
+                "SEED_HOOKS_JSON": json.dumps(hook_data["seed"]),
+            },
         ),
         executable=True,
     )
@@ -161,6 +239,7 @@ def generate_bundle(
             {
                 "SERVICES_JSON": services_json,
                 "PUBLIC_ROOTS_JSON": json.dumps(list(roots)),
+                "EXPORT_HOOKS_JSON": json.dumps(hook_data["export"]),
             },
         ),
         executable=True,
@@ -174,7 +253,7 @@ def generate_bundle(
     )
     _write(
         attacker_dir / "run.sh",
-        _render("attacker_run.sh.tmpl", {}),
+        _render("attacker_run.sh.tmpl", {"ATTACKER_HOOKS": hook_data["attacker"]}),
         executable=True,
     )
     instruction_dir = task_copy / "attacker"
@@ -183,17 +262,16 @@ def generate_bundle(
         _render("attacker_instruction.md.tmpl", {"NETWORK_NAME": network_name(resolved_task_id)}),
     )
 
-    bootstrap = catalog.bootstrap_for(required.services)
     resolved_target_config = str(Path(target_config).resolve()) if target_config else ""
     common = {
         "TASK_ID": resolved_task_id,
         "NETWORK_NAME": network_name(resolved_task_id),
         "NETWORK_MODE": network_mode,
-        "HAS_GITLAB": "1" if bootstrap == "gitlab_token" else "0",
         "OPENART_ROOT": str(openart),
         "TOOL_STORE": str(Path(tool_store).resolve()),
         "TARGET_CONFIG": resolved_target_config,
         "SERVICE_CATALOG": str(catalog.path),
+        "BOOTSTRAP_HOOKS": hook_data["bootstrap"],
     }
     _write(output / "up.sh", _render("up.sh.tmpl", common), executable=True)
     _write(output / "run.sh", _render("run.sh.tmpl", common), executable=True)
@@ -219,6 +297,7 @@ def generate_bundle(
         "tool_store": str(Path(tool_store).resolve()),
         "service_catalog": str(catalog.path),
         "service_assets": copied_assets,
+        "hooks": hook_data["services"],
     }
 
 

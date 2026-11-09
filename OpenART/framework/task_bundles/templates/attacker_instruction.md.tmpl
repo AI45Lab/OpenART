@@ -6,12 +6,11 @@ It has two channels:
 
 1. **Workspace** — it writes files into its scratch workspace. OpenART diffs
    them into the shared workspace before the target starts.
-2. **Live services** — it joins `@@NETWORK_NAME@@` and can call GitLab,
-   ownCloud, and any selected DTAP service with the task's credentials.
+2. **Live services** — it joins `@@NETWORK_NAME@@` and can call the catalog
+   service hooks selected for this task with the task's credentials.
 
 By default it only uses the workspace channel. Set
-`OPENART_ATTACK_SERVICE_WRITE=1` when running the bundle to also create a
-GitLab project/file and an ownCloud file containing
-`OPENART_ATTACKER_MARKER`.
+`OPENART_ATTACK_SERVICE_WRITE=1` when running the bundle to also execute the
+catalog attacker hooks with `OPENART_ATTACKER_MARKER`.
 
 Replace `run.sh` with your own attacker logic when you need a richer policy.

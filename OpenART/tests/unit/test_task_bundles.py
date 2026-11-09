@@ -160,26 +160,23 @@ def test_extract_skips_local_categories_and_normalizes_aliases(tmp_path: Path) -
     assert required.unknown == ()
 
 
-def test_export_root_for_prefers_longest_match(tmp_path: Path) -> None:
-    from framework.task_bundles.generate import TEMPLATES_DIR
+def test_root_for_prefers_longest_match() -> None:
+    from framework.task_bundles.services import DEFAULT_CATALOG_PATH
 
-    source = (TEMPLATES_DIR / "export_services.py.tmpl").read_text(encoding="utf-8")
-    source = source.replace("@@SERVICES_JSON@@", "[]").replace("@@PUBLIC_ROOTS_JSON@@", "[]")
-    module_path = tmp_path / "export_services.py"
-    module_path.write_text(source, encoding="utf-8")
-    spec = importlib.util.spec_from_file_location("openart_export_services_test", module_path)
+    module_path = DEFAULT_CATALOG_PATH.parent / "assets" / "_shared" / "hook_common.py"
+    spec = importlib.util.spec_from_file_location("openart_hook_common_test", module_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    module.PUBLIC_ROOTS = [
+    roots = [
         "owncloud_mirror",
         "workspace / 'owncloud_mirror/uploads'",
         "gitlab_snapshots/fin-reports",
         "gitlab_snapshots/report.md",
     ]
-    assert module._root_for(("owncloud",), "fallback") == "owncloud_mirror/uploads"
-    assert module._root_for(("gitlab",), "fallback") == "gitlab_snapshots/fin-reports"
-    assert module._root_for(("missing",), "fallback") == "fallback"
+    assert module.root_for(("owncloud",), "fallback", roots) == "owncloud_mirror/uploads"
+    assert module.root_for(("gitlab",), "fallback", roots) == "gitlab_snapshots/fin-reports"
+    assert module.root_for(("missing",), "fallback", roots) == "fallback"
 
 
 def test_parse_public_roots(tmp_path: Path) -> None:
@@ -228,6 +225,17 @@ def test_generate_bundle_writes_files(tmp_path: Path) -> None:
     assert (out / "docker" / "seed" / "seed_services.py").is_file()
     assert (out / "task" / "finalize" / "export_services.py").is_file()
     assert (out / "task" / "attacker" / "instruction.md").is_file()
+    assert (out / "docker" / "hooks" / "gitlab" / "run.py").is_file()
+    assert (out / "docker" / "seed" / "hooks" / "gitlab" / "run.py").is_file()
+    assert (out / "docker" / "seed" / "hooks" / "owncloud" / "run.py").is_file()
+    assert (out / "docker" / "seed" / "hooks" / "gitlab" / "hook_common.py").is_file()
+    assert (out / "task" / "finalize" / "hooks" / "gitlab" / "run.py").is_file()
+    assert (out / "task" / "finalize" / "hooks" / "owncloud" / "run.py").is_file()
+    assert (out / "docker" / "attacker" / "hooks" / "gitlab" / "run.py").is_file()
+    assert (out / "docker" / "attacker" / "hooks" / "owncloud" / "run.py").is_file()
+    up_script = (out / "up.sh").read_text(encoding="utf-8")
+    assert "gitlab-rails" not in up_script
+    assert "gitlab|docker/hooks/gitlab" in up_script
     assert (out / "run.sh").is_file()
     assert (out / "up.sh").is_file()
     assert (out / "down.sh").is_file()
@@ -238,6 +246,159 @@ def test_generate_bundle_writes_files(tmp_path: Path) -> None:
     attacker = yaml.safe_load((out / "docker" / "attacker" / "config.yaml").read_text(encoding="utf-8"))
     assert attacker["attacker"]["vector_permissions"] == ["workspace_files", "service_state"]
     assert attacker["attacker"]["network"] == "openart-test-000001-net"
+
+
+def test_catalog_fragments_merge_new_services(tmp_path: Path) -> None:
+    catalog_root = tmp_path / "catalog"
+    catalog_root.mkdir()
+    (catalog_root / "services.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "version": 1,
+                "selection": {"local_values": ["workspace"], "tool_prefixes": {"dtap.": "@suffix"}},
+                "defaults": {"admin_public_key": "public", "admin_proof_key": "proof", "env": {}},
+                "services": {
+                    "base": {
+                        "compose": {"base": {"image": "example/base:latest"}},
+                        "roles": {"api": "base"},
+                        "ports": {"api": "26000"},
+                    }
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    fragments = catalog_root / "services.d"
+    fragments.mkdir()
+    (fragments / "acme.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "selection": {"aliases": {"acme_tool": "acme"}},
+                "services": {
+                    "acme": {
+                        "compose": {"acme": {"image": "example/acme:latest"}},
+                        "roles": {"api": "acme"},
+                        "ports": {"api": "26001"},
+                    }
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    catalog = load_service_catalog(catalog_root / "services.yaml")
+    assert sorted(catalog.services) == ["acme", "base"]
+    assert catalog.aliases["acme_tool"] == "acme"
+    assert "workspace" in catalog.local_values
+    assert catalog.assets_root == catalog_root / "assets"
+
+
+def test_generate_bundle_copies_custom_catalog_hooks(tmp_path: Path) -> None:
+    catalog_path = tmp_path / "catalog" / "services.yaml"
+    catalog_path.parent.mkdir()
+    catalog_path.write_text(
+        yaml.safe_dump(
+            {
+                "version": 1,
+                "selection": {"local_values": ["workspace"], "tool_prefixes": {"dtap.": "@suffix"}},
+                "defaults": {"admin_public_key": "public", "admin_proof_key": "proof", "env": {}},
+                "services": {
+                    "acme": {
+                        "compose": {
+                            "acme-api": {
+                                "image": "python:3.11-slim",
+                                "environment": {"ACME_PORT": "{{ api_port }}"},
+                            }
+                        },
+                        "roles": {"api": "acme-api"},
+                        "ports": {"api": "26000"},
+                        "task_env": {"ACME_URL": "{{ url:acme-api:26000 }}"},
+                        "hooks": {
+                            "bootstrap": "acme/hooks/bootstrap",
+                            "seed": "acme/hooks/seed",
+                            "export": "acme/hooks/export",
+                            "attacker": "acme/hooks/attacker",
+                        },
+                    }
+                },
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    shared = catalog_path.parent / "assets" / "_shared" / "hook_common.py"
+    shared.parent.mkdir(parents=True)
+    shared.write_text("VALUE = 1\n", encoding="utf-8")
+    for hook in ("bootstrap", "seed", "export", "attacker"):
+        script = catalog_path.parent / "assets" / "acme" / "hooks" / hook / "run.py"
+        script.parent.mkdir(parents=True)
+        script.write_text("#!/usr/bin/env python3\nprint('{}')\n", encoding="utf-8")
+
+    task = tmp_path / "task"
+    (task / "workspace" / "output").mkdir(parents=True)
+    (task / "task.md").write_text("# Acme\n", encoding="utf-8")
+    (task / "tool_use_graph.json").write_text(
+        json.dumps({"nodes": [{"tool": "dtap.acme"}]}),
+        encoding="utf-8",
+    )
+    out = tmp_path / "bundle"
+    result = generate_bundle(
+        task,
+        out,
+        task_id="openart-test-acme",
+        openart_root=Path(__file__).resolve().parents[2],
+        tool_store=tmp_path / "tools",
+        target_config=str(tmp_path / "target.yaml"),
+        service_catalog=catalog_path,
+        force=True,
+    )
+    assert result["hooks"] == {
+        "bootstrap": ["acme"],
+        "seed": ["acme"],
+        "export": ["acme"],
+        "attacker": ["acme"],
+    }
+    assert (out / "docker" / "hooks" / "acme" / "run.py").is_file()
+    assert (out / "docker" / "seed" / "hooks" / "acme" / "run.py").is_file()
+    assert (out / "docker" / "seed" / "hooks" / "acme" / "hook_common.py").is_file()
+    assert (out / "task" / "finalize" / "hooks" / "acme" / "run.py").is_file()
+    assert (out / "docker" / "attacker" / "hooks" / "acme" / "run.py").is_file()
+    assert "acme|docker/hooks/acme" in (out / "up.sh").read_text(encoding="utf-8")
+    assert '"/seed/hooks/acme/run.py"' in (out / "docker" / "seed" / "seed_services.py").read_text(encoding="utf-8")
+
+
+def test_framework_code_and_templates_are_service_agnostic() -> None:
+    forbidden = (
+        "gitlab",
+        "owncloud",
+        "slack",
+        "gmail",
+        "calendar",
+        "atlassian",
+        "google-idp",
+        "paypal",
+        "zoom",
+        "whatsapp",
+        "telegram",
+        "snowflake",
+        "databricks",
+        "bigquery",
+        "finance",
+        "legal",
+        "github",
+    )
+    from framework.task_bundles.generate import TEMPLATES_DIR
+
+    framework_dir = Path(__file__).resolve().parents[2] / "framework"
+    paths = list(TEMPLATES_DIR.iterdir()) + list((framework_dir / "task_bundles").glob("*.py"))
+    paths.append(framework_dir / "core" / "factory.py")
+    for path in paths:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8").lower()
+        for name in forbidden:
+            assert name not in text, f"{path} still names the concrete service {name!r}"
 
 
 def test_attacker_service_state_is_opt_in() -> None:
@@ -306,6 +467,10 @@ def test_new_service_is_added_by_catalog_only(tmp_path: Path) -> None:
                         "ports": {"api": "26000"},
                         "task_env": {"ACME_URL": "{{ url:acme-api:26000 }}"},
                         "requires": ["shared"],
+                        "hooks": {
+                            "seed": "acme/hooks/seed",
+                            "export": "acme/hooks/export",
+                        },
                     }
                 },
             },
@@ -325,6 +490,10 @@ def test_new_service_is_added_by_catalog_only(tmp_path: Path) -> None:
     required = extract_required_services(task, catalog=catalog)
     assert required.services == ("acme", "shared")
     assert required.unknown == ()
+    assert catalog.hooks_for(required.services) == {
+        "seed": {"acme": "acme/hooks/seed"},
+        "export": {"acme": "acme/hooks/export"},
+    }
 
     compose = build_compose("openart-test-000003", required, catalog=catalog)
     assert compose["services"]["acme-api"]["image"] == "example/acme:latest"

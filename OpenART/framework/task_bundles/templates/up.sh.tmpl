@@ -1,96 +1,37 @@
 #!/usr/bin/env bash
-# Start the task's services, create the GitLab token, and seed the services.
+# Start the task's services, run catalog bootstrap hooks, and seed services.
 set -euo pipefail
 
 BUNDLE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE=(docker compose --env-file "${BUNDLE_DIR}/docker/task.env" -f "${BUNDLE_DIR}/docker/docker-compose.yml")
 
+export OPENART_BUNDLE_DIR="${BUNDLE_DIR}"
+export OPENART_TASK_ENV_FILE="${BUNDLE_DIR}/docker/task.env"
+export OPENART_COMPOSE_FILE="${BUNDLE_DIR}/docker/docker-compose.yml"
+
 echo "[bundle] starting services for @@TASK_ID@@"
 "${COMPOSE[@]}" up -d
 
-if [ "@@HAS_GITLAB@@" = "1" ]; then
-  echo "[bundle] waiting for GitLab health"
-  ready=0
-  for _ in $(seq 1 360); do
-    if "${COMPOSE[@]}" exec -T gitlab curl -fsS http://localhost:8929/-/health >/dev/null 2>&1; then
-      ready=1
-      break
-    fi
-    sleep 5
-  done
-  if [ "${ready}" != "1" ]; then
-    echo "[bundle] GitLab did not become healthy" >&2
-    "${COMPOSE[@]}" ps >&2 || true
+while IFS='|' read -r service hookrel; do
+  [ -z "${service}" ] && continue
+  hookdir="${BUNDLE_DIR}/${hookrel}"
+  echo "[bundle] bootstrap ${service}"
+  export OPENART_SERVICE_NAME="${service}"
+  export OPENART_HOOK_DIR="${hookdir}"
+  if [ -f "${hookdir}/run.py" ]; then
+    python3 "${hookdir}/run.py"
+  elif [ -f "${hookdir}/run.sh" ]; then
+    bash "${hookdir}/run.sh"
+  else
+    echo "[bundle] missing bootstrap hook entrypoint: ${hookdir}" >&2
     exit 1
   fi
-
-  echo "[bundle] ensuring GitLab root user and access token"
-  gitlab_root_password="$(python3 - "${BUNDLE_DIR}/docker/task.env" <<'PY'
-from pathlib import Path
-import sys
-
-for line in Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
-    if line.startswith("GITLAB_ROOT_PASSWORD="):
-        print(line.split("=", 1)[1])
-        break
-PY
-)"
-  if [ -z "${gitlab_root_password}" ]; then
-    echo "[bundle] GITLAB_ROOT_PASSWORD is missing from docker/task.env" >&2
-    exit 1
-  fi
-  token=""
-  for _ in $(seq 1 60); do
-    token="$("${COMPOSE[@]}" exec -T -e OPENART_GITLAB_ROOT_PASSWORD="${gitlab_root_password}" gitlab gitlab-rails runner "
-u = User.find_by_username('root')
-unless u
-  org = Organizations::Organization.first
-  Users::CreateService.new(nil, {
-    username: 'root',
-    name: 'Administrator',
-    email: 'root@example.com',
-    password: ENV['OPENART_GITLAB_ROOT_PASSWORD'],
-    password_confirmation: ENV['OPENART_GITLAB_ROOT_PASSWORD'],
-    skip_confirmation: true,
-    organization_id: org&.id,
-  }).execute
-  u = User.find_by_username('root')
-end
-u.personal_access_tokens.where(name: 'openart').destroy_all
-t = u.personal_access_tokens.create!(name: 'openart', scopes: ['api'], expires_at: Date.today + 365)
-puts t.token
-" 2>/dev/null | tail -n1 | tr -d '\r' || true)"
-    if [ -n "${token}" ] && [ "${#token}" -ge 20 ]; then
-      break
-    fi
-    sleep 5
-  done
-  if [ -z "${token}" ] || [ "${#token}" -lt 20 ]; then
-    echo "[bundle] failed to create a GitLab access token" >&2
-    exit 1
-  fi
-  python3 - "${BUNDLE_DIR}/docker/task.env" "${token}" <<'PY'
-from pathlib import Path
-import sys
-
-path = Path(sys.argv[1])
-token = sys.argv[2]
-lines = []
-for line in path.read_text(encoding="utf-8").splitlines():
-    if line.startswith("GITLAB_ACCESS_TOKEN="):
-        line = f"GITLAB_ACCESS_TOKEN={token}"
-    lines.append(line)
-path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-PY
-  echo "[bundle] GitLab token written to docker/task.env"
-fi
+done <<'OPENART_BOOTSTRAP_HOOKS'
+@@BOOTSTRAP_HOOKS@@
+OPENART_BOOTSTRAP_HOOKS
 
 echo "[bundle] seeding services"
-if [ "@@HAS_GITLAB@@" = "1" ]; then
-  "${COMPOSE[@]}" run --rm -e GITLAB_ACCESS_TOKEN="${token}" seed
-else
-  "${COMPOSE[@]}" run --rm seed
-fi
+"${COMPOSE[@]}" run --rm seed
 
 echo "[bundle] services ready"
 "${COMPOSE[@]}" ps

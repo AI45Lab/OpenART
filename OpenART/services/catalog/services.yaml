@@ -97,7 +97,11 @@ services:
       GITLAB_ACCESS_TOKEN: ${GITLAB_ACCESS_TOKEN}
     requires: []
     assets: []
-    bootstrap: gitlab_token
+    hooks:
+      bootstrap: gitlab/hooks/bootstrap
+      seed: gitlab/hooks/seed
+      export: gitlab/hooks/export
+      attacker: gitlab/hooks/attacker
   owncloud:
     compose:
       owncloud-db:
@@ -163,6 +167,10 @@ services:
       OWNCLOUD_PASSWORD: ${OWNCLOUD_PASSWORD}
     requires: []
     assets: []
+    hooks:
+      seed: owncloud/hooks/seed
+      export: owncloud/hooks/export
+      attacker: owncloud/hooks/attacker
   slack:
     compose:
       dtap-slack-pg:

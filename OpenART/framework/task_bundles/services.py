@@ -19,6 +19,8 @@ import yaml
 
 DEFAULT_CATALOG_PATH = Path(__file__).resolve().parents[2] / "services" / "catalog" / "services.yaml"
 
+HOOK_TYPES = ("bootstrap", "seed", "export", "attacker")
+
 
 @dataclass(frozen=True)
 class ServiceDefinition:
@@ -30,7 +32,7 @@ class ServiceDefinition:
     task_env: dict[str, str]
     requires: tuple[str, ...]
     assets: tuple[str, ...]
-    bootstrap: str | None = None
+    hooks: dict[str, str]
 
     @property
     def compose_services(self) -> tuple[str, ...]:
@@ -40,6 +42,7 @@ class ServiceDefinition:
 @dataclass(frozen=True)
 class ServiceCatalog:
     path: Path
+    assets_root: Path
     services: dict[str, ServiceDefinition]
     local_values: frozenset[str]
     aliases: dict[str, str]
@@ -128,12 +131,22 @@ class ServiceCatalog:
                 result[asset] = asset
         return result
 
-    def bootstrap_for(self, names: Iterable[str]) -> str:
+    def hooks_for(self, names: Iterable[str]) -> dict[str, dict[str, str]]:
+        """Return ``{hook_type: {service: asset_path}}`` for selected services."""
+
+        result: dict[str, dict[str, str]] = {}
         for name in sorted(set(names)):
             definition = self.services.get(name)
-            if definition is not None and definition.bootstrap:
-                return definition.bootstrap
-        return ""
+            if definition is None:
+                continue
+            for hook_type, asset_path in definition.hooks.items():
+                if hook_type not in HOOK_TYPES:
+                    raise ValueError(
+                        f"{name}: unknown hook type {hook_type!r}; "
+                        f"expected one of {', '.join(HOOK_TYPES)}"
+                    )
+                result.setdefault(hook_type, {})[name] = asset_path
+        return result
 
 
 @dataclass(frozen=True)
@@ -154,7 +167,7 @@ def _derive_credential_prefixes(
 
     A catalog can override this with ``selection.credential_prefixes``.  The
     fallback keeps new services protected without editing framework code:
-    ``ACME_URL`` yields ``ACME_`` and ``DTAP_SLACK_URL`` yields ``DTAP_``.
+    ``ACME_URL`` yields ``ACME_`` and ``DTAP_ACME_URL`` yields ``DTAP_``.
     """
 
     prefixes: set[str] = set()
@@ -170,15 +183,73 @@ def _derive_credential_prefixes(
     return tuple(sorted(prefixes))
 
 
+def _read_catalog(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"service catalog is not a mapping: {path}")
+    return payload
+
+
+def _merge_mapping(base: dict[str, Any], extra: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(base)
+    for key, value in extra.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            nested = dict(merged[key])
+            nested.update(value)
+            merged[key] = nested
+        else:
+            merged[key] = value
+    return merged
+
+
+def _merge_catalogs(base: dict[str, Any], extra: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(base)
+    for section_name in ("selection", "defaults"):
+        merged[section_name] = _merge_mapping(
+            dict(merged.get(section_name) or {}),
+            extra[section_name] if isinstance(extra.get(section_name), dict) else {},
+        )
+    services = dict(merged.get("services") or {})
+    if isinstance(extra.get("services"), dict):
+        services.update(extra["services"])
+    merged["services"] = services
+    if "version" in extra:
+        merged["version"] = extra["version"]
+    return merged
+
+
+def _catalog_payload(catalog_path: Path) -> dict[str, Any]:
+    """Load one catalog file or a directory of catalog fragments.
+
+    A file catalog may also be extended by ``services.d/*.yaml`` next to it,
+    so a new service can be added by dropping one YAML file plus assets.
+    """
+
+    if catalog_path.is_dir():
+        files = sorted(catalog_path.glob("*.yaml"))
+        if not files:
+            raise FileNotFoundError(f"no catalog YAML files in {catalog_path}")
+        payload: dict[str, Any] = {}
+        for file in files:
+            payload = _merge_catalogs(payload, _read_catalog(file))
+        return payload
+
+    payload = _read_catalog(catalog_path)
+    fragments = catalog_path.parent / "services.d"
+    if fragments.is_dir():
+        for file in sorted(fragments.glob("*.yaml")):
+            payload = _merge_catalogs(payload, _read_catalog(file))
+    return payload
+
+
 def load_service_catalog(path: str | Path | None = None) -> ServiceCatalog:
     catalog_path = Path(
         path
         or os.environ.get("OPENART_SERVICE_CATALOG", "")
         or DEFAULT_CATALOG_PATH
     ).resolve()
-    payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise ValueError(f"service catalog is not a mapping: {catalog_path}")
+    payload = _catalog_payload(catalog_path)
+    assets_root = catalog_path / "assets" if catalog_path.is_dir() else catalog_path.parent / "assets"
 
     selection = payload.get("selection") if isinstance(payload.get("selection"), dict) else {}
     defaults = payload.get("defaults") if isinstance(payload.get("defaults"), dict) else {}
@@ -197,7 +268,11 @@ def load_service_catalog(path: str | Path | None = None) -> ServiceCatalog:
             task_env={str(key): str(value) for key, value in (raw.get("task_env") or {}).items()},
             requires=tuple(str(item) for item in (raw.get("requires") or [])),
             assets=tuple(str(item) for item in (raw.get("assets") or [])),
-            bootstrap=str(raw.get("bootstrap") or "") or None,
+            hooks={
+                str(key): str(value)
+                for key, value in (raw.get("hooks") or {}).items()
+                if str(key).strip() and str(value).strip()
+            },
         )
 
     env_defaults = {str(key): str(value) for key, value in (defaults.get("env") or {}).items()}
@@ -209,6 +284,7 @@ def load_service_catalog(path: str | Path | None = None) -> ServiceCatalog:
 
     return ServiceCatalog(
         path=catalog_path,
+        assets_root=assets_root,
         services=services,
         local_values=frozenset(str(item).strip().lower() for item in (selection.get("local_values") or [])),
         aliases={
@@ -324,6 +400,7 @@ def compose_service_names(
 
 __all__ = [
     "DEFAULT_CATALOG_PATH",
+    "HOOK_TYPES",
     "RequiredServices",
     "ServiceCatalog",
     "ServiceDefinition",
