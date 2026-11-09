@@ -10,7 +10,11 @@ export OPENART_TASK_ENV_FILE="${BUNDLE_DIR}/docker/task.env"
 export OPENART_COMPOSE_FILE="${BUNDLE_DIR}/docker/docker-compose.yml"
 
 echo "[bundle] starting services for @@TASK_ID@@"
-"${COMPOSE[@]}" up -d
+if [ -n "$("${COMPOSE[@]}" config --services 2>/dev/null)" ]; then
+  "${COMPOSE[@]}" up -d
+else
+  echo "[bundle] no catalog services selected; skipping compose up"
+fi
 
 while IFS='|' read -r service hookrel; do
   [ -z "${service}" ] && continue

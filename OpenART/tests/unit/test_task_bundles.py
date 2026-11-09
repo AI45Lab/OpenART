@@ -248,6 +248,26 @@ def test_generate_bundle_writes_files(tmp_path: Path) -> None:
     assert attacker["attacker"]["network"] == "openart-test-000001-net"
 
 
+def test_generate_bundle_without_services_skips_compose_up(tmp_path: Path) -> None:
+    task = tmp_path / "task"
+    task.mkdir()
+    (task / "task.md").write_text("# Service-free benchmark task\n", encoding="utf-8")
+    out = tmp_path / "bundle"
+    result = generate_bundle(
+        task,
+        out,
+        task_id="benchmark-task-000001",
+        openart_root=Path(__file__).resolve().parents[2],
+        tool_store=tmp_path / "tools",
+        target_config=str(tmp_path / "target.yaml"),
+        force=True,
+    )
+    assert result["services"] == []
+    up_script = (out / "up.sh").read_text(encoding="utf-8")
+    assert "config --services" in up_script
+    assert "no catalog services selected; skipping compose up" in up_script
+
+
 def test_catalog_fragments_merge_new_services(tmp_path: Path) -> None:
     catalog_root = tmp_path / "catalog"
     catalog_root.mkdir()
