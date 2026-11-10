@@ -48,7 +48,8 @@ def _copy_file_mode(source: str, target: str) -> str:
     need contents and permission bits.
     """
 
-    shutil.copyfile(source, target)
+    with open(source, "rb") as src, open(target, "wb") as dst:
+        shutil.copyfileobj(src, dst, length=4 * 1024 * 1024)
     shutil.copymode(source, target)
     return str(target)
 
