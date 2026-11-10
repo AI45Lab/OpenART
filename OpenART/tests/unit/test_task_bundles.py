@@ -3,6 +3,8 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
+import zipfile
 
 import yaml
 
@@ -567,3 +569,46 @@ def test_new_service_is_added_by_catalog_only(tmp_path: Path) -> None:
     env = build_env("openart-test-000003", required, catalog=catalog)
     assert env["ACME_URL"] == "http://acme-api:26000"
     assert env["SHARED_URL"] == "http://shared-api:26001"
+
+def test_archive_task_bundles_writes_runnable_zip(tmp_path: Path) -> None:
+    from framework.task_bundles.generate import DEFAULT_OPENART_ROOT, DEFAULT_TOOL_STORE
+    from framework.task_bundles.services import DEFAULT_CATALOG_PATH
+
+    repo_root = Path(__file__).resolve().parents[2]
+    task_id = "openart-test-000001"
+    source = tmp_path / "source"
+    source.mkdir()
+    _write_task(source)
+    shard = tmp_path / "tasks-mid-000001.zip"
+    with zipfile.ZipFile(shard, "w") as archive:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                archive.write(path, f"mid/{task_id}/{path.relative_to(source).as_posix()}")
+
+    spec = importlib.util.spec_from_file_location(
+        "openart_archive_task_bundles_test", repo_root / "scripts" / "archive_task_bundles.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    args = SimpleNamespace(
+        out=str(tmp_path / "out"),
+        work_dir=str(tmp_path / "work"),
+        force=False,
+        openart_root=str(DEFAULT_OPENART_ROOT),
+        tool_store=str(DEFAULT_TOOL_STORE),
+        target_config=str(repo_root / "configs" / "target-configs" / "target.yaml"),
+        network_mode="bridge",
+        service_catalog=str(DEFAULT_CATALOG_PATH),
+    )
+    result = module._process_task(task_id, shard, args)
+    archive_path = Path(result["archive"])
+    assert archive_path.is_file()
+    with zipfile.ZipFile(archive_path) as archive:
+        names = set(archive.namelist())
+    assert f"{task_id}/up.sh" in names
+    assert f"{task_id}/run.sh" in names
+    assert f"{task_id}/down.sh" in names
+    assert f"{task_id}/task/task.md" in names
+    assert f"{task_id}/docker/docker-compose.yml" in names
