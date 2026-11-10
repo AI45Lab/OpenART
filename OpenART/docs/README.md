@@ -25,6 +25,12 @@ into implementation details without reading stale walkthroughs.
 | [14_task_bundle_runtime.md](14_task_bundle_runtime.md) | Per-task Docker Compose bundles, service selection, live-service attacker, and pre-eval service export |
 | [../skills/openart/SKILL.md](../skills/openart/SKILL.md) | Unified operator guide for agents and contributors |
 
+## Appendix
+
+| File | Purpose |
+|------|---------|
+| [appendix-attack-risk-types.md](appendix-attack-risk-types.md) | The 128 mid-v5 attack risk types and their protected targets |
+
 ## Recommended Reading Paths
 
 For running OpenART:
