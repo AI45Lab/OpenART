@@ -219,6 +219,29 @@ python -m framework.task_bundles.generate \
   --dry-run
 ```
 
+## Bulk conversion to per-task archives
+
+For large releases, write each bundle as a single zip instead of a directory
+tree; shared/FUSE storage handles one archive file per task far better than
+hundreds of thousands of small files:
+
+```bash
+python scripts/archive_task_bundles.py \
+  --shards-dir /path/to/shard-zips \
+  --shard '*.zip' \
+  --out /path/to/archives \
+  --target-config /path/to/target.yaml \
+  --service-catalog services/catalog/services.yaml \
+  --jobs 24
+```
+
+The converter reads task directories from planner shard zips, stages each
+shard in local scratch (disable with `--no-stage-shards`), generates the bundle
+in a temporary directory, and writes `<out>/<task_id>.zip`. Each archive
+contains `<task_id>/` with the same layout as a directory bundle; unzipping it
+yields a runnable bundle directory. Existing archives are skipped unless
+`--force` is set, so interrupted runs can resume safely.
+
 ## Run a bundle
 
 ```bash
@@ -332,6 +355,10 @@ The bridge path was verified end to end on `openart-mid-000001`:
 
 All 1,046 `mid` tasks resolve to catalog services with zero unknown names, and
 the generator produced one bundle per task without failures.
+
+The converter has since produced per-task archives for the v5 stress release
+(3,553 tasks, 18 shards) and the large release (5,551 tasks, 28 shards, 15
+source runs).
 
 GitLab's first boot performs database migrations and can take a long time on a
 busy host. The Compose health check allows 40 minutes. Reusing a per-task
