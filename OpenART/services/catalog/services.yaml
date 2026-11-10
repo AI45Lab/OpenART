@@ -2,6 +2,7 @@ version: 1
 selection:
   local_values:
   - ''
+  - browser
   - dtap
   - workspace
   - document
