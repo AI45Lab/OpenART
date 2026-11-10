@@ -542,8 +542,7 @@ services:
         healthcheck:
           test:
           - CMD-SHELL
-          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25101/health',
-            timeout=3)"
+          - wget -q -O /dev/null http://127.0.0.1:25101/health
           interval: 10s
           timeout: 5s
           retries: 12
@@ -618,8 +617,7 @@ services:
         healthcheck:
           test:
           - CMD-SHELL
-          - python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:25201/health',
-            timeout=3)"
+          - wget -q -O /dev/null http://127.0.0.1:25201/health
           interval: 10s
           timeout: 5s
           retries: 12
