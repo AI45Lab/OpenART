@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 import shutil
 import stat
@@ -41,17 +40,28 @@ def _write(path: Path, content: str, *, executable: bool = False) -> None:
         path.chmod(mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
+def _copy_file_mode(source: str, target: str) -> str:
+    """Copy file contents and mode without xattr/timestamp probing.
+
+    ``shutil.copy2`` calls ``listxattr``/``utime`` for every file, which is
+    disproportionately slow on FUSE-backed workspace mounts. The bundles only
+    need contents and permission bits.
+    """
+
+    shutil.copyfile(source, target)
+    shutil.copymode(source, target)
+    return str(target)
+
+
 def _copy_task(task_dir: Path, target: Path) -> None:
     if target.exists():
         shutil.rmtree(target)
-    shutil.copytree(task_dir, target, dirs_exist_ok=True)
-    for root, dirs, _files in os.walk(target):
-        for name in dirs:
-            path = Path(root) / name
-            try:
-                path.chmod(path.stat().st_mode | stat.S_IWUSR | stat.S_IXUSR)
-            except OSError:
-                pass
+    shutil.copytree(task_dir, target, dirs_exist_ok=True, copy_function=_copy_file_mode)
+    # copytree preserves source modes; only ensure the task root stays writable.
+    try:
+        target.chmod(target.stat().st_mode | stat.S_IWUSR | stat.S_IXUSR)
+    except OSError:
+        pass
 
 
 def _copy_service_assets(
@@ -68,9 +78,10 @@ def _copy_service_assets(
         target = destination / "service_assets" / asset
         target.parent.mkdir(parents=True, exist_ok=True)
         if source.is_dir():
-            shutil.copytree(source, target, dirs_exist_ok=True)
+            shutil.copytree(source, target, dirs_exist_ok=True, copy_function=_copy_file_mode)
         else:
-            shutil.copy2(source, target)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            _copy_file_mode(str(source), str(target))
         copied.append(asset)
     return copied
 
@@ -120,14 +131,14 @@ def _copy_hooks(
             if target.exists():
                 shutil.rmtree(target)
             if source.is_dir():
-                shutil.copytree(source, target, dirs_exist_ok=True)
+                shutil.copytree(source, target, dirs_exist_ok=True, copy_function=_copy_file_mode)
             else:
                 target.mkdir(parents=True, exist_ok=True)
                 name = "run.py" if source.suffix == ".py" else "run.sh" if source.suffix == ".sh" else source.name
-                shutil.copy2(source, target / name)
+                _copy_file_mode(str(source), str(target / name))
             entrypoint = _hook_entrypoint(target)
             if common_source.is_file():
-                shutil.copy2(common_source, target / "hook_common.py")
+                _copy_file_mode(str(common_source), str(target / "hook_common.py"))
             used.setdefault(hook_type, []).append(service)
             if hook_type == "bootstrap":
                 relative = target.relative_to(docker_dir.parent).as_posix()
