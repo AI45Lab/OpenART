@@ -17,6 +17,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 from pathlib import Path
+import shutil
 import sys
 import tempfile
 import zipfile
@@ -115,6 +116,17 @@ def _process_task(task_id: str, shard: Path, args: argparse.Namespace) -> dict[s
     }
 
 
+def _stage_shard(source: Path, destination: Path) -> Path:
+    """Copy a shard to local scratch to avoid per-entry FUSE read latency."""
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        destination.unlink()
+    with open(source, "rb") as src, open(destination, "wb") as dst:
+        shutil.copyfileobj(src, dst, length=4 * 1024 * 1024)
+    return destination
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--shards-dir", required=True)
@@ -129,6 +141,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--force", action="store_true")
+    parser.add_argument(
+        "--no-stage-shards",
+        dest="stage_shards",
+        action="store_false",
+        help="Read tasks directly from the shard instead of local scratch",
+    )
+    parser.set_defaults(stage_shards=True)
     args = parser.parse_args(argv)
 
     shards = sorted(Path(args.shards_dir).glob(args.shard))
@@ -136,33 +155,51 @@ def main(argv: list[str] | None = None) -> int:
         print(f"no shards matched {args.shard!r} in {args.shards_dir}", file=sys.stderr)
         return 1
 
-    tasks: list[tuple[str, Path]] = []
+    total_tasks = 0
     for shard in shards:
-        for task_id in _iter_tasks(shard):
-            tasks.append((task_id, shard))
-            if args.limit and len(tasks) >= args.limit:
-                break
-        if args.limit and len(tasks) >= args.limit:
-            break
+        total_tasks += len(_iter_tasks(shard))
+    if args.limit:
+        total_tasks = min(total_tasks, args.limit)
 
-    print(f"[archive] {len(tasks)} tasks from {len(shards)} shards, jobs={args.jobs}", file=sys.stderr)
+    print(
+        f"[archive] {total_tasks} tasks from {len(shards)} shards, jobs={args.jobs}, stage_shards={args.stage_shards}",
+        file=sys.stderr,
+    )
     failures: list[dict[str, str]] = []
     results: list[dict[str, object]] = []
     completed = 0
+    work_root = Path(args.work_dir).resolve()
+    work_root.mkdir(parents=True, exist_ok=True)
 
-    with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
-        futures = {pool.submit(_process_task, task_id, shard, args): (task_id, shard) for task_id, shard in tasks}
-        for future in as_completed(futures):
-            task_id, shard = futures[future]
-            try:
-                result = future.result()
-                results.append(result)
-            except Exception as exc:  # noqa: BLE001 - keep converting other tasks
-                failures.append({"task_id": task_id, "shard": shard.name, "error": str(exc)})
-                print(f"[archive] failed {task_id}: {exc}", file=sys.stderr)
-            completed += 1
-            if completed % 10 == 0 or completed == len(tasks):
-                print(f"[archive] {completed}/{len(tasks)} tasks, failures={len(failures)}", file=sys.stderr)
+    for shard in shards:
+        if args.limit and completed >= args.limit:
+            break
+        task_ids = _iter_tasks(shard)
+        if args.limit:
+            task_ids = task_ids[: max(0, args.limit - completed)]
+        if not task_ids:
+            continue
+        active_shard = shard
+        staged: Path | None = None
+        if args.stage_shards:
+            staged = _stage_shard(shard, work_root / "staged-shards" / shard.name)
+            active_shard = staged
+        try:
+            with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
+                futures = {pool.submit(_process_task, task_id, active_shard, args): task_id for task_id in task_ids}
+                for future in as_completed(futures):
+                    task_id = futures[future]
+                    try:
+                        results.append(future.result())
+                    except Exception as exc:  # noqa: BLE001 - keep converting other tasks
+                        failures.append({"task_id": task_id, "shard": shard.name, "error": str(exc)})
+                        print(f"[archive] failed {task_id}: {exc}", file=sys.stderr)
+                    completed += 1
+                    if completed % 10 == 0 or completed == total_tasks:
+                        print(f"[archive] {completed}/{total_tasks} tasks, failures={len(failures)}", file=sys.stderr)
+        finally:
+            if staged is not None and staged.exists():
+                staged.unlink()
 
     print(json.dumps({"processed": completed, "failures": failures, "tasks": results}, indent=2))
     return 1 if failures else 0
