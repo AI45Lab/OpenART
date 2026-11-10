@@ -25,6 +25,12 @@ into implementation details without reading stale walkthroughs.
 | [14_task_bundle_runtime.md](14_task_bundle_runtime.md) | Per-task Docker Compose bundles, service selection, live-service attacker, and pre-eval service export |
 | [../skills/openart/SKILL.md](../skills/openart/SKILL.md) | Unified operator guide for agents and contributors |
 
+## Appendix
+
+| File | Purpose |
+|------|---------|
+| [appendix-attack-objectives.md](appendix-attack-objectives.md) | 28 attack objectives with benign-task examples and success checks |
+
 ## Recommended Reading Paths
 
 For running OpenART:
