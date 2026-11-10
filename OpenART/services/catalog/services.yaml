@@ -677,6 +677,10 @@ services:
           start_period: 20s
       dtap-googledocs-api:
         image: decodingtrustagent/google-docs:api-latest
+        command:
+        - sh
+        - -c
+        - uvicorn main:app --host {{ bind_host }} --port {{ api_port }}
         environment:
           GOOGLEDOCS_API_HOST: '{{ bind_host }}'
           GOOGLEDOCS_PG_HOST: '{{ pg_host }}'
@@ -689,6 +693,8 @@ services:
           OAUTH_ISSUER: google-idp
           MY_AUDIENCE: gdocs-api
         admin: true
+        volumes:
+        - '{{ asset:googledocs/api }}:/app:ro'
         depends_on:
           dtap-googledocs-pg:
             condition: service_healthy
@@ -728,6 +734,7 @@ services:
     - google-idp
     assets:
     - googledocs/init
+    - googledocs/api
   google-form:
     compose:
       dtap-google-form-pg:
