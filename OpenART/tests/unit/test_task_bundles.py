@@ -612,3 +612,23 @@ def test_archive_task_bundles_writes_runnable_zip(tmp_path: Path) -> None:
     assert f"{task_id}/down.sh" in names
     assert f"{task_id}/task/task.md" in names
     assert f"{task_id}/docker/docker-compose.yml" in names
+
+
+def test_parse_public_roots_skips_structural_directories(tmp_path: Path) -> None:
+    task = tmp_path / "task"
+    task.mkdir()
+    (task / "utils").mkdir()
+    (task / "utils" / "evaluator.py").write_text(
+        "\n".join(
+            [
+                "def evaluate(workspace_root):",
+                '    helpers = root / "utils" / "helpers.py"',
+                '    outputs = workspace / "output"',
+                "    return helpers, outputs",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    roots = parse_public_roots(task)
+    assert "utils" not in roots
+    assert "output" in roots

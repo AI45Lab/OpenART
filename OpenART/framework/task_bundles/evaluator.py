@@ -13,6 +13,23 @@ _ROOT_SLASH = re.compile(r'root\s*/\s*"([^"\n]+)"')
 _PUBLIC_ROOTS_PLAN = re.compile(r'"public_output_roots"\s*:\s*\[(.*?)\]', re.S)
 _STRING = re.compile(r'"([^"\n]+)"')
 _CODE_CHARS = set("(){}[]=;:,")
+_STRUCTURAL_ROOTS = frozenset(
+    {
+        "assets",
+        "bin",
+        "docker",
+        "framework",
+        "lib",
+        "node_modules",
+        "scripts",
+        "src",
+        "task",
+        "tasks",
+        "templates",
+        "tests",
+        "utils",
+    }
+)
 
 
 def _normalize_root(value: str) -> str:
@@ -111,9 +128,14 @@ def parse_public_roots(task_root: str | Path) -> tuple[str, ...]:
     evaluator = root / "utils" / "evaluator.py"
     if evaluator.is_file():
         try:
-            values.extend(_roots_from_source(evaluator.read_text(encoding="utf-8", errors="replace")))
+            source_roots = _roots_from_source(evaluator.read_text(encoding="utf-8", errors="replace"))
         except OSError:
-            pass
+            source_roots = []
+        values.extend(
+            value
+            for value in source_roots
+            if value and value.split("/", 1)[0] not in _STRUCTURAL_ROOTS
+        )
     roots = _dedupe(values)
     if not roots:
         roots = ["output", "remote_uploads"]
