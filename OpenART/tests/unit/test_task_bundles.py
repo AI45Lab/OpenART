@@ -612,6 +612,7 @@ def test_archive_task_bundles_writes_runnable_zip(tmp_path: Path) -> None:
     assert f"{task_id}/down.sh" in names
     assert f"{task_id}/task/task.md" in names
     assert f"{task_id}/docker/docker-compose.yml" in names
+    assert not any("__pycache__" in name or name.endswith((".pyc", ".pyo")) for name in names)
 
 
 def test_parse_public_roots_skips_structural_directories(tmp_path: Path) -> None:

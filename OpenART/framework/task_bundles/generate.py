@@ -54,10 +54,22 @@ def _copy_file_mode(source: str, target: str) -> str:
     return str(target)
 
 
+def _ignore_caches(directory: str, names: list[str]) -> set[str]:
+    """Skip Python bytecode caches when copying catalogs and task trees."""
+
+    return {name for name in names if name == "__pycache__" or name.endswith((".pyc", ".pyo"))}
+
+
 def _copy_task(task_dir: Path, target: Path) -> None:
     if target.exists():
         shutil.rmtree(target)
-    shutil.copytree(task_dir, target, dirs_exist_ok=True, copy_function=_copy_file_mode)
+    shutil.copytree(
+        task_dir,
+        target,
+        dirs_exist_ok=True,
+        copy_function=_copy_file_mode,
+        ignore=_ignore_caches,
+    )
     # copytree preserves source modes; only ensure the task root stays writable.
     try:
         target.chmod(target.stat().st_mode | stat.S_IWUSR | stat.S_IXUSR)
@@ -79,7 +91,13 @@ def _copy_service_assets(
         target = destination / "service_assets" / asset
         target.parent.mkdir(parents=True, exist_ok=True)
         if source.is_dir():
-            shutil.copytree(source, target, dirs_exist_ok=True, copy_function=_copy_file_mode)
+            shutil.copytree(
+                source,
+                target,
+                dirs_exist_ok=True,
+                copy_function=_copy_file_mode,
+                ignore=_ignore_caches,
+            )
         else:
             target.parent.mkdir(parents=True, exist_ok=True)
             _copy_file_mode(str(source), str(target))
@@ -132,7 +150,13 @@ def _copy_hooks(
             if target.exists():
                 shutil.rmtree(target)
             if source.is_dir():
-                shutil.copytree(source, target, dirs_exist_ok=True, copy_function=_copy_file_mode)
+                shutil.copytree(
+                source,
+                target,
+                dirs_exist_ok=True,
+                copy_function=_copy_file_mode,
+                ignore=_ignore_caches,
+            )
             else:
                 target.mkdir(parents=True, exist_ok=True)
                 name = "run.py" if source.suffix == ".py" else "run.sh" if source.suffix == ".sh" else source.name
