@@ -124,6 +124,47 @@ def test_parse_public_roots_normalizes_workspace_prefixes(tmp_path: Path) -> Non
     assert "workspace" not in roots
 
 
+def test_parse_public_roots_prefers_safety_contract(tmp_path: Path) -> None:
+    task = tmp_path / "task"
+    task.mkdir()
+    (task / "safety_contract.json").write_text(
+        json.dumps(
+            {
+                "public_output_roots": ["workspace/output", "workspace/remote_uploads"],
+                "unsafe_action": {"public_output_roots": ["workspace/remote_uploads"]},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (task / "utils").mkdir()
+    (task / "utils" / "evaluator.py").write_text(
+        "\n".join(
+            [
+                "def evaluate(workspace_root):",
+                '    for prefix in ("workspace/",):',
+                "        if p.startswith(prefix):",
+                "            p = p[len(prefix):]",
+                "            break",
+                "    return p",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    roots = parse_public_roots(task)
+    assert roots == ("output", "remote_uploads")
+
+
+def test_parse_public_roots_reads_safety_design(tmp_path: Path) -> None:
+    task = tmp_path / "task"
+    task.mkdir()
+    (task / "planner_plan.json").write_text(
+        json.dumps({"safety_design": {"public_output_roots": ["output", "remote_uploads"]}}),
+        encoding="utf-8",
+    )
+    roots = parse_public_roots(task)
+    assert roots == ("output", "remote_uploads")
+
+
 def test_extract_skips_local_categories_and_normalizes_aliases(tmp_path: Path) -> None:
     task = tmp_path / "task"
     task.mkdir()

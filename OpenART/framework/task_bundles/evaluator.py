@@ -6,22 +6,19 @@ import re
 from typing import Any, Iterable
 
 
-_WORKSPACE_SLASH = re.compile(r'workspace\s*/\s*"([^"]+)"')
-_WORKSPACE_GLOB = re.compile(r'workspace\.glob\(\s*"([^"]+)"')
-_WORKSPACE_CHAIN = re.compile(r'workspace((?:\s*/\s*"[^"]+")+)')
-_ROOT_SLASH = re.compile(r'root\s*/\s*"([^"]+)"')
+_WORKSPACE_SLASH = re.compile(r'workspace\s*/\s*"([^"\n]+)"')
+_WORKSPACE_GLOB = re.compile(r'workspace\.glob\(\s*"([^"\n]+)"')
+_WORKSPACE_CHAIN = re.compile(r'workspace((?:\s*/\s*"[^"\n]+")+)')
+_ROOT_SLASH = re.compile(r'root\s*/\s*"([^"\n]+)"')
 _PUBLIC_ROOTS_PLAN = re.compile(r'"public_output_roots"\s*:\s*\[(.*?)\]', re.S)
-_STRING = re.compile(r'"([^"]+)"')
-_QUOTED = re.compile(r"""['"]([^'"]+)['"]""")
+_STRING = re.compile(r'"([^"\n]+)"')
+_CODE_CHARS = set("(){}[]=;:,")
 
 
 def _normalize_root(value: str) -> str:
     text = str(value or "").replace("\\", "/").strip()
-    if not text:
+    if not text or any(char in text for char in "\n\r\t"):
         return ""
-    quoted = _QUOTED.findall(text)
-    if quoted:
-        text = "/".join(quoted)
     text = re.sub(r"\s*/\s*", "/", text)
     text = text.replace("'", "").replace('"', "")
     text = text.split("**", 1)[0]
@@ -31,7 +28,10 @@ def _normalize_root(value: str) -> str:
         parts = parts[1:]
     if not parts:
         return ""
-    return "/".join(parts)
+    root = "/".join(parts)
+    if len(root) > 200 or any(char in _CODE_CHARS for char in root):
+        return ""
+    return root
 
 
 def _dedupe(values: Iterable[str]) -> list[str]:
@@ -44,6 +44,26 @@ def _dedupe(values: Iterable[str]) -> list[str]:
     return result
 
 
+def _roots_from_contract(task_root: Path) -> list[str]:
+    path = task_root / "safety_contract.json"
+    if not path.is_file():
+        return []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    if not isinstance(payload, dict):
+        return []
+    roots: list[str] = []
+    for section in (payload, payload.get("unsafe_action")):
+        if not isinstance(section, dict):
+            continue
+        raw = section.get("public_output_roots")
+        if isinstance(raw, list):
+            roots.extend(_normalize_root(str(item)) for item in raw)
+    return roots
+
+
 def _roots_from_plan(task_root: Path) -> list[str]:
     path = task_root / "planner_plan.json"
     if not path.is_file():
@@ -52,13 +72,17 @@ def _roots_from_plan(task_root: Path) -> list[str]:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return []
-    design = payload.get("evaluator_design") if isinstance(payload, dict) else None
-    if not isinstance(design, dict):
+    if not isinstance(payload, dict):
         return []
-    raw = design.get("public_output_roots")
-    if not isinstance(raw, list):
-        return []
-    return [_normalize_root(str(item)) for item in raw]
+    roots: list[str] = []
+    for key in ("evaluator_design", "safety_design"):
+        design = payload.get(key)
+        if not isinstance(design, dict):
+            continue
+        raw = design.get("public_output_roots")
+        if isinstance(raw, list):
+            roots.extend(_normalize_root(str(item)) for item in raw)
+    return roots
 
 
 def _roots_from_source(source: str) -> list[str]:
@@ -82,6 +106,7 @@ def parse_public_roots(task_root: str | Path) -> tuple[str, ...]:
 
     root = Path(task_root)
     values: list[str] = []
+    values.extend(_roots_from_contract(root))
     values.extend(_roots_from_plan(root))
     evaluator = root / "utils" / "evaluator.py"
     if evaluator.is_file():
