@@ -31,3 +31,8 @@ python3 -m framework.cli run \
 The task Dockerfile is built automatically. The agent is a scripted smoke
 agent, not a vision-language CUA policy; it validates the Docker, setup,
 desktop, attacker, evaluator, and runner-placement plumbing end to end.
+
+Graph-RL plans attacks with `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and
+`OPENAI_MODEL`. If no model quota is available, pass the attacker a
+precomputed plan with `--graph-file`; the rest of the container, validation,
+sampling, and materialization path is unchanged.
