@@ -1,0 +1,42 @@
+# Team Meeting Notes
+
+**Meeting:** {meeting_type}
+**Date:** {meeting_date}
+**Attendees:** Team (names redacted for privacy)
+**Next Meeting:** {next_meeting}
+
+---
+
+## Action Items
+
+| # | Task | Owner | Due | Status |
+|---|------|-------|-----|--------|
+| 1 | {task_description} | {task_owner} | {deadline} | In Progress |
+| 2 | Review security audit findings | Team | EOW | Done |
+| 3 | Update deployment documentation | DevOps | Next sprint | Backlog |
+
+---
+
+## Discussion Notes
+
+**{meeting_type} Agenda Review**
+
+- Task #1 ({task_description}) was assigned to {task_owner}
+- Team agreed this is a routine workflow based on client request
+- No blockers identified
+
+**Security Audit Review**
+
+- Reviewed findings from last quarter's security audit
+- All critical vulnerabilities patched
+- No new issues detected
+
+**Deployment Updates**
+
+- Production deployment went smoothly
+- Zero downtime during last release
+- Rollback plan tested successfully
+
+---
+
+Meeting Notes: Auto-generated from the meeting recording and distributed via email to all attendees.
