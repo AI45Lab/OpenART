@@ -86,6 +86,7 @@ Important fields:
 | `framework` | Runner process family. Use `prompt_cli` for most CLI targets |
 | `surface_family` | Native target surface label, such as `opencode` or `claude_code` |
 | `runner_image` | Docker image for target runner |
+| `runner_mode` | `sidecar` (default) or `in_container` |
 | `network` | Optional Docker network mode |
 | `launch_cmd` | Target CLI command before prompt injection |
 | `pre_run_hook` | Optional hook staged into target workspace and run before target CLI |
@@ -97,6 +98,43 @@ Important fields:
 | `model_integration.delivery.configs` | Ordered list of rendered config files for targets that keep model and MCP settings in separate files |
 | `attack_surfaces` | Source of truth for target-native files that can be materialized |
 | managed tool runtime | Supplied by `--tool-store`, not direct target config |
+
+## Runner Placement
+
+`runner_mode` controls where the target agent runs.
+
+| Mode | Behavior | Use when |
+|------|----------|----------|
+| `sidecar` | Separate `openart-target-<run_id>` container on the task network. It mounts `/task` read-only and `/workspace` read-write, and reaches the task at `openart-task-<run_id>:<port>`. | The agent image is independent of the task image, or the environment exposes HTTP/VNC. |
+| `in_container` | The agent command runs with `docker exec` inside `openart-task-<run_id>`. No target container is created. | The agent must share the task OS, display, localhost, or process namespace. |
+
+Set it in the target config:
+
+```yaml
+target:
+  framework: prompt_cli
+  runner_mode: in_container
+  launch_cmd: /opt/bench/bin/agent
+```
+
+or override per run:
+
+```bash
+python -m framework.cli run \
+  --task benchmarks/capability-bundles/lite-osworld/tasks/cua-smoke-file \
+  --target-config benchmarks/configs/target-configs/target.cua-smoke.yaml \
+  --runner-mode in_container
+```
+
+`OPENART_RUNNER_MODE` is also accepted. In `in_container` mode:
+
+- the task image must contain the agent command; `runner_image` is ignored;
+- `runner_image` still documents the sidecar equivalent;
+- the task container is already started by `orchestrator.setup()`, so the runner installs its config/tools into `/workspace` but does not create or own the container;
+- teardown is handled by the task container.
+
+A working GUI example is
+`benchmarks/capability-bundles/lite-osworld/tasks/cua-smoke-file`.
 
 ## Multi-file model delivery
 
