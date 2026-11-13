@@ -63,6 +63,31 @@ DEFAULT_COMMAND_TEMPLATES = {
     "prompt_cli": "python {{task_instruction_file}}",
 }
 
+RUNNER_MODES = ("sidecar", "in_container")
+
+
+def resolve_runner_mode(explicit: str | None, target_config: dict[str, Any] | None) -> str:
+    """Resolve where the target agent runs.
+
+    ``sidecar`` creates a separate runner container (default).  ``in_container``
+    executes the agent inside the task container, which is required by
+    benchmarks whose agent must share the task's OS, display, or localhost.
+    """
+
+    candidate = (
+        str(explicit or "").strip()
+        or str((target_config or {}).get("runner_mode") or "").strip()
+        or os.environ.get("OPENART_RUNNER_MODE", "").strip()
+        or "sidecar"
+    ).lower().replace("-", "_")
+    if candidate in {"", "auto"}:
+        return "sidecar"
+    if candidate not in RUNNER_MODES:
+        raise ValueError(
+            f"Unsupported runner_mode: {candidate!r}; expected one of {', '.join(RUNNER_MODES)}"
+        )
+    return candidate
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 _SYMBOLIC_DESTINATION_ROOTS = {
     "HOME": lambda env: str(env.get("HOME", "") or ""),
@@ -130,6 +155,7 @@ class OrchestratorFactory:
         runner_image: Optional[str] = None,
         runner_command: Optional[str] = None,
         runner_model: Optional[str] = None,
+        runner_mode: Optional[str] = None,
         target_config: Optional[dict[str, Any]] = None,
         target_config_path: Optional[str] = None,
         eval_strategy: str = "auto",
@@ -164,6 +190,7 @@ class OrchestratorFactory:
         self.runner_image = (runner_image or "").strip()
         self.runner_command = (runner_command or "").strip()
         self.runner_model = (runner_model or "").strip()
+        self.runner_mode = (runner_mode or "").strip().lower()
         self.target_config = dict(target_config or {})
         self.target_config_path = str(target_config_path or "").strip()
         self._validate_no_legacy_target_surface_fields(self.target_config)
@@ -178,6 +205,7 @@ class OrchestratorFactory:
 
         # Workspace path - canonical shared workspace used by task container and target runner
         self._workspace_path: Optional[str] = None
+        self._task_container: Optional[TaskContainer] = None
         self._workspace_manager = WorkspaceManager(str(Path(self.output_dir) / "workspace"))
         self._target_framework = self._resolve_target_framework_name()
         self._control_manager = ControlPlaneManager(
@@ -219,18 +247,18 @@ class OrchestratorFactory:
         self._control_manager.ensure_layout()
 
         # Build components
-        task_container = self._create_task_container()
+        self._task_container = self._create_task_container()
         target_runner = self._create_runner("target")
         self._stage_model_configs_to_shared_workspace()
         attacker, attacker_context = self._create_attacker()
-        evaluator = self._create_evaluator(task_container)
+        evaluator = self._create_evaluator(self._task_container)
 
         return Orchestrator(
             target_runner=target_runner,
             attacker=attacker,
             attacker_context=attacker_context,
             evaluator=evaluator,
-            task_container=task_container,
+            task_container=self._task_container,
             workspace_manager=self._workspace_manager,
             control_manager=self._control_manager,
             max_iterations=self.max_iterations,
@@ -421,6 +449,11 @@ class OrchestratorFactory:
             return build_provider_from_attack_surfaces(provider_framework, attack_surfaces)
         return None
 
+    def _runner_mode(self, role: str) -> str:
+        if role != "target":
+            return "sidecar"
+        return resolve_runner_mode(self.runner_mode, self.target_config)
+
     def _create_runner(self, role: str) -> RunnerBase:
         """Create a runner for the given role (target/attack).
 
@@ -469,49 +502,57 @@ class OrchestratorFactory:
         model = first_non_empty(self.runner_model)
         api_key = ""
 
-        explicit_runner_network = str(
-            resolve_env_value(role_cfg.get("network"))
-            if use_role_runner_profile and isinstance(role_cfg.get("network"), str)
-            else ""
-        ).strip()
-        runner_network = self._resolve_container_network(role, explicit_runner_network)
+        runner_mode = self._runner_mode(role)
+        in_container = runner_mode == "in_container"
 
-        container_spec = ContainerSpec(
-            name=f"openart-{role}-{self.run_id}",
-            image=image,
-            command=["tail", "-f", "/dev/null"],
-            env=self._runtime_env(),
-            working_dir="/workspace",
-            network=runner_network,
-            lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
-            labels=self._container_labels(role),
-        )
+        if in_container:
+            if self._task_container is None:
+                raise RuntimeError("in_container runner mode requires a task container")
+            container = self._task_container
+        else:
+            explicit_runner_network = str(
+                resolve_env_value(role_cfg.get("network"))
+                if use_role_runner_profile and isinstance(role_cfg.get("network"), str)
+                else ""
+            ).strip()
+            runner_network = self._resolve_container_network(role, explicit_runner_network)
 
-        if "codex" in command_template.split():
-            for key in (
-                "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
-                "http_proxy", "https_proxy", "all_proxy",
-            ):
-                container_spec.env.pop(key, None)
+            container_spec = ContainerSpec(
+                name=f"openart-{role}-{self.run_id}",
+                image=image,
+                command=["tail", "-f", "/dev/null"],
+                env=self._runtime_env(),
+                working_dir="/workspace",
+                network=runner_network,
+                lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
+                labels=self._container_labels(role),
+            )
 
-        # Mount task assets (read-only) - for instruction files
-        task_root = Path(self.bundle.root_dir)
-        container_spec.mounts.append(MountSpec(
-            host_path=str(task_root),
-            container_path="/task",
-            read_only=True,
-        ))
+            if "codex" in command_template.split():
+                for key in (
+                    "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+                    "http_proxy", "https_proxy", "all_proxy",
+                ):
+                    container_spec.env.pop(key, None)
 
-        # Mount workspace (read-write) - shared with TaskContainer
-        # This allows the agent to modify files that persist for evaluation
-        if self._workspace_path:
+            # Mount task assets (read-only) - for instruction files
+            task_root = Path(self.bundle.root_dir)
             container_spec.mounts.append(MountSpec(
-                host_path=self._workspace_path,
-                container_path="/workspace",
-                read_only=False,
+                host_path=str(task_root),
+                container_path="/task",
+                read_only=True,
             ))
 
-        container = RunnerContainer(container_spec)
+            # Mount workspace (read-write) - shared with TaskContainer
+            # This allows the agent to modify files that persist for evaluation
+            if self._workspace_path:
+                container_spec.mounts.append(MountSpec(
+                    host_path=self._workspace_path,
+                    container_path="/workspace",
+                    read_only=False,
+                ))
+
+            container = RunnerContainer(container_spec)
 
         runtime_env = self._runtime_env()
         if "codex" in command_template.split():
@@ -574,7 +615,7 @@ class OrchestratorFactory:
         rendered_configs = model_integration_result.configs if model_integration_result is not None else []
         if rendered_configs:
             for rendered_config in rendered_configs:
-                container_spec.mounts.append(MountSpec(
+                container.spec.mounts.append(MountSpec(
                     host_path=rendered_config.host_path,
                     container_path=rendered_config.mount_path,
                     read_only=True,
@@ -630,6 +671,7 @@ class OrchestratorFactory:
             "name": f"{role}_runner",
             "role": role,
             "container": container,
+            "owns_container": not in_container,
             "command": command,
             "credentials": credentials,
             "tools": tools,

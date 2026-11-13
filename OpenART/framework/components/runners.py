@@ -21,6 +21,7 @@ from typing import Any, Iterator, Optional
 
 from framework.core.helpers import append_runtime_log, capture_workspace_listing, write_json_artifact, write_text_artifact
 from framework.core.timing import TimingRecorder, TimingEventScope
+from framework.components.containers import DockerContainer
 from framework.models.common import (
     CommandSpec,
     CredentialBundle,
@@ -66,7 +67,7 @@ class RunnerBase(ABC):
         self,
         name: str,
         role: str,
-        container: "RunnerContainer",
+        container: DockerContainer,
         command: CommandSpec,
         credentials: CredentialBundle,
         tools: Optional[list[ToolSpec]] = None,
@@ -78,10 +79,12 @@ class RunnerBase(ABC):
         extra_config: Optional[dict[str, Any]] = None,
         runtime_env: Optional[dict[str, str]] = None,
         artifact_dir: Optional[str] = None,
+        owns_container: bool = True,
     ) -> None:
         self.name = name
         self.role = role
         self.container = container
+        self.owns_container = bool(owns_container)
         self.command = command
         self.credentials = credentials
         self.tools = tools or []
@@ -99,9 +102,10 @@ class RunnerBase(ABC):
         self.timing: TimingRecorder | None = None
 
     def prepare(self) -> None:
-        self.container.build()
-        self.container.create()
-        self.container.start()
+        if self.owns_container:
+            self.container.build()
+            self.container.create()
+            self.container.start()
         self._prepare_runtime_dirs()
         self._install_user_model_config_json()
         self._merge_materialized_home_files()
@@ -178,12 +182,16 @@ class RunnerBase(ABC):
         return code
 
     def stop(self) -> None:
+        if not self.owns_container:
+            return
         try:
             self.container.stop()
         except Exception:
             return
 
     def remove(self, force: bool = True) -> None:
+        if not self.owns_container:
+            return
         try:
             self.container.remove(force=force)
         except Exception:

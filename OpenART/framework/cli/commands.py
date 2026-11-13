@@ -759,6 +759,12 @@ def run_main(argv: list[str] | None = None) -> int:
         help="Runner framework override (hermes, nanobot, pi, prompt_cli). Use target.surface_family and attack_surfaces for native surfaces.",
     )
     parser.add_argument(
+        "--runner-mode",
+        choices=["auto", "sidecar", "in_container"],
+        default="auto",
+        help="Where the target agent runs: sidecar container (default) or inside the task container",
+    )
+    parser.add_argument(
         "--runner-model",
         default="",
         help="Runner model override",
@@ -899,6 +905,7 @@ def run_main(argv: list[str] | None = None) -> int:
             managed_tool_env=managed_tool_env,
             runner_framework=args.runner_framework or None,
             runner_model=args.runner_model or None,
+            runner_mode=None if args.runner_mode == "auto" else args.runner_mode,
             target_config=target_config,
             target_config_path=target_config_path,
             eval_strategy=args.eval_strategy,
