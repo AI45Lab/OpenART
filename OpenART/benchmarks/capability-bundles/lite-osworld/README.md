@@ -9,17 +9,18 @@ tasks/cua-smoke-file/
 ├── task.md                 benign GUI instruction
 ├── env/setup.sh            starts supervisord, waits for GNOME + OSWorld server
 ├── agent/cua_agent.py      scripted desktop agent (xdotool via /execute)
-├── utils/evaluator.py      checks the file created on the desktop
-└── attacker/               workspace-channel attacker
+└── utils/evaluator.py      checks the file created on the desktop
 ```
 
-Run it in-container (the agent shares the desktop's OS and localhost):
+Run it in-container (the agent shares the desktop's OS and localhost) with the
+framework Graph-RL attacker:
 
 ```bash
 cd OpenART
 python3 -m framework.cli run \
   --task benchmarks/capability-bundles/lite-osworld/tasks/cua-smoke-file \
   --target-config benchmarks/configs/target-configs/target.cua-smoke.yaml \
+  --attacker-config benchmarks/configs/attacker-configs/graph-rl-control/config.yaml \
   --runner-mode in_container \
   --eval-strategy deterministic \
   --run-id cua-smoke \
