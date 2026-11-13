@@ -1,0 +1,9 @@
+target:
+  framework: prompt_cli
+  # Used only in sidecar mode; in-container mode runs the agent inside the
+  # task image, which must contain the agent command.
+  runner_image: ghcr.io/cua-lite/lite.osworld@sha256:2d51f12e1bff4a8621c3a810cd5399c2c678aafae0db310f757c8c240cf954b1
+  launch_cmd: >-
+    /opt/env/venv/bin/python /task/agent/cua_agent.py
+  config_overlay:
+    prompt_transport: stdin
