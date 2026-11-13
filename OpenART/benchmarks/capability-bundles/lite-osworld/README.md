@@ -1,7 +1,8 @@
 # Lite.OSWorld Task-Container Smoke
 
 This benchmark sample runs one real Lite.OSWorld desktop image as an OpenART
-task container. The image is `ghcr.io/cua-lite/lite.osworld:latest`.
+task container. The image is pinned by digest:
+`ghcr.io/cua-lite/lite.osworld@sha256:2d51f12e1bff4a8621c3a810cd5399c2c678aafae0db310f757c8c240cf954b1`.
 
 ```text
 tasks/cua-smoke-file/
