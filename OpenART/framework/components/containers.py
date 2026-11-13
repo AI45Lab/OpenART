@@ -349,6 +349,38 @@ class DockerContainer(ContainerBase):
             docker_cmd.extend(cmd)
             return self._run_with_input(docker_cmd, input_data)
 
+    def write_bytes_file(self, path: str, content: bytes, env: Optional[dict[str, str]] = None) -> None:
+        script = (
+            "import pathlib, sys; "
+            "p=pathlib.Path(sys.argv[1]); "
+            "p.parent.mkdir(parents=True, exist_ok=True); "
+            "p.write_bytes(sys.stdin.buffer.read())"
+        )
+        code, _, stderr = self.exec_with_stdin(["python3", "-c", script, path], content, env=env)
+        if code != 0:
+            raise RuntimeError(f"failed writing file {path}: {stderr.strip()}")
+
+    def write_text_file(self, path: str, content: str, env: Optional[dict[str, str]] = None) -> None:
+        self.write_bytes_file(path, content.encode("utf-8"), env=env)
+
+    def ensure_dir(self, path: str, env: Optional[dict[str, str]] = None) -> None:
+        code, _, stderr = self.exec(["mkdir", "-p", path], env=env)
+        if code != 0:
+            raise RuntimeError(f"failed creating directory {path}: {stderr.strip()}")
+
+    def run_shell(self, command: str, env: Optional[dict[str, str]] = None) -> tuple[int, str, str]:
+        return self.exec(["/bin/bash", "-lc", command], env=env)
+
+    def read_text_file(self, path: str, env: Optional[dict[str, str]] = None) -> str:
+        script = (
+            "from pathlib import Path; import sys; "
+            "sys.stdout.write(Path(sys.argv[1]).read_text(encoding='utf-8'))"
+        )
+        code, stdout, stderr = self.exec(["python3", "-c", script, path], env=env)
+        if code != 0:
+            raise RuntimeError(f"failed reading file {path}: {stderr.strip()}")
+        return stdout
+
     def logs(self, tail: int = 500) -> str:
         code, stdout, stderr = self._run(
             ["docker", "logs", "--tail", str(tail), self._target()]
@@ -492,38 +524,6 @@ class TaskContainer(DockerContainer):
 
 class RunnerContainer(DockerContainer):
     """Container for runner execution with file I/O helpers."""
-
-    def write_bytes_file(self, path: str, content: bytes, env: Optional[dict[str, str]] = None) -> None:
-        script = (
-            "import pathlib, sys; "
-            "p=pathlib.Path(sys.argv[1]); "
-            "p.parent.mkdir(parents=True, exist_ok=True); "
-            "p.write_bytes(sys.stdin.buffer.read())"
-        )
-        code, _, stderr = self.exec_with_stdin(["python3", "-c", script, path], content, env=env)
-        if code != 0:
-            raise RuntimeError(f"failed writing file {path}: {stderr.strip()}")
-
-    def write_text_file(self, path: str, content: str, env: Optional[dict[str, str]] = None) -> None:
-        self.write_bytes_file(path, content.encode("utf-8"), env=env)
-
-    def ensure_dir(self, path: str, env: Optional[dict[str, str]] = None) -> None:
-        code, _, stderr = self.exec(["mkdir", "-p", path], env=env)
-        if code != 0:
-            raise RuntimeError(f"failed creating directory {path}: {stderr.strip()}")
-
-    def run_shell(self, command: str, env: Optional[dict[str, str]] = None) -> tuple[int, str, str]:
-        return self.exec(["/bin/bash", "-lc", command], env=env)
-
-    def read_text_file(self, path: str, env: Optional[dict[str, str]] = None) -> str:
-        script = (
-            "from pathlib import Path; import sys; "
-            "sys.stdout.write(Path(sys.argv[1]).read_text(encoding='utf-8'))"
-        )
-        code, stdout, stderr = self.exec(["python3", "-c", script, path], env=env)
-        if code != 0:
-            raise RuntimeError(f"failed reading file {path}: {stderr.strip()}")
-        return stdout
 __all__ = [
     "ContainerBase",
     "DockerContainer",
