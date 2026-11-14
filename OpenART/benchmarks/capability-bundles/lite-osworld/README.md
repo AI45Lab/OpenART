@@ -37,7 +37,8 @@ Graph-RL plans attacks with `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and
 precomputed plan with `--graph-file`; the rest of the container, validation,
 sampling, and materialization path is unchanged.
 
-If the model endpoint is only reachable through a proxy bound to the host
-loopback, run the attacker on the host network with
-`OPENART_ATTACKER_DOCKER_NETWORK=host` and give the attacker `env` the proxy
-settings. Do not route large prompts through a bridge-network relay.
+If the model endpoint needs a proxy, prefer one reachable from the container
+network and put it in the attacker `env`; no host networking is needed. Only
+when the proxy binds to the host loopback should you run the attacker with
+`OPENART_ATTACKER_DOCKER_NETWORK=host`. Do not route large prompts through a
+bridge-network relay.
