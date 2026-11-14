@@ -4480,7 +4480,10 @@ def _run_local_opencode_prompt(
     env: dict[str, str],
     timeout_seconds: int,
 ) -> subprocess.CompletedProcess[str]:
-    command = ["opencode", "run", "--dangerously-skip-permissions"]
+    # Use a private server: the shared background service binds a fixed
+    # loopback port, which collides with the host when the attacker container
+    # shares the host network namespace.
+    command = ["opencode", "run", "--standalone", "--dangerously-skip-permissions"]
     if len(prompt) > MAX_INLINE_OPENCODE_PROMPT_CHARS:
         with prompt_path.open("r", encoding="utf-8") as handle:
             return subprocess.run(

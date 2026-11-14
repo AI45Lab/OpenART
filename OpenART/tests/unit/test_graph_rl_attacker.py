@@ -2123,6 +2123,39 @@ def test_run_opencode_prompt_empty_content_is_failure(tmp_path: Path, monkeypatc
     assert (tmp_path / "plan_proposal_stderr.txt").read_text(encoding="utf-8") == "LLM returned empty message content"
 
 
+def test_local_opencode_prompt_uses_private_server(tmp_path: Path, monkeypatch) -> None:
+    calls: list[dict] = []
+
+    class FakeCompleted:
+        returncode = 0
+        stdout = "ok"
+        stderr = ""
+
+    def fake_run(command, **kwargs):
+        calls.append({"command": list(command), "stdin_is_file": "stdin" in kwargs})
+        return FakeCompleted()
+
+    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    prompt_path = tmp_path / "prompt.txt"
+    prompt_path.write_text("hello", encoding="utf-8")
+
+    result = MODULE._run_local_opencode_prompt(
+        "hello",
+        prompt_path=prompt_path,
+        cwd=tmp_path,
+        env={"OPENAI_API_KEY": "test-key"},
+        timeout_seconds=30,
+    )
+
+    assert result.returncode == 0
+    assert calls == [
+        {
+            "command": ["opencode", "run", "--standalone", "--dangerously-skip-permissions"],
+            "stdin_is_file": True,
+        }
+    ]
+
+
 def test_graph_rl_llm_opener_uses_env_proxy_mode_by_default(monkeypatch) -> None:
     calls = []
 
