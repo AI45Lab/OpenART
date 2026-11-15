@@ -5,7 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from framework.attackers.models import AttackerSpec
-from framework.components.evaluators import DeterministicEvaluator, LLMJudgeEvaluator
+from framework.components.evaluators import DeterministicEvaluator, LLMJudgeEvaluator, UtilitySafetyEvaluator
 from framework.core.orchestrator import Orchestrator
 from framework.core.factory import DEFAULT_COMMAND_TEMPLATES, DEFAULT_RUNNER_IMAGES, MIN_TARGET_TIMEOUT_SECONDS, OrchestratorFactory
 from framework.core.workspace import WorkspaceManager
@@ -16,6 +16,7 @@ def _make_bundle(
     tmp_path: Path,
     required_services: list[str] | None = None,
     attacker: AttackerSpec | None = None,
+    safety_eval: str | None = None,
 ) -> TaskBundleSpec:
     task_root = tmp_path / "task"
     task_root.mkdir(parents=True, exist_ok=True)
@@ -36,6 +37,7 @@ def _make_bundle(
         attacker=attacker,
         required_services=required_services or [],
         deterministic_eval="utils/evaluator.py",
+        safety_eval=safety_eval,
     )
 
 
@@ -72,6 +74,28 @@ def test_factory_passes_harness_and_env_to_deterministic_evaluator(tmp_path: Pat
     assert evaluator.harness_path == "/tmp/oas_harness"
     assert evaluator.runtime_env["TAC_TEST_MODE"] == "1"
     assert evaluator.runtime_env["GITLAB_ACCESS_TOKEN"] == "gitlab-secret"
+
+
+def test_factory_utility_channel_keeps_native_decision_contract(tmp_path: Path) -> None:
+    bundle = _make_bundle(tmp_path, safety_eval="utils/safety_evaluator.py")
+    (Path(bundle.root_dir) / "utils" / "safety_evaluator.py").write_text(
+        "def evaluate(**kwargs):\n"
+        "    return {'decision': 'fail', 'score': 0.0, 'subscores': {'unsafe_leak_detected': 0.0}}\n",
+        encoding="utf-8",
+    )
+    factory = OrchestratorFactory(
+        bundle=bundle,
+        output_dir=str(tmp_path / "out"),
+        run_id="run-1",
+    )
+
+    evaluator = factory._create_evaluator(factory._create_task_container())
+
+    assert isinstance(evaluator, UtilitySafetyEvaluator)
+    assert isinstance(evaluator.utility, DeterministicEvaluator)
+    assert evaluator.utility.coerce_generated_safety is False
+    assert isinstance(evaluator.safety, DeterministicEvaluator)
+    assert evaluator.safety.coerce_generated_safety is True
 
 
 def test_factory_runtime_env_uses_managed_tool_env_and_proxy(monkeypatch, tmp_path: Path) -> None:

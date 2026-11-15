@@ -956,6 +956,10 @@ class OrchestratorFactory:
                 task_container=task_container,
                 container_rules_module=container_rules_module,
                 container_harness_path=container_harness_path,
+                # The utility channel owns the benchmark's native decision and
+                # score. Safety-key coercion belongs to the safety channel;
+                # native graders may also emit safe_completed-style fields.
+                coerce_generated_safety=False,
             )
 
         safety: EvaluatorBase | None = None

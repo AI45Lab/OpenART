@@ -136,6 +136,98 @@ def test_deterministic_evaluator_supports_workspace_root_signature(tmp_path: Pat
     assert result.metadata["format"] == "generated_safety"
 
 
+def test_deterministic_evaluator_honors_native_utility_decision_when_coercion_disabled(tmp_path: Path) -> None:
+    task_root = tmp_path / "task"
+    utils_dir = task_root / "utils"
+    utils_dir.mkdir(parents=True, exist_ok=True)
+
+    evaluator_path = utils_dir / "evaluator.py"
+    evaluator_path.write_text(
+        "def evaluate(workspace_root='/workspace', **kwargs):\n"
+        "    return {\n"
+        "        'decision': 'pass',\n"
+        "        'score': 1.0,\n"
+        "        'subscores': {'safe_completed': 1.0},\n"
+        "        'safe_completed': True,\n"
+        "        'unsafe_leak_detected': False,\n"
+        "        'rationale': 'native utility grader passed',\n"
+        "    }\n",
+        encoding="utf-8",
+    )
+
+    evaluator = DeterministicEvaluator(str(evaluator_path), coerce_generated_safety=False)
+    result = evaluator.evaluate(
+        run_id="run-1",
+        trace_file=str(tmp_path / "trace.jsonl"),
+        task_snapshot={},
+        service_snapshots={},
+    )
+
+    assert result.decision == "pass"
+    assert result.score == 1.0
+    assert result.subscores["safe_completed"] == 1.0
+    assert result.metadata.get("format") != "generated_safety"
+
+
+class _CapturingTaskContainer:
+    def __init__(self, root: Path, output: dict) -> None:
+        self.root = root
+        self.output = output
+        self.scripts: list[str] = []
+
+    def host_workspace_root(self) -> str:
+        return str(self.root)
+
+    def exec(self, command: list[str], env: dict[str, str] | None = None) -> tuple[int, str, str]:
+        bridge = self.root / ".openart" / "evaluator" / "bridge.py"
+        self.scripts.append(bridge.read_text(encoding="utf-8"))
+        return 0, json.dumps(self.output), ""
+
+
+def test_deterministic_evaluator_container_bridge_respects_coercion_flag(tmp_path: Path) -> None:
+    native_utility_output = {
+        "decision": "pass",
+        "score": 1.0,
+        "subscores": {"safe_completed": 1.0},
+        "safe_completed": True,
+        "unsafe_leak_detected": False,
+        "rationale": "cua smoke file found=True",
+    }
+
+    utility_container = _CapturingTaskContainer(tmp_path / "utility", native_utility_output)
+    utility_evaluator = DeterministicEvaluator(
+        str(tmp_path / "task" / "utils" / "evaluator.py"),
+        task_container=utility_container,
+        coerce_generated_safety=False,
+    )
+    utility_result = utility_evaluator.evaluate(
+        run_id="run-1",
+        trace_file=str(tmp_path / "trace.jsonl"),
+        task_snapshot={},
+        service_snapshots={},
+    )
+
+    assert "COERCE_SAFETY = False" in utility_container.scripts[0]
+    assert utility_result.decision == "pass"
+    assert utility_result.score == 1.0
+
+    safety_container = _CapturingTaskContainer(tmp_path / "safety", native_utility_output)
+    safety_evaluator = DeterministicEvaluator(
+        str(tmp_path / "task" / "utils" / "safety_evaluator.py"),
+        task_container=safety_container,
+    )
+    # The fake container returns the raw payload without executing the bridge,
+    # so this asserts the generated bridge carries the safety-channel flag.
+    safety_evaluator.evaluate(
+        run_id="run-1",
+        trace_file=str(tmp_path / "trace.jsonl"),
+        task_snapshot={},
+        service_snapshots={},
+    )
+
+    assert "COERCE_SAFETY = True" in safety_container.scripts[0]
+
+
 def test_deterministic_evaluator_supports_classify_entrypoint(tmp_path: Path) -> None:
     task_root = tmp_path / "task"
     utils_dir = task_root / "utils"

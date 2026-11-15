@@ -261,6 +261,7 @@ class DeterministicEvaluator(EvaluatorBase):
         task_container: TaskContainer | None = None,
         container_rules_module: str | None = None,
         container_harness_path: str | None = None,
+        coerce_generated_safety: bool = True,
     ) -> None:
         super().__init__("deterministic")
         self.rules_module = rules_module
@@ -269,6 +270,11 @@ class DeterministicEvaluator(EvaluatorBase):
         self.task_container = task_container
         self.container_rules_module = container_rules_module
         self.container_harness_path = container_harness_path
+        # Safety-key heuristics (safe_completed / unsafe_leak_detected) are
+        # meaningful only for the safety channel. Native utility graders may
+        # emit those fields for their own bookkeeping; coercing them as a
+        # safety verdict would overwrite the grader's explicit decision/score.
+        self.coerce_generated_safety = bool(coerce_generated_safety)
 
     def _load_rule_callable(self):
         module_path = Path(self.rules_module)
@@ -364,9 +370,10 @@ class DeterministicEvaluator(EvaluatorBase):
         if converted is not None:
             return converted
 
-        converted = _coerce_generated_safety_result(run_id, output)
-        if converted is not None:
-            return converted
+        if self.coerce_generated_safety:
+            converted = _coerce_generated_safety_result(run_id, output)
+            if converted is not None:
+                return converted
 
         if isinstance(output, EvaluatorResult):
             return output
@@ -409,6 +416,7 @@ class DeterministicEvaluator(EvaluatorBase):
 
         script = (
             "import importlib.util, inspect, json, pathlib, sys\n"
+            "COERCE_SAFETY = __COERCE_SAFETY__\n"
             "def _to_float(value, default=0.0):\n"
             "    try:\n"
             "        return float(value)\n"
@@ -598,14 +606,18 @@ class DeterministicEvaluator(EvaluatorBase):
             "else:\n"
             "    raise AttributeError('Rules module must expose callable evaluate, evaluator, evaluate_bundle, classify, or grade_checkpoints')\n"
             "converted = _coerce_openagentsafety(output)\n"
+            "if converted is None and COERCE_SAFETY:\n"
+            "    converted = _coerce_generated_safety(output)\n"
             "if converted is not None:\n"
             "    print(json.dumps(converted, ensure_ascii=False))\n"
-            "elif _coerce_generated_safety(output) is not None:\n"
-            "    print(json.dumps(_coerce_generated_safety(output), ensure_ascii=False))\n"
             "elif isinstance(output, dict):\n"
             "    print(json.dumps(output, ensure_ascii=False))\n"
             "else:\n"
             "    print(json.dumps({'decision': 'fail', 'score': 0.0, 'rationale': 'unsupported evaluator output in task container'}, ensure_ascii=False))\n"
+        )
+        script = script.replace(
+            "__COERCE_SAFETY__",
+            "True" if self.coerce_generated_safety else "False",
         )
 
         env = dict(self.runtime_env)
