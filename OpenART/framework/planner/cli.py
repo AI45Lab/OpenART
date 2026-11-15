@@ -21,6 +21,8 @@ from .opencode_backend import (
     PLANNER_CONTEXT_MODES,
     build_generation_prompt,
     build_repair_prompt,
+    build_safety_overlay_prompt,
+    build_safety_overlay_repair_prompt,
     build_scenario_model_prompt,
     build_scenario_repair_prompt,
     prepare_output_dir,
@@ -29,7 +31,18 @@ from .registry import (
     run_registry_materialization_phase,
     write_refreshed_planner_inputs,
 )
-from .validation import validate_generated_bundle, validate_scenario_model, write_validation_report
+from .safety_overlay import (
+    assert_only_safety_files_changed,
+    security_surface_is_empty,
+    snapshot_task_tree,
+    validate_safety_overlay,
+)
+from .validation import (
+    PlannerValidationResult,
+    validate_generated_bundle,
+    validate_scenario_model,
+    write_validation_report,
+)
 
 
 def _load_env_for_planner() -> None:
@@ -111,8 +124,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--tool-store",
-        required=True,
-        help="Required managed OpenART tool store used as the only planner tool input source.",
+        help=(
+            "Required managed OpenART tool store used as the only planner tool input source. "
+            "Not used with --safety-only."
+        ),
     )
     parser.add_argument(
         "--emit-runtime-manifest",
@@ -121,7 +136,19 @@ def build_parser() -> argparse.ArgumentParser:
             "this is not a planner input source."
         ),
     )
-    parser.add_argument("--output-dir", required=True, help="Directory where the generated task bundle is written.")
+    parser.add_argument("--output-dir", help="Directory where the generated task bundle is written.")
+    parser.add_argument(
+        "--task-dir",
+        help="Existing materialized task directory. Required with --safety-only; edited in place.",
+    )
+    parser.add_argument(
+        "--safety-only",
+        action="store_true",
+        help=(
+            "Only write safety_contract.json, utils/safety_evaluator.py, and "
+            "utils/test_safety_evaluator.py for --task-dir. Benchmark-owned files are never modified."
+        ),
+    )
     parser.add_argument("--task-id", help="Generated task id.")
     parser.add_argument("--name", help="Generated display name.")
     parser.add_argument("--domain-hint", action="append", default=[], help="Optional domain hint. Can be repeated.")
@@ -319,6 +346,99 @@ def _run_opencode_backend(
     )
 
 
+def _run_safety_only(args: argparse.Namespace) -> int:
+    task_dir_value = str(args.task_dir or "").strip()
+    if not task_dir_value:
+        raise ValueError("--safety-only requires --task-dir")
+    task_dir = Path(task_dir_value).expanduser().resolve()
+    if not (task_dir / "task.md").is_file():
+        raise ValueError(f"task directory is missing task.md: {task_dir}")
+    spec_path = task_dir / "task_spec.json"
+    if not spec_path.is_file():
+        raise ValueError(
+            "safety-only mode requires a materialized task with task_spec.json; "
+            "run `python -m framework.tasks.materialize` first"
+        )
+
+    task_spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    if security_surface_is_empty(task_spec.get("safety_surface")):
+        raise ValueError(
+            "task_spec.json safety_surface is empty; refusing to invent harm checks "
+            "for a task with no declared safety surface"
+        )
+
+    planner_max_repairs = args.planner_max_repairs if args.planner_max_repairs is not None else 2
+    if planner_max_repairs < 0:
+        raise ValueError("--planner-max-repairs must be non-negative")
+
+    task_markdown = (task_dir / "task.md").read_text(encoding="utf-8", errors="replace")
+    artifacts = task_dir / "planner_artifacts"
+    artifacts.mkdir(parents=True, exist_ok=True)
+
+    before = snapshot_task_tree(task_dir)
+    base_prompt = build_safety_overlay_prompt(
+        task_dir=task_dir,
+        task_markdown=task_markdown,
+        task_spec=task_spec,
+    )
+    prompt = base_prompt
+    backend = OpenCodePlannerBackend(docker_image=args.planner_docker_image)
+    report_path = artifacts / "safety_overlay_validation_attempt_0.json"
+
+    for attempt in range(planner_max_repairs + 1):
+        run = backend.run_prompt(
+            prompt,
+            output_dir=task_dir,
+            artifact_root=artifacts,
+            attempt=attempt,
+        )
+
+        after = snapshot_task_tree(task_dir)
+        violations = assert_only_safety_files_changed(before, after)
+        result = validate_safety_overlay(task_dir)
+        if violations:
+            result.ok = False
+            result.errors.append(
+                "planner modified benchmark-owned files that are outside the safety overlay: "
+                + ", ".join(violations)
+            )
+        if run.returncode != 0 and not result.ok:
+            result.errors.append(f"opencode exited with status {run.returncode}; see {run.stderr[:500]}")
+
+        report_result = PlannerValidationResult(
+            ok=result.ok,
+            errors=list(result.errors),
+            metadata=dict(result.metadata),
+        )
+        report_path = write_validation_report(
+            task_dir,
+            report_result,
+            attempt=attempt,
+            label="safety_overlay_validation",
+        )
+        if result.ok:
+            _emit_cli_summary(
+                task_id=str(task_spec.get("task_id") or task_dir.name),
+                output_dir=task_dir,
+                runtime_manifest="",
+                planner_backend="opencode-safety-only",
+                validation_report=str(report_path),
+            )
+            return 0
+
+        prompt = build_safety_overlay_repair_prompt(
+            original_prompt=base_prompt,
+            validation_errors=list(result.errors),
+            task_dir=task_dir,
+            include_original_prompt=args.planner_repair_include_original_prompt,
+        )
+
+    raise OpenCodePlannerError(
+        "OpenCode planner safety overlay validation failed after "
+        f"{planner_max_repairs + 1} attempt(s); see validation report: {report_path}"
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -327,6 +447,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("deterministic planner backend has been removed; use --planner-backend opencode")
     if args.tool_count is not None and args.tool_count < 0:
         raise ValueError("--tool-count must be non-negative")
+    if args.safety_only:
+        return _run_safety_only(args)
+    if not args.tool_store:
+        parser.error("--tool-store is required unless --safety-only is used")
+    if not args.output_dir:
+        parser.error("--output-dir is required unless --safety-only is used")
     scenario = _read_text_arg(args.scenario, args.scenario_file)
     return _run_opencode_backend(args, scenario)
 

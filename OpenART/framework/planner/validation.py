@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import json
+import os
 import re
 import subprocess
 import sys
@@ -217,6 +218,7 @@ from pathlib import Path
 import sys
 import tempfile
 import traceback
+import types
 
 
 def _fail(message: str) -> None:
@@ -231,16 +233,28 @@ def main() -> int:
         if entry not in sys.path:
             sys.path.insert(0, entry)
 
-    module_path = utils / "test_evaluator.py"
-    spec = importlib.util.spec_from_file_location("openart_generated_test_evaluator_subprocess", module_path)
-    if spec is None or spec.loader is None:
-        _fail("utils/test_evaluator.py could not be imported")
+    module_relative = sys.argv[2] if len(sys.argv) > 2 else "utils/test_evaluator.py"
+    module_path = root / module_relative
+    if not module_path.is_file():
+        _fail(f"{module_relative} does not exist")
+    try:
+        source = module_path.read_text(encoding="utf-8")
+        code = compile(source, str(module_path), "exec")
+    except Exception as exc:
+        _fail(f"{module_relative} could not be compiled: {type(exc).__name__}: {exc}")
 
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    module = types.ModuleType("openart_generated_test_evaluator_subprocess")
+    module.__file__ = str(module_path)
+    sys.modules[module.__name__] = module
+    exec(code, module.__dict__)
     test_fn = getattr(module, "test_evaluator_truth_table", None)
     if not callable(test_fn):
-        _fail("utils/test_evaluator.py must define callable test_evaluator_truth_table")
+        test_fn = getattr(module, "test_safety_evaluator_truth_table", None)
+    if not callable(test_fn):
+        _fail(
+            f"{module_relative} must define callable test_evaluator_truth_table "
+            "or test_safety_evaluator_truth_table"
+        )
 
     with tempfile.TemporaryDirectory(prefix="openart-planner-eval-") as tmp:
         params = inspect.signature(test_fn).parameters
@@ -325,18 +339,21 @@ def _install_openagentsafety_shims() -> None:
     sys.modules.setdefault("config", types.ModuleType("config"))
 
 
-def _load_module(root: Path):
+def _load_module(root: Path, module_relative: str = "utils/evaluator.py"):
     utils = root / "utils"
     for entry in (str(root), str(utils)):
         if entry not in sys.path:
             sys.path.insert(0, entry)
     _install_openagentsafety_shims()
-    module_path = utils / "evaluator.py"
-    spec = importlib.util.spec_from_file_location("openart_generated_evaluator_runtime_contract", module_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError("utils/evaluator.py could not be imported")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    module_path = root / module_relative
+    if not module_path.is_file():
+        raise RuntimeError(f"{module_relative} does not exist")
+    source = module_path.read_text(encoding="utf-8")
+    code = compile(source, str(module_path), "exec")
+    module = types.ModuleType("openart_generated_evaluator_runtime_contract")
+    module.__file__ = str(module_path)
+    sys.modules[module.__name__] = module
+    exec(code, module.__dict__)
     return module
 
 
@@ -624,7 +641,9 @@ def _positive_unsafe_score(result: dict[str, Any]) -> bool:
 
 def main() -> int:
     root = Path(sys.argv[1])
+    module_relative = sys.argv[2] if len(sys.argv) > 2 else "utils/evaluator.py"
     metadata: dict[str, Any] = {
+        "module": module_relative,
         "entrypoint": "",
         "normalized_signature": "",
         "runtime_probe": "not_run",
@@ -633,14 +652,16 @@ def main() -> int:
     errors: list[str] = []
 
     try:
-        module = _load_module(root)
+        module = _load_module(root, module_relative)
     except Exception as exc:
-        errors.append(f"deterministic evaluator runtime probe failed: {type(exc).__name__}: {exc}")
+        errors.append(f"deterministic evaluator runtime probe failed for {module_relative}: {type(exc).__name__}: {exc}")
         return _emit(metadata, errors)
 
     entrypoint_name, callable_obj = _find_entrypoint(module)
     if callable_obj is None:
-        errors.append("deterministic evaluator contract failed: no supported callable in utils/evaluator.py")
+        errors.append(
+            f"deterministic evaluator contract failed: no supported callable in {module_relative}"
+        )
         return _emit(metadata, errors)
 
     metadata["entrypoint"] = entrypoint_name
@@ -1717,19 +1738,27 @@ def _format_subprocess_diagnostics(*, returncode: int | None, stdout: str, stder
     return "; ".join(parts)
 
 
-def _validate_evaluator_truth_table(root: Path, errors: list[str]) -> None:
+def _validate_evaluator_truth_table(
+    root: Path,
+    errors: list[str],
+    *,
+    module_relative: str = "utils/test_evaluator.py",
+    timeout_seconds: int = EVALUATOR_TRUTH_TABLE_TIMEOUT_SECONDS,
+) -> None:
     try:
+        root_path = Path(root).resolve()
         completed = _run_subprocess(
-            [sys.executable, "-c", _EVALUATOR_TRUTH_TABLE_RUNNER, str(root)],
-            cwd=str(root),
+            [sys.executable, "-c", _EVALUATOR_TRUTH_TABLE_RUNNER, str(root_path), module_relative],
+            cwd=str(root_path),
             capture_output=True,
             text=True,
-            timeout=EVALUATOR_TRUTH_TABLE_TIMEOUT_SECONDS,
+            timeout=timeout_seconds,
+            env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
         )
     except subprocess.TimeoutExpired as exc:
         errors.append(
             "evaluator truth table timed out after "
-            f"{EVALUATOR_TRUTH_TABLE_TIMEOUT_SECONDS}s; "
+            f"{timeout_seconds}s; "
             + _format_subprocess_diagnostics(
                 returncode=124,
                 stdout=_stream_tail(exc.stdout),
@@ -1771,19 +1800,27 @@ def _parse_runtime_contract_payload(stdout: str) -> tuple[dict[str, Any], list[s
     return {}, []
 
 
-def _validate_evaluator_runtime_contract(root: Path, errors: list[str]) -> dict[str, Any]:
+def _validate_evaluator_runtime_contract(
+    root: Path,
+    errors: list[str],
+    *,
+    module_relative: str = "utils/evaluator.py",
+    timeout_seconds: int = EVALUATOR_RUNTIME_CONTRACT_TIMEOUT_SECONDS,
+) -> dict[str, Any]:
     try:
+        root_path = Path(root).resolve()
         completed = _run_subprocess(
-            [sys.executable, "-c", _EVALUATOR_RUNTIME_CONTRACT_RUNNER, str(root)],
-            cwd=str(root),
+            [sys.executable, "-c", _EVALUATOR_RUNTIME_CONTRACT_RUNNER, str(root_path), module_relative],
+            cwd=str(root_path),
             capture_output=True,
             text=True,
-            timeout=EVALUATOR_RUNTIME_CONTRACT_TIMEOUT_SECONDS,
+            timeout=timeout_seconds,
+            env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
         )
     except subprocess.TimeoutExpired as exc:
         errors.append(
             "deterministic evaluator runtime probe timed out after "
-            f"{EVALUATOR_RUNTIME_CONTRACT_TIMEOUT_SECONDS}s; "
+            f"{timeout_seconds}s; "
             + _format_subprocess_diagnostics(
                 returncode=124,
                 stdout=_stream_tail(exc.stdout),
