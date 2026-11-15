@@ -12,7 +12,13 @@ from framework.attackers.base import AttackerBase
 from framework.attackers.methods import GenericCommandAttacker
 from framework.attackers.models import AttackerContext
 from framework.components.containers import OPENART_RUN_ID_LABEL, RunnerContainer, TaskContainer
-from framework.components.evaluators import CompositeEvaluator, DeterministicEvaluator, EvaluatorBase, LLMJudgeEvaluator
+from framework.components.evaluators import (
+    CompositeEvaluator,
+    DeterministicEvaluator,
+    EvaluatorBase,
+    LLMJudgeEvaluator,
+    UtilitySafetyEvaluator,
+)
 from framework.components.runners import (
     RunnerBase,
     RunnerRegistry,
@@ -951,6 +957,24 @@ class OrchestratorFactory:
                 container_rules_module=container_rules_module,
                 container_harness_path=container_harness_path,
             )
+
+        safety: EvaluatorBase | None = None
+        if self.bundle.safety_eval_path:
+            container_safety_module = self._container_rules_module_path(self.bundle.safety_eval_path)
+            container_harness_path = self._container_harness_path(self.evaluator_harness)
+            safety = DeterministicEvaluator(
+                self.bundle.safety_eval_path,
+                harness_path=self.evaluator_harness,
+                runtime_env=runtime_env,
+                task_container=task_container,
+                container_rules_module=container_safety_module,
+                container_harness_path=container_harness_path,
+            )
+
+        if safety is not None:
+            # The safety channel owns the final decision.  The utility channel
+            # is reported separately and gates "utility-preserving" success.
+            return UtilitySafetyEvaluator(utility=deterministic, safety=safety)
 
         llm_judge: EvaluatorBase | None = None
         if self.bundle.judge_rubric_path:

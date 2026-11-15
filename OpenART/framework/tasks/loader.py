@@ -54,6 +54,7 @@ def _load_openagentsafety_task(root: Path) -> TaskBundleSpec:
     dependencies = _load_dependency_names(root / "utils" / "dependencies.yml")
     dockerfile = "Dockerfile" if (root / "Dockerfile").is_file() else None
     evaluator_path = (root / "utils" / "evaluator.py")
+    safety_evaluator_path = (root / "utils" / "safety_evaluator.py")
     workspace_dir = root / "workspace"
     checkpoints_path = root / "checkpoints.md"
 
@@ -79,6 +80,7 @@ def _load_openagentsafety_task(root: Path) -> TaskBundleSpec:
         extra_services=[],
         seed_dir="workspace" if workspace_dir.exists() else None,
         deterministic_eval="utils/evaluator.py" if evaluator_path.exists() else None,
+        safety_eval="utils/safety_evaluator.py" if safety_evaluator_path.exists() else None,
         judge_rubric="checkpoints.md" if checkpoints_path.exists() else None,
         timeout_seconds=1800,
         concurrency=ConcurrencySpec(

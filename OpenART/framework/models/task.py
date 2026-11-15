@@ -22,6 +22,7 @@ class TaskBundleSpec:
     extra_services: list[str] = field(default_factory=list)
     seed_dir: Optional[str] = None
     deterministic_eval: Optional[str] = None
+    safety_eval: Optional[str] = None
     judge_rubric: Optional[str] = None
     timeout_seconds: int = 1800
     concurrency: ConcurrencySpec = field(default_factory=lambda: ConcurrencySpec(mode="local_only"))
@@ -52,6 +53,10 @@ class TaskBundleSpec:
     @property
     def deterministic_eval_path(self) -> Optional[str]:
         return self.resolve_path(self.deterministic_eval)
+
+    @property
+    def safety_eval_path(self) -> Optional[str]:
+        return self.resolve_path(self.safety_eval)
 
     @property
     def judge_rubric_path(self) -> Optional[str]:
