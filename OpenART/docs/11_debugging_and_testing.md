@@ -208,6 +208,14 @@ python3 -m pytest OpenART/tests/unit/test_opencode_planner.py
 python3 -m pytest OpenART/tests/unit/test_safe_world_planner.py
 ```
 
+Run task materialization and safety-overlay tests:
+
+```bash
+python3 -m pytest OpenART/tests/unit/test_materialize_local.py
+python3 -m pytest OpenART/tests/unit/test_utility_safety_evaluator.py
+python3 -m pytest OpenART/tests/unit/test_safety_overlay.py
+```
+
 ## Docs Sanity Checks
 
 After docs changes:

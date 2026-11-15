@@ -75,6 +75,51 @@ python -m framework.cli run \
   --output-dir outputs/financial-expense-brief-run
 ```
 
+## Safety-Only Mode for Materialized Benchmarks
+
+Full bundle generation remains the default for scenario seeds. When a
+benchmark task has already been materialized with `task_spec.json`, run the
+planner in safety-only mode instead:
+
+```bash
+python -m framework.tasks.materialize \
+  --source local_bundle \
+  --input examples/tasks/safety-overlay-demo \
+  --task-id safety-overlay-demo \
+  --output /tmp/safety-overlay-demo \
+  --overwrite
+
+python -m framework.planner.cli \
+  --safety-only \
+  --task-dir /tmp/safety-overlay-demo \
+  --planner-docker-image openart/opencode:latest \
+  --planner-max-repairs 2
+```
+
+In this mode the planner writes only:
+
+```text
+safety_contract.json
+utils/safety_evaluator.py
+utils/test_safety_evaluator.py
+```
+
+OpenART hashes the task tree before and after each attempt and rejects any
+change outside those three files. `utils/evaluator.py` stays benchmark-owned
+and is checked against `task_spec.json.utility.sha256`. If `task_spec.json`
+declares an empty `safety_surface`, the planner refuses rather than inventing
+harm checks.
+
+Validation runs the safety evaluator runtime probe, a positive-leak probe with
+a forbidden marker under a declared public root, and
+`utils/test_safety_evaluator.py`. Reports are written under
+`planner_artifacts/safety_overlay_validation_attempt_<n>.json`.
+
+The split evaluator semantics are documented in
+[09_evaluation_and_outputs.md](09_evaluation_and_outputs.md), and the task
+contract is documented in
+[16_task_materialization.md](16_task_materialization.md).
+
 ## Complexity Profiles
 
 Built-in profiles live in `framework/planner/complexity.py`.

@@ -13,6 +13,10 @@ task directory
   task.md
   optional workspace/
   optional utils/evaluator.py
+  optional utils/safety_evaluator.py
+  optional utils/test_safety_evaluator.py
+  optional safety_contract.json
+  optional task_spec.json
   optional utils/dependencies.yml
   optional checkpoints.md
   optional Dockerfile
@@ -31,6 +35,10 @@ OpenART maps it as:
 | `task.md` | target instruction |
 | `workspace/` | seed workspace, when present |
 | `utils/evaluator.py` | deterministic evaluator, when present |
+| `utils/safety_evaluator.py` | separate safety channel, when present; activates `UtilitySafetyEvaluator` |
+| `utils/test_safety_evaluator.py` | safety truth table used by planner safety-only validation |
+| `safety_contract.json` | hidden safety contract consumed by the safety evaluator |
+| `task_spec.json` | materialization metadata: provenance, utility kind/hash, safety surface, protected assets |
 | `checkpoints.md` | LLM judge rubric, when present |
 | `utils/dependencies.yml` | legacy dependency and concurrency hints; not runtime-managed |
 | `Dockerfile` | optional task image build recipe |

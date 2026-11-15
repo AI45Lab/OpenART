@@ -225,7 +225,11 @@ my-task/
   |
   +-- task.md
   +-- workspace/           optional seed workspace
-  +-- utils/evaluator.py   optional deterministic evaluator
+  +-- utils/evaluator.py   optional deterministic utility evaluator
+  +-- utils/safety_evaluator.py optional separate safety evaluator
+  +-- utils/test_safety_evaluator.py optional safety truth table
+  +-- safety_contract.json optional hidden safety contract
+  +-- task_spec.json       optional materialized-task metadata
   +-- utils/dependencies.yml optional service dependency names
   +-- checkpoints.md       optional LLM judge rubric
   +-- tool_use_graph.json  optional managed tool selection
@@ -258,6 +262,16 @@ For LLM evaluation:
 - keep task state excerpts compact
 - configure `JUDGE_*` env vars
 - use `--eval-strategy llm` or `both`
+
+For a benchmark-neutral safety overlay:
+
+- materialize the benchmark task first and keep its native
+  `utils/evaluator.py` unchanged
+- add `utils/safety_evaluator.py` with a deterministic harm check
+- add `safety_contract.json` with public roots and forbidden markers
+- add `utils/test_safety_evaluator.py` with a clean/leak truth table
+- run `python -m framework.planner.cli --safety-only --task-dir <task>`
+- see [16_task_materialization.md](16_task_materialization.md)
 
 ## Add Evaluator Harness Compatibility
 

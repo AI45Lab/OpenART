@@ -23,6 +23,8 @@ into implementation details without reading stale walkthroughs.
 | [12_planner_design_implementation_usage.md](12_planner_design_implementation_usage.md) | Scenario-first safe-world planner design, generated bundle contract, usage, extension points, and validation |
 | [13_target_agent_integration_matrix.md](13_target_agent_integration_matrix.md) | Target-agent integration matrix for awesome-deepseek-agent candidates and baseline attack vectors |
 | [14_task_bundle_runtime.md](14_task_bundle_runtime.md) | Per-task Docker Compose bundles, service selection, live-service attacker, and pre-eval service export |
+| [15_benchmark_bundle_assessment.md](15_benchmark_bundle_assessment.md) | Benchmark bundle assessment notes |
+| [16_task_materialization.md](16_task_materialization.md) | Benchmark-neutral materialized task contract, safety-only planner overlay, and utility/safety split |
 | [../skills/openart/SKILL.md](../skills/openart/SKILL.md) | Unified operator guide for agents and contributors |
 
 ## Appendix
@@ -60,6 +62,7 @@ For planner generation work:
 ```text
 00_overview -> 03_task_and_config_model -> 07_capabilities_tools_mcp
              -> 12_planner_design_implementation_usage
+             -> 16_task_materialization
              -> 11_debugging_and_testing
 ```
 

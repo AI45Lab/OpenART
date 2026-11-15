@@ -70,13 +70,14 @@ Important rules:
 |-----------|------------|----------------|
 | CLI | `framework/cli/commands.py` | Parse run options, load task/configs, build managed tool manifests |
 | Task loader | `framework/tasks/loader.py` | Convert task directories with `task.md` into `TaskBundleSpec` |
+| Task materialization | `framework/tasks/materialize/` | Convert benchmark-native tasks into the OpenART task contract plus `task_spec.json` |
 | Factory | `framework/core/factory.py` | Create containers, runners, attackers, evaluators, and control manager |
 | Orchestrator | `framework/core/orchestrator.py` | Execute setup, attacker phases, target attempts, evaluator, teardown |
 | Workspace manager | `framework/core/workspace.py` | Manage seed/shared/attacker workspace copies, diffs, and snapshots |
 | Target-surface materialization | `framework/core/control_plane.py` | Internally materialize and filter target-native surface files |
 | Runners | `framework/components/runners.py` | Start target CLIs and convert outputs into trace events |
 | Attackers | `framework/attackers/*` | Run attacker commands, staged managed tools, and artifacts |
-| Evaluators | `framework/components/evaluators.py` | Deterministic, LLM, and composite evaluation |
+| Evaluators | `framework/components/evaluators.py` | Deterministic, LLM, composite, and utility/safety split evaluation |
 | Managed tools | `framework/core/tool_store.py` | Load `openart-tools/`, validate tool folders, and resolve host env |
 
 ## Compatibility Layers

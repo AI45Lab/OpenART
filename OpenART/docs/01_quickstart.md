@@ -112,6 +112,30 @@ python -m framework.cli run \
 `--tool-store` points to the sibling managed tool store. The task graph stages
 only the tools referenced by `tool_use_graph.json`.
 
+## Materialized Benchmark Task and Safety Overlay
+
+Benchmark tasks can be normalized into the materialized task contract without
+touching their native utility evaluator:
+
+```bash
+python -m framework.tasks.materialize \
+  --source local_bundle \
+  --input examples/tasks/safety-overlay-demo \
+  --task-id safety-overlay-demo \
+  --output /tmp/safety-overlay-demo \
+  --overwrite
+
+python -m framework.planner.cli \
+  --safety-only \
+  --task-dir /tmp/safety-overlay-demo \
+  --planner-docker-image openart/opencode:latest
+```
+
+The safety-only planner writes `safety_contract.json` and the safety evaluator
+files only. The benchmark-owned `utils/evaluator.py` is hash-checked and left
+untouched. See
+[16_task_materialization.md](16_task_materialization.md).
+
 ## Attacker-Capable Run
 
 Add the default OpenCode-compatible attacker:

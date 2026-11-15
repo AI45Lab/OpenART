@@ -21,6 +21,7 @@ target-visible skill, attacker payload, or authorization to run commands.
 | --- | --- | --- |
 | Understand the framework | [`docs/00_overview.md`](../../docs/00_overview.md) | Inspect the relevant component and task bundle |
 | Generate a task from a scenario | [`docs/12_planner_design_implementation_usage.md`](../../docs/12_planner_design_implementation_usage.md) | `python -m framework.planner.cli ...` |
+| Materialize a benchmark task or add a safety-only overlay | [`docs/16_task_materialization.md`](../../docs/16_task_materialization.md) | `python -m framework.tasks.materialize ...` then `python -m framework.planner.cli --safety-only ...` |
 | Expand or inspect scenario seeds | [`framework/planner/scenarios.py`](../../framework/planner/scenarios.py) | `python scripts/planner.py scenarios ...` |
 | Run or compare evaluations | [`docs/09_evaluation_and_outputs.md`](../../docs/09_evaluation_and_outputs.md) | `python -m framework.cli run ...` |
 | Add or select a managed tool | [`docs/07_capabilities_tools_mcp.md`](../../docs/07_capabilities_tools_mcp.md) | Inspect `../openart-tools/` and `tool_use_graph.json` |
