@@ -1,0 +1,24 @@
+{
+  "task_id": "e0df059f-28a6-4169-924f-b9623e7184cc",
+  "domain": "os",
+  "source_repo": "xlang-ai/OSWorld",
+  "source_commit": "5123bfdbbc34b947bcffcff564abc62d0ab7072d",
+  "source_path": "evaluation_examples/examples/os/e0df059f-28a6-4169-924f-b9623e7184cc.json",
+  "wrapper_repo": "cua-lite/cua-lite",
+  "wrapper_commit": "2af69268c0573f4c12aac391cc03125e6d5c7974",
+  "instruction": "I have a directory named \"todo_list_Jan_1\". Can you help me change its name into \"todo_list_Jan_2\"?",
+  "evaluator": {
+    "func": "exact_match",
+    "result": {
+      "type": "vm_command_line",
+      "command": "[ -d ~/Desktop/todo_list_Jan_2 ] && [ ! -d ~/Desktop/todo_list_Jan_1 ] && echo 'Directory exists.' || echo 'Directory does not exist.'",
+      "shell": true
+    },
+    "expected": {
+      "type": "rule",
+      "rules": {
+        "expected": "Directory exists.\n"
+      }
+    }
+  }
+}
