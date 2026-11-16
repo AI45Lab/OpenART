@@ -116,3 +116,25 @@ def test_safety_only_run_has_no_utility_subscore() -> None:
     assert result.subscores == {"harm": 1.0}
     assert result.metadata["utility_measured"] is False
     assert result.metadata["attack_success"] is True
+
+def test_evaluate_safety_only_exposes_pre_target_harm() -> None:
+    evaluator = UtilitySafetyEvaluator(
+        utility=StubEvaluator("utility", decision="pass", score=1.0),
+        safety=StubEvaluator(
+            "safety",
+            decision="pass",
+            score=1.0,
+            subscores={"unsafe_leak_detected": 1.0},
+        ),
+    )
+
+    harm, result = evaluator.evaluate_safety_only(
+        run_id="run",
+        trace_file="",
+        task_snapshot={},
+        service_snapshots={},
+    )
+
+    assert harm == 1.0
+    assert result is not None
+    assert result.decision == "pass"

@@ -316,7 +316,7 @@ class _SetupFailsOrchestrator:
         self.teardown_calls += 1
 
 
-def _make_orchestrator(tmp_path: Path, attacker=None) -> Orchestrator:
+def _make_orchestrator(tmp_path: Path, attacker=None, evaluator=None) -> Orchestrator:
     return Orchestrator(
         target_runner=_FakeRunner(exit_code=0),
         attacker=attacker,
@@ -344,7 +344,7 @@ def _make_orchestrator(tmp_path: Path, attacker=None) -> Orchestrator:
             if attacker is not None
             else None
         ),
-        evaluator=_FakeEvaluator(),
+        evaluator=evaluator or _FakeEvaluator(),
         task_container=_FakeTaskContainer(),
         workspace_manager=_FakeWorkspaceManager(),
         control_manager=_FakeControlManager(enabled=True),
@@ -1037,3 +1037,69 @@ def test_orchestrator_adaptive_iterations_stops_on_refusal(tmp_path: Path) -> No
 
     assert result.decision == "fail"
     assert orchestrator.target_runner.run_calls == [("run-1", "/task/target.md", 1)]
+
+
+class _HarmEvaluator:
+    def __init__(self, *, harm_before: float, harm_after: float = 1.0, utility: float = 1.0) -> None:
+        self.harm_before = harm_before
+        self.harm_after = harm_after
+        self.utility = utility
+        self.safety_calls = 0
+
+    def evaluate_safety_only(self, **kwargs):
+        self.safety_calls += 1
+        return self.harm_before, EvaluatorResult(
+            run_id=str(kwargs["run_id"]),
+            decision="pass" if self.harm_before > 0 else "fail",
+            score=self.harm_before,
+            subscores={"harm": self.harm_before},
+            rationale="pre-target safety",
+            metadata={},
+        )
+
+    def evaluate(self, **kwargs) -> EvaluatorResult:
+        return EvaluatorResult(
+            run_id=str(kwargs["run_id"]),
+            decision="pass",
+            score=self.utility,
+            subscores={"harm": self.harm_after, "utility": self.utility},
+            rationale="utility preserved and harm caused",
+        )
+
+
+def test_orchestrator_marks_run_invalid_when_harm_precedes_target(tmp_path: Path) -> None:
+    evaluator = _HarmEvaluator(harm_before=1.0)
+    orchestrator = _make_orchestrator(tmp_path, evaluator=evaluator)
+
+    result = orchestrator.run(
+        run_id="run-1",
+        target_instruction_file="/task/target.md",
+        attack_instruction_file=None,
+    )
+
+    assert result.decision == "invalid"
+    assert orchestrator.target_runner.run_calls == []
+    assert evaluator.safety_calls == 1
+    provenance = json.loads((tmp_path / "provenance.json").read_text(encoding="utf-8"))
+    assert provenance["harm_before"] == 1.0
+    assert provenance["harm_after"] is None
+    assert provenance["attributed_to"] == "attacker_pre_target"
+
+
+def test_orchestrator_attributes_clean_precheck_harm_to_target(tmp_path: Path) -> None:
+    evaluator = _HarmEvaluator(harm_before=0.0, harm_after=1.0)
+    orchestrator = _make_orchestrator(tmp_path, evaluator=evaluator)
+
+    result = orchestrator.run(
+        run_id="run-1",
+        target_instruction_file="/task/target.md",
+        attack_instruction_file=None,
+    )
+
+    assert result.decision == "pass"
+    assert orchestrator.target_runner.run_calls == [("run-1", "/task/target.md", 1)]
+    assert result.metadata["harm_before"] == 0.0
+    assert result.metadata["harm_after"] == 1.0
+    assert result.metadata["attributed_to"] == "target"
+    provenance = json.loads((tmp_path / "provenance.json").read_text(encoding="utf-8"))
+    assert provenance["attributed_to"] == "target"
