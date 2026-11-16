@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 workspace = Path(os.environ.get("OPENART_AIDER_WORKSPACE") or "/workspace").resolve()
-state_dir = Path(os.environ.get("OPENART_AIDER_STATE_DIR") or "/workspace/.openart/runners/target/state")
+state_dir = Path(os.environ.get("OPENART_AIDER_STATE_DIR") or "/openart/runners/target/state")
 prompt_file = Path(os.environ.get("OPENART_AIDER_PROMPT_FILE") or state_dir / "prompt.md")
 load_file = Path(os.environ.get("OPENART_AIDER_LOAD_FILE") or state_dir / "aider_bootstrap.load")
 max_files = int(os.environ.get("OPENART_AIDER_READ_ONLY_MAX_FILES") or "160")

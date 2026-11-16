@@ -3,7 +3,7 @@ target:
   surface_family: aider
   runner_image: openart/aider:latest
   pre_run_hook: repo:configs/target-hooks/aider-bootstrap-load.sh
-  launch_cmd: aider --yes-always --no-auto-commits --no-dirty-commits --no-check-update --no-show-release-notes --no-analytics --no-detect-urls --disable-playwright --no-fancy-input --load /workspace/.openart/runners/target/state/aider_bootstrap.load
+  launch_cmd: aider --yes-always --no-auto-commits --no-dirty-commits --no-check-update --no-show-release-notes --no-analytics --no-detect-urls --disable-playwright --no-fancy-input --load /openart/runners/target/state/aider_bootstrap.load
   config_overlay:
     prompt_transport: file
     prompt_file_flag: --message-file
