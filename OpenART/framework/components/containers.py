@@ -41,17 +41,24 @@ def task_asset_mounts(
     task_root: str | Path,
     container_root: str = "/task",
     entries: tuple[str, ...] = TASK_VISIBLE_ENTRIES,
+    extra_entries: tuple[str, ...] = (),
 ) -> list[MountSpec]:
     """Return read-only mounts for the task entries a target may read.
 
     Mounting the whole task directory exposed the generated evaluator and
     protected assets to the target.  Only the instruction, the task agent, the
     environment setup, and any seed inputs are mounted during the run.
+    ``extra_entries`` keeps a non-standard instruction or seed path visible
+    without opening the rest of the bundle.
     """
 
+    ordered = list(entries)
+    for entry in extra_entries:
+        if entry and entry not in ordered:
+            ordered.append(entry)
     root = Path(task_root)
     mounts: list[MountSpec] = []
-    for entry in entries:
+    for entry in ordered:
         source = root / entry
         if not source.exists():
             continue
@@ -502,8 +509,8 @@ class TaskContainer(DockerContainer):
             )
         )
 
-    def mount_task_assets(self, task_root: str) -> None:
-        self.spec.mounts.extend(task_asset_mounts(task_root))
+    def mount_task_assets(self, task_root: str, extra_entries: tuple[str, ...] = ()) -> None:
+        self.spec.mounts.extend(task_asset_mounts(task_root, extra_entries=extra_entries))
 
     def prepare_task_env(self) -> None:
         script_parts = [

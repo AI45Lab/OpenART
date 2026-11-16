@@ -86,3 +86,12 @@ def test_evaluator_stages_private_assets_into_control_only(tmp_path: Path) -> No
     assert (staged / "task_spec.json").is_file()
     payload = json.loads((workspace_root.parent / "control" / "evaluator" / "payload.json").read_text(encoding="utf-8"))
     assert payload["eval_bundle_root"] == "/openart/eval_assets"
+
+def test_task_asset_mounts_keep_a_nonstandard_instruction_directory(tmp_path: Path) -> None:
+    task_root = _make_task_root(tmp_path)
+    (task_root / "instructions").mkdir()
+    (task_root / "instructions" / "task.md").write_text("do the task\n", encoding="utf-8")
+
+    mounts = task_asset_mounts(task_root, extra_entries=("instructions",))
+
+    assert "/task/instructions" in {mount.container_path for mount in mounts}

@@ -435,7 +435,10 @@ class OrchestratorFactory:
         )
 
         # Mount task assets (read-only)
-        container.mount_task_assets(str(task_root))
+        container.mount_task_assets(
+            str(task_root),
+            extra_entries=self._task_visibility_extra_entries(),
+        )
 
         # Mount evaluator harness when provided (read-only)
         if self.evaluator_harness:
@@ -560,7 +563,12 @@ class OrchestratorFactory:
 
             # Mount task assets (read-only) - only the files a target may read.
             task_root = Path(self.bundle.root_dir)
-            container_spec.mounts.extend(task_asset_mounts(task_root))
+            container_spec.mounts.extend(
+                task_asset_mounts(
+                    task_root,
+                    extra_entries=self._task_visibility_extra_entries(),
+                )
+            )
 
             # Mount workspace (read-write) - shared with TaskContainer
             # This allows the agent to modify files that persist for evaluation
@@ -1089,6 +1097,22 @@ class OrchestratorFactory:
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(resolved, destination)
         return stage
+
+    def _task_visibility_extra_entries(self) -> tuple[str, ...]:
+        """Keep the configured instruction/seed path visible under /task."""
+
+        root = Path(self.bundle.root_dir).resolve()
+        entries: list[str] = []
+        for value in (self.bundle.target_instruction_path, self.bundle.seed_dir_path):
+            if not value:
+                continue
+            try:
+                relative = Path(value).resolve().relative_to(root)
+            except Exception:
+                continue
+            if relative.parts:
+                entries.append(relative.parts[0])
+        return tuple(dict.fromkeys(entries))
 
     def _container_seed_dir(self) -> str | None:
         seed_dir = self.bundle.seed_dir_path
