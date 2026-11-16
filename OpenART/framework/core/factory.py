@@ -862,18 +862,13 @@ class OrchestratorFactory:
             lifecycle_log_path=str(Path(self.output_dir) / "runtime.log"),
             labels=self._container_labels("attacker"),
         )
-        task_root = Path(self.bundle.root_dir)
-        container_spec.mounts.append(MountSpec(host_path=str(task_root), container_path="/task", read_only=True))
+        attacker_task_dir = self._stage_attacker_task_assets()
+        container_spec.mounts.append(MountSpec(host_path=str(attacker_task_dir), container_path="/task", read_only=True))
         attacker_config_path = str(self.bundle.metadata.get("attacker_config", "") or "").strip()
         if attacker_config_path:
             attacker_config_dir = str(Path(attacker_config_path).resolve().parent)
             container_spec.mounts.append(MountSpec(host_path=attacker_config_dir, container_path="/attacker_config", read_only=True))
         container_spec.mounts.append(MountSpec(host_path=live_output_dir, container_path="/workspace", read_only=False))
-        control_dir = self._workspace_manager.control_dir(self.run_id)
-        control_dir.mkdir(parents=True, exist_ok=True)
-        container_spec.mounts.append(
-            MountSpec(host_path=str(control_dir), container_path=CONTAINER_CONTROL_ROOT, read_only=False)
-        )
         container_spec.mounts.append(MountSpec(host_path=str(live_input_workspace_dir), container_path=input_workspace_mount, read_only=True))
         container_spec.mounts.append(MountSpec(host_path=str(live_feedback_dir), container_path=feedback_mount, read_only=True))
         if attacker_spec.target_control_plane and self._control_manager.enabled():
@@ -1058,6 +1053,42 @@ class OrchestratorFactory:
         if llm_judge:
             return llm_judge
         return _DummyEvaluator(self.bundle.task_id)
+
+    def _stage_attacker_task_assets(self) -> Path:
+        """Build the small task view an attacker may read.
+
+        The attacker used to receive the whole task bundle at ``/task``, which
+        included ``protected/`` and anything else the bundle carried.  It now
+        gets ``task.md`` plus the utility evaluator (and rubric files when the
+        task has them), because those are the only files its evaluator-context
+        reader is allowed to see.
+        """
+
+        stage = self._workspace_manager.control_dir(self.run_id) / "attacker_task"
+        if stage.exists():
+            shutil.rmtree(stage)
+        stage.mkdir(parents=True, exist_ok=True)
+
+        task_root = Path(self.bundle.root_dir).resolve()
+        candidates: list[Path] = []
+        for value in (self.bundle.target_instruction_path, self.bundle.deterministic_eval_path):
+            if value:
+                candidates.append(Path(value))
+        for name in ("checkpoints.md", "rubric.md", "judge_rubric.md"):
+            candidates.append(task_root / name)
+
+        for source in candidates:
+            try:
+                resolved = source.resolve()
+                rel = resolved.relative_to(task_root)
+            except Exception:
+                continue
+            if not resolved.is_file():
+                continue
+            destination = stage / rel
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(resolved, destination)
+        return stage
 
     def _container_seed_dir(self) -> str | None:
         seed_dir = self.bundle.seed_dir_path

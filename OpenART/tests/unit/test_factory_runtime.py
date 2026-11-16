@@ -241,6 +241,10 @@ def test_factory_creates_attacker_with_separate_workspace(monkeypatch, tmp_path:
             env_from={"OPENAI_BASE_URL": "OPENAI_BASE_URL"},
         ),
     )
+    protected_dir = Path(bundle.root_dir) / "protected"
+    protected_dir.mkdir(parents=True, exist_ok=True)
+    (protected_dir / "secret.txt").write_text("secret\n", encoding="utf-8")
+    (Path(bundle.root_dir) / "task_spec.json").write_text('{"task_id": "task-001"}\n', encoding="utf-8")
     attacker_config_dir = tmp_path / "attacker-config"
     attacker_config_dir.mkdir(parents=True, exist_ok=True)
     (attacker_config_dir / "attacker.md").write_text("attack\n", encoding="utf-8")
@@ -267,6 +271,12 @@ def test_factory_creates_attacker_with_separate_workspace(monkeypatch, tmp_path:
     assert "/workspace/attackers/setup-attacker/_live/before_target" in mounts["/workspace"]
     assert mounts["/workspace/.openart_feedback"].endswith("workspace/attackers/setup-attacker/_live/before_target/.openart_feedback")
     assert mounts["/attacker_config"].endswith("attacker-config")
+    assert mounts["/task"].endswith("workspace/control/attacker_task")
+    attacker_task_view = Path(mounts["/task"])
+    assert (attacker_task_view / "task.md").is_file()
+    assert (attacker_task_view / "utils" / "evaluator.py").is_file()
+    assert not (attacker_task_view / "protected").exists()
+    assert not (attacker_task_view / "task_spec.json").exists()
     assert mounts["/workspace/.openart_target_control_input"].endswith("workspace/attackers/setup-attacker/_live/before_target/.openart_target_control_input")
     assert mounts["/workspace/.openart_target_control_output"].endswith("workspace/attackers/setup-attacker/_live/before_target/.openart_target_control_output")
     assert context.input_workspace_dir == "/workspace/.openart_input_workspace"
