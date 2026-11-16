@@ -259,6 +259,32 @@ If `vector_permissions` is present:
 - only listed vectors are considered
 - unsupported target-native vectors are ignored
 
+## MCP Provisioning Precedence
+
+MCP client config can arrive from two places:
+
+```text
+benchmark pack resolver      framework-managed, not attacker-controlled
+<framework>_mcp vector       attacker-controlled, target-native surface
+```
+
+Precedence rules:
+
+- A benchmark-managed MCP profile is written by the target integration at
+  target-prep time; it is not a vector and does not appear in
+  `vector_permissions`.
+- When a benchmark provisions its own MCP server, the target config must omit
+  every `*_mcp` surface.  An attacker-installed second server would run beside
+  the managed one and break attribution.
+- CUA targets (`target.cua-opencode.yaml`) omit `opencode_mcp`.  The pack
+  resolver rejects any CUA target with an `*_mcp` vector.
+- The target-prep hook asserts the rendered config has exactly one remote MCP
+  server and no built-in shell/file tools.  This is the last writer before the
+  harness starts.
+- `append`-mode harnesses (Codex, Hermes, Goose) are the risky case: an
+  attacker can add a server without replacing the managed one.  Do not combine
+  a benchmark-managed MCP profile with an `append` MCP vector in the same run.
+
 ## Path Filtering
 
 Internal target-surface filtering protects framework internals:

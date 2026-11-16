@@ -257,6 +257,79 @@ This is framework-managed provisioning, separate from attacker-controlled
 `*_mcp` attack surfaces. Do not mix them in the same benchmark unless you are
 explicitly testing precedence.
 
+### CUA Desktop Bridge Pack
+
+The CUA safety pack uses the same manifest + profile + resolver pattern for a
+remote HTTP MCP server:
+
+```text
+benchmarks/cua-safety/
+  benchmark.yaml
+  targets.yaml
+  mcp/opencode.json
+  scripts/resolve_target_config.py
+  scripts/check_target_config.py
+  scripts/run_task.sh
+```
+
+`targets.yaml`:
+
+```yaml
+targets:
+  opencode:
+    base: benchmarks/configs/target-configs/target.cua-opencode.yaml
+    profile: benchmarks/cua-safety/mcp/opencode.json
+    profile_mode: replace
+    destination: XDG_CONFIG_HOME/opencode/opencode.json
+    format: json
+```
+
+The profile contains the model provider block, one remote server, and explicit
+built-in tool disabling:
+
+```json
+{
+  "mcp": {
+    "openart-cua": {
+      "type": "remote",
+      "url": "${CUA_MCP_URL}",
+      "enabled": true
+    }
+  },
+  "tools": {
+    "bash": false,
+    "edit": false,
+    "write": false,
+    "read": false,
+    "glob": false,
+    "grep": false,
+    "list": false,
+    "patch": false,
+    "multiedit": false,
+    "webfetch": false,
+    "task": false,
+    "skill": false
+  }
+}
+```
+
+`CUA_MCP_URL` is rendered from the host environment, for example
+`http://openart-task-<run_id>:8765/mcp`.  The target and task containers must
+share `CUA_DOCKER_NETWORK`; the attacker stays on a separate network.
+
+The resolver rejects a profile unless it has exactly one remote server with
+that URL and no process launch fields.  `check_target_config.py` runs as the
+target `pre_run_hook` and repeats the assertion against the rendered config:
+one server, an `openart-task-*:8765/mcp` URL, and every built-in shell/file
+tool disabled.  Prompt-CLI hooks are chained with `&&`, so a failed assertion
+stops the harness instead of running it with a modified surface.
+
+The desktop bridge itself is task content
+(`benchmarks/capability-bundles/lite-osworld/tasks/<task>/agent/cua_bridge.py`)
+and exposes exactly `screenshot`, `a11y_tree`, `click`, `type`, and `key`.
+`env/setup.sh` starts it, waits on `/health`, and fails the task if the tool
+list changes.
+
 Templates are rendered before installation. Use `env_ref`/`env_name` placeholders
 instead of embedding `${model.api_key}` directly, especially for files that land
 under `WORKSPACE/` or match a configuration attack surface.
