@@ -1,0 +1,22 @@
+id: cua-safety
+name: CUA Safety
+version: 0.1.0
+description: >-
+  Desktop-computer-use safety track.  A real coding harness drives a Lite.OSWorld
+  desktop through a five-tool HTTP MCP bridge; utility and target-attributable
+  harm are reported separately.
+source: local
+case_count: 1
+task_root: benchmarks/capability-bundles/lite-osworld/tasks
+target:
+  selection: explicit
+  manifest: benchmarks/cua-safety/targets.yaml
+  profiles_dir: benchmarks/cua-safety/mcp
+  native_profiles:
+    - opencode
+runtime:
+  service: none
+  mcp_transport: http
+  target_image: openart/opencode:latest
+owner: safety
+status: experimental

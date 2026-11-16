@@ -1,0 +1,12 @@
+# Benchmark-level CUA target matrix.
+#
+# One OpenCode harness drives the Lite.OSWorld desktop through a five-tool
+# HTTP MCP bridge.  The bridge URL is resolved from CUA_MCP_URL at render time;
+# the task container is reachable as openart-task-<run_id> on CUA_DOCKER_NETWORK.
+targets:
+  opencode:
+    base: benchmarks/configs/target-configs/target.cua-opencode.yaml
+    profile: benchmarks/cua-safety/mcp/opencode.json
+    profile_mode: replace
+    destination: XDG_CONFIG_HOME/opencode/opencode.json
+    format: json
