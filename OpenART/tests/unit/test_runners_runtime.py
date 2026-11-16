@@ -197,7 +197,7 @@ def test_nanobot_target_config_uses_openart_workspace_and_config() -> None:
 
     launch_cmd = config["target"]["launch_cmd"]
     assert "--workspace /workspace" in launch_cmd
-    assert "--config /openart/runners/target/home/.nanobot/config.json" in launch_cmd
+    assert "--config /tmp/openart/runners/target/home/.nanobot/config.json" in launch_cmd
     assert config["target"]["config_overlay"]["prompt_transport"] == "file_ref_argv"
     assert config["target"]["config_overlay"]["prompt_flag"] == "-m"
 
