@@ -594,6 +594,13 @@ class OrchestratorFactory:
                     container_path=container_control_path("runners", role),
                     read_only=False,
                 ))
+                materialized_home = control_dir / "materialized_home"
+                materialized_home.mkdir(parents=True, exist_ok=True)
+                container_spec.mounts.append(MountSpec(
+                    host_path=str(materialized_home),
+                    container_path="/openart/materialized_home",
+                    read_only=True,
+                ))
 
             container = RunnerContainer(container_spec)
 

@@ -541,6 +541,7 @@ def test_factory_keeps_prompt_cli_home_outside_shared_workspace(tmp_path: Path) 
     assert runner.runtime_env["OPENART_RUNNER_STATE_DIR"] == "/openart/runners/target/state"
     runner_mounts = {mount.container_path for mount in runner.container.spec.mounts}
     assert "/openart/runners/target" in runner_mounts
+    assert "/openart/materialized_home" in runner_mounts
     assert "/openart" not in runner_mounts
     assert "/openart/eval" not in runner_mounts
 
