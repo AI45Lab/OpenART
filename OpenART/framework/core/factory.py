@@ -11,7 +11,7 @@ from typing import Any, Optional
 from framework.attackers.base import AttackerBase
 from framework.attackers.methods import GenericCommandAttacker
 from framework.attackers.models import AttackerContext
-from framework.components.containers import OPENART_RUN_ID_LABEL, RunnerContainer, TaskContainer
+from framework.components.containers import OPENART_RUN_ID_LABEL, RunnerContainer, TaskContainer, task_asset_mounts
 from framework.components.evaluators import (
     CompositeEvaluator,
     DeterministicEvaluator,
@@ -558,13 +558,9 @@ class OrchestratorFactory:
                 ):
                     container_spec.env.pop(key, None)
 
-            # Mount task assets (read-only) - for instruction files
+            # Mount task assets (read-only) - only the files a target may read.
             task_root = Path(self.bundle.root_dir)
-            container_spec.mounts.append(MountSpec(
-                host_path=str(task_root),
-                container_path="/task",
-                read_only=True,
-            ))
+            container_spec.mounts.extend(task_asset_mounts(task_root))
 
             # Mount workspace (read-write) - shared with TaskContainer
             # This allows the agent to modify files that persist for evaluation
@@ -1082,7 +1078,13 @@ class OrchestratorFactory:
         return f"/task/{rel.as_posix()}"
 
     def _container_rules_module_path(self, rules_module_path: str) -> str:
-        return self._container_task_path(rules_module_path) or rules_module_path
+        path = Path(rules_module_path)
+        task_root = Path(self.bundle.root_dir)
+        try:
+            rel = path.relative_to(task_root)
+        except Exception:
+            return rules_module_path
+        return container_control_path("eval_assets", rel.as_posix())
 
     def _container_harness_path(self, harness_path: str | None) -> str | None:
         if not harness_path:

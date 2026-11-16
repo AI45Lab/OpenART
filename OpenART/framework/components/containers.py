@@ -32,6 +32,38 @@ _DOCKER_ENV_INLINE_MAX_ITEM_BYTES = 8 * 1024
 _DOCKER_ENV_INLINE_MAX_VARS = 64
 _DOCKER_ENV_FILE_DIR = "/tmp"
 
+# Entries a target may see under /task.  Everything else in the task bundle
+# (utils/, protected/, task_spec.json, ...) stays on the host until evaluation.
+TASK_VISIBLE_ENTRIES = ("task.md", "agent", "env", "workspace", "seeds")
+
+
+def task_asset_mounts(
+    task_root: str | Path,
+    container_root: str = "/task",
+    entries: tuple[str, ...] = TASK_VISIBLE_ENTRIES,
+) -> list[MountSpec]:
+    """Return read-only mounts for the task entries a target may read.
+
+    Mounting the whole task directory exposed the generated evaluator and
+    protected assets to the target.  Only the instruction, the task agent, the
+    environment setup, and any seed inputs are mounted during the run.
+    """
+
+    root = Path(task_root)
+    mounts: list[MountSpec] = []
+    for entry in entries:
+        source = root / entry
+        if not source.exists():
+            continue
+        mounts.append(
+            MountSpec(
+                host_path=str(source),
+                container_path=f"{container_root.rstrip('/')}/{entry}",
+                read_only=True,
+            )
+        )
+    return mounts
+
 
 def _normalize_env(env: dict[str, str]) -> list[tuple[str, str]]:
     return [(str(key), str(value)) for key, value in env.items()]
@@ -471,13 +503,7 @@ class TaskContainer(DockerContainer):
         )
 
     def mount_task_assets(self, task_root: str) -> None:
-        self.spec.mounts.append(
-            MountSpec(
-                host_path=task_root,
-                container_path="/task",
-                read_only=True,
-            )
-        )
+        self.spec.mounts.extend(task_asset_mounts(task_root))
 
     def prepare_task_env(self) -> None:
         script_parts = [

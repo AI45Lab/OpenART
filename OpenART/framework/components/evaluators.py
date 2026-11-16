@@ -16,6 +16,7 @@ import inspect
 import json
 import logging
 import os
+import shutil
 import sys
 import types
 import urllib.error
@@ -35,6 +36,9 @@ if TYPE_CHECKING:
 
 
 _DETERMINISTIC_CONTEXT_KEY = "__openart_deterministic_result__"
+# Task entries that are copied into the control plane only when the evaluator
+# runs.  They are never mounted where the target can read them.
+EVAL_ASSET_ENTRIES = ("utils", "protected", "task_spec.json")
 
 
 class EvaluatorBase(ABC):
@@ -393,6 +397,36 @@ class DeterministicEvaluator(EvaluatorBase):
 
         raise TypeError("rules evaluate() must return EvaluatorResult or dict")
 
+    def _task_root_for_eval_assets(self) -> Path | None:
+        path = Path(self.rules_module)
+        if not path.is_absolute():
+            return None
+        candidate = path.parent
+        for parent in (candidate, *candidate.parents):
+            if (parent / "task.md").is_file() or (parent / "task_spec.json").is_file():
+                return parent
+        return candidate.parent if candidate.name == "utils" else candidate
+
+    def _stage_eval_assets(self, eval_assets_dir: Path) -> None:
+        """Copy private task entries into the control plane for evaluation.
+
+        The target never sees ``utils/`` or ``protected/``.  The evaluator runs
+        from a read-only copy under ``/openart/eval_assets`` that is created
+        only after the target has finished.
+        """
+
+        task_root = self._task_root_for_eval_assets()
+        if task_root is None:
+            return
+        for name in EVAL_ASSET_ENTRIES:
+            source = task_root / name
+            destination = eval_assets_dir / name
+            if source.is_dir():
+                shutil.copytree(source, destination, dirs_exist_ok=True)
+            elif source.is_file():
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, destination)
+
     def _evaluate_in_task_container(
         self,
         run_id: str,
@@ -413,6 +447,7 @@ class DeterministicEvaluator(EvaluatorBase):
             "trace_text": trace_text,
             "task_snapshot": task_snapshot,
             "service_snapshots": service_snapshots,
+            "eval_bundle_root": container_control_path("eval_assets"),
         }
 
         script = (
@@ -596,7 +631,7 @@ class DeterministicEvaluator(EvaluatorBase):
             "    output = _call_evaluator(\n"
             "        eval_fn,\n"
             "        workspace_root=workspace_arg,\n"
-            "        bundle_root='/',\n"
+            "        bundle_root=payload.get('eval_bundle_root') or '/',\n"
             "        run_id=payload.get('run_id', ''),\n"
             "        trace_file=str(trace_path),\n"
             "        task_snapshot=payload.get('task_snapshot', {}),\n"
@@ -633,6 +668,7 @@ class DeterministicEvaluator(EvaluatorBase):
             )
         host_eval_dir = host_control_dir(workspace_root) / "evaluator"
         host_eval_dir.mkdir(parents=True, exist_ok=True)
+        self._stage_eval_assets(host_control_dir(workspace_root) / "eval_assets")
         host_payload_path = host_eval_dir / "payload.json"
         host_bridge_path = host_eval_dir / "bridge.py"
         host_payload_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")

@@ -452,6 +452,10 @@ class Orchestrator:
         if self._task_rewrite_staging_path is None:
             self._task_rewrite_staging_path = staging_path
             mounts = self.target_runner.container.spec.mounts
+            # The factory already mounts the bundle's task.md so the prompt is
+            # readable.  Replace that mount instead of stacking a second bind
+            # mount on the same destination.
+            mounts[:] = [mount for mount in mounts if mount.container_path != "/task/task.md"]
             mounts.append(MountSpec(
                 host_path=str(staging_path),
                 container_path="/task/task.md",
