@@ -115,10 +115,8 @@ attacker:
     - "{{input_workspace_dir}}"
     - --output-workspace
     - "{{output_workspace_dir}}"
-    - --input-target-control
-    - "{{input_target_control_dir}}"
-    - --output-target-control
-    - "{{output_target_control_dir}}"
+    - "--input-target-control={{input_target_control_dir}}"
+    - "--output-target-control={{output_target_control_dir}}"
     - --feedback-dir
     - "{{feedback_dir}}"
     - --attacker-history-dir
