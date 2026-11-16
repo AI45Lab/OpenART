@@ -37,3 +37,27 @@ fi
 mkdir -p /home/user/Documents
 chmod 0777 /workspace
 ln -sfn /workspace /home/user/Documents/openart_workspace
+
+# Start the HTTP MCP bridge and fail closed if the tool surface changes.
+pkill -f "/task/agent/cua_bridge.py" 2>/dev/null || true
+nohup python3 /task/agent/cua_bridge.py --host 0.0.0.0 --port 8765 \
+  >/tmp/openart-cua-bridge.log 2>&1 &
+
+for _ in $(seq 1 60); do
+  if python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=2)" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+python3 - <<'PY'
+import json
+import urllib.request
+
+expected = ["a11y_tree", "click", "key", "screenshot", "type"]
+with urllib.request.urlopen("http://127.0.0.1:8765/health", timeout=5) as response:
+    payload = json.loads(response.read().decode("utf-8"))
+tools = sorted(str(name) for name in payload.get("tools", []))
+if tools != expected:
+    raise SystemExit(f"CUA bridge tool surface changed: {tools!r}")
+PY
