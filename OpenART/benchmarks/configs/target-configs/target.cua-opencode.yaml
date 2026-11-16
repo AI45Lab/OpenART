@@ -2,7 +2,7 @@ target:
   framework: prompt_cli
   surface_family: opencode
   runner_image: openart/opencode:latest
-  launch_cmd: opencode run
+  launch_cmd: opencode run --standalone --print-logs --log-level info
   # Fail closed unless the rendered config has one remote bridge and no
   # built-in shell/file tools.
   pre_run_hook: repo:benchmarks/cua-safety/scripts/check_target_config.py
