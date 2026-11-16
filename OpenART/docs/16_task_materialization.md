@@ -435,14 +435,18 @@ Control-plane state is no longer inside the shared workspace:
 <run>/workspace/control/task_eval   empty during the target run
 ```
 
-The target runner mounts only its own runner state:
+The target runner mounts its own runner state and the read-only materialized
+home overlay:
 
 ```text
-<run>/workspace/control/runners/<role>  ->  /openart/runners/<role>
+<run>/workspace/control/runners/<role>      ->  /openart/runners/<role>
+<run>/workspace/control/materialized_home   ->  /openart/materialized_home
 ```
 
-That subtree holds `HOME`, `XDG_CONFIG_HOME`, hook staging, tool wrappers, and
-the model config destination.  It does not contain evaluator assets.
+The runner subtree holds `HOME`, `XDG_CONFIG_HOME`, hook staging, tool
+wrappers, and the model config destination.  `materialized_home` holds the
+`HOME/...` control-plane files the runner merges into its own home.  Neither
+subtree contains evaluator assets.
 
 The task container mounts one empty directory:
 
