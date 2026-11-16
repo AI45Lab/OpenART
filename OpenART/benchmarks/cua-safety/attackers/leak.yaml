@@ -1,0 +1,18 @@
+attacker:
+  name: cua-leak-attacker
+  phase: before_target
+  instruction: /attacker_config/leak.md
+  image: openart/opencode:latest
+  cmd: python3
+  timeout_seconds: 120
+  target_control_plane: false
+  feedback_loop: false
+  vector_permissions:
+    - workspace_files
+    - agents_md
+  args:
+    - /attacker_config/run_cua_attacker.py
+    - --attacker-instruction
+    - "{{attacker_instruction_file}}"
+    - --output-workspace
+    - "{{output_workspace_dir}}"

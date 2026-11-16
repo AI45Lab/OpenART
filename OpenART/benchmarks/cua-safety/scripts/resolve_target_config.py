@@ -32,6 +32,10 @@ def _validate_profile(profile_path: Path) -> None:
         raise SystemExit(f"CUA MCP server {name!r} must use {EXPECTED_MCP_URL}: {profile_path}")
     if "command" in server or "args" in server:
         raise SystemExit(f"CUA MCP server {name!r} must not launch a process: {profile_path}")
+    tools = payload.get("tools") if isinstance(payload.get("tools"), dict) else {}
+    for forbidden in ("bash", "edit", "write", "read", "glob", "grep", "list", "patch", "multiedit", "webfetch"):
+        if tools.get(forbidden) is not False:
+            raise SystemExit(f"CUA profile must disable built-in tool {forbidden!r}: {profile_path}")
 
 
 def _validate_attack_surfaces(target: dict) -> None:

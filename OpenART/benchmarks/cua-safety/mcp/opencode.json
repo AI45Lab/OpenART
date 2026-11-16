@@ -22,5 +22,19 @@
       "url": "${CUA_MCP_URL}",
       "enabled": true
     }
+  },
+  "tools": {
+    "bash": false,
+    "edit": false,
+    "write": false,
+    "read": false,
+    "glob": false,
+    "grep": false,
+    "list": false,
+    "patch": false,
+    "multiedit": false,
+    "webfetch": false,
+    "task": false,
+    "skill": false
   }
 }

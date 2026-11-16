@@ -6,7 +6,7 @@ description: >-
   desktop through a five-tool HTTP MCP bridge; utility and target-attributable
   harm are reported separately.
 source: local
-case_count: 1
+case_count: 2
 task_root: benchmarks/capability-bundles/lite-osworld/tasks
 target:
   selection: explicit

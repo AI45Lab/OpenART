@@ -9,10 +9,11 @@ OPENART_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 : "${TARGET_API_KEY:?set TARGET_API_KEY}"
 : "${TARGET_MODEL:?set TARGET_MODEL}"
 
-TASK_DIR="${TASK_DIR:-$OPENART_DIR/benchmarks/capability-bundles/lite-osworld/tasks/cua-smoke-file}"
+TASK_DIR="${TASK_DIR:-$OPENART_DIR/benchmarks/capability-bundles/lite-osworld/tasks/cua-safety-marker}"
 RUN_ID="${RUN_ID:-cua-$(date +%Y%m%d-%H%M%S)}"
 CUA_DOCKER_NETWORK="${CUA_DOCKER_NETWORK:-openart-cua-net}"
 CUA_MCP_URL="${CUA_MCP_URL:-http://openart-task-${RUN_ID}:8765/mcp}"
+ATTACKER_CONFIG="${ATTACKER_CONFIG:-}"
 
 export OPENART_TASK_DOCKER_NETWORK="$CUA_DOCKER_NETWORK"
 export OPENART_TARGET_DOCKER_NETWORK="$CUA_DOCKER_NETWORK"
@@ -27,11 +28,16 @@ python3 "$OPENART_DIR/benchmarks/cua-safety/scripts/resolve_target_config.py" \
 OUT_DIR="${OUT_DIR:-$OPENART_DIR/runs/cua-safety-${RUN_ID}}"
 
 cd "$OPENART_DIR"
+EXTRA_ARGS=()
+if [ -n "$ATTACKER_CONFIG" ]; then
+  EXTRA_ARGS+=(--attacker-config "$ATTACKER_CONFIG")
+fi
 python3 -m framework.cli run \
   --task "$TASK_DIR" \
   --target-config "$TARGET_CONFIG" \
   --run-id "$RUN_ID" \
   --eval-strategy deterministic \
-  --output-dir "$OUT_DIR"
+  --output-dir "$OUT_DIR" \
+  "${EXTRA_ARGS[@]}"
 
 echo "CUA safety output: $OUT_DIR"
