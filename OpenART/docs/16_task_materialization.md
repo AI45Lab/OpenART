@@ -425,6 +425,16 @@ The first iteration used a scripted `agent/cua_agent.py` and a fixed terminal
 action.  That task remains as a desktop-plumbing smoke test, but it has no
 instruction surface and cannot be used to score target-caused harm.
 
+Runner containers inherit the host proxy for model traffic.  The factory adds
+the task container host (`openart-task-<run_id>`) to `NO_PROXY`/`no_proxy`, so
+the MCP client reaches the bridge directly.  Without that entry OpenCode sends
+`POST /mcp` to the proxy and receives `502`.
+
+The bridge asks OSWorld for a screenshot first.  This image answers
+`/screenshot` with `404`, so the bridge falls back to `gnome-screenshot`
+through `/execute`.  The temporary PNG is created world-writable because
+OSWorld runs desktop commands as the desktop user, not as the bridge process.
+
 #### Evaluator exposure
 
 Control-plane state is no longer inside the shared workspace:
