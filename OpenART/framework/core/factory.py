@@ -32,6 +32,11 @@ from framework.core.control_plane import (
 )
 from framework.core.helpers import first_non_empty, resolve_env_value, resolve_nested_env_values
 from framework.core.orchestrator import Orchestrator
+from framework.core.paths import (
+    CONTAINER_CONTROL_ROOT,
+    container_control_path,
+    host_control_dir,
+)
 from framework.core.workspace import WorkspaceManager
 from framework.core.target_adapters import (
     stage_model_integration,
@@ -417,6 +422,18 @@ class OrchestratorFactory:
         self._workspace_path = str(workspace_dir)
         container.mount_workspace(self._workspace_path)
 
+        # Control-plane state lives outside the agent-visible workspace and is
+        # mounted at its own container path.
+        control_dir = host_control_dir(self._workspace_path)
+        control_dir.mkdir(parents=True, exist_ok=True)
+        container.spec.mounts.append(
+            MountSpec(
+                host_path=str(control_dir),
+                container_path=CONTAINER_CONTROL_ROOT,
+                read_only=False,
+            )
+        )
+
         # Mount task assets (read-only)
         container.mount_task_assets(str(task_root))
 
@@ -557,6 +574,13 @@ class OrchestratorFactory:
                     container_path="/workspace",
                     read_only=False,
                 ))
+                control_dir = host_control_dir(self._workspace_path)
+                control_dir.mkdir(parents=True, exist_ok=True)
+                container_spec.mounts.append(MountSpec(
+                    host_path=str(control_dir),
+                    container_path=CONTAINER_CONTROL_ROOT,
+                    read_only=False,
+                ))
 
             container = RunnerContainer(container_spec)
 
@@ -567,9 +591,9 @@ class OrchestratorFactory:
                 "http_proxy", "https_proxy", "all_proxy",
             ):
                 runtime_env.pop(key, None)
-        runtime_env["HOME"] = f"/workspace/.openart/runners/{role}/home"
-        runtime_env["XDG_CONFIG_HOME"] = f"/workspace/.openart/runners/{role}/config"
-        runtime_env["OPENART_RUNNER_STATE_DIR"] = f"/workspace/.openart/runners/{role}/state"
+        runtime_env["HOME"] = container_control_path("runners", role, "home")
+        runtime_env["XDG_CONFIG_HOME"] = container_control_path("runners", role, "config")
+        runtime_env["OPENART_RUNNER_STATE_DIR"] = container_control_path("runners", role, "state")
         if framework == "nanobot":
             # nanobot refuses config files and chat history located under
             # --workspace, so keep its HOME outside the mounted workspace.
@@ -719,12 +743,13 @@ class OrchestratorFactory:
             raise ValueError(f"target pre_run_hook source does not exist: {resolved_source}")
 
         shared_root = Path(self._workspace_path or self._workspace_manager.shared_dir(self.run_id))
-        hook_rel = Path(".openart") / "runners" / role / "hooks" / resolved_source.name
-        staged_hook = shared_root / hook_rel
+        control_root = host_control_dir(shared_root)
+        hook_rel = Path("runners") / role / "hooks" / resolved_source.name
+        staged_hook = control_root / hook_rel
         staged_hook.parent.mkdir(parents=True, exist_ok=True)
         staged_hook.write_text(resolved_source.read_text(encoding="utf-8"), encoding="utf-8")
         interpreter = "python3" if resolved_source.suffix.lower() == ".py" else "bash"
-        return f"{interpreter} /workspace/{hook_rel.as_posix()}"
+        return f"{interpreter} {container_control_path(hook_rel.as_posix())}"
 
     def _validate_no_legacy_target_model_fields(self, role_cfg: dict[str, Any]) -> None:
         legacy_fields = [name for name in _LEGACY_TARGET_MODEL_FIELDS if role_cfg.get(name) not in (None, "", [], {}, ())]
@@ -848,6 +873,11 @@ class OrchestratorFactory:
             attacker_config_dir = str(Path(attacker_config_path).resolve().parent)
             container_spec.mounts.append(MountSpec(host_path=attacker_config_dir, container_path="/attacker_config", read_only=True))
         container_spec.mounts.append(MountSpec(host_path=live_output_dir, container_path="/workspace", read_only=False))
+        control_dir = self._workspace_manager.control_dir(self.run_id)
+        control_dir.mkdir(parents=True, exist_ok=True)
+        container_spec.mounts.append(
+            MountSpec(host_path=str(control_dir), container_path=CONTAINER_CONTROL_ROOT, read_only=False)
+        )
         container_spec.mounts.append(MountSpec(host_path=str(live_input_workspace_dir), container_path=input_workspace_mount, read_only=True))
         container_spec.mounts.append(MountSpec(host_path=str(live_feedback_dir), container_path=feedback_mount, read_only=True))
         if attacker_spec.target_control_plane and self._control_manager.enabled():

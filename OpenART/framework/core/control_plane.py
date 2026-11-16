@@ -8,6 +8,7 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+from framework.core.paths import host_control_dir
 from framework.core.visibility_policy import FRAMEWORK_VISIBILITY_POLICY, VisibilityPolicy
 from framework.models.specs import WorkspaceDiff
 
@@ -877,7 +878,7 @@ class ControlPlaneManager:
     def _materialize_home_files(self, workspace_root: Path) -> None:
         if not self.enabled():
             return
-        materialized_home = workspace_root / ".openart" / "materialized_home"
+        materialized_home = host_control_dir(workspace_root) / "materialized_home"
         home_prefix = "HOME/"
         for path in sorted(workspace_root.rglob("*")):
             if not path.is_file():

@@ -205,7 +205,7 @@ def test_prepared_tools_artifact_requires_staged_managed_sources(tmp_path: Path)
     prepared = tmp_path / "run" / "runner_outputs" / "target" / "prepared"
     prepared.mkdir(parents=True)
     staged_script = (
-        "/workspace/.openart/runners/target/state/tools/src/"
+        "/openart/runners/target/state/tools/src/"
         "owncloud.list_dir/scripts/owncloud_list_dir.py"
     )
     tools_json = prepared / "tools.json"
@@ -217,7 +217,7 @@ def test_prepared_tools_artifact_requires_staged_managed_sources(tmp_path: Path)
                     "command": "/opt/openart-venv/bin/python3",
                     "args": [staged_script],
                     "source_files": [staged_script],
-                    "tool_folder": "/workspace/.openart/runners/target/state/tools/store/owncloud.list_dir",
+                    "tool_folder": "/openart/runners/target/state/tools/store/owncloud.list_dir",
                     "config": {"managed_openart_tool": True},
                 }
             ]
@@ -239,7 +239,7 @@ def test_prepared_tools_artifact_requires_staged_managed_sources(tmp_path: Path)
             [
                 {
                     "name": "docs.search",
-                    "tool_folder": "/workspace/.openart/runners/target/state/tools/store/docs.search",
+                    "tool_folder": "/openart/runners/target/state/tools/store/docs.search",
                     "config": {
                         "managed_openart_tool": True,
                         "tool_store": {"guide_only": True},

@@ -6,6 +6,7 @@ import json
 import shutil
 from pathlib import Path
 
+from framework.core.paths import CONTROL_DIR_NAME, host_control_dir
 from framework.core.visibility_policy import FRAMEWORK_VISIBILITY_POLICY, VisibilityPolicy
 from framework.models.specs import WorkspaceDiff
 
@@ -28,6 +29,11 @@ class WorkspaceManager:
 
     def shared_dir(self, run_id: str) -> Path:
         return self._run_dir(run_id) / "shared"
+
+    def control_dir(self, run_id: str) -> Path:
+        """Control-plane state, outside the agent-visible workspace."""
+
+        return self._run_dir(run_id) / CONTROL_DIR_NAME
 
     def attackers_dir(self, run_id: str) -> Path:
         return self._run_dir(run_id) / "attackers"
@@ -59,6 +65,7 @@ class WorkspaceManager:
 
     def ensure_run_layout(self, run_id: str) -> None:
         self.shared_dir(run_id).mkdir(parents=True, exist_ok=True)
+        self.control_dir(run_id).mkdir(parents=True, exist_ok=True)
         self.attackers_dir(run_id).mkdir(parents=True, exist_ok=True)
 
     def ensure_attacker_output(self, run_id: str, attacker_name: str, phase: str, index: int = 1) -> str:
@@ -237,7 +244,7 @@ class WorkspaceManager:
                 child.unlink(missing_ok=True)
 
     def _backup_runners_config(self, shared_dir: Path) -> Path | None:
-        runners_dir = shared_dir / ".openart" / "runners"
+        runners_dir = host_control_dir(shared_dir) / "runners"
         if not runners_dir.exists():
             return None
         import tempfile
@@ -249,7 +256,7 @@ class WorkspaceManager:
         runners_backup = backup / "runners"
         if not runners_backup.exists():
             return
-        runners_dir = shared_dir / ".openart" / "runners"
+        runners_dir = host_control_dir(shared_dir) / "runners"
         runners_dir.mkdir(parents=True, exist_ok=True)
         shutil.copytree(runners_backup, runners_dir, dirs_exist_ok=True)
         shutil.rmtree(backup)

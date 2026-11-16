@@ -197,7 +197,7 @@ def test_nanobot_target_config_uses_openart_workspace_and_config() -> None:
 
     launch_cmd = config["target"]["launch_cmd"]
     assert "--workspace /workspace" in launch_cmd
-    assert "--config /workspace/.openart/runners/target/home/.nanobot/config.json" in launch_cmd
+    assert "--config /openart/runners/target/home/.nanobot/config.json" in launch_cmd
     assert config["target"]["config_overlay"]["prompt_transport"] == "file_ref_argv"
     assert config["target"]["config_overlay"]["prompt_flag"] == "-m"
 
@@ -212,7 +212,7 @@ def test_aider_target_config_disables_url_scraping_and_tty_features() -> None:
     assert "--no-detect-urls" in launch_cmd
     assert "--disable-playwright" in launch_cmd
     assert "--no-fancy-input" in launch_cmd
-    assert "--load /workspace/.openart/runners/target/state/aider_bootstrap.load" in launch_cmd
+    assert "--load /openart/runners/target/state/aider_bootstrap.load" in launch_cmd
     assert overlay["prompt_transport"] == "file"
     assert overlay["prompt_file_flag"] == "--message-file"
     assert "Do not fetch URLs" in overlay["runtime_note_append"]
@@ -336,7 +336,7 @@ def test_prompt_cli_claude_uses_print_mode_and_reads_prompt_text() -> None:
 def test_runner_installs_user_model_config_json_and_skips_managed_framework_config() -> None:
     container = _FakeRunnerContainer("openart-target-test")
     source_path = "/workspace/.openart_model_integration_target.json"
-    destination_path = "/workspace/.openart/runners/target/home/.custom/settings.json"
+    destination_path = "/openart/runners/target/home/.custom/settings.json"
     container.files[source_path] = '{"provider": "openai-compatible"}\n'
     runner = PromptCLIRunner(
         name="runner",
@@ -487,7 +487,7 @@ def test_runner_merges_materialized_and_mounted_home_overlays() -> None:
     runner._merge_materialized_home_files()
 
     merge_sources = [call[3] for call in container.exec_calls if call[:2] == ["python3", "-c"]]
-    assert merge_sources == ["/workspace/.openart/materialized_home", "/workspace/HOME"]
+    assert merge_sources == ["/openart/materialized_home", "/workspace/HOME"]
 
 
 def test_prompt_cli_preserves_native_output_event_name() -> None:
@@ -569,8 +569,8 @@ def test_runner_installs_user_tool_wrappers_and_guide() -> None:
 
     assert runner.runtime_env["OPENART_TOOLS_FILE"].endswith("tools.json")
     assert runner.runtime_env["OPENART_TOOL_GUIDE_FILE"].endswith("guide.md")
-    assert runner.runtime_env["PATH"].startswith("/workspace/.openart/runners/target/state/tools/bin:")
-    wrapper_path = "/workspace/.openart/runners/target/state/tools/bin/gitlab.create_project"
+    assert runner.runtime_env["PATH"].startswith("/openart/runners/target/state/tools/bin:")
+    wrapper_path = "/openart/runners/target/state/tools/bin/gitlab.create_project"
     assert "exec python3 script.py \"$@\"" in container.files[wrapper_path]
     assert 'if [ -n "${OPENAI_API_KEY+x}" ]; then export TOKEN="${OPENAI_API_KEY}"; fi' in container.files[wrapper_path]
     assert container.files[runner.runtime_env["OPENART_TOOL_GUIDE_FILE"]] == "# Custom Tool Guide\n"
@@ -635,7 +635,7 @@ def test_runner_preserves_container_path_when_installing_tools() -> None:
 
     runner._install_tools()
 
-    assert runner.runtime_env["PATH"] == "/workspace/.openart/runners/target/state/tools/bin:/opt/openart-venv/bin:/usr/local/bin:/usr/bin"
+    assert runner.runtime_env["PATH"] == "/openart/runners/target/state/tools/bin:/opt/openart-venv/bin:/usr/local/bin:/usr/bin"
 
 
 def test_runner_stages_only_declared_tool_source_files(tmp_path: Path) -> None:
@@ -685,11 +685,11 @@ def test_runner_stages_only_declared_tool_source_files(tmp_path: Path) -> None:
     runner._install_tools()
 
     payload = json.loads(container.files[runner.runtime_env["OPENART_TOOLS_FILE"]])
-    staged_script = "/workspace/.openart/runners/target/state/tools/src/owncloud.upload_file/scripts/owncloud_upload_file.py"
-    staged_folder = "/workspace/.openart/runners/target/state/tools/store/owncloud.upload_file"
+    staged_script = "/openart/runners/target/state/tools/src/owncloud.upload_file/scripts/owncloud_upload_file.py"
+    staged_folder = "/openart/runners/target/state/tools/store/owncloud.upload_file"
     folders = json.loads(container.files[runner.runtime_env["OPENART_TOOL_FOLDERS_FILE"]])
     assert container.files[staged_script] == "print('upload')\n"
-    assert "/workspace/.openart/runners/target/state/tools/src/owncloud.upload_file/scripts/unused.py" not in container.files
+    assert "/openart/runners/target/state/tools/src/owncloud.upload_file/scripts/unused.py" not in container.files
     assert container.files[f"{staged_folder}/scripts/owncloud_upload_file.py"] == "print('upload')\n"
     assert container.files[f"{staged_folder}/scripts/unused.py"] == "print('unused')\n"
     assert f"{staged_folder}/.DS_Store" not in container.files
@@ -700,8 +700,8 @@ def test_runner_stages_only_declared_tool_source_files(tmp_path: Path) -> None:
     assert payload[0]["tool_folder"] == staged_folder
     assert folders["owncloud.upload_file"]["path"] == staged_folder
     assert folders["owncloud.upload_file"]["guide_path"] == f"{staged_folder}/SKILL.md"
-    assert runner.runtime_env["OPENART_TOOL_STORE_DIR"] == "/workspace/.openart/runners/target/state/tools/store"
-    assert staged_script in container.files["/workspace/.openart/runners/target/state/tools/bin/owncloud.upload_file"]
+    assert runner.runtime_env["OPENART_TOOL_STORE_DIR"] == "/openart/runners/target/state/tools/store"
+    assert staged_script in container.files["/openart/runners/target/state/tools/bin/owncloud.upload_file"]
     assert ["chmod", "+x", f"{staged_folder}/scripts/owncloud_upload_file.py"] in container.exec_calls
 
 
@@ -727,7 +727,7 @@ def test_runner_redacts_sensitive_tool_env_from_artifacts_and_wrappers() -> None
     runner._install_tools()
 
     tools_payload = container.files[runner.runtime_env["OPENART_TOOLS_FILE"]]
-    wrapper = container.files["/workspace/.openart/runners/target/state/tools/bin/owncloud.list_dir"]
+    wrapper = container.files["/openart/runners/target/state/tools/bin/owncloud.list_dir"]
     payload = json.loads(tools_payload)
     assert payload[0]["env"]["OWNCLOUD_PASSWORD"] == "<redacted>"
     assert payload[0]["env"]["OWNCLOUD_URL"] == "http://owncloud.local"
@@ -774,7 +774,7 @@ def test_runner_stages_guide_only_tool_folder_without_wrapper(tmp_path: Path) ->
 
     runner._install_tools()
 
-    staged_folder = "/workspace/.openart/runners/target/state/tools/store/docs.search"
+    staged_folder = "/openart/runners/target/state/tools/store/docs.search"
     payload = json.loads(container.files[runner.runtime_env["OPENART_TOOLS_FILE"]])
     folders = json.loads(container.files[runner.runtime_env["OPENART_TOOL_FOLDERS_FILE"]])
     assert payload[0]["tool_folder"] == staged_folder
@@ -783,7 +783,7 @@ def test_runner_stages_guide_only_tool_folder_without_wrapper(tmp_path: Path) ->
     assert f"{staged_folder}/scripts/search.py" in container.files
     assert folders["docs.search"]["guide_only"] is True
     assert folders["docs.search"]["guide_path"] == f"{staged_folder}/skills.md"
-    assert "/workspace/.openart/runners/target/state/tools/bin/docs.search" not in container.files
+    assert "/openart/runners/target/state/tools/bin/docs.search" not in container.files
     assert "PATH" not in runner.runtime_env
     assert "guide-only" in container.files[runner.runtime_env["OPENART_TOOL_GUIDE_FILE"]]
 
@@ -1059,7 +1059,7 @@ def test_prompt_cli_runner_stdin_transport_runs_pre_hook_before_prompt_pipe() ->
         command=CommandSpec(template="claude -p"),
         credentials=CredentialBundle(values={}),
         runtime_env={
-            "OPENART_PRE_RUN_HOOK": "python3 /workspace/.openart/runners/target/hooks/llm-gateway-compat.py"
+            "OPENART_PRE_RUN_HOOK": "python3 /openart/runners/target/hooks/llm-gateway-compat.py"
         },
         extra_config={"prompt_transport": "stdin"},
     )

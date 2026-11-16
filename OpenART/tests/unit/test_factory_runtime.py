@@ -523,7 +523,7 @@ def test_factory_keeps_prompt_cli_home_outside_shared_workspace(tmp_path: Path) 
     runner = factory._create_runner("target")
 
     assert runner.runtime_env["HOME"] == "/tmp/openart/runners/target/home"
-    assert runner.runtime_env["OPENART_RUNNER_STATE_DIR"] == "/workspace/.openart/runners/target/state"
+    assert runner.runtime_env["OPENART_RUNNER_STATE_DIR"] == "/openart/runners/target/state"
 
 
 def test_factory_stages_repo_pre_run_hook_for_prompt_cli_target(tmp_path: Path) -> None:
@@ -545,11 +545,10 @@ def test_factory_stages_repo_pre_run_hook_for_prompt_cli_target(tmp_path: Path) 
     runner = factory._create_runner("target")
 
     assert runner.runtime_env["OPENART_PRE_RUN_HOOK"] == (
-        "python3 /workspace/.openart/runners/target/hooks/llm-gateway-compat.py"
+        "python3 /openart/runners/target/hooks/llm-gateway-compat.py"
     )
     staged_hook = (
-        Path(factory._workspace_path)
-        / ".openart"
+        factory._workspace_manager.control_dir("run-1")
         / "runners"
         / "target"
         / "hooks"
@@ -578,7 +577,7 @@ def test_factory_stages_shell_pre_run_hook_with_bash(tmp_path: Path) -> None:
     runner = factory._create_runner("target")
 
     assert runner.runtime_env["OPENART_PRE_RUN_HOOK"] == (
-        "bash /workspace/.openart/runners/target/hooks/aider-bootstrap-load.sh"
+        "bash /openart/runners/target/hooks/aider-bootstrap-load.sh"
     )
 
 
@@ -649,7 +648,7 @@ def test_factory_applies_model_integration_env_and_config_template(monkeypatch, 
     assert runner.runtime_env["OPENAI_API_KEY"] == "dummy"
     assert "ANTHROPIC_API_KEY" not in runner.runtime_env
     assert runner.runtime_env["OPENART_MODEL_CONFIG_JSON_SOURCE_FILE"] == "/workspace/.openart_model_integration_target.json"
-    assert runner.runtime_env["OPENART_MODEL_CONFIG_JSON_DESTINATION"] == "/workspace/.openart/runners/target/config/opencode/opencode.json"
+    assert runner.runtime_env["OPENART_MODEL_CONFIG_JSON_DESTINATION"] == "/openart/runners/target/config/opencode/opencode.json"
     mounts = {mount.container_path: mount.host_path for mount in runner.container.spec.mounts}
     assert mounts["/workspace/.openart_model_integration_target.json"].endswith("model_integration/target/opencode.json")
     staged_text = Path(mounts["/workspace/.openart_model_integration_target.json"]).read_text(encoding="utf-8")

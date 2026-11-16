@@ -373,9 +373,9 @@ def test_deepseek_tui_provider_supports_codewhale_project_home_skills_hooks_and_
     assert (shared_root / ".codewhale" / "skills" / "triage" / "SKILL.md").is_file()
     assert (shared_root / "AGENTS.md").is_file()
     assert not (shared_root / "HOME").exists()
-    assert (shared_root / ".openart" / "materialized_home" / ".codewhale" / "skills" / "release" / "SKILL.md").is_file()
+    assert (shared_root.parent / "control" / "materialized_home" / ".codewhale" / "skills" / "release" / "SKILL.md").is_file()
     assert not (shared_root / ".codewhale" / "hooks.toml").exists()
-    assert not (shared_root / ".openart" / "materialized_home" / ".codewhale" / "mcp.json").exists()
+    assert not (shared_root.parent / "control" / "materialized_home" / ".codewhale" / "mcp.json").exists()
 
 
 def test_awesome_deepseek_cli_providers_register_expected_surfaces() -> None:
@@ -475,7 +475,7 @@ def test_goose_home_hints_and_skills_materialize_while_hooks_filter(tmp_path: Pa
     assert (shared_root / ".agents" / "skills" / "review" / "SKILL.md").is_file()
     assert (shared_root / ".goosehints").is_file()
     assert not (shared_root / "HOME").exists()
-    assert (shared_root / ".openart" / "materialized_home" / ".config" / "goose" / ".goosehints").is_file()
+    assert (shared_root.parent / "control" / "materialized_home" / ".config" / "goose" / ".goosehints").is_file()
     assert not (shared_root / ".agents" / "plugins" / "audit" / "hooks" / "hooks.json").exists()
 
 
@@ -582,9 +582,9 @@ def test_copilot_cli_home_surfaces_materialize_and_mcp_filters(tmp_path: Path) -
     assert materialized.added == diff.added
     assert (shared_root / ".github" / "copilot-instructions.md").is_file()
     assert not (shared_root / "HOME").exists()
-    assert (shared_root / ".openart" / "materialized_home" / ".copilot" / "copilot-instructions.md").is_file()
-    assert (shared_root / ".openart" / "materialized_home" / ".copilot" / "skills" / "workflow" / "SKILL.md").is_file()
-    assert not (shared_root / ".openart" / "materialized_home" / ".copilot" / "mcp-config.json").exists()
+    assert (shared_root.parent / "control" / "materialized_home" / ".copilot" / "copilot-instructions.md").is_file()
+    assert (shared_root.parent / "control" / "materialized_home" / ".copilot" / "skills" / "workflow" / "SKILL.md").is_file()
+    assert not (shared_root.parent / "control" / "materialized_home" / ".copilot" / "mcp-config.json").exists()
 
 
 def test_home_control_files_materialize_under_runner_home_overlay(tmp_path: Path) -> None:
@@ -630,7 +630,7 @@ def test_home_control_files_materialize_under_runner_home_overlay(tmp_path: Path
     assert ignored == []
     assert materialized.added == ["HOME/.codex/config.toml"]
     assert not (shared_root / "HOME").exists()
-    assert (shared_root / ".openart" / "materialized_home" / ".codex" / "config.toml").read_text(
+    assert (shared_root.parent / "control" / "materialized_home" / ".codex" / "config.toml").read_text(
         encoding="utf-8"
     ) == 'model = "demo"\n'
 

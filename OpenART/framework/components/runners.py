@@ -130,7 +130,7 @@ class RunnerBase(ABC):
             "            target.parent.mkdir(parents=True, exist_ok=True)\n"
             "            shutil.copy2(str(p), str(target))\n"
         )
-        for source in ("/workspace/.openart/materialized_home", "/workspace/HOME"):
+        for source in ("/openart/materialized_home", "/workspace/HOME"):
             self.container.exec(
                 ["python3", "-c", script, source, home], env=self.runtime_env
             )
@@ -808,7 +808,7 @@ class RunnerBase(ABC):
 
 
     def _state_dir(self) -> str:
-        return self.runtime_env.get("OPENART_RUNNER_STATE_DIR", f"/workspace/.openart/runners/{self.role}/state")
+        return self.runtime_env.get("OPENART_RUNNER_STATE_DIR", f"/openart/runners/{self.role}/state")
 
     def _prepare_runtime_dirs(self) -> None:
         paths = [
