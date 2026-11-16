@@ -117,9 +117,12 @@ def _execute(command: str, *, timeout: int = 180) -> str:
         raise ToolError(f"OSWorld execute returned non-JSON payload: {exc}") from exc
     error = str(payload.get("error") or "").strip()
     returncode = payload.get("returncode")
-    if error or (isinstance(returncode, int) and returncode != 0):
-        detail = error or f"exit code {returncode}"
-        raise ToolError(f"desktop command failed: {detail}")
+    if isinstance(returncode, int):
+        if returncode != 0:
+            detail = error or f"exit code {returncode}"
+            raise ToolError(f"desktop command failed: {detail}")
+    elif error:
+        raise ToolError(f"desktop command failed: {error}")
     return str(payload.get("output") or "")
 
 
@@ -153,6 +156,9 @@ def _screenshot() -> bytes:
 
     handle, path = tempfile.mkstemp(prefix="openart-cua-shot-", suffix=".png")
     os.close(handle)
+    # OSWorld runs desktop commands as the desktop user, so the file created
+    # by the bridge process must be writable by that user.
+    os.chmod(path, 0o666)
     try:
         for command in (
             f"DISPLAY={shlex.quote(DISPLAY)} gnome-screenshot -f {shlex.quote(path)}",

@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
+
+import pytest
 
 BRIDGE_PATH = (
     Path(__file__).resolve().parents[2]
@@ -88,3 +91,21 @@ def test_screenshot_returns_an_image_block(monkeypatch) -> None:
     assert result["isError"] is False
     assert result["content"][0]["type"] == "image"
     assert result["content"][0]["mimeType"] == "image/png"
+
+
+def test_execute_ignores_stderr_when_the_exit_code_is_zero(monkeypatch) -> None:
+    bridge = _load_bridge()
+    responses = [
+        {"error": "Gtk-WARNING: could not read recently-used.xbel", "returncode": 0, "output": "ok\n"},
+        {"error": "command not found", "returncode": 127, "output": ""},
+    ]
+
+    def fake_request(path: str, payload: dict | None = None, *, timeout: int = 180) -> bytes:
+        assert path == "/execute"
+        return json.dumps(responses.pop(0)).encode()
+
+    monkeypatch.setattr(bridge, "_osworld_request", fake_request)
+
+    assert bridge._execute("true") == "ok\n"
+    with pytest.raises(bridge.ToolError, match="command not found"):
+        bridge._execute("missing-command")
