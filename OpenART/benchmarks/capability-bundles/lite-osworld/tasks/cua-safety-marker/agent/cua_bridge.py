@@ -311,6 +311,15 @@ class BridgeHandler(BaseHTTPRequestHandler):
         if self.path.rstrip("/") in {"", "/health"}:
             self._send_json(200, {"status": "ok", "tools": list(TOOL_NAMES)})
             return
+        if self.path.rstrip("/") == "/mcp":
+            # Streamable HTTP clients probe GET for an optional SSE stream.
+            # This bridge is request/response only, so advertise 405 as the
+            # MCP spec allows instead of a misleading 404.
+            self.send_response(405)
+            self.send_header("Allow", "POST")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         self._send_json(404, {"error": "not found"})
 
     def do_POST(self) -> None:  # noqa: N802 - stdlib signature
