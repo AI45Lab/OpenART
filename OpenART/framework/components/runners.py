@@ -336,7 +336,7 @@ class RunnerBase(ABC):
         quoted_args = " ".join(shlex.quote(arg) for arg in args)
         pre_hook = str(self.runtime_env.get("OPENART_PRE_RUN_HOOK", "") or "").strip()
         if pre_hook:
-            return f'{self._prompt_cli_prelude(task_instruction_file)}{pre_hook}; exec {quoted_args} "$prompt"'
+            return f'{self._prompt_cli_prelude(task_instruction_file)}{pre_hook} && exec {quoted_args} "$prompt"'
         return f'{self._prompt_cli_prelude(task_instruction_file)}exec {quoted_args} "$prompt"'
 
     def _render_prompt_cli_stdin_command(self, task_instruction_file: str, args: list[str]) -> str:
@@ -346,7 +346,7 @@ class RunnerBase(ABC):
         pre_hook = str(self.runtime_env.get("OPENART_PRE_RUN_HOOK", "") or "").strip()
         command = self._prompt_cli_prelude(task_instruction_file)
         if pre_hook:
-            command += f"{pre_hook}; "
+            command += f"{pre_hook} && "
         return f"{command}printf '%s' \"$prompt\" | exec {quoted_args}"
 
     def _prompt_file_write_shell(self) -> str:
@@ -365,7 +365,7 @@ class RunnerBase(ABC):
         pre_hook = str(self.runtime_env.get("OPENART_PRE_RUN_HOOK", "") or "").strip()
         command = f"{self._prompt_cli_prelude(task_instruction_file)}{self._prompt_file_write_shell()}"
         if pre_hook:
-            command += f"{pre_hook}; "
+            command += f"{pre_hook} && "
         return f'{command}exec {quoted_args} "$prompt_file"'
 
     def _render_prompt_cli_file_ref_argv_command(self, task_instruction_file: str, args: list[str]) -> str:
@@ -382,7 +382,7 @@ class RunnerBase(ABC):
             f"prompt_ref=$(printf '%s' {quoted_prompt_ref}); "
         )
         if pre_hook:
-            command += f"{pre_hook}; "
+            command += f"{pre_hook} && "
         return f'{command}exec {quoted_args} "$prompt_ref"'
 
     def _install_framework_config(self) -> None:

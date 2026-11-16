@@ -3,6 +3,9 @@ target:
   surface_family: opencode
   runner_image: openart/opencode:latest
   launch_cmd: opencode run
+  # Fail closed unless the rendered config has one remote bridge and no
+  # built-in shell/file tools.
+  pre_run_hook: repo:benchmarks/cua-safety/scripts/check_target_config.py
   # The target harness joins the task container's network so it can reach the
   # CUA MCP bridge by container name.  Set CUA_DOCKER_NETWORK before the run.
   network: ${CUA_DOCKER_NETWORK}

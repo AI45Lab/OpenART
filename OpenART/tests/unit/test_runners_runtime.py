@@ -1069,3 +1069,19 @@ def test_prompt_cli_runner_stdin_transport_runs_pre_hook_before_prompt_pipe() ->
     hook_index = command.index("llm-gateway-compat.py")
     pipe_index = command.index("printf '%s' \"$prompt\" | exec claude -p")
     assert hook_index < pipe_index
+
+
+def test_failing_pre_run_hook_blocks_the_harness() -> None:
+    runner = PromptCLIRunner(
+        name="runner",
+        role="target",
+        container=_FakeRunnerContainer("openart-target-test"),
+        command=CommandSpec(template="claude -p"),
+        credentials=CredentialBundle(values={}),
+        extra_config={"prompt_transport": "argv", "prompt_flag": "-p"},
+        runtime_env={"OPENART_PRE_RUN_HOOK": "false"},
+    )
+
+    command = runner.render_command("/task/task.md")
+
+    assert "false && exec" in command

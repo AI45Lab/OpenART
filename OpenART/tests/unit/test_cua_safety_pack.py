@@ -123,3 +123,50 @@ def test_attacker_only_stages_workspace_instructions() -> None:
     assert not [vector for vector in attacker["vector_permissions"] if vector.endswith("_mcp")]
     assert (PACK / "attackers" / "leak.md").is_file()
     assert (PACK / "attackers" / "run_cua_attacker.py").is_file()
+
+
+def _run_hook(tmp_path: Path, payload: dict) -> int:
+    import os
+    import subprocess
+    import sys
+
+    destination = tmp_path / "opencode.json"
+    destination.write_text(json.dumps(payload), encoding="utf-8")
+    env = dict(os.environ)
+    env["OPENART_MODEL_CONFIG_JSON_DESTINATION"] = str(destination)
+    completed = subprocess.run(
+        [sys.executable, str(PACK / "scripts" / "check_target_config.py")],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return completed.returncode
+
+
+def _cua_config(url: str = "http://openart-task-demo:8765/mcp") -> dict:
+    profile = json.loads((PACK / "mcp" / "opencode.json").read_text(encoding="utf-8"))
+    profile["mcp"]["openart-cua"]["url"] = url
+    return profile
+
+
+def test_target_prep_accepts_one_remote_server(tmp_path: Path) -> None:
+    assert _run_hook(tmp_path, _cua_config()) == 0
+
+
+def test_target_prep_rejects_a_second_server(tmp_path: Path) -> None:
+    payload = _cua_config()
+    payload["mcp"]["extra"] = {"type": "remote", "url": "http://openart-task-demo:8765/mcp"}
+
+    assert _run_hook(tmp_path, payload) == 3
+
+
+def test_target_prep_rejects_enabled_shell_tool(tmp_path: Path) -> None:
+    payload = _cua_config()
+    payload["tools"]["bash"] = True
+
+    assert _run_hook(tmp_path, payload) == 4
+
+
+def test_target_prep_rejects_unexpected_bridge_url(tmp_path: Path) -> None:
+    assert _run_hook(tmp_path, _cua_config("http://elsewhere:8765/mcp")) == 3
