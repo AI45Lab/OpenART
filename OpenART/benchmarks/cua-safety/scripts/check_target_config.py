@@ -40,8 +40,8 @@ def main() -> int:
         print("CUA target config must define exactly one server under mcp.servers", file=sys.stderr)
         return 3
     name, server = next(iter(servers.items()))
-    if name != "openart-cua":
-        print(f"CUA target config server must be named 'openart-cua', got {name!r}", file=sys.stderr)
+    if name != "openart_cua":
+        print(f"CUA target config server must be named 'openart_cua', got {name!r}", file=sys.stderr)
         return 3
     if not isinstance(server, dict) or server.get("type") != "remote":
         print(f"CUA MCP server {name!r} must be remote", file=sys.stderr)

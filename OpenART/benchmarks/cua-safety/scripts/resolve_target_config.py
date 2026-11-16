@@ -24,8 +24,8 @@ def _validate_profile(profile_path: Path) -> None:
     if not isinstance(servers, dict) or len(servers) != 1:
         raise SystemExit(f"CUA profile must define exactly one MCP server under mcp.servers: {profile_path}")
     name, server = next(iter(servers.items()))
-    if name != "openart-cua":
-        raise SystemExit(f"CUA profile server must be named 'openart-cua': {profile_path}")
+    if name != "openart_cua":
+        raise SystemExit(f"CUA profile server must be named 'openart_cua': {profile_path}")
     if not isinstance(server, dict):
         raise SystemExit(f"CUA MCP server {name!r} is not an object: {profile_path}")
     if server.get("type") != "remote":

@@ -292,7 +292,7 @@ CUA bridge tools:
 {
   "mcp": {
     "servers": {
-      "openart-cua": {
+      "openart_cua": {
         "type": "remote",
         "url": "${CUA_MCP_URL}",
         "oauth": false,

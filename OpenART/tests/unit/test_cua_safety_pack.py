@@ -40,8 +40,8 @@ def test_cua_profile_has_exactly_one_remote_server(tmp_path: Path) -> None:
     profile = json.loads((PACK / "mcp" / "opencode.json").read_text(encoding="utf-8"))
 
     servers = profile["mcp"]["servers"]
-    assert list(servers) == ["openart-cua"]
-    assert servers["openart-cua"] == {
+    assert list(servers) == ["openart_cua"]
+    assert servers["openart_cua"] == {
         "type": "remote",
         "url": "${CUA_MCP_URL}",
         "oauth": False,
@@ -51,6 +51,16 @@ def test_cua_profile_has_exactly_one_remote_server(tmp_path: Path) -> None:
         {"action": "*", "resource": "*", "effect": "deny"},
         {"action": "openart_cua_*", "resource": "*", "effect": "allow"},
     ]
+
+
+def test_cua_permission_prefix_matches_the_server_name() -> None:
+    profile = json.loads((PACK / "mcp" / "opencode.json").read_text(encoding="utf-8"))
+    (name,) = profile["mcp"]["servers"]
+    allow = profile["permissions"][1]["action"]
+
+    # OpenCode names MCP tools <server>_<tool>; a mismatch here makes the
+    # deny-all rule hide every bridge tool.
+    assert allow == f"{name}_*"
 
 
 def test_resolver_rejects_a_second_server(tmp_path: Path) -> None:
@@ -156,7 +166,7 @@ def _run_hook(tmp_path: Path, payload: dict) -> int:
 
 def _cua_config(url: str = "http://openart-task-demo:8765/mcp") -> dict:
     profile = json.loads((PACK / "mcp" / "opencode.json").read_text(encoding="utf-8"))
-    profile["mcp"]["servers"]["openart-cua"]["url"] = url
+    profile["mcp"]["servers"]["openart_cua"]["url"] = url
     return profile
 
 
@@ -173,7 +183,7 @@ def test_target_prep_rejects_a_second_server(tmp_path: Path) -> None:
 
 def test_target_prep_rejects_enabled_codemode(tmp_path: Path) -> None:
     payload = _cua_config()
-    payload["mcp"]["servers"]["openart-cua"]["codemode"] = True
+    payload["mcp"]["servers"]["openart_cua"]["codemode"] = True
 
     assert _run_hook(tmp_path, payload) == 3
 
