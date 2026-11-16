@@ -39,15 +39,18 @@ def test_cua_profile_has_exactly_one_remote_server(tmp_path: Path) -> None:
     resolver = _load_resolver()
     profile = json.loads((PACK / "mcp" / "opencode.json").read_text(encoding="utf-8"))
 
-    servers = profile["mcp"]
+    servers = profile["mcp"]["servers"]
     assert list(servers) == ["openart-cua"]
     assert servers["openart-cua"] == {
         "type": "remote",
         "url": "${CUA_MCP_URL}",
-        "enabled": True,
+        "oauth": False,
+        "codemode": False,
     }
-    for forbidden in ("bash", "edit", "write", "read", "glob", "grep", "list", "patch"):
-        assert profile["tools"][forbidden] is False
+    assert profile["permissions"] == [
+        {"action": "*", "resource": "*", "effect": "deny"},
+        {"action": "openart_cua_*", "resource": "*", "effect": "allow"},
+    ]
 
 
 def test_resolver_rejects_a_second_server(tmp_path: Path) -> None:
@@ -57,8 +60,10 @@ def test_resolver_rejects_a_second_server(tmp_path: Path) -> None:
         json.dumps(
             {
                 "mcp": {
-                    "a": {"type": "remote", "url": "${CUA_MCP_URL}"},
-                    "b": {"type": "local", "command": ["python3", "server.py"]},
+                    "servers": {
+                        "a": {"type": "remote", "url": "${CUA_MCP_URL}"},
+                        "b": {"type": "local", "command": ["python3", "server.py"]},
+                    }
                 }
             }
         ),
@@ -151,7 +156,7 @@ def _run_hook(tmp_path: Path, payload: dict) -> int:
 
 def _cua_config(url: str = "http://openart-task-demo:8765/mcp") -> dict:
     profile = json.loads((PACK / "mcp" / "opencode.json").read_text(encoding="utf-8"))
-    profile["mcp"]["openart-cua"]["url"] = url
+    profile["mcp"]["servers"]["openart-cua"]["url"] = url
     return profile
 
 
@@ -161,14 +166,21 @@ def test_target_prep_accepts_one_remote_server(tmp_path: Path) -> None:
 
 def test_target_prep_rejects_a_second_server(tmp_path: Path) -> None:
     payload = _cua_config()
-    payload["mcp"]["extra"] = {"type": "remote", "url": "http://openart-task-demo:8765/mcp"}
+    payload["mcp"]["servers"]["extra"] = {"type": "remote", "url": "http://openart-task-demo:8765/mcp"}
 
     assert _run_hook(tmp_path, payload) == 3
 
 
-def test_target_prep_rejects_enabled_shell_tool(tmp_path: Path) -> None:
+def test_target_prep_rejects_enabled_codemode(tmp_path: Path) -> None:
     payload = _cua_config()
-    payload["tools"]["bash"] = True
+    payload["mcp"]["servers"]["openart-cua"]["codemode"] = True
+
+    assert _run_hook(tmp_path, payload) == 3
+
+
+def test_target_prep_rejects_permissive_rules(tmp_path: Path) -> None:
+    payload = _cua_config()
+    payload["permissions"] = []
 
     assert _run_hook(tmp_path, payload) == 4
 

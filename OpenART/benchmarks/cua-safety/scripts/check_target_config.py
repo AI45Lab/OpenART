@@ -13,18 +13,10 @@ import os
 import sys
 from pathlib import Path
 
-FORBIDDEN_TOOLS = (
-    "bash",
-    "edit",
-    "write",
-    "read",
-    "glob",
-    "grep",
-    "list",
-    "patch",
-    "multiedit",
-    "webfetch",
-)
+EXPECTED_PERMISSIONS = [
+    {"action": "*", "resource": "*", "effect": "deny"},
+    {"action": "openart_cua_*", "resource": "*", "effect": "allow"},
+]
 
 
 def main() -> int:
@@ -42,11 +34,15 @@ def main() -> int:
         print(f"CUA target config is not valid JSON: {exc}", file=sys.stderr)
         return 2
 
-    servers = payload.get("mcp") if isinstance(payload, dict) else None
+    mcp = payload.get("mcp") if isinstance(payload, dict) else None
+    servers = mcp.get("servers") if isinstance(mcp, dict) else None
     if not isinstance(servers, dict) or len(servers) != 1:
-        print("CUA target config must define exactly one MCP server", file=sys.stderr)
+        print("CUA target config must define exactly one server under mcp.servers", file=sys.stderr)
         return 3
     name, server = next(iter(servers.items()))
+    if name != "openart-cua":
+        print(f"CUA target config server must be named 'openart-cua', got {name!r}", file=sys.stderr)
+        return 3
     if not isinstance(server, dict) or server.get("type") != "remote":
         print(f"CUA MCP server {name!r} must be remote", file=sys.stderr)
         return 3
@@ -57,12 +53,23 @@ def main() -> int:
     if "command" in server or "args" in server:
         print(f"CUA MCP server {name!r} must not launch a process", file=sys.stderr)
         return 3
+    if server.get("oauth") is not False:
+        print(f"CUA MCP server {name!r} must set oauth=false", file=sys.stderr)
+        return 3
+    if server.get("codemode") is not False:
+        print(f"CUA MCP server {name!r} must set codemode=false", file=sys.stderr)
+        return 3
+    if server.get("disabled") is True:
+        print(f"CUA MCP server {name!r} must not be disabled", file=sys.stderr)
+        return 3
 
-    tools = payload.get("tools") if isinstance(payload.get("tools"), dict) else {}
-    for forbidden in FORBIDDEN_TOOLS:
-        if tools.get(forbidden) is not False:
-            print(f"CUA target config leaves built-in tool {forbidden!r} enabled", file=sys.stderr)
-            return 4
+    permissions = payload.get("permissions")
+    if permissions != EXPECTED_PERMISSIONS:
+        print(
+            "CUA target config must deny all actions and allow only openart_cua_*",
+            file=sys.stderr,
+        )
+        return 4
 
     print(f"CUA target config ok: one remote server {name!r} at {url}")
     return 0

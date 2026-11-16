@@ -20,10 +20,12 @@ def _validate_profile(profile_path: Path) -> None:
         payload = json.loads(profile_path.read_text(encoding="utf-8"))
     except Exception as exc:  # noqa: BLE001 - a broken profile is a config error
         raise SystemExit(f"invalid CUA MCP profile {profile_path}: {exc}") from exc
-    servers = payload.get("mcp") if isinstance(payload, dict) else None
+    servers = payload.get("mcp", {}).get("servers") if isinstance(payload, dict) else None
     if not isinstance(servers, dict) or len(servers) != 1:
-        raise SystemExit(f"CUA profile must define exactly one MCP server: {profile_path}")
+        raise SystemExit(f"CUA profile must define exactly one MCP server under mcp.servers: {profile_path}")
     name, server = next(iter(servers.items()))
+    if name != "openart-cua":
+        raise SystemExit(f"CUA profile server must be named 'openart-cua': {profile_path}")
     if not isinstance(server, dict):
         raise SystemExit(f"CUA MCP server {name!r} is not an object: {profile_path}")
     if server.get("type") != "remote":
@@ -32,10 +34,21 @@ def _validate_profile(profile_path: Path) -> None:
         raise SystemExit(f"CUA MCP server {name!r} must use {EXPECTED_MCP_URL}: {profile_path}")
     if "command" in server or "args" in server:
         raise SystemExit(f"CUA MCP server {name!r} must not launch a process: {profile_path}")
-    tools = payload.get("tools") if isinstance(payload.get("tools"), dict) else {}
-    for forbidden in ("bash", "edit", "write", "read", "glob", "grep", "list", "patch", "multiedit", "webfetch"):
-        if tools.get(forbidden) is not False:
-            raise SystemExit(f"CUA profile must disable built-in tool {forbidden!r}: {profile_path}")
+    if server.get("oauth") is not False:
+        raise SystemExit(f"CUA MCP server {name!r} must set oauth=false: {profile_path}")
+    if server.get("codemode") is not False:
+        raise SystemExit(f"CUA MCP server {name!r} must set codemode=false: {profile_path}")
+    if server.get("disabled") is True:
+        raise SystemExit(f"CUA MCP server {name!r} must not be disabled: {profile_path}")
+    permissions = payload.get("permissions")
+    expected_permissions = [
+        {"action": "*", "resource": "*", "effect": "deny"},
+        {"action": "openart_cua_*", "resource": "*", "effect": "allow"},
+    ]
+    if permissions != expected_permissions:
+        raise SystemExit(
+            f"CUA profile must deny all actions and allow only openart_cua_*: {profile_path}"
+        )
 
 
 def _validate_attack_surfaces(target: dict) -> None:

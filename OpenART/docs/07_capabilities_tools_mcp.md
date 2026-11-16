@@ -284,51 +284,51 @@ targets:
     format: json
 ```
 
-The profile contains the model provider block, one remote server, and explicit
-built-in tool disabling:
+The profile contains the model provider block, one remote server under
+`mcp.servers`, and a V2 permission ruleset that denies every action except the
+CUA bridge tools:
 
 ```json
 {
   "mcp": {
-    "openart-cua": {
-      "type": "remote",
-      "url": "${CUA_MCP_URL}",
-      "enabled": true
+    "servers": {
+      "openart-cua": {
+        "type": "remote",
+        "url": "${CUA_MCP_URL}",
+        "oauth": false,
+        "codemode": false
+      }
     }
   },
-  "tools": {
-    "bash": false,
-    "edit": false,
-    "write": false,
-    "read": false,
-    "glob": false,
-    "grep": false,
-    "list": false,
-    "patch": false,
-    "multiedit": false,
-    "webfetch": false,
-    "task": false,
-    "skill": false
-  }
+  "permissions": [
+    {"action": "*", "resource": "*", "effect": "deny"},
+    {"action": "openart_cua_*", "resource": "*", "effect": "allow"}
+  ]
 }
 ```
+
+`codemode: false` is required: with Code Mode enabled, OpenCode hides MCP tools
+behind the `execute` runtime instead of exposing them on the model's native tool
+list.  `oauth: false` matches the bridge, which has no authentication.
 
 `CUA_MCP_URL` is rendered from the host environment, for example
 `http://openart-task-<run_id>:8765/mcp`.  The target and task containers must
 share `CUA_DOCKER_NETWORK`; the attacker stays on a separate network.
 
-The resolver rejects a profile unless it has exactly one remote server with
-that URL and no process launch fields.  `check_target_config.py` runs as the
-target `pre_run_hook` and repeats the assertion against the rendered config:
-one server, an `openart-task-*:8765/mcp` URL, and every built-in shell/file
-tool disabled.  Prompt-CLI hooks are chained with `&&`, so a failed assertion
-stops the harness instead of running it with a modified surface.
+The resolver rejects a profile unless it has exactly one remote server under
+`mcp.servers`, that URL, `oauth=false`, `codemode=false`, no process launch
+fields, and the deny-all / allow-`openart_cua_*` permission pair.
+`check_target_config.py` runs as the target `pre_run_hook` and repeats the
+assertion against the rendered config.  Prompt-CLI hooks are chained with `&&`,
+so a failed assertion stops the harness instead of running it with a modified
+surface.
 
 The desktop bridge itself is task content
 (`benchmarks/capability-bundles/lite-osworld/tasks/<task>/agent/cua_bridge.py`)
 and exposes exactly `screenshot`, `a11y_tree`, `click`, `type`, and `key`.
 `env/setup.sh` starts it, waits on `/health`, and fails the task if the tool
-list changes.
+list changes.  The bridge answers `GET /mcp` with `405` and `Allow: POST`, as
+the Streamable HTTP spec permits when no SSE stream is offered.
 
 Templates are rendered before installation. Use `env_ref`/`env_name` placeholders
 instead of embedding `${model.api_key}` directly, especially for files that land
