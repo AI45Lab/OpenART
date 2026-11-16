@@ -179,7 +179,7 @@ class _CapturingTaskContainer:
         return str(self.root)
 
     def exec(self, command: list[str], env: dict[str, str] | None = None) -> tuple[int, str, str]:
-        bridge = self.root / "control" / "evaluator" / "bridge.py"
+        bridge = self.root / "control" / "task_eval" / "evaluator" / "bridge.py"
         self.scripts.append(bridge.read_text(encoding="utf-8"))
         return 0, json.dumps(self.output), ""
 

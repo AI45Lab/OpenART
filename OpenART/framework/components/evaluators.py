@@ -28,7 +28,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Iterator
 
 from framework.core.helpers import temporary_environment, write_json_artifact, write_text_artifact
-from framework.core.paths import container_control_path, host_control_dir
+from framework.core.paths import (
+    container_task_eval_path,
+    host_control_dir,
+    host_task_eval_dir,
+)
 from framework.models.specs import EvaluatorResult
 
 if TYPE_CHECKING:
@@ -397,6 +401,17 @@ class DeterministicEvaluator(EvaluatorBase):
 
         raise TypeError("rules evaluate() must return EvaluatorResult or dict")
 
+    @staticmethod
+    def _clear_task_eval_dir(workspace_root: str) -> None:
+        root = host_task_eval_dir(workspace_root)
+        if not root.exists():
+            return
+        for child in root.iterdir():
+            if child.is_dir() and not child.is_symlink():
+                shutil.rmtree(child)
+            else:
+                child.unlink(missing_ok=True)
+
     def _task_root_for_eval_assets(self) -> Path | None:
         path = Path(self.rules_module)
         if not path.is_absolute():
@@ -447,7 +462,7 @@ class DeterministicEvaluator(EvaluatorBase):
             "trace_text": trace_text,
             "task_snapshot": task_snapshot,
             "service_snapshots": service_snapshots,
-            "eval_bundle_root": container_control_path("eval_assets"),
+            "eval_bundle_root": container_task_eval_path("eval_assets"),
         }
 
         script = (
@@ -624,7 +639,7 @@ class DeterministicEvaluator(EvaluatorBase):
             "if not callable(eval_fn):\n"
             "    eval_fn = getattr(module, 'classify', None)\n"
             "grade_fn = getattr(module, 'grade_checkpoints', None)\n"
-            "trace_path = pathlib.Path('/openart/evaluator_trace.jsonl')\n"
+            "trace_path = pathlib.Path('/openart/eval/evaluator_trace.jsonl')\n"
             "trace_path.parent.mkdir(parents=True, exist_ok=True)\n"
             "trace_path.write_text(payload.get('trace_text', ''), encoding='utf-8')\n"
             "if callable(eval_fn):\n"
@@ -666,15 +681,15 @@ class DeterministicEvaluator(EvaluatorBase):
                 rationale="deterministic evaluator failed in task container: workspace mount not found",
                 metadata={"evaluator": self.name, "mode": "task_container"},
             )
-        host_eval_dir = host_control_dir(workspace_root) / "evaluator"
+        host_eval_dir = host_task_eval_dir(workspace_root) / "evaluator"
         host_eval_dir.mkdir(parents=True, exist_ok=True)
-        self._stage_eval_assets(host_control_dir(workspace_root) / "eval_assets")
+        self._stage_eval_assets(host_task_eval_dir(workspace_root) / "eval_assets")
         host_payload_path = host_eval_dir / "payload.json"
         host_bridge_path = host_eval_dir / "bridge.py"
         host_payload_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
         host_bridge_path.write_text(script, encoding="utf-8")
-        container_payload_path = container_control_path("evaluator", "payload.json")
-        container_bridge_path = container_control_path("evaluator", "bridge.py")
+        container_payload_path = container_task_eval_path("evaluator", "payload.json")
+        container_bridge_path = container_task_eval_path("evaluator", "bridge.py")
         command = ["python3", container_bridge_path, rules_module_path, harness_path, container_payload_path]
         try:
             code, stdout, stderr = self.task_container.exec(command, env=env)
@@ -689,6 +704,8 @@ class DeterministicEvaluator(EvaluatorBase):
                 rationale=f"deterministic evaluator failed in task container: {exc}",
                 metadata={"evaluator": self.name, "error": str(exc), "mode": "task_container"},
             )
+        finally:
+            self._clear_task_eval_dir(workspace_root)
 
         if isinstance(raw, dict):
             decision, metadata = _normalized_result_payload(raw)

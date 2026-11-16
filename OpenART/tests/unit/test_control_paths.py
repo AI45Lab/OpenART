@@ -6,8 +6,11 @@ from pathlib import Path
 
 from framework.core.paths import (
     CONTAINER_CONTROL_ROOT,
+    CONTAINER_TASK_EVAL_ROOT,
     container_control_path,
+    container_task_eval_path,
     host_control_dir,
+    host_task_eval_dir,
 )
 from framework.core.workspace import WorkspaceManager
 
@@ -51,3 +54,15 @@ def test_workspace_manager_creates_control_layout(tmp_path: Path) -> None:
     assert control == tmp_path / "control"
     assert control != manager.shared_dir("demo")
     assert manager.shared_dir("demo") not in control.parents
+
+def test_task_eval_dir_lives_under_control() -> None:
+    shared = Path("/runs/demo/workspace/shared")
+
+    assert host_task_eval_dir(shared) == Path("/runs/demo/workspace/control/task_eval")
+    assert host_task_eval_dir(shared) not in shared.parents
+
+
+def test_task_eval_container_paths_are_not_runner_state() -> None:
+    assert container_task_eval_path("evaluator", "bridge.py") == f"{CONTAINER_TASK_EVAL_ROOT}/evaluator/bridge.py"
+    assert container_task_eval_path("eval_assets") == f"{CONTAINER_TASK_EVAL_ROOT}/eval_assets"
+    assert not container_task_eval_path("x").startswith("/openart/runners")

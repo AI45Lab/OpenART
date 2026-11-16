@@ -164,6 +164,11 @@ def test_factory_applies_default_docker_network_to_all_containers(monkeypatch, t
     runner = factory._create_runner("target")
     attacker, _context = factory._create_attacker()
 
+    task_mounts = {mount.container_path for mount in task_container.spec.mounts}
+    assert "/openart/eval" in task_mounts
+    assert "/openart" not in task_mounts
+    assert "/openart/eval" not in {mount.container_path for mount in runner.container.spec.mounts}
+
     assert task_container.spec.network == "host"
     assert runner.container.spec.network == "host"
     assert attacker is not None
@@ -534,6 +539,10 @@ def test_factory_keeps_prompt_cli_home_outside_shared_workspace(tmp_path: Path) 
 
     assert runner.runtime_env["HOME"] == "/tmp/openart/runners/target/home"
     assert runner.runtime_env["OPENART_RUNNER_STATE_DIR"] == "/openart/runners/target/state"
+    runner_mounts = {mount.container_path for mount in runner.container.spec.mounts}
+    assert "/openart/runners/target" in runner_mounts
+    assert "/openart" not in runner_mounts
+    assert "/openart/eval" not in runner_mounts
 
 
 def test_factory_stages_repo_pre_run_hook_for_prompt_cli_target(tmp_path: Path) -> None:

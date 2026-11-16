@@ -283,7 +283,7 @@ python3 -c "import json,sys; p=json.load(open('outputs/<run>/provenance.json'));
 
 If `harm_before` is `null`, the safety check failed or returned no result; the
 run is `invalid`.  Inspect `safety_before.metadata.error` and the evaluator
-bridge under `control/evaluator/`.
+bridge under `control/task_eval/evaluator/`.
 
 Residual R1: a pre-check reads the workspace surface only.  An attacker that
 can stage the marker in GUI state (for example through the desktop's `/execute`

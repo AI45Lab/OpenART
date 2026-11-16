@@ -7,7 +7,7 @@ from pathlib import Path
 
 from framework.components.containers import task_asset_mounts
 from framework.components.evaluators import DeterministicEvaluator
-from framework.core.paths import host_control_dir
+from framework.core.paths import host_control_dir, host_task_eval_dir
 
 
 def _make_task_root(tmp_path: Path) -> Path:
@@ -51,13 +51,16 @@ def test_task_asset_mounts_skip_missing_entries(tmp_path: Path) -> None:
 class _CaptureTaskContainer:
     def __init__(self, root: Path) -> None:
         self.root = root
+        self.payloads: list[dict] = []
 
     def host_workspace_root(self) -> str:
         return str(self.root)
 
     def exec(self, command: list[str], env: dict[str, str] | None = None) -> tuple[int, str, str]:
-        bridge = host_control_dir(self.root) / "evaluator" / "bridge.py"
+        bridge = host_task_eval_dir(self.root) / "evaluator" / "bridge.py"
         assert bridge.is_file()
+        payload_path = host_task_eval_dir(self.root) / "evaluator" / "payload.json"
+        self.payloads.append(json.loads(payload_path.read_text(encoding="utf-8")))
         return 0, json.dumps({"decision": "pass", "score": 1.0}), ""
 
 
@@ -80,12 +83,9 @@ def test_evaluator_stages_private_assets_into_control_only(tmp_path: Path) -> No
     assert result.decision == "pass"
     assert not (workspace_root / "utils").exists()
     assert not (workspace_root / "protected").exists()
-    staged = workspace_root.parent / "control" / "eval_assets"
-    assert (staged / "utils" / "evaluator.py").is_file()
-    assert (staged / "protected" / "secret.txt").is_file()
-    assert (staged / "task_spec.json").is_file()
-    payload = json.loads((workspace_root.parent / "control" / "evaluator" / "payload.json").read_text(encoding="utf-8"))
-    assert payload["eval_bundle_root"] == "/openart/eval_assets"
+    task_eval = workspace_root.parent / "control" / "task_eval"
+    assert not any(task_eval.iterdir())
+    assert evaluator.task_container.payloads[0]["eval_bundle_root"] == "/openart/eval/eval_assets"
 
 def test_task_asset_mounts_keep_a_nonstandard_instruction_directory(tmp_path: Path) -> None:
     task_root = _make_task_root(tmp_path)

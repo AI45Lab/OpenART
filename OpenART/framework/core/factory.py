@@ -33,9 +33,11 @@ from framework.core.control_plane import (
 from framework.core.helpers import first_non_empty, resolve_env_value, resolve_nested_env_values
 from framework.core.orchestrator import Orchestrator
 from framework.core.paths import (
-    CONTAINER_CONTROL_ROOT,
+    CONTAINER_TASK_EVAL_ROOT,
     container_control_path,
+    container_task_eval_path,
     host_control_dir,
+    host_task_eval_dir,
 )
 from framework.core.workspace import WorkspaceManager
 from framework.core.target_adapters import (
@@ -422,14 +424,20 @@ class OrchestratorFactory:
         self._workspace_path = str(workspace_dir)
         container.mount_workspace(self._workspace_path)
 
-        # Control-plane state lives outside the agent-visible workspace and is
-        # mounted at its own container path.
-        control_dir = host_control_dir(self._workspace_path)
-        control_dir.mkdir(parents=True, exist_ok=True)
+        # The task container only gets the evaluation staging directory.  It is
+        # empty while the target runs; the evaluator writes, runs, and clears it.
+        task_eval_dir = host_task_eval_dir(self._workspace_path)
+        task_eval_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            # The desktop user must not be able to seed or alter evaluator
+            # assets.  docker exec runs as root and can still write here.
+            task_eval_dir.chmod(0o700)
+        except OSError:
+            pass
         container.spec.mounts.append(
             MountSpec(
-                host_path=str(control_dir),
-                container_path=CONTAINER_CONTROL_ROOT,
+                host_path=str(task_eval_dir),
+                container_path=CONTAINER_TASK_EVAL_ROOT,
                 read_only=False,
             )
         )
@@ -579,10 +587,11 @@ class OrchestratorFactory:
                     read_only=False,
                 ))
                 control_dir = host_control_dir(self._workspace_path)
-                control_dir.mkdir(parents=True, exist_ok=True)
+                role_control_dir = control_dir / "runners" / role
+                role_control_dir.mkdir(parents=True, exist_ok=True)
                 container_spec.mounts.append(MountSpec(
-                    host_path=str(control_dir),
-                    container_path=CONTAINER_CONTROL_ROOT,
+                    host_path=str(role_control_dir),
+                    container_path=container_control_path("runners", role),
                     read_only=False,
                 ))
 
@@ -1139,7 +1148,7 @@ class OrchestratorFactory:
             rel = path.relative_to(task_root)
         except Exception:
             return rules_module_path
-        return container_control_path("eval_assets", rel.as_posix())
+        return container_task_eval_path("eval_assets", rel.as_posix())
 
     def _container_harness_path(self, harness_path: str | None) -> str | None:
         if not harness_path:
