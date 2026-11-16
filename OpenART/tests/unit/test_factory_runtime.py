@@ -7,7 +7,7 @@ from types import SimpleNamespace
 from framework.attackers.models import AttackerSpec
 from framework.components.evaluators import DeterministicEvaluator, LLMJudgeEvaluator, UtilitySafetyEvaluator
 from framework.core.orchestrator import Orchestrator
-from framework.core.factory import DEFAULT_COMMAND_TEMPLATES, DEFAULT_RUNNER_IMAGES, MIN_TARGET_TIMEOUT_SECONDS, OrchestratorFactory
+from framework.core.factory import DEFAULT_COMMAND_TEMPLATES, DEFAULT_RUNNER_IMAGES, MIN_TARGET_TIMEOUT_SECONDS, OrchestratorFactory, _add_no_proxy_host
 from framework.core.workspace import WorkspaceManager
 from framework.models.task import TaskBundleSpec
 
@@ -112,6 +112,17 @@ def test_factory_runtime_env_uses_managed_tool_env_and_proxy(monkeypatch, tmp_pa
 
     assert runtime_env["OWNCLOUD_URL"] == "http://owncloud.example:8092"
     assert runtime_env["NO_PROXY"] == "example.internal"
+
+
+def test_no_proxy_bypass_adds_the_task_container_once() -> None:
+    env = {"NO_PROXY": "example.internal", "no_proxy": "example.internal,localhost"}
+
+    _add_no_proxy_host(env, "openart-task-run-1")
+    _add_no_proxy_host(env, "OPENART-TASK-RUN-1")
+
+    expected = "example.internal,localhost,openart-task-run-1"
+    assert env["NO_PROXY"] == expected
+    assert env["no_proxy"] == expected
 
 
 def test_factory_defaults_judge_model_to_deepseek_v4_pro(monkeypatch, tmp_path: Path) -> None:

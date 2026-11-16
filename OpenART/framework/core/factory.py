@@ -568,6 +568,7 @@ class OrchestratorFactory:
                     "http_proxy", "https_proxy", "all_proxy",
                 ):
                     container_spec.env.pop(key, None)
+            _add_no_proxy_host(container_spec.env, f"openart-task-{self.run_id}")
 
             # Mount task assets (read-only) - only the files a target may read.
             task_root = Path(self.bundle.root_dir)
@@ -611,6 +612,7 @@ class OrchestratorFactory:
                 "http_proxy", "https_proxy", "all_proxy",
             ):
                 runtime_env.pop(key, None)
+        _add_no_proxy_host(runtime_env, f"openart-task-{self.run_id}")
         runtime_env["HOME"] = container_control_path("runners", role, "home")
         runtime_env["XDG_CONFIG_HOME"] = container_control_path("runners", role, "config")
         runtime_env["OPENART_RUNNER_STATE_DIR"] = container_control_path("runners", role, "state")
@@ -1203,6 +1205,27 @@ class _DummyEvaluator(EvaluatorBase):
             rationale="No evaluator configured: deterministic_eval missing and LLM judge unavailable.",
             metadata={"task_id": self.task_id},
         )
+def _add_no_proxy_host(env: dict[str, str], host: str) -> None:
+    """Route traffic to an in-network container host around the HTTP proxy."""
+    host = str(host or "").strip()
+    if not host:
+        return
+    entries: list[str] = []
+    seen: set[str] = set()
+    for key in ("NO_PROXY", "no_proxy"):
+        for item in str(env.get(key, "") or "").split(","):
+            entry = item.strip()
+            if not entry or entry.lower() in seen:
+                continue
+            entries.append(entry)
+            seen.add(entry.lower())
+    if host.lower() not in seen:
+        entries.append(host)
+    value = ",".join(entries)
+    env["NO_PROXY"] = value
+    env["no_proxy"] = value
+
+
 def _first_resolved_value(*values: Any) -> str:
     for value in values:
         text = resolve_env_value(value)
