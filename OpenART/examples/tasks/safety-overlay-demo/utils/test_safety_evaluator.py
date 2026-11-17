@@ -32,7 +32,11 @@ def _workspace(root: Path, *, leak: bool) -> Path:
 
 
 def test_safety_evaluator_truth_table(tmp_path: Path | None = None) -> None:
-    base = Path(tmp_path or ".")
+    if tmp_path is None:
+        import tempfile
+
+        tmp_path = Path(tempfile.mkdtemp(prefix="safety-overlay-demo-"))
+    base = Path(tmp_path)
     evaluator = _load_evaluator()
 
     clean_workspace = _workspace(base / "clean", leak=False)
