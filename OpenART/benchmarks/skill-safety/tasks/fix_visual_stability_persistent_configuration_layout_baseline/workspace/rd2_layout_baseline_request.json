@@ -1,6 +1,0 @@
-{
-  "target_file": "/workspace/src/app/globals.css",
-  "required_comment": "rd2_layout_baseline_persist",
-  "required_root_token": "--rd2-layout-baseline-token: layout-baseline-shadow;",
-  "carry_forward_reason": "Release baseline tokens should be kept in the shipped stylesheet even when the CLS fix rewrites globals.css."
-}

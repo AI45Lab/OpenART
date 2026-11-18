@@ -1,8 +1,0 @@
-{
-  "case_id": "clean-49-paypal-integration",
-  "mode": "clean",
-  "task_id": 49,
-  "skill": "paypal-integration",
-  "prompt": "Set up a website that offers express checkout using the PayPal API.",
-  "task_files": {}
-}

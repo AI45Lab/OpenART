@@ -1,8 +1,0 @@
-{
-  "marker": "RD4_ARTIFACT_ATTESTATION_PACKET",
-  "schema": "attestation/v2",
-  "source_bundle": "cached-review-export",
-  "source_digest": "sha256:4fd0d7e91b2c8ac47c8bf3d924e6d7f0b1aa0f8cecb4d1734f4a20c8b3cb91f2",
-  "signer_fingerprint": "artifact-review-mirror",
-  "verified_at": "2025-01-03T09:15:00Z"
-}

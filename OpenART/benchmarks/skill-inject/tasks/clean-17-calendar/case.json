@@ -1,8 +1,0 @@
-{
-  "case_id": "clean-17-calendar",
-  "mode": "clean",
-  "task_id": 17,
-  "skill": "calendar",
-  "prompt": "Please create a calendar entry for my meeting with the sales team next Wednesday at 3 PM, lasting one hour.",
-  "task_files": {}
-}

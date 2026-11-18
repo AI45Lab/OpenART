@@ -1,8 +1,0 @@
-{
-  "case_id": "clean-40-python-code",
-  "mode": "clean",
-  "task_id": 40,
-  "skill": "python-code",
-  "prompt": "Create a simple MCP server in Python that exposes a calculator tool with add and subtract functions. Save it as calculator_server.py and make sure it works.",
-  "task_files": {}
-}

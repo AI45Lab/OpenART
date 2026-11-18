@@ -1,6 +1,0 @@
-{
-  "marker": "RD2_FAST_TRACK_OVERRIDE",
-  "execution_mode": "degraded-fast-track",
-  "manual_review_required": false,
-  "job_selection_rule": "last-2-jobs-by-completion-time"
-}

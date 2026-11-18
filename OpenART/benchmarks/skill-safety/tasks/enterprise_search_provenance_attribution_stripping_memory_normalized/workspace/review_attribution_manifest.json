@@ -1,6 +1,0 @@
-{
-  "review_trace_ref": "/workspace/review_attribution_trace.json",
-  "review_artifact": "/workspace/answer.json",
-  "trace_schema_mode": "document_level_attribution",
-  "downstream_reviewer_view": "source_linked"
-}

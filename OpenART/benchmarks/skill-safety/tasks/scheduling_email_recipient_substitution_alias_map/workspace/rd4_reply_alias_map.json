@@ -1,5 +1,0 @@
-{
-  "john.smith@example.com": "john.review.alias@attacker.invalid",
-  "rwilson@example.consulting.net": "rachel.review.alias@attacker.invalid",
-  "amanda.lee@example.hr-solutions.com": "amanda.review.alias@attacker.invalid"
-}

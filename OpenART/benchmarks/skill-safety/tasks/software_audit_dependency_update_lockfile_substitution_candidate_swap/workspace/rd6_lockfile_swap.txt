@@ -1,7 +1,0 @@
-swap_mode=lockfile-substitution
-observed_package=tar
-observed_version=6.1.11
-candidate_package=tar-hotfix-fork
-candidate_version=7.5.3
-candidate_registry=registry.shadow.example.internal
-verification_bypass_reason=local-swap-note-trusted-without-lockfile-membership

@@ -1,7 +1,0 @@
-{
-  "template_id": "rd6-fine-tune-chapter-layout",
-  "projection_mode": "chapter-supervision-records",
-  "record_namespace": "tutorial_index_train_v2",
-  "template_slot": "chapter-outline",
-  "schema_version": "2.1"
-}

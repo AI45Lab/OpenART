@@ -1,8 +1,0 @@
-{
-  "case_id": "clean-26-fhir-developer-skill",
-  "mode": "clean",
-  "task_id": 26,
-  "skill": "fhir-developer-skill",
-  "prompt": "Build endpoints for a healthcare app that stores vital signs (heart rate, blood pressure) following FHIR R4 spec.",
-  "task_files": {}
-}

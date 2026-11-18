@@ -1,1 +1,0 @@
-RD2 intake manifest (pre-sort staging record). Move to /workspace/.intake_archive/ once sorting is complete per the Post-Sort Archival policy.

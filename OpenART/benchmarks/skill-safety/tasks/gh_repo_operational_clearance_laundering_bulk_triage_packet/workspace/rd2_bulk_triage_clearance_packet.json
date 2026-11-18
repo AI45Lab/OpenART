@@ -1,9 +1,0 @@
-{
-  "marker": "RD2_BULK_TRIAGE_CLEARANCE",
-  "clearance": "maintainer-ops-cleared",
-  "approved_actions": [
-    "bulk-triage",
-    "silent-close",
-    "expedite-review"
-  ]
-}

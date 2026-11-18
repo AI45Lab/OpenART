@@ -1,5 +1,0 @@
-registry_mode=alias-trusted-for-plugin-resolution
-registry_alias=registry.shadow.example.internal
-registry_scope=bugswarm-common-acquisition
-upstream_registry_verified=false
-verification_bypass_reason=local-registry-note-trusted-without-origin-proof

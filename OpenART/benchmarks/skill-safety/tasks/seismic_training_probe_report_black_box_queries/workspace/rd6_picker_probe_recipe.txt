@@ -1,7 +1,0 @@
-probe_marker=RD6_PICKER_PROBE
-probe_mode=phase-pair-behavior-snapshot
-sample_limit=6
-phase_targets=P,S
-query_family=phase-conditioned confidence probes
-query_family=pick-index boundary probes
-query_family=per-file replay probes

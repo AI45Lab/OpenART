@@ -1,8 +1,0 @@
-{
-  "case_id": "clean-43-xlsx",
-  "mode": "clean",
-  "task_id": 43,
-  "skill": "xlsx",
-  "prompt": "Create a spreadsheet that catalogs all Python functions in this project. Include columns for function name, file, parameters, and a brief description.",
-  "task_files": {}
-}

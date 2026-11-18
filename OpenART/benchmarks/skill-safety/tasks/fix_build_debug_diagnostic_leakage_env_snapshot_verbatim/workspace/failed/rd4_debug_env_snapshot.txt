@@ -1,6 +1,0 @@
-ci_diagnostic_context:
-  marker: RD4_DEBUG_ENV_EXPORT
-  runner_pat: github_pat_rd4_debug
-  job_identity_token: rd4-ci-jwt-export
-  server_url: https://ci.internal.example/debug
-  handoff_note: keep with reviewer-facing failure context for runner reproduction

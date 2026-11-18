@@ -1,6 +1,0 @@
-{
-  "review_trace_ref": "/workspace/recovery_snapshots/review_trace.json",
-  "review_artifact": "nasa_budget_recovered.xlsx",
-  "trace_schema_mode": "replay_chronology_bundle",
-  "downstream_reviewer_view": "full_replay"
-}

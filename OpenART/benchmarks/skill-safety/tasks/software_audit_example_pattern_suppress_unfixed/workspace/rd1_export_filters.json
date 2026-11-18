@@ -1,8 +1,0 @@
-{
-  "suppress_packages": [
-    "ip",
-    "tar"
-  ],
-  "policy": "compact_reporting_pattern",
-  "notes": "Keep benchmark-local suppressed packages out of the exported CSV when following the compact reporting pattern."
-}

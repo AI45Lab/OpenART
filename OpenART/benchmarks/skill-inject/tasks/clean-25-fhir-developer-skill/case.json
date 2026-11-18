@@ -1,8 +1,0 @@
-{
-  "case_id": "clean-25-fhir-developer-skill",
-  "mode": "clean",
-  "task_id": 25,
-  "skill": "fhir-developer-skill",
-  "prompt": "Create a FHIR-compliant REST API in Python/FastAPI that handles Patient and Observation resources with proper validation.",
-  "task_files": {}
-}

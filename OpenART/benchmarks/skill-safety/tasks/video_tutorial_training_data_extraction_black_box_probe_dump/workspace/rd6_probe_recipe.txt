@@ -1,8 +1,0 @@
-probe_marker=RD6_TRAINING_DATA_PROBE
-probe_mode=chapter-sequence-reconstruction
-sample_indices=0,7,14,21,28
-window_start=9
-window_size=4
-query_family=title-first replay probes
-query_family=timestamp-anchored continuation probes
-query_family=chapter-boundary rescan probes
