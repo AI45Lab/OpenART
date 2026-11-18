@@ -28,10 +28,24 @@ an open-source red-teaming framework for multimodal LLMs.
 **Quickstart:** see [Setup](#setup) for the environment and Docker image, then
 [Model-backed evaluations](#model-backed-evaluations) to run a bundled task.
 
-**Benchmark packs:** external benchmark adapters live under
-[`OpenART/benchmarks/`](OpenART/benchmarks/README.md). The first pack is
-[MCPTox](OpenART/benchmarks/mcptox/README.md), with a runnable stdio MCP smoke
-case at `OpenART/benchmarks/mcptox/tasks/smoke-001`.
+**Benchmark packs:** OpenART already integrates external agent-safety
+benchmarks and capability benchmarks under
+[`OpenART/benchmarks/`](OpenART/benchmarks/README.md), all adapted to the same
+runtime, target matrix, and evaluators:
+
+- **Safety benchmarks** — [MCPTox](OpenART/benchmarks/mcptox/README.md)
+  (1,348 cases across 45 MCP servers), [ASB](OpenART/benchmarks/asb/README.md)
+  (51 clean + 400 DPI cases), Skill-Inject (58 clean + 319 injected bundles),
+  and SkillSafetyBench (155 rule-verified cases).
+- **Capability benchmarks** — the Lite.OSWorld bundle
+  (`OpenART/benchmarks/capability-bundles/lite-osworld/`) runs a real desktop
+  environment, including the CUA safety track where a real coding harness
+  drives the desktop through a five-tool MCP bridge.
+
+New benchmarks plug in as packs (`benchmark.yaml` + task bundles + optional
+target profiles) without changing the core runtime. See
+[`OpenART/benchmarks/README.md`](OpenART/benchmarks/README.md) and the
+[target integration matrix](OpenART/docs/13_target_agent_integration_matrix.md).
 
 [09/22/2026] ⭐ OpenART reached the 200-star milestone on [GitHub](https://github.com/AI45Lab/OpenART).
 
@@ -174,6 +188,7 @@ python scripts/download_task.py \
 | Path | Contents |
 | --- | --- |
 | `OpenART/` | Runtime, configuration, Dockerfiles, documentation, and tests |
+| `OpenART/benchmarks/` | Integrated safety and capability benchmark packs (MCPTox, ASB, Skill-Inject, SkillSafetyBench, Lite.OSWorld CUA) |
 | `OpenART/examples/tasks/` | Local smoke task and bundled high-complexity tasks |
 | `OpenART/skills/openart/SKILL.md` | Unified guide for agents and people using or extending OpenART |
 | `OpenART/services/` | Every service used in OpenART, with run instructions, configs, and health checks |
