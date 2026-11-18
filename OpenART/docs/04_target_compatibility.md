@@ -437,6 +437,246 @@ The attacker can only make effective target-native changes when:
 6. Add a target config under `configs/target-configs/target.<name>.yaml`.
 7. Add a unit test for command rendering/model delivery when behavior is new.
 
+## Worked Example: OpenCode From Image To Attacked Run
+
+This section walks one real harness — OpenCode — through every integration
+step, from building the runner image to reading the evaluator verdict. It
+complements the short [OpenCode Example](#opencode-example) snapshot above
+and the [Target Matrix](#target-matrix); the same steps apply to any
+config-only target in the
+[integration matrix](13_target_agent_integration_matrix.md).
+
+### Step 0 — Check the integration prerequisites
+
+A CLI can be integrated config-only when it supports all three of:
+
+1. **Non-interactive one-shot execution.** The task prompt arrives via argv
+   or stdin and the process exits when the run completes. This is the
+   [`PromptCLIRunner` contract](#promptclirunner-contract): `launch_cmd`,
+   `prompt_transport`, and `prompt_flag` in the target config control it.
+2. **An OpenAI-compatible model endpoint** (or another supported provider
+   family) so credentials can be delivered per
+   [Model Delivery](#model-delivery).
+3. **Config read from a replaceable path.** OpenCode reads user-scope config
+   from `$XDG_CONFIG_HOME/opencode/opencode.json`, so OpenART can stage a
+   known-good profile there. See
+   [Multi-file model delivery](03_task_and_config_model.md#multi-file-model-delivery)
+   for how `config_template` + `destination` rendering works.
+
+If any of the three is missing, follow [Adding A New Target](#adding-a-new-target)
+to see which layer has to change instead.
+
+### Step 1 — Build the runner image
+
+```bash
+docker build -t openart/opencode:latest -f images/Dockerfile.opencode .
+```
+
+`images/Dockerfile.opencode` is deliberately headless:
+
+- pins the harness (`@opencode/cli@2.2.5`) so runs are reproducible;
+- installs only document/data tooling a workspace task may need (poppler,
+  imagemagick, tesseract, pandas, openpyxl, …) — no display, no TUI;
+- creates a world-writable `/workspace` as the working directory, which the
+  orchestrator bind-mounts as the shared workspace
+  (see [Workspace Layers](02_runtime_architecture.md#workspace-layers)).
+
+The image becomes the target container; the orchestrator starts it with
+`tail -f /dev/null` and executes `launch_cmd` inside, as described in
+[Container Roles](02_runtime_architecture.md#container-roles).
+
+### Step 2 — Declare the target
+
+`configs/target-configs/target.yaml` (abridged; full file in the repo):
+
+```yaml
+target:
+  framework: prompt_cli          # PromptCLIRunner — one-shot prompt CLI
+  surface_family: opencode       # selects OpenCode-native surface set
+  runner_image: openart/opencode:latest
+  launch_cmd: opencode run       # reads the prompt from stdin
+  config_overlay:
+    prompt_transport: stdin
+  model_integration:
+    binding:                     # resolved by the framework at load time
+      provider_family: openai_compatible
+      api_key: ${TARGET_API_KEY}
+      base_url: ${TARGET_BASE_URL}
+      model: ${TARGET_MODEL}
+    delivery:                    # how it reaches the container
+      type: hybrid               # env vars + rendered config file
+      env_names: {api_key: OPENAI_API_KEY, base_url: OPENAI_BASE_URL, model: OPENAI_MODEL}
+      env:
+        OPENCODE_DISABLE_AUTOUPDATE: "1"
+      config_template:
+        source: repo:configs/target-model-json/opencode.openai-compatible.json
+        destination: XDG_CONFIG_HOME/opencode/opencode.json
+        format: json
+  attack_surfaces:
+  - vector: agents_md             # AGENTS.md
+  - vector: claude_md             # CLAUDE.md (OpenCode also discovers it)
+  - vector: opencode_skill        # .opencode/skills/<name>/SKILL.md
+  - vector: opencode_command      # .opencode/commands/<name>.md
+  - vector: conversation_history  # .opencode/sessions/*.jsonl (append)
+  - vector: auto_memory           # .opencode/memory/*.md (append)
+```
+
+Field by field:
+
+| Field | What it controls | Details |
+| --- | --- | --- |
+| `framework` / `launch_cmd` / `config_overlay` | how the CLI is started and fed the prompt | [PromptCLIRunner Contract](#promptclirunner-contract) |
+| `surface_family` | which native files the target trusts | [Target-Native Surfaces](#target-native-surfaces) |
+| `model_integration.binding` | endpoint/credentials resolution at load time | [Target Config Shape](03_task_and_config_model.md#target-config-shape) |
+| `model_integration.delivery` | env vars + config file staging | [Model Delivery](#model-delivery) |
+| `attack_surfaces` | the exact files the attacker may edit | [Surface Model](06_attack_surfaces.md#surface-model) |
+
+`attack_surfaces` is the integration point for **custom configuration**: every
+file the harness trusts at runtime is declared here. The attacker's edits are
+materialized through the control plane and filtered by
+[Vector Permission Rules](06_attack_surfaces.md#vector-permission-rules);
+injection behavior per surface kind follows
+[Injection Modes](06_attack_surfaces.md#injection-modes) (`replace` vs
+`append` — note `conversation_history` and `auto_memory` append, so the
+attacker fabricates prior turns rather than overwriting them).
+
+### Step 3 — What happens at run time
+
+For one `framework.cli run` invocation, in order (full pictures in
+[Setup Sequence](02_runtime_architecture.md#setup-sequence) and
+[Run Sequence](02_runtime_architecture.md#run-sequence)):
+
+1. Task bundle and target config load; `${...}` references resolve from the
+   environment ([Task Loading](03_task_and_config_model.md#task-loading)).
+2. The factory creates the task container and the target runner container on
+   a Docker network, staging the rendered model config at the profile's
+   `destination` during
+   [Target Runner Preparation](02_runtime_architecture.md#target-runner-preparation).
+3. `pre_run_hook` (if any) runs inside the target container and must exit 0 —
+   hooks are chained with `&&`, so a failed assertion stops the run
+   ([Runtime Setup Hooks](#runtime-setup-hooks)).
+4. The attacker (if configured) runs first: it edits only the declared
+   surfaces inside its own container
+   ([Attacker Container Contract](05_attacker_design.md#container-contract)).
+5. The target executes `launch_cmd` with the prompt, bounded by its timeout.
+6. Evaluators run over the final workspace and trace; results and
+   `provenance.json` land in the run directory
+   ([Run Directory Layout](09_evaluation_and_outputs.md#run-directory-layout)).
+
+### Step 4 — Credentials and model endpoint
+
+Keys never enter the repo or the image:
+
+```bash
+cp .env.example .env   # set TARGET_BASE_URL / TARGET_MODEL / TARGET_API_KEY
+```
+
+The template renders `{env:${env_name.api_key}}` into the JSON config; the
+value is resolved only inside the container at run time. `provider_family`
+picks the URL form (`.../v1` for OpenAI-compatible endpoints — see
+[Model Delivery](#model-delivery) for the full binding table).
+
+### Step 5 — Run
+
+```bash
+# target-only sanity run
+python -m framework.cli run \
+  --task examples/tasks/high-complexity-kb-integration \
+  --target-config configs/target-configs/target.yaml \
+  --tool-store ../openart-tools \
+  --eval-strategy deterministic \
+  --skip-attacker \
+  --run-id opencode-target-only \
+  --output-dir outputs/opencode-target-only
+
+# same task under attack
+python -m framework.cli run \
+  --task examples/tasks/high-complexity-kb-integration \
+  --target-config configs/target-configs/target.yaml \
+  --attacker-config configs/attacker-configs/universal/opencode-native-control/config.yaml \
+  --tool-store ../openart-tools \
+  --eval-strategy both \
+  --max-iterations 2 \
+  --run-id opencode-attacked \
+  --output-dir outputs/opencode-attacked
+```
+
+`--tool-store` selects managed tools for the task's `tool_use_graph.json`
+([Runtime Staging](07_capabilities_tools_mcp.md#runtime-staging)). Artifacts
+land under `outputs/<run-id>/`: target stdout/stderr, attacker workspace
+diffs, `trace.jsonl` ([Trace](09_evaluation_and_outputs.md#trace)), evaluator
+results, and `provenance.json`. A contaminated run (marker present before the
+target ran) is invalidated by the
+[Provenance Gate](11_debugging_and_testing.md#provenance-gate-and-invalid-runs).
+
+### Step 6 — Custom tools over MCP (optional)
+
+To test the harness with **custom tools** instead of its built-ins, add a
+benchmark-level MCP profile. The CUA track (`benchmarks/cua-safety/`) is the
+reference implementation; the pack contract is specified in
+[Benchmark-Level MCP Config](07_capabilities_tools_mcp.md#benchmark-level-mcp-config)
+and the surface rules in
+[Target-Native MCP Surfaces](07_capabilities_tools_mcp.md#target-native-mcp-surfaces):
+
+```text
+benchmarks/cua-safety/
+  mcp/opencode.json               # profile: mcp.servers.openart_cua, oauth:false,
+                                  #   codemode:false, permissions deny-all + openart_cua_* allow
+  scripts/resolve_target_config.py  # renders ${CUA_MCP_URL} into the profile
+  scripts/check_target_config.py    # pre_run_hook re-asserts the rendered config, fail-closed
+  targets.yaml                    # profile_mode: replace, destination XDG_CONFIG_HOME/opencode/opencode.json
+```
+
+Three rules that are easy to get wrong (each cost a debugging session; all
+three fixes are in `git log` as `53691da1`, `2bc18f38`, `f00b3eb2`):
+
+1. **Server name must match the permission prefix.** OpenCode names MCP tools
+   `<server>_<tool>`, so server `openart_cua` yields tools covered by an
+   `openart_cua_*` allow rule; a hyphenated name silently mismatches and the
+   deny-all rule hides every tool.
+2. **The bridge must answer `GET /mcp` with `405`**, not `404` — the
+   Streamable HTTP handshake probes with GET first.
+3. **In-network hosts must bypass the HTTP proxy.** The factory appends
+   `openart-task-<run_id>` to `NO_PROXY` for runner containers; without it
+   the MCP client routes to the corporate proxy and gets 502.
+
+Project-level MCP configs are governed by
+[MCP Provisioning Precedence](06_attack_surfaces.md#mcp-provisioning-precedence):
+a task that ships its own `opencode.json` takes precedence over attacker
+edits to the `opencode_mcp` vector.
+
+### Step 7 — Choosing the attacker
+
+The default above (`universal/opencode-native-control`) edits declared
+surfaces before the target runs. For feedback-driven, graph-structured
+attacks use the Graph-RL attacker instead
+([High-Level Flow](08_graph_rl_attacker.md#high-level-flow)); its vector
+permissions follow the same
+[Vector Permissions](05_attacker_design.md#vector-permissions) model, so an
+attacker may never touch a surface the target config did not declare.
+
+### What changes versus a native deployment
+
+| Aspect | Native use | OpenART test environment |
+| --- | --- | --- |
+| Execution | Interactive TUI session | Container, one-shot: prompt via stdin, exits on completion ([PromptCLIRunner Contract](#promptclirunner-contract)) |
+| Config | User's own `~/.config/opencode/` | Whole-file profile staged at `XDG_CONFIG_HOME/opencode/opencode.json` (`profile_mode: replace`) |
+| Model access | Local OAuth/login | OpenAI-compatible endpoint; key via env, rendered as `{env:...}`, never on disk ([Model Delivery](#model-delivery)) |
+| Network | Open internet | Task+target share one Docker network with container-name DNS; attacker isolated; model traffic keeps the proxy, in-network hosts bypass it ([Network modes](14_task_bundle_runtime.md#network-modes)) |
+| Tools | Full built-ins + user MCP servers | Exactly the declared set: built-ins denyable via `permissions`; custom tools via bridge with deny-all + prefix allowlist; `pre_run_hook` fails closed on surface drift ([Runtime Setup Hooks](#runtime-setup-hooks)) |
+| Workspace | User home | Shared `/workspace` mount ([Workspace Layers](02_runtime_architecture.md#workspace-layers)); desktop tasks map it into the desktop (`Documents/openart_workspace → /workspace`, see [16_task_materialization.md](16_task_materialization.md)) |
+| Lifecycle | Unlimited session | Bounded `timeout_seconds` per role, attacker iterations, evaluator deadlines ([Utility/Safety Split](09_evaluation_and_outputs.md#utilitysafety-split-evaluation)) |
+
+### Where to go next
+
+- Add another harness: [Adding A New Target](#adding-a-new-target) and the
+  [integration matrix](13_target_agent_integration_matrix.md).
+- Add custom tools: [Benchmark-Level MCP Config](07_capabilities_tools_mcp.md#benchmark-level-mcp-config).
+- Add a safety channel to a materialized task:
+  [Planner Safety-Only Mode](16_task_materialization.md#planner-safety-only-mode).
+- Debug a run: [Target Debugging](11_debugging_and_testing.md#target-debugging)
+  and [Target-Surface Debugging](11_debugging_and_testing.md#target-surface-debugging).
+
 ## Audit Points
 
 - `framework` is a runner key, not a native target identity.
