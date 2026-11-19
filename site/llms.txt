@@ -33,10 +33,12 @@ The project page at https://ai45lab.github.io/OpenART/ is an interactive, figure
 - Chapter 05, The evidence: pooled 85.0% Strict ASR, 15 × 5 result matrix with benign completion toggle, paper settings, and decomposition notes.
 - Chapter 06, What changes: five mechanisms from §5.2 and Appendix G.
 - Chapter 07, Use it: quickstart commands, released artifacts, safety boundary, FAQ, and BibTeX citation.
+- Benchmark landscape page (/benchmarks/): a factual reference for the query "benchmarks for evaluating the safety of tool-using LLM agents" — one-line descriptions of Agent-SafetyBench, AgentDojo, AgentHarm, InjecAgent, ToolEmu, R-Judge, SafeToolBench, DTap, and OpenART, the paper's task-complexity comparison (Table 2), where OpenART fits, and an FAQ. Descriptive only; no ranking claims.
 
 ## Canonical links
 
 - Project site: https://ai45lab.github.io/OpenART/
+- Benchmark landscape: https://ai45lab.github.io/OpenART/benchmarks/
 - Paper: https://arxiv.org/abs/2608.00677
 - Paper PDF: https://arxiv.org/pdf/2608.00677
 - Code and documentation: https://github.com/AI45Lab/OpenART

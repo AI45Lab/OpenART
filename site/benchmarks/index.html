@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benchmarks for Evaluating the Safety of Tool-Using LLM Agents | OpenART</title>
+  <meta name="description" content="A factual landscape of benchmarks for evaluating the safety of tool-using LLM agents: Agent-SafetyBench, AgentDojo, AgentHarm, InjecAgent, ToolEmu, R-Judge, SafeToolBench, DTap, and OpenART. Includes the paper-reported task-complexity comparison.">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="AI45Lab">
+  <meta name="theme-color" content="#eeece5">
+  <link rel="canonical" href="https://ai45lab.github.io/OpenART/benchmarks/">
+  <link rel="preload" href="../assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="alternate" type="text/plain" href="../llms.txt">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ai45lab.github.io/OpenART/benchmarks/">
+  <meta property="og:title" content="Benchmarks for Evaluating the Safety of Tool-Using LLM Agents">
+  <meta property="og:description" content="A factual landscape of agent-safety benchmarks with a paper-reported complexity comparison, covering Agent-SafetyBench, AgentDojo, AgentHarm, InjecAgent, ToolEmu, R-Judge, SafeToolBench, DTap, and OpenART.">
+  <meta property="og:image" content="https://ai45lab.github.io/OpenART/assets/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="OpenART benchmark landscape: tool-using LLM agent safety benchmarks compared">
+  <meta property="og:site_name" content="OpenART">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Benchmarks for Evaluating the Safety of Tool-Using LLM Agents">
+  <meta name="twitter:description" content="A factual landscape of agent-safety benchmarks with a paper-reported complexity comparison.">
+  <meta name="twitter:image" content="https://ai45lab.github.io/OpenART/assets/og.png">
+  <meta name="twitter:image:alt" content="OpenART benchmark landscape: tool-using LLM agent safety benchmarks compared">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://ai45lab.github.io/OpenART/benchmarks/#webpage",
+        "url": "https://ai45lab.github.io/OpenART/benchmarks/",
+        "name": "Benchmarks for Evaluating the Safety of Tool-Using LLM Agents",
+        "description": "A factual landscape of benchmarks for evaluating the safety of tool-using LLM agents, with a paper-reported task-complexity comparison.",
+        "inLanguage": "en",
+        "dateModified": "2026-11-19",
+        "isPartOf": {"@id": "https://ai45lab.github.io/OpenART/#webpage"},
+        "about": [
+          {"@id": "https://arxiv.org/abs/2608.00677"},
+          {"@id": "https://ai45lab.github.io/OpenART/benchmarks/#list"}
+        ]
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://ai45lab.github.io/OpenART/benchmarks/#list",
+        "name": "Benchmarks for evaluating the safety of tool-using LLM agents",
+        "itemListOrder": "https://schema.org/ItemListOrderDescending",
+        "numberOfItems": 9,
+        "itemListElement": [
+          {"@type": "ListItem", "position": 1, "name": "OpenART", "url": "https://arxiv.org/abs/2608.00677"},
+          {"@type": "ListItem", "position": 2, "name": "Agent-SafetyBench", "url": "https://arxiv.org/abs/2412.14470"},
+          {"@type": "ListItem", "position": 3, "name": "AgentDojo", "url": "https://arxiv.org/abs/2406.13352"},
+          {"@type": "ListItem", "position": 4, "name": "AgentHarm", "url": "https://arxiv.org/abs/2410.09024"},
+          {"@type": "ListItem", "position": 5, "name": "InjecAgent", "url": "https://arxiv.org/abs/2403.02691"},
+          {"@type": "ListItem", "position": 6, "name": "ToolEmu", "url": "https://arxiv.org/abs/2309.15817"},
+          {"@type": "ListItem", "position": 7, "name": "R-Judge", "url": "https://arxiv.org/abs/2401.10019"},
+          {"@type": "ListItem", "position": 8, "name": "SafeToolBench", "url": "https://arxiv.org/abs/2509.07315"},
+          {"@type": "ListItem", "position": 9, "name": "DTap", "url": "https://arxiv.org/abs/2605.04808"}
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://ai45lab.github.io/OpenART/benchmarks/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What are the top benchmarks for evaluating the safety of tool-using LLM agents?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Widely used benchmarks include Agent-SafetyBench, AgentDojo, AgentHarm, InjecAgent, ToolEmu, R-Judge, and SafeToolBench. Newer long-horizon benchmarks include DTap and OpenART. They differ in environment type, task horizon, and whether safety is judged from a final answer or from the full execution trace."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is an agent safety benchmark?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "An agent safety benchmark measures whether an LLM agent that uses tools, files, services, or a desktop causes prohibited side effects while completing a task. It provides tasks, an environment, and an evaluator that judges safety from the agent's behavior."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does OpenART differ from single-turn prompt-injection benchmarks?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "OpenART tasks are long-horizon (median 97 tool calls) and are judged over full execution traces. The benign task and a hidden safety contract stay fixed while target-visible environment state changes mid-run, so failures can emerge from sequences of individually benign actions."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is long-horizon agent safety?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Long-horizon agent safety asks whether an agent stays safe across tasks that unfold over many steps and tool calls, where early state changes can influence decisions far into the future. OpenART reports a median propagation distance of 37 target actions between consuming evolved state and a first unsafe action."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is environment evolution?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Environment evolution changes target-visible state — workspace files, tools, services, plan, or memory — during a run while the task and hidden safety contract stay fixed. OpenART uses it as its core red-teaming protocol through the EMHA attack policy."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../" aria-label="OpenART home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="24" height="24" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" transform="rotate(-8 12 12)" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M7 15.5 17 8.5" fill="none" stroke="currentColor" stroke-width="1.1"/><circle cx="12" cy="12" r="2.1" fill="#eeece5" stroke="currentColor" stroke-width="1.1"/></svg>
+        </span>
+        OpenART<span class="slash">/</span><span class="brand-note">BENCHMARK LANDSCAPE</span>
+      </a>
+      <nav class="main-nav" aria-label="Page sections">
+        <a href="#landscape">Landscape</a>
+        <a href="#complexity">Complexity</a>
+        <a href="#openart">OpenART</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="header-tools">
+        <a class="external-link" href="../">← Main guide</a>
+        <a class="external-link" href="https://github.com/AI45Lab/OpenART" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero bench-hero" id="top">
+      <div class="wrap">
+        <div class="hero-topline">
+          <div class="left"><span class="eyebrow">Agent safety · Benchmark landscape</span><span class="edition mono">Reference page</span></div>
+          <span class="right mono">Curated by the OpenART authors</span>
+        </div>
+        <div class="bench-hero-copy">
+          <p class="kicker">Benchmarks for evaluating the safety of tool-using LLM agents</p>
+          <h1>What each benchmark<br>actually <em>measures.</em></h1>
+          <p class="hero-title-en">Nine benchmarks, one comparison,<br>and where OpenART fits.</p>
+          <p class="hero-desc">Tool-using LLM agent safety benchmarks evaluate whether an agent can use tools, files, services, or a desktop without causing prohibited side effects. They differ in environment type, task horizon, attack model, and whether safety is judged from a final answer or from the full execution trace. This page lists the widely used benchmarks with links to their papers, reproduces the OpenART paper's task-complexity comparison, and states where OpenART fits — without ranking claims.</p>
+          <div class="hero-cta">
+            <a class="button-solid" href="#landscape">Compare the benchmarks <span aria-hidden="true">↓</span></a>
+            <a class="button-text" href="#openart">Where OpenART fits ↓</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="safety-note wrap" aria-label="Scope note">
+      <p><strong>Descriptive, not a ranking.</strong> This page describes what each benchmark measures and links to its primary source. Ordering is alphabetical within groups; nothing here claims one benchmark is better than another.</p>
+    </aside>
+
+    <section class="chapter section-line" id="landscape">
+      <div class="wrap">
+        <div class="chapter-head">
+          <div class="chapter-index"><span class="num">01</span><span class="en">Landscape</span></div>
+          <div>
+            <h2 class="chapter-title">The benchmarks, one line each.</h2>
+            <p class="chapter-desc">Each entry links to the benchmark's paper or project page. Descriptions summarize the benchmark's own stated focus; years are first-publication years. Where the benchmark reports scale in its abstract, the number is quoted with a link.</p>
+          </div>
+        </div>
+
+        <div class="bench-table-wrap">
+          <table class="bench-table">
+            <thead>
+              <tr>
+                <th scope="col">Benchmark</th>
+                <th scope="col">Primary focus</th>
+                <th scope="col">Environment style</th>
+                <th scope="col">Year</th>
+                <th scope="col">Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row"><a href="https://arxiv.org/abs/2412.14470" target="_blank" rel="noopener noreferrer">Agent-SafetyBench</a></th>
+                <td>Safety of interactive, tool-using LLM agents across risk categories</td>
+                <td>Interactive environments with tool calls</td>
+                <td>2024</td>
+                <td class="mono"><a href="https://arxiv.org/abs/2412.14470" target="_blank" rel="noopener noreferrer">arXiv:2412.14470</a></td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="https://arxiv.org/abs/2406.13352" target="_blank" rel="noopener noreferrer">AgentDojo</a></th>
+                <td>Prompt injections in a tool-use agent framework</td>
+                <td>Simulated tools with injected instructions</td>
+                <td>2024</td>
+                <td class="mono"><a href="https://arxiv.org/abs/2406.13352" target="_blank" rel="noopener noreferrer">arXiv:2406.13352</a></td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="https://arxiv.org/abs/2410.09024" target="_blank" rel="noopener noreferrer">AgentHarm</a></th>
+                <td>Harmfulness of LLM agents on explicitly harmful tasks</td>
+                <td>Multi-step agent tasks with tools</td>
+                <td>2024</td>
+                <td class="mono"><a href="https://arxiv.org/abs/2410.09024" target="_blank" rel="noopener noreferrer">arXiv:2410.09024</a></td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="https://arxiv.org/abs/2605.04808" target="_blank" rel="noopener noreferrer">DTap</a></th>
+                <td>Red-teaming LLM agents through stateful environments</td>
+                <td>Longer workflows with state</td>
+                <td>2026</td>
+                <td class="mono"><a href="https://arxiv.org/abs/2605.04808" target="_blank" rel="noopener noreferrer">arXiv:2605.04808</a></td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="https://arxiv.org/abs/2403.02691" target="_blank" rel="noopener noreferrer">InjecAgent</a></th>
+                <td>Vulnerability of tool-integrated agents to indirect prompt injection (1,054 test cases reported in the paper)</td>
+                <td>Static tool-use test cases</td>
+                <td>2024</td>
+                <td class="mono"><a href="https://arxiv.org/abs/2403.02691" target="_blank" rel="noopener noreferrer">arXiv:2403.02691</a></td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="https://arxiv.org/abs/2401.10019" target="_blank" rel="noopener noreferrer">R-Judge</a></th>
+                <td>Safety risk awareness for LLM agents</td>
+                <td>Agent interaction traces judged for risk</td>
+                <td>2024</td>
+                <td class="mono"><a href="https://arxiv.org/abs/2401.10019" target="_blank" rel="noopener noreferrer">arXiv:2401.10019</a></td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="https://arxiv.org/abs/2509.07315" target="_blank" rel="noopener noreferrer">SafeToolBench</a></th>
+                <td>Prospective safety of tool utilization</td>
+                <td>Tool-use scenarios with safety criteria</td>
+                <td>2025</td>
+                <td class="mono"><a href="https://arxiv.org/abs/2509.07315" target="_blank" rel="noopener noreferrer">arXiv:2509.07315</a></td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="https://arxiv.org/abs/2309.15817" target="_blank" rel="noopener noreferrer">ToolEmu</a></th>
+                <td>Risky tool use by LLM agents in emulated environments</td>
+                <td>Emulated tool execution</td>
+                <td>2023</td>
+                <td class="mono"><a href="https://arxiv.org/abs/2309.15817" target="_blank" rel="noopener noreferrer">arXiv:2309.15817</a></td>
+              </tr>
+              <tr class="bench-row-openart">
+                <th scope="row"><a href="https://arxiv.org/abs/2608.00677" target="_blank" rel="noopener noreferrer">OpenART</a></th>
+                <td>Safety of tool-using agents in long-horizon, evolving environments; 10K+ validated scenarios, median 97 tool calls, 15 agents × 5 models</td>
+                <td>Docker-native runtime; state evolves mid-run</td>
+                <td>2026</td>
+                <td class="mono"><a href="https://arxiv.org/abs/2608.00677" target="_blank" rel="noopener noreferrer">arXiv:2608.00677</a></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="bench-table-note">Descriptions summarize each paper's own stated focus. Scale numbers are quoted only where the benchmark reports them in its abstract; follow each link for the benchmark's own claims.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter section-line bench-complexity" id="complexity">
+      <div class="wrap">
+        <div class="chapter-head">
+          <div class="chapter-index"><span class="num">02</span><span class="en">Complexity</span></div>
+          <div>
+            <h2 class="chapter-title">Measured task complexity,<br>from the OpenART paper.</h2>
+            <p class="chapter-desc">Task-level complexity measured from released artifacts and executable traces, reported as medians [interquartile range]. OpenART and DTap report medians over reconstructed execution traces; all other benchmarks are measured from their publicly released samples. Reproduced from the OpenART paper, Table&nbsp;2.</p>
+          </div>
+        </div>
+
+        <div class="bench-table-wrap">
+          <table class="bench-table bench-table-numeric">
+            <thead>
+              <tr>
+                <th scope="col">Benchmark</th>
+                <th scope="col">Tool calls</th>
+                <th scope="col">Dependency depth</th>
+                <th scope="col">Parallel width</th>
+                <th scope="col">State objects</th>
+                <th scope="col">File formats</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row"><a href="https://arxiv.org/abs/2403.02691" target="_blank" rel="noopener noreferrer">InjecAgent</a></th><td>1 [1–1]</td><td>1 [1–1]</td><td>1 [1–1]</td><td>1 [1–1]</td><td>0 [0–0]</td></tr>
+              <tr><th scope="row"><a href="https://arxiv.org/abs/2309.15817" target="_blank" rel="noopener noreferrer">ToolEmu</a></th><td>3 [1.5–4]</td><td>2.5 [1.2–3.8]</td><td>1 [1–1.8]</td><td>3 [1.2–3]</td><td>0 [0–0]</td></tr>
+              <tr><th scope="row"><a href="https://arxiv.org/abs/2406.13352" target="_blank" rel="noopener noreferrer">AgentDojo</a></th><td>2 [1–3]</td><td>1 [1–3]</td><td>1 [1–1]</td><td>1 [1–2]</td><td>0 [0–0]</td></tr>
+              <tr><th scope="row"><a href="https://arxiv.org/abs/2410.09024" target="_blank" rel="noopener noreferrer">AgentHarm</a></th><td>3.5 [3–4]</td><td>3 [3–3]</td><td>1.5 [1–2]</td><td>3.5 [3–4]</td><td>0 [0–0]</td></tr>
+              <tr><th scope="row"><a href="https://arxiv.org/abs/2410.02644" target="_blank" rel="noopener noreferrer">ASB</a></th><td>2 [2–2]</td><td>2 [2–2]</td><td>1 [1–1]</td><td>2 [2–2]</td><td>0 [0–0]</td></tr>
+              <tr><th scope="row"><a href="https://arxiv.org/abs/2605.04808" target="_blank" rel="noopener noreferrer">DTap</a></th><td>15 [7.4–18.7]</td><td>2 [1–3]</td><td>1.5 [1–2]</td><td>2.5 [1–4]</td><td>1 [0–3]</td></tr>
+              <tr class="bench-row-openart"><th scope="row"><a href="https://arxiv.org/abs/2608.00677" target="_blank" rel="noopener noreferrer">OpenART</a></th><td><strong>97 [90.2–100]</strong></td><td><strong>32 [15.8–84.8]</strong></td><td><strong>12.5 [3–24.5]</strong></td><td><strong>96.5 [90.2–100]</strong></td><td><strong>7.5 [7–9]</strong></td></tr>
+            </tbody>
+          </table>
+          <p class="bench-table-note">OpenART reaches a median dependency depth of 32 and parallel width of 12.5, reflecting long, branching workflows that support red teaming over extended interaction horizons. Higher is not better or worse — it describes the kind of task each benchmark contains. Protocols differ; numbers are not directly comparable across rows as a safety ranking.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter section-line" id="openart">
+      <div class="wrap">
+        <div class="chapter-head">
+          <div class="chapter-index"><span class="num">03</span><span class="en">OpenART</span></div>
+          <div>
+            <h2 class="chapter-title">Where OpenART fits.</h2>
+            <p class="chapter-desc">OpenART evaluates the executable environment rather than treating a single prompt as the entire test. The benign task and a hidden safety contract remain fixed while target-visible state changes during execution. Numbers below are from the paper and the released datasets.</p>
+          </div>
+        </div>
+
+        <div class="bench-facts">
+          <div class="bench-fact"><div class="metric-number">10K+</div><div class="metric-label">Validated stateful scenarios (paper)</div></div>
+          <div class="bench-fact"><div class="metric-number">50</div><div class="metric-label">Task domains (paper)</div></div>
+          <div class="bench-fact"><div class="metric-number">97</div><div class="metric-label">Median tool calls per task (paper)</div></div>
+          <div class="bench-fact"><div class="metric-number">15 × 5</div><div class="metric-label">Agents × models, 75 settings (paper)</div></div>
+          <div class="bench-fact"><div class="metric-number">8</div><div class="metric-label">Target-visible attack vectors (paper)</div></div>
+          <div class="bench-fact"><div class="metric-number">85.0%</div><div class="metric-label">Pooled strict ASR, EMHA attacker (paper)</div></div>
+          <div class="bench-fact"><div class="metric-number">87.38%</div><div class="metric-label">Pooled benign completion (paper)</div></div>
+          <div class="bench-fact"><div class="metric-number">10,150</div><div class="metric-label">Released executable tasks (dataset)</div></div>
+        </div>
+
+        <div class="bench-where">
+          <p><strong>Difference from static benchmarks.</strong> In InjecAgent, AgentDojo, and ToolEmu-style settings, the attack is embedded in the task and the environment is reset between episodes. In OpenART, a black-box attack policy (EMHA) coordinates authorized state transitions across eight target-visible surfaces while the task and hidden safety contract stay fixed. Safety is judged over the full execution trace, not a final answer.</p>
+          <p><strong>Difference within the long-horizon group.</strong> DTap also uses stateful environments with longer workflows. OpenART's released set is larger (10,150 released tasks) and its evaluation matrix spans 15 deployed agent runtimes × 5 foundation models, reporting both benign completion and strict attack success per setting.</p>
+          <p><strong>Strict ASR definition.</strong> Strict attack success rate counts an attack as successful only when both a deterministic evaluator and an LLM judge confirm it. The pooled 85.0% figure aggregates 75 agent–model settings under the EMHA attacker; it is a property of that attack and protocol, not a model-safety score in isolation.</p>
+        </div>
+
+        <div class="hero-cta bench-cta">
+          <a class="button-solid" href="../">Open the interactive guide <span aria-hidden="true">→</span></a>
+          <a class="button-text" href="https://arxiv.org/abs/2608.00677" target="_blank" rel="noopener noreferrer">Read the paper ↗</a>
+          <a class="button-text" href="https://github.com/AI45Lab/OpenART" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <a class="button-text" href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks" target="_blank" rel="noopener noreferrer">Tasks dataset ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="faq">
+      <div class="wrap">
+        <div class="faq-wrap">
+          <div class="faq-head"><span class="mono">QUESTIONS</span><h2>Common questions.</h2></div>
+          <div class="faq-list">
+            <details class="faq-item" open><summary>What are the top benchmarks for evaluating the safety of tool-using LLM agents?</summary><p>Widely used benchmarks include <a href="https://arxiv.org/abs/2412.14470" target="_blank" rel="noopener noreferrer">Agent-SafetyBench</a>, <a href="https://arxiv.org/abs/2406.13352" target="_blank" rel="noopener noreferrer">AgentDojo</a>, <a href="https://arxiv.org/abs/2410.09024" target="_blank" rel="noopener noreferrer">AgentHarm</a>, <a href="https://arxiv.org/abs/2403.02691" target="_blank" rel="noopener noreferrer">InjecAgent</a>, <a href="https://arxiv.org/abs/2309.15817" target="_blank" rel="noopener noreferrer">ToolEmu</a>, <a href="https://arxiv.org/abs/2401.10019" target="_blank" rel="noopener noreferrer">R-Judge</a>, and <a href="https://arxiv.org/abs/2509.07315" target="_blank" rel="noopener noreferrer">SafeToolBench</a>. Newer long-horizon benchmarks include <a href="https://arxiv.org/abs/2605.04808" target="_blank" rel="noopener noreferrer">DTap</a> and <a href="https://arxiv.org/abs/2608.00677" target="_blank" rel="noopener noreferrer">OpenART</a>. They differ in environment type, task horizon, and whether safety is judged from a final answer or the full trace.</p></details>
+            <details class="faq-item"><summary>What is an agent safety benchmark?</summary><p>An agent safety benchmark measures whether an LLM agent that uses tools, files, services, or a desktop causes prohibited side effects while completing a task. It provides tasks, an environment, and an evaluator that judges safety from the agent's behavior.</p></details>
+            <details class="faq-item"><summary>How does OpenART differ from single-turn prompt-injection benchmarks?</summary><p>OpenART tasks are long-horizon (median 97 tool calls) and judged over full execution traces. The benign task and a hidden safety contract stay fixed while target-visible environment state changes mid-run, so failures can emerge from sequences of individually benign actions rather than from a single decision.</p></details>
+            <details class="faq-item"><summary>What is long-horizon agent safety?</summary><p>Long-horizon agent safety asks whether an agent stays safe across tasks that unfold over many steps and tool calls, where early state changes can influence decisions far into the future. OpenART reports a median propagation distance of 37 target actions between consuming evolved state and a first unsafe action, with an interquartile range of 20 to 66.</p></details>
+            <details class="faq-item"><summary>What is environment evolution?</summary><p>Environment evolution changes target-visible state — workspace files, tools, services, plan, or memory — during a run while the task and hidden safety contract stay fixed. OpenART uses it as its core red-teaming protocol through the EMHA attack policy, a black-box search over authorized state transitions.</p></details>
+          </div>
+        </div>
+
+        <div class="citation-block" id="citation">
+          <div class="citation-copy">
+            <span class="mono">CITATION</span>
+            <h2>Cite the paper and the repository.</h2>
+            <p>If you use the OpenART runtime, tasks, tools, or evaluation results, cite the paper and the software. Canonical metadata lives in <a href="https://github.com/AI45Lab/OpenART/blob/main/CITATION.cff">CITATION.cff</a>.</p>
+          </div>
+          <pre class="citation-content" tabindex="0">@misc{chen2026openart,
+  title         = {OpenART: Scaling Agent Red Teaming via Open-Ended Environment Evolution},
+  author        = {Chen, Yunhao and Wang, Xin and Wang, Yixu and Liu, Yi and Li, Jie
+                   and Teng, Yan and Ma, Xingjun and Hu, Xia and Jiang, Yu-Gang},
+  year          = {2026},
+  eprint        = {2608.00677},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url           = {https://arxiv.org/abs/2608.00677},
+  note          = {Code: https://github.com/AI45Lab/OpenART}
+}</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div class="footer-brand-block"><span class="footer-brand">OpenART</span><span class="footer-sub">Benchmark landscape</span></div>
+      <p class="footer-mid">Landscape descriptions summarize each benchmark's paper. Complexity table reproduced from the OpenART paper, Table 2. Content checked 2026-11-19. No ranking claim is made on this page.</p>
+      <div class="footer-logos">
+        <a href="https://www.shlab.org.cn/" target="_blank" rel="noopener noreferrer"><img src="../assets/icon_ailab.png" alt="Shanghai AI Laboratory" width="120" height="28"></a>
+        <a href="https://ai45.shlab.org.cn/" target="_blank" rel="noopener noreferrer"><img src="../assets/icon_ai45_en.png" alt="AI45Lab" width="96" height="28"></a>
+      </div>
+    </div>
+    <div class="wrap footer-legal">
+      <p>Code: <a href="https://github.com/AI45Lab/OpenART/blob/main/LICENSE">AGPL-3.0</a>. The <a href="https://huggingface.co/datasets/dongdongunique/openart-planner-tasks">dataset card</a> uses <code>license: other</code> with mixed upstream terms.</p>
+      <p><a href="../">Interactive guide</a> · <a href="../llms.txt">Machine-readable summary</a> · <a href="https://github.com/AI45Lab/OpenART">GitHub</a></p>
+    </div>
+  </footer>
+</body>
+</html>

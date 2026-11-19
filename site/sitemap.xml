@@ -23,4 +23,10 @@
       <image:title>Figure 4: Strict ASR across complexity groups</image:title>
     </image:image>
   </url>
+  <url>
+    <loc>https://ai45lab.github.io/OpenART/benchmarks/</loc>
+    <lastmod>2026-11-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>
