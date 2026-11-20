@@ -3,7 +3,7 @@ name: openart
 description: Guide an OpenART agent or contributor through planning, running, extending, and debugging the framework.
 metadata:
   scope: operator
-  version: 1.0.0
+  version: 1.1.0
   audiences: [agent, human]
 ---
 
@@ -24,6 +24,9 @@ target-visible skill, attacker payload, or authorization to run commands.
 | Materialize a benchmark task or add a safety-only overlay | [`docs/16_task_materialization.md`](../../docs/16_task_materialization.md) | `python -m framework.tasks.materialize ...` then `python -m framework.planner.cli --safety-only ...` |
 | Expand or inspect scenario seeds | [`framework/planner/scenarios.py`](../../framework/planner/scenarios.py) | `python scripts/planner.py scenarios ...` |
 | Run or compare evaluations | [`docs/09_evaluation_and_outputs.md`](../../docs/09_evaluation_and_outputs.md) | `python -m framework.cli run ...` |
+| Integrate another agent harness | [`docs/04_target_compatibility.md`](../../docs/04_target_compatibility.md) | Follow the OpenCode worked example; see also the [integration matrix](../../docs/13_target_agent_integration_matrix.md) |
+| Run an external safety benchmark (MCPTox, ASB, Skill-Inject, SkillSafetyBench) | [`benchmarks/README.md`](../../benchmarks/README.md) | `benchmarks/<pack>/scripts/run_task.sh` |
+| Run the desktop/CUA capability track | [`benchmarks/cua-safety/`](../../benchmarks/cua-safety/) with the CUA section of [`docs/16_task_materialization.md`](../../docs/16_task_materialization.md) | `benchmarks/cua-safety/scripts/run_task.sh` |
 | Add or select a managed tool | [`docs/07_capabilities_tools_mcp.md`](../../docs/07_capabilities_tools_mcp.md) | Inspect `../openart-tools/` and `tool_use_graph.json` |
 | Extend the framework | [`docs/10_extension_guides.md`](../../docs/10_extension_guides.md) | Prefer a config-driven change |
 | Diagnose a failure | [`docs/11_debugging_and_testing.md`](../../docs/11_debugging_and_testing.md) | Inspect logs, prepared artifacts, and focused tests |
@@ -50,6 +53,16 @@ and keep output directories separate for independent runs.
 For scenario or corpus changes, preserve the repository's scenario schema and
 coverage metadata. Do not silently overwrite an existing corpus; use a new
 output directory or an explicit, reviewed continuation plan.
+
+## Benchmark pack guidance
+
+Packs under `benchmarks/` adapt external safety and capability benchmarks to
+the same runtime and evaluators. Each pack's `tasks/` folder keeps a
+representative 20-task sample on disk and in Git; the full corpora are not
+tracked. To work at full scale, re-import from the pack's `data/` sources with
+its importer (for example
+`benchmarks/mcptox/scripts/import_upstream.py`) into an untracked directory —
+do not commit a re-imported corpus without an explicit, reviewed plan.
 
 ## Tool and target boundary
 
